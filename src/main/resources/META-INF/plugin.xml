@@ -1,0 +1,41 @@
+<idea-plugin>
+    <id>com.example.demo</id>
+    <name>Demo</name>
+    <vendor email="mtb550@gmail.com" url="https://mtb.com">initial</vendor>
+
+    <description><![CDATA[
+        Plugin to browse test projects, view features, and manage test cases.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <!-- Register the tool window -->
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow
+                id="TestCaseViewer"
+                factoryClass="com.example.demo.TestCaseToolWindowFactory"
+                anchor="right"
+                icon="/icons/t1.png"
+                secondary="true" />
+    </extensions>
+
+    <!-- Register menu action -->
+    <actions>
+<!--        <action-->
+<!--                id="com.example.demo.OpenTestTreeAction"-->
+<!--                class="com.example.demo.ShowTestTreeAction"-->
+<!--                text="Open Test Plan Tree"-->
+<!--                description="Open a tree of test projects and features">-->
+<!--            <add-to-group group-id="ToolsMenu" anchor="last"/>-->
+<!--        </action>-->
+        <action
+                id="com.example.demo.OpenTestTreeAction"
+                class="com.example.demo.ShowTestTreeAction"
+                text="Open Test Plan Tree"
+                description="Open a tree of test projects and features"
+                icon="/icons/t2.png">
+            <add-to-group group-id="MainToolBar" anchor="last"/>
+        </action>
+
+    </actions>
+</idea-plugin>
