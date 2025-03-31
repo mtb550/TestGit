@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
@@ -22,6 +23,46 @@ public class TestCaseTableEditor extends UserDataHolderBase implements FileEdito
         panel = new JPanel(new BorderLayout());
         TestCaseTableModel model = new TestCaseTableModel(feature.getTestCases());
         JBTable table = new JBTable(model);
+
+        table.setFont(new Font("SansSerif", Font.PLAIN, 20));
+        table.setRowHeight(28);
+        table.setIntercellSpacing(new Dimension(5, 5));
+        table.setShowGrid(false);
+        table.setRowHeight(100); // or calculate dynamically if needed
+        table.setRowMargin(10);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus,
+                                                           int row, int column) {
+                JTextArea area = new JTextArea(value == null ? "" : value.toString());
+                area.setWrapStyleWord(true);
+                area.setLineWrap(true);
+                area.setOpaque(true);
+                area.setFont(table.getFont());
+                area.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+                if (isSelected) {
+                    area.setBackground(table.getSelectionBackground());
+                    area.setForeground(table.getSelectionForeground());
+                }
+//                else {
+//                    area.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 245)); // zebra stripe
+//                    area.setForeground(table.getForeground());
+//                }
+
+                return area;
+            }
+        });
+
+
+        JBScrollPane scrollPane = new JBScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Test Cases"));
 
         // Toolbar
         JToolBar toolBar = new JToolBar();
