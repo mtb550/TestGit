@@ -29,4 +29,14 @@ public class DB {
         history.add(new TestCaseHistory("2024-03-15", "Updated expected result"));
         return history;
     }
+
+    public static Feature getFeature(String projectName, String featureName) {
+        return loadProjects().stream()
+                .filter(p -> p.getName().equals(projectName))
+                .flatMap(p -> p.getFeatures().stream())
+                .filter(f -> f.getName().equals(featureName))
+                .findFirst()
+                .orElse(null);
+    }
+
 }

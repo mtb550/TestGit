@@ -7,15 +7,21 @@
         Plugin to browse test projects, view features, and manage test cases with details and bug tracking.
     ]]></description>
 
+    <!-- Required to access core IntelliJ APIs -->
     <depends>com.intellij.modules.platform</depends>
 
+
     <extensions defaultExtensionNs="com.intellij">
+
+        <!-- 🧭 Left-side tool window: Test Case Explorer -->
         <toolWindow
                 id="TestCaseExplorer"
                 factoryClass="com.example.demo.TestCaseExplorerToolWindowFactory"
                 anchor="left"
                 icon="/icons/t1.png"
                 secondary="true" />
+
+        <!-- 🔍 Right-side tool window: Test Case Details -->
         <toolWindow
                 id="TestCaseDetails"
                 factoryClass="com.example.demo.TestCaseDetailsToolWindowFactory"
@@ -23,11 +29,12 @@
                 icon="/icons/t1.png"
                 secondary="true" />
 
+        <!-- 📝 File editor provider for table editor -->
         <fileEditorProvider implementation="com.example.demo.TestCaseEditorProvider"/>
-
     </extensions>
 
     <actions>
+        <!-- 📂 Menu action to show tree view manually -->
         <action
                 id="com.example.demo.OpenTestTreeAction"
                 class="com.example.demo.ShowTestTreeAction"
