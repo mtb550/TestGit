@@ -9,7 +9,9 @@
 
     <!-- Required to access core IntelliJ APIs -->
     <depends>com.intellij.modules.platform</depends>
-
+    <depends>com.intellij.modules.java</depends>
+    <depends>TestNG-J</depends>
+    <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
 
@@ -19,7 +21,7 @@
                 factoryClass="com.example.explorer.TestCaseExplorerToolWindowFactory"
                 anchor="left"
                 icon="/icons/t1.png"
-                secondary="true" />
+                secondary="true"/>
 
         <!-- 🔍 Right-side tool window: Test Case Details -->
         <toolWindow
@@ -27,10 +29,16 @@
                 factoryClass="com.example.viewer.TestCaseDetailsToolWindowFactory"
                 anchor="right"
                 icon="/icons/t1.png"
-                secondary="true" />
+                secondary="true"/>
 
         <!-- 📝 File editor provider for table editor -->
         <fileEditorProvider implementation="com.example.editor.TestCaseEditorProvider"/>
+
+        <notificationGroup id="Test Case Notifications"
+                           displayType="BALLOON"
+                           isLogByDefault="true"/>
+
+
     </extensions>
 
     <actions>
@@ -44,9 +52,9 @@
             <add-to-group group-id="ToolsMenu" anchor="last"/>
 
         </action>
-            <action id="TestTreeContextMenuGroup"
-                    class="com.example.explorer.TestTreeContextMenuGroup"
-                    text="Test Tree Context Menu"
-                    popup="true"/>
+        <action id="TestTreeContextMenuGroup"
+                class="com.example.explorer.TestTreeContextMenuGroup"
+                text="Test Tree Context Menu"
+                popup="true"/>
     </actions>
 </idea-plugin>

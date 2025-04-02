@@ -6,7 +6,7 @@ import javax.swing.table.AbstractTableModel;
 import java.util.List;
 
 public class TestCaseTableModel extends AbstractTableModel {
-    private final String[] columnNames = {"Title", "Expected Result", "Steps", "Priority"};
+    private final String[] columnNames = {"Title", "Expected Result", "Steps", "Priority", "Automation Ref"};
     private final List<TestCase> testCases;
 
     public TestCaseTableModel(List<TestCase> testCases) {
@@ -36,6 +36,7 @@ public class TestCaseTableModel extends AbstractTableModel {
             case 1 -> tc.getExpectedResult();
             case 2 -> tc.getSteps();
             case 3 -> tc.getPriority();
+            case 4 -> tc.getAutomationRef();
             default -> "";
         };
     }

@@ -1,7 +1,11 @@
 package com.example.editor;
 
+import com.example.Runner.TestNGRunnerByClass;
 import com.example.demo.TestCaseToolWindow;
 import com.example.pojo.TestCase;
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.notification.NotificationType;
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.table.JBTable;
 
 import javax.swing.*;
@@ -69,10 +73,26 @@ public class TestCaseTableContextMenu {
         int row = table.getSelectedRow();
         if (row >= 0) {
             TestCase tc = model.getTestCaseAt(row);
-            System.out.println("Running automation for: "/* + tc.getAutomationRef()*/);
-            // TODO: Actual execution logic
+            String automationRef = tc.getAutomationRef();
+            System.out.println("🧪 Automation Ref: " + automationRef);
+            if (automationRef != null && !automationRef.isBlank()) {
+                Project project = com.intellij.openapi.project.ProjectManager.getInstance().getOpenProjects()[0]; // You may want a better way to get project
+                TestNGRunnerByClass.runTestClass(project, automationRef); // call your method
+
+                notify("Running TestNG class: " + automationRef, NotificationType.INFORMATION);
+            } else {
+                notify("No automation reference found for this test case.", NotificationType.WARNING);
+            }
         }
     }
+
+    private void notify(String message, NotificationType type) {
+        NotificationGroupManager.getInstance()
+                .getNotificationGroup("Test Case Notifications")
+                .createNotification(message, type)
+                .notify(null);
+    }
+
 
     private void viewDetails() {
         int row = table.getSelectedRow();

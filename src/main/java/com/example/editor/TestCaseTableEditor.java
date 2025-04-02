@@ -11,7 +11,6 @@ import com.intellij.ui.TableSpeedSearch;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
-import com.intellij.util.ui.components.JBComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,7 +25,7 @@ public class TestCaseTableEditor extends UserDataHolderBase implements FileEdito
     private final JPanel panel;
 
     public TestCaseTableEditor(Feature feature) {
-        panel = new JBPanel(new BorderLayout());
+        panel = new JBPanel<>(new BorderLayout());
 
         TestCaseTableModel model = new TestCaseTableModel(feature.getTestCases());
         JBTable table = new JBTable(model);
@@ -62,6 +61,53 @@ public class TestCaseTableEditor extends UserDataHolderBase implements FileEdito
 
     }
 
+    // FileEditor interface methods
+    @Override
+    public @NotNull JComponent getComponent() {
+        return panel;
+    }
+
+    @Override
+    public @Nullable JComponent getPreferredFocusedComponent() {
+        return panel;
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return "Test Case Table";
+    }
+
+    @Override
+    public void dispose() {
+    }
+
+    @Override
+    public void addPropertyChangeListener(@NotNull PropertyChangeListener listener) {
+    }
+
+    @Override
+    public void removePropertyChangeListener(@NotNull PropertyChangeListener listener) {
+    }
+
+    @Override
+    public FileEditorState getState(@NotNull FileEditorStateLevel level) {
+        return FileEditorState.INSTANCE;
+    }
+
+    @Override
+    public void setState(@NotNull FileEditorState state) {
+    }
+
+    @Override
+    public boolean isModified() {
+        return false;
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
     static class WrapTextCellRenderer extends JTextArea implements TableCellRenderer {
         public WrapTextCellRenderer() {
             setLineWrap(true);
@@ -89,18 +135,4 @@ public class TestCaseTableEditor extends UserDataHolderBase implements FileEdito
             return this;
         }
     }
-
-    // FileEditor interface methods
-    @Override public @NotNull JComponent getComponent() { return panel; }
-    @Override public @Nullable JComponent getPreferredFocusedComponent() { return panel; }
-    @Override public @NotNull String getName() { return "Test Case Table"; }
-    @Override public void dispose() {}
-    @Override public void addPropertyChangeListener(@NotNull PropertyChangeListener listener) {}
-    @Override public void removePropertyChangeListener(@NotNull PropertyChangeListener listener) {}
-    @Override public FileEditorState getState(@NotNull FileEditorStateLevel level) {
-        return FileEditorState.INSTANCE;
-    }
-    @Override public void setState(@NotNull FileEditorState state) {}
-    @Override public boolean isModified() { return false; }
-    @Override public boolean isValid() { return true; }
 }

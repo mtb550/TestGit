@@ -8,6 +8,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class Project {
-    private  String name;
+    private String name;
     private List<Feature> features;
 }

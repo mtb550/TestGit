@@ -13,7 +13,7 @@ repositories {
 intellij {
     version.set("2024.1.7")
     type.set("IC") // Target IDE Platform
-    plugins.set(listOf("java"))
+    plugins.set(listOf("java", "TestNG-J"))
 }
 
 sourceSets {
@@ -33,6 +33,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.30")
     testCompileOnly("org.projectlombok:lombok:1.18.30")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
+    testImplementation("org.testng:testng:7.11.0")
 }
 
 tasks {
