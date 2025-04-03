@@ -1,0 +1,7 @@
+view method code in details panel.
+add new tool window (To Do or Notes) that stored content in db.
+implement all notifications.
+DONE - implement class runner
+DONE - implement method runner
+implement class debugger
+implement method debugger
