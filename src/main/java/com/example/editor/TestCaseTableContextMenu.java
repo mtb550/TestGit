@@ -3,6 +3,7 @@ package com.example.editor;
 import com.example.Runner.TestNGRunner;
 import com.example.Runner.TestNGRunnerByClassName;
 import com.example.Runner.TestNGRunnerByMethod;
+import com.example.Runner.TestNGRunnerBySuite;
 import com.example.demo.TestCaseToolWindow;
 import com.example.pojo.TestCase;
 import com.example.util.Tools;
@@ -83,7 +84,8 @@ public class TestCaseTableContextMenu {
                 Tools.printTestSourceRoots(project);
                 //TestNGRunner.debugTestMethod(project, automationRef); // call your method
                 //TestNGRunnerByMethod.runTestMethod(project,automationRef,"test1"); // works fine
-                TestNGRunnerByClassName.runTestClass(project,automationRef);
+                TestNGRunnerByClassName.runTestClass(project,automationRef); // works fine
+                TestNGRunnerBySuite.runTestSuite(project,"test.testng.xml"); // works fine
 
                 notify("Running TestNG class: " + automationRef, NotificationType.INFORMATION);
             } else {
