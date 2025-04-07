@@ -23,6 +23,7 @@ public class TestTreeContextMenuGroup extends DefaultActionGroup {
         exportGroup.add(new ExportCsvAction());
         exportGroup.add(new ExportHtmlAction());
         exportGroup.add(new ExportExcelAction());
+        exportGroup.add(new ExportJsonAction());
         add(exportGroup);
 
         add(new ImportAction());
@@ -144,6 +145,17 @@ public class TestTreeContextMenuGroup extends DefaultActionGroup {
     public class ExportExcelAction extends AnAction {
         public ExportExcelAction() {
             super("Export as Excel");
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent e) {
+            // TODO: Implement export logic to EXCEL
+        }
+    }
+
+    public class ExportJsonAction extends AnAction {
+        public ExportJsonAction() {
+            super("Export as Json");
         }
 
         @Override
