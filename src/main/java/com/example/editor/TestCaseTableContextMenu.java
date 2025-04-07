@@ -3,108 +3,64 @@ package com.example.editor;
 import com.example.Runner.TestNGRunnerByClassName;
 import com.example.Runner.TestNGRunnerBySuite;
 import com.example.demo.TestCaseToolWindow;
+import com.example.pojo.GroupType;
 import com.example.pojo.TestCase;
+import com.example.util.Notifier;
 import com.example.util.Tools;
-import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.table.JBTable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.util.List;
 
 public class TestCaseTableContextMenu {
-    private final JBTable table;
-    private final TestCaseTableModel model;
 
-    public TestCaseTableContextMenu(JBTable table, TestCaseTableModel model) {
-        this.table = table;
-        this.model = model;
-
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.isPopupTrigger()) showContextMenu(e);
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger()) showContextMenu(e);
-            }
-        });
-    }
-
-    private void showContextMenu(MouseEvent e) {
-        int row = table.rowAtPoint(e.getPoint());
-        if (row >= 0 && !table.isRowSelected(row)) {
-            table.setRowSelectionInterval(row, row);
-        }
-
+    public TestCaseTableContextMenu(JPanel card, TestCase tc, List<TestCase> testCases) {
         JPopupMenu menu = new JPopupMenu();
 
         JMenuItem copyItem = new JMenuItem("📋 Copy");
-        copyItem.addActionListener(evt -> copySelectedTestCase());
+        copyItem.addActionListener(e -> {
+            String text = "Title: " + tc.getTitle() + "\nSteps: " + tc.getSteps() + "\nExpected: " + tc.getExpectedResult();
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
+        });
 
         JMenuItem runItem = new JMenuItem("▶ Run Test");
-        runItem.addActionListener(evt -> runSelectedTestCase());
+
+        runItem.addActionListener(e -> {
+            String ref = tc.getAutomationRef();
+            Project project = com.intellij.openapi.project.ProjectManager.getInstance().getOpenProjects()[0];
+            if (ref != null && !ref.isBlank()) {
+                Tools.printTestSourceRoots(project);
+                TestNGRunnerByClassName.runTestClass(project, ref);
+                TestNGRunnerBySuite.runTestSuite(project, "test.testng.xml");
+                Notifier.notify(project, "Test Case Notifications", "Running TestNG class: ", ref, NotificationType.INFORMATION);
+            } else {
+                Notifier.notify(project, "No automation reference found for this test case.", "", "", NotificationType.WARNING);
+            }
+        });
 
         JMenuItem viewItem = new JMenuItem("🔍 View Details");
-        viewItem.addActionListener(evt -> viewDetails());
+        viewItem.addActionListener(e -> TestCaseToolWindow.show(tc));
+
+        JMenuItem duplicateItem = new JMenuItem("📄 Duplicate");
+        duplicateItem.addActionListener(e -> {
+            testCases.add(new TestCase(tc.getId(), tc.getTitle() + " (Copy)", tc.getExpectedResult(), tc.getSteps(), tc.getPriority(), tc.getAutomationRef(), List.of(GroupType.Regression)));
+        });
+
+        JMenuItem deleteItem = new JMenuItem("🗑 Delete");
+        deleteItem.addActionListener(e -> {
+            testCases.remove(tc);
+        });
 
         menu.add(copyItem);
         menu.add(runItem);
         menu.add(viewItem);
+        menu.add(duplicateItem);
+        menu.add(deleteItem);
 
-        menu.show(table, e.getX(), e.getY());
+        card.addMouseListener(new CardMouseAdapter(card, menu, tc));
     }
 
-    private void copySelectedTestCase() {
-        int row = table.getSelectedRow();
-        if (row >= 0) {
-            TestCase tc = model.getTestCaseAt(row);
-            String text = String.format("Title: %s\nSteps: %s\nExpected: %s",
-                    tc.getTitle(), tc.getSteps(), tc.getExpectedResult());
-            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
-        }
-    }
-
-    private void runSelectedTestCase() {
-        int row = table.getSelectedRow();
-        if (row >= 0) {
-            TestCase tc = model.getTestCaseAt(row);
-            String automationRef = tc.getAutomationRef();
-            System.out.println("🧪 Automation Ref: " + automationRef);
-            if (automationRef != null && !automationRef.isBlank()) {
-                Project project = com.intellij.openapi.project.ProjectManager.getInstance().getOpenProjects()[0]; // You may want a better way to get project
-                Tools.printTestSourceRoots(project);
-                //TestNGRunner.debugTestMethod(project, automationRef); // call your method
-                //TestNGRunnerByMethod.runTestMethod(project,automationRef,"test1"); // works fine
-                TestNGRunnerByClassName.runTestClass(project, automationRef); // works fine
-                TestNGRunnerBySuite.runTestSuite(project, "test.testng.xml"); // works fine
-
-                notify("Running TestNG class: " + automationRef, NotificationType.INFORMATION);
-            } else {
-                notify("No automation reference found for this test case.", NotificationType.WARNING);
-            }
-        }
-    }
-
-    private void notify(String message, NotificationType type) {
-        NotificationGroupManager.getInstance()
-                .getNotificationGroup("Test Case Notifications")
-                .createNotification(message, type)
-                .notify(null);
-    }
-
-
-    private void viewDetails() {
-        int row = table.getSelectedRow();
-        if (row >= 0) {
-            TestCase tc = model.getTestCaseAt(row);
-            TestCaseToolWindow.show(tc);
-        }
-    }
 }

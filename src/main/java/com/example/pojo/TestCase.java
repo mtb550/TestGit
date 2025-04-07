@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -21,6 +23,6 @@ public class TestCase {
 
     private String automationRef;
 
-    public Group group;
+    public List<GroupType> group;
 
 }
