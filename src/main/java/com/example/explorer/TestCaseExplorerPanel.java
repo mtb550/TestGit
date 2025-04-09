@@ -1,14 +1,8 @@
 package com.example.explorer;
 
-import com.example.editor.TestCaseEditor;
-import com.example.pojo.DB;
-import com.example.pojo.Feature;
-import com.example.pojo.Project;
+import com.example.pojo.Tree;
+import com.example.util.sql;
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.ActionGroup;
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.ActionPlaces;
-import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.ui.SimpleColoredComponent;
 import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.components.JBScrollPane;
@@ -19,15 +13,12 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
-import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.List;
 
 public class TestCaseExplorerPanel {
     private final NonOpaquePanel toolWindowPanel;
     private final SimpleTree tree;
+    private sql db = new sql();
 
     public TestCaseExplorerPanel() {
         toolWindowPanel = new NonOpaquePanel(new BorderLayout());
@@ -37,37 +28,7 @@ public class TestCaseExplorerPanel {
         tree.setRootVisible(true);
         tree.setShowsRootHandles(true);
         tree.setCellRenderer(new IntelliJRenderer());
-
-        tree.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    TreePath path = tree.getPathForLocation(e.getX(), e.getY());
-                    if (path != null) {
-                        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-                        Object userObject = node.getUserObject();
-                        if (userObject instanceof NodeInfo info && info.type == NodeType.FEATURE) {
-                            Feature feature = DB.getFeature(info.projectName, info.name);
-                            if (feature != null) {
-                                TestCaseEditor.open(info.projectName, feature);
-                            }
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    TreePath path = tree.getPathForLocation(e.getX(), e.getY());
-                    if (path != null) {
-                        tree.setSelectionPath(path);
-                        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-                        showContextMenu(e, node);
-                    }
-                }
-            }
-        });
+        tree.addMouseListener(new TestCaseTreeMouseAdapter(tree));
 
         JBScrollPane scrollPane = new JBScrollPane(tree);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -77,23 +38,31 @@ public class TestCaseExplorerPanel {
 
     private DefaultTreeModel buildTreeModel() {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Test Cases");
-        List<Project> projects = DB.loadProjects();
-        for (Project project : projects) {
-            DefaultMutableTreeNode projectNode = new DefaultMutableTreeNode(new NodeInfo(project.getName(), NodeType.PROJECT));
-            for (Feature feature : project.getFeatures()) {
-                DefaultMutableTreeNode featureNode = new DefaultMutableTreeNode(new NodeInfo(feature.getName(), NodeType.FEATURE, project.getName()));
-                projectNode.add(featureNode);
-            }
-            root.add(projectNode);
+
+        Tree[] rootNodes = db.get("SELECT * FROM tree WHERE type = 0").as(Tree[].class);
+
+        for (Tree treeItem : rootNodes) {
+            DefaultMutableTreeNode node = buildSubTree(treeItem);
+            root.add(node);
         }
+
         return new DefaultTreeModel(root);
     }
 
-    private void showContextMenu(MouseEvent e, DefaultMutableTreeNode node) {
-        ActionGroup actionGroup = (ActionGroup) ActionManager.getInstance().getAction("TestTreeContextMenuGroup");
-        ActionPopupMenu popupMenu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.PROJECT_VIEW_POPUP, actionGroup);
-        popupMenu.getComponent().show(tree, e.getX(), e.getY());
+    private DefaultMutableTreeNode buildSubTree(Tree treeItem) {
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(
+                new NodeInfo(treeItem.getName(), treeItem.getType(), treeItem.getId())
+        );
+
+        Tree[] children = db.get("SELECT * FROM tree WHERE link = ?", treeItem.getId()).as(Tree[].class);
+
+        for (Tree child : children) {
+            node.add(buildSubTree(child));
+        }
+
+        return node;
     }
+
 
     public JPanel getPanel() {
         return toolWindowPanel;
@@ -111,21 +80,15 @@ public class TestCaseExplorerPanel {
         tree.setModel(buildTreeModel());
     }
 
-    enum NodeType {PROJECT, FOLDER, FEATURE}
-
     static class NodeInfo {
         String name;
-        String projectName;
-        NodeType type;
+        int type;
+        int id;
 
-        NodeInfo(String name, NodeType type) {
-            this(name, type, null);
-        }
-
-        NodeInfo(String name, NodeType type, String projectName) {
+        NodeInfo(String name, int type, int id) {
             this.name = name;
             this.type = type;
-            this.projectName = projectName;
+            this.id = id;
         }
 
         public String toString() {
@@ -148,9 +111,9 @@ public class TestCaseExplorerPanel {
             if (userObject instanceof NodeInfo info) {
                 text = info.name;
                 switch (info.type) {
-                    case PROJECT -> comp.setIcon(AllIcons.Nodes.Module);
-                    case FOLDER -> comp.setIcon(AllIcons.Nodes.Folder);
-                    case FEATURE -> comp.setIcon(AllIcons.Nodes.Test);
+                    case 0 -> comp.setIcon(AllIcons.Nodes.Project);
+                    case 1 -> comp.setIcon(AllIcons.Nodes.Folder);
+                    case 2 -> comp.setIcon(AllIcons.Nodes.Class);
                 }
             }
 

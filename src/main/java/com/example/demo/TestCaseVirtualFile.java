@@ -1,44 +1,32 @@
 package com.example.demo;
 
-import com.example.pojo.Feature;
+import com.example.pojo.TestCase;
 import com.intellij.testFramework.LightVirtualFile;
+import lombok.Getter;
 
+import java.util.List;
 import java.util.Objects;
 
+@Getter
 public class TestCaseVirtualFile extends LightVirtualFile {
-    private final String projectName;
-    private final Feature feature;
+    private final int moduleId;
+    private final List<TestCase> testCases;
 
-    public TestCaseVirtualFile(String projectName, Feature feature) {
-        super("[" + projectName + "] " + feature.getName(), TestCaseFileType.INSTANCE, "");
-        this.projectName = projectName;
-        this.feature = feature;
+    public TestCaseVirtualFile(int moduleId, List<TestCase> testCases) {
+        super("Module " + moduleId, TestCaseFileType.INSTANCE, "");
+        this.moduleId = moduleId;
+        this.testCases = testCases;
     }
 
-    public Feature getFeature() {
-        return feature;
-    }
-
-    public String getProjectName() {
-        return projectName;
-    }
-
-    @Override
-    public String getName() {
-        return "[" + projectName + "] " + feature.getName();
-    }
-
-    // ✅ Prevent duplicate tab logic
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TestCaseVirtualFile that)) return false;
-        return Objects.equals(projectName, that.projectName)
-                && Objects.equals(feature.getName(), that.feature.getName());
+        return moduleId == that.moduleId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(projectName, feature.getName());
+        return Objects.hash(moduleId);
     }
 }

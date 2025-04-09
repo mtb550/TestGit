@@ -34,6 +34,9 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok:1.18.30")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
     testImplementation("org.testng:testng:7.11.0")
+    testImplementation("org.xerial:sqlite-jdbc:3.49.1.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.3")
 }
 
 tasks {

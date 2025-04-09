@@ -1,12 +1,11 @@
-// src/main/java/com/example/editor/TableEditor.java
 package com.example.editor;
 
 import com.example.demo.TestCaseToolWindow;
-import com.example.pojo.Feature;
 import com.example.pojo.TestCase;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.util.UserDataHolderBase;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
@@ -19,23 +18,27 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Comparator;
+import java.util.List;
 
 /**
- * Displays your TestCase list as draggable, multi‑selectable cards with working context‑menu & double‑click.
+ * Displays your TestCase list as draggable, multi​-selectable cards with working context​-menu & double​-click.
  */
 public class TableEditor extends UserDataHolderBase implements FileEditor {
     private final JPanel panel;
+    private final VirtualFile file;
 
-    public TableEditor(@NotNull Feature feature) {
+
+    public TableEditor(@NotNull List<TestCase> testCases, @NotNull VirtualFile file) {
         panel = new JBPanel<>(new BorderLayout());
+        this.file = file;
 
         // 1) Build a sorted, mutable list model
         DefaultListModel<TestCase> model = new DefaultListModel<>();
-        feature.getTestCases().stream()
-                .sorted(Comparator.comparingInt(TestCase::getOrder))
+        testCases.stream()
+                .sorted(Comparator.comparingInt(TestCase::getSort))
                 .forEach(model::addElement);
 
-        // 2) JList with multi‑select and drag‑to‑reorder
+        // 2) JList with multi​-select and drag​-to​-reorder
         JBList<TestCase> list = new JBList<>(model);
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         list.setDragEnabled(true);
@@ -55,7 +58,7 @@ public class TableEditor extends UserDataHolderBase implements FileEditor {
             return card;
         });
 
-        // 4) Global mouse listener for context‑menu & double‑click
+        // 4) Global mouse listener for context​-menu & double​-click
         list.addMouseListener(new MouseAdapter() {
             private void maybeShowPopup(MouseEvent e) {
                 if (!e.isPopupTrigger()) return;
@@ -136,5 +139,10 @@ public class TableEditor extends UserDataHolderBase implements FileEditor {
     @Override
     public boolean isValid() {
         return true;
+    }
+
+    @Override
+    public @NotNull VirtualFile getFile() {
+        return file;
     }
 }

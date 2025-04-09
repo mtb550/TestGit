@@ -4,11 +4,12 @@ import com.example.demo.TestCaseVirtualFile;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
-public class EditorProvider implements FileEditorProvider {
+public class EditorProvider implements FileEditorProvider, DumbAware {
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
         return file instanceof TestCaseVirtualFile;
@@ -16,7 +17,7 @@ public class EditorProvider implements FileEditorProvider {
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        return new TableEditor(((TestCaseVirtualFile) file).getFeature());
+        return new TableEditor(((TestCaseVirtualFile) file).getTestCases(), file);
     }
 
     @Override

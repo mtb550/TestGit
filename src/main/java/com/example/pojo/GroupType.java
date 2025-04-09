@@ -4,5 +4,8 @@ public enum GroupType {
     Regression,
     Smoke,
     Sanity,
-    Security
+    Security,
+    UI,
+    Functional,
+    Validation
 }
