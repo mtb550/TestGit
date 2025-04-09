@@ -1,13 +1,24 @@
 package com.example.explorer;
 
+import com.example.pojo.Tree;
+import com.example.util.sql;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.ui.Messages;
 import org.jetbrains.annotations.NotNull;
 
-public class TestTreeContextMenuGroup extends DefaultActionGroup {
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import java.sql.SQLException;
 
-    public TestTreeContextMenuGroup() {
+import static com.intellij.openapi.actionSystem.PlatformCoreDataKeys.CONTEXT_COMPONENT;
+
+public class ExplorerContextMenu extends DefaultActionGroup {
+
+    public ExplorerContextMenu() {
         super("Test Explorer Context Menu", true);
 
         add(new AddSuiteAction());
@@ -127,9 +138,43 @@ public class TestTreeContextMenuGroup extends DefaultActionGroup {
 
         @Override
         public void actionPerformed(@NotNull AnActionEvent e) {
-            // TODO: Show dialog and add suite to selected node
+            JTree tree = e.getData(CONTEXT_COMPONENT) instanceof JTree jTree ? jTree : null;
+            if (tree == null) return;
+
+            TreePath path = tree.getSelectionPath();
+            if (path == null) return;
+
+            DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+            Object userObject = parentNode.getUserObject();
+
+            if (!(userObject instanceof TestCaseExplorerPanel.NodeInfo parentInfo) || parentInfo.type == 2) return;
+
+            String name = Messages.showInputDialog("Enter suite name:", "Add Suite", null);
+            if (name == null || name.isBlank()) return;
+
+            sql db = new sql();
+            try {
+                db.execute("INSERT INTO tree (name, type, link, created_by, created_at) VALUES (?, ?, ?, ?, datetime('now'))",
+                        name, 1,parentInfo.id, System.getProperty("user.name"));
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            // Fetch new ID
+            int newId = db.get("SELECT id from tree where name = ?",name).as(Tree.class).getId();
+
+            // Build new node and insert it
+            TestCaseExplorerPanel.NodeInfo newSuiteInfo = new TestCaseExplorerPanel.NodeInfo(name, 1, parentInfo.id);
+            newSuiteInfo.id = newId;
+
+            DefaultMutableTreeNode newSuiteNode = new DefaultMutableTreeNode(newSuiteInfo);
+            DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+            model.insertNodeInto(newSuiteNode, parentNode, parentNode.getChildCount());
+
+            tree.scrollPathToVisible(new TreePath(newSuiteNode.getPath()));
         }
     }
+
 
     public class ExportHtmlAction extends AnAction {
         public ExportHtmlAction() {
