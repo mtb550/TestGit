@@ -21,6 +21,7 @@ public class ExplorerContextMenu extends DefaultActionGroup {
     public ExplorerContextMenu() {
         super("Test Explorer Context Menu", true);
 
+        add(new AddProjectAction());
         add(new AddSuiteAction());
         add(new AddFeatureAction());
         addSeparator();
@@ -43,7 +44,7 @@ public class ExplorerContextMenu extends DefaultActionGroup {
         add(new ViewCommitsAction());
     }
 
-    public class ViewCommitsAction extends AnAction {
+    public static class ViewCommitsAction extends AnAction {
         public ViewCommitsAction() {
             super("📌 View Pending Commits");
         }
@@ -54,7 +55,7 @@ public class ExplorerContextMenu extends DefaultActionGroup {
         }
     }
 
-    public class OpenOldVersionsAction extends AnAction {
+    public static class OpenOldVersionsAction extends AnAction {
         public OpenOldVersionsAction() {
             super("🕓 Open Old Versions");
         }
@@ -65,7 +66,7 @@ public class ExplorerContextMenu extends DefaultActionGroup {
         }
     }
 
-    public class ImportAction extends AnAction {
+    public static class ImportAction extends AnAction {
         public ImportAction() {
             super("📥 Import");
         }
@@ -76,7 +77,7 @@ public class ExplorerContextMenu extends DefaultActionGroup {
         }
     }
 
-    public class ExportCsvAction extends AnAction {
+    public static class ExportCsvAction extends AnAction {
         public ExportCsvAction() {
             super("Export as CSV");
         }
@@ -87,7 +88,7 @@ public class ExplorerContextMenu extends DefaultActionGroup {
         }
     }
 
-    public class RunFeatureAction extends AnAction {
+    public static class RunFeatureAction extends AnAction {
         public RunFeatureAction() {
             super("▶ Run Feature");
         }
@@ -98,40 +99,110 @@ public class ExplorerContextMenu extends DefaultActionGroup {
         }
     }
 
-    public class RenameNodeAction extends AnAction {
+    public static class RenameNodeAction extends AnAction {
         public RenameNodeAction() {
             super("✏️ Rename");
         }
 
         @Override
         public void actionPerformed(@NotNull AnActionEvent e) {
-            // TODO: Rename selected node
+            JTree tree = e.getData(CONTEXT_COMPONENT) instanceof JTree jTree ? jTree : null;
+            if (tree == null) return;
+
+            TreePath path = tree.getSelectionPath();
+            if (path == null) return;
+
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+            Object userObject = node.getUserObject();
+            if (!(userObject instanceof TestCaseExplorerPanel.NodeInfo info)) return;
+
+            String newName = Messages.showInputDialog("Rename node:", "Rename", null, info.name, null);
+            if (newName == null || newName.isBlank()) return;
+
+            sql db = new sql();
+            try {
+                db.execute("UPDATE tree SET name = ? WHERE id = ?", newName, info.id);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            info.name = newName;
+            ((DefaultTreeModel) tree.getModel()).nodeChanged(node);
         }
     }
 
-    public class DeleteNodeAction extends AnAction {
+
+    public static class DeleteNodeAction extends AnAction {
         public DeleteNodeAction() {
             super("❌ Delete");
         }
 
         @Override
         public void actionPerformed(@NotNull AnActionEvent e) {
-            // TODO: Delete selected node
+            JTree tree = e.getData(CONTEXT_COMPONENT) instanceof JTree jTree ? jTree : null;
+            if (tree == null) return;
+
+            TreePath path = tree.getSelectionPath();
+            if (path == null) return;
+
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+            Object userObject = node.getUserObject();
+            if (!(userObject instanceof TestCaseExplorerPanel.NodeInfo info)) return;
+
+            int confirm = Messages.showYesNoDialog("Delete '" + info.name + "' and all its children?", "Confirm Delete", null);
+            if (confirm != Messages.YES) return;
+
+            sql db = new sql();
+            try {
+                db.execute("DELETE FROM tree WHERE id = ?", info.id);
+                // Optionally delete children in DB if cascade isn't set
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            ((DefaultTreeModel) tree.getModel()).removeNodeFromParent(node);
         }
     }
 
-    public class AddFeatureAction extends AnAction {
+
+    public static class AddFeatureAction extends AnAction {
         public AddFeatureAction() {
             super("➕ Add Feature");
         }
 
         @Override
         public void actionPerformed(@NotNull AnActionEvent e) {
-            // TODO: Show dialog and add feature to selected node
+            JTree tree = e.getData(CONTEXT_COMPONENT) instanceof JTree jTree ? jTree : null;
+            if (tree == null) return;
+
+            TreePath path = tree.getSelectionPath();
+            if (path == null) return;
+
+            DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+            Object userObject = parentNode.getUserObject();
+            if (!(userObject instanceof TestCaseExplorerPanel.NodeInfo parentInfo) || parentInfo.type == 2) return;
+
+            String name = Messages.showInputDialog("Enter feature name:", "Add Feature", null);
+            if (name == null || name.isBlank()) return;
+
+            sql db = new sql();
+            try {
+                db.execute("INSERT INTO tree (name, type, link, created_by, created_at) VALUES (?, ?, ?, ?, datetime('now'))",
+                        name, 2, parentInfo.id, System.getProperty("user.name"));
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            int newId = db.get("SELECT id from tree where name = ?", name).as(Tree.class).getId();
+            TestCaseExplorerPanel.NodeInfo newFeature = new TestCaseExplorerPanel.NodeInfo(name, 2, newId);
+            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newFeature);
+            ((DefaultTreeModel) tree.getModel()).insertNodeInto(newNode, parentNode, parentNode.getChildCount());
+            tree.scrollPathToVisible(new TreePath(newNode.getPath()));
         }
     }
 
-    public class AddSuiteAction extends AnAction {
+
+    public static class AddSuiteAction extends AnAction {
         public AddSuiteAction() {
             super("➕ Add Suite");
         }
@@ -176,7 +247,7 @@ public class ExplorerContextMenu extends DefaultActionGroup {
     }
 
 
-    public class ExportHtmlAction extends AnAction {
+    public static class ExportHtmlAction extends AnAction {
         public ExportHtmlAction() {
             super("Export as HTML");
         }
@@ -187,7 +258,7 @@ public class ExplorerContextMenu extends DefaultActionGroup {
         }
     }
 
-    public class ExportExcelAction extends AnAction {
+    public static class ExportExcelAction extends AnAction {
         public ExportExcelAction() {
             super("Export as Excel");
         }
@@ -198,7 +269,7 @@ public class ExplorerContextMenu extends DefaultActionGroup {
         }
     }
 
-    public class ExportJsonAction extends AnAction {
+    public static class ExportJsonAction extends AnAction {
         public ExportJsonAction() {
             super("Export as Json");
         }
@@ -208,6 +279,40 @@ public class ExplorerContextMenu extends DefaultActionGroup {
             // TODO: Implement export logic to EXCEL
         }
     }
+
+    public static class AddProjectAction extends AnAction {
+        public AddProjectAction() {
+            super("🆕 Add Project");
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent e) {
+            JTree tree = e.getData(CONTEXT_COMPONENT) instanceof JTree jTree ? jTree : null;
+            if (tree == null) return;
+
+            String name = Messages.showInputDialog("Enter project name:", "Add Project", null);
+            if (name == null || name.isBlank()) return;
+
+            sql db = new sql();
+            try {
+                db.execute("INSERT INTO tree (name, type, created_by, created_at) VALUES (?, ?, ?, datetime('now'))",
+                        name, 0, System.getProperty("user.name"));
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            int newId = db.get("SELECT id FROM tree WHERE name = ?", name).as(Tree.class).getId();
+            TestCaseExplorerPanel.NodeInfo newProject = new TestCaseExplorerPanel.NodeInfo(name, 0, newId);
+            DefaultMutableTreeNode newProjectNode = new DefaultMutableTreeNode(newProject);
+
+            DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+            DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+
+            model.insertNodeInto(newProjectNode, root, root.getChildCount());
+            tree.scrollPathToVisible(new TreePath(newProjectNode.getPath()));
+        }
+    }
+
 
 
 }
