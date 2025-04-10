@@ -63,7 +63,8 @@ public class sql {
     /**
      * Execute an INSERT/UPDATE/DELETE
      */
-    public int execute(String query, Object... params) throws SQLException {
+    @SneakyThrows
+    public int execute(String query, Object... params) {
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             for (int i = 0; i < params.length; i++) {
                 stmt.setObject(i + 1, params[i]);

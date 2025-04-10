@@ -125,12 +125,8 @@ public class ExplorerContextMenu extends DefaultActionGroup {
             String newName = Messages.showInputDialog("Rename node:", "Rename", null, info.name, null);
             if (newName == null || newName.isBlank()) return;
 
-            sql db = new sql();
-            try {
-                db.execute("UPDATE tree SET name = ? WHERE id = ?", newName, info.id);
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
+            new sql().execute("UPDATE tree SET name = ? WHERE id = ?", newName, info.id);
+
 
             info.name = newName;
             ((DefaultTreeModel) tree.getModel()).nodeChanged(node);
@@ -143,7 +139,6 @@ public class ExplorerContextMenu extends DefaultActionGroup {
             super("❌ Delete");
         }
 
-        @Override
         public void actionPerformed(@NotNull AnActionEvent e) {
             JTree tree = e.getData(CONTEXT_COMPONENT) instanceof JTree jTree ? jTree : null;
             if (tree == null) return;
@@ -208,12 +203,9 @@ public class ExplorerContextMenu extends DefaultActionGroup {
             if (name == null || name.isBlank()) return;
 
             sql db = new sql();
-            try {
-                db.execute("INSERT INTO tree (name, type, link, created_by, created_at) VALUES (?, ?, ?, ?, datetime('now'))",
-                        name, 2, parentInfo.id, System.getProperty("user.name"));
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
+            db.execute("INSERT INTO tree (name, type, link, created_by, created_at) VALUES (?, ?, ?, ?, datetime('now'))",
+                    name, 2, parentInfo.id, System.getProperty("user.name"));
+
 
             int newId = db.get("SELECT id from tree where name = ?", name).as(Tree.class).getId();
             TestCaseExplorerPanel.NodeInfo newFeature = new TestCaseExplorerPanel.NodeInfo(name, 2, newId);
@@ -246,15 +238,12 @@ public class ExplorerContextMenu extends DefaultActionGroup {
             if (name == null || name.isBlank()) return;
 
             sql db = new sql();
-            try {
-                db.execute("INSERT INTO tree (name, type, link, created_by, created_at) VALUES (?, ?, ?, ?, datetime('now'))",
-                        name, 1,parentInfo.id, System.getProperty("user.name"));
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
+            db.execute("INSERT INTO tree (name, type, link, created_by, created_at) VALUES (?, ?, ?, ?, datetime('now'))",
+                    name, 1, parentInfo.id, System.getProperty("user.name"));
+
 
             // Fetch new ID
-            int newId = db.get("SELECT id from tree where name = ?",name).as(Tree.class).getId();
+            int newId = db.get("SELECT id from tree where name = ?", name).as(Tree.class).getId();
 
             // Build new node and insert it
             TestCaseExplorerPanel.NodeInfo newSuiteInfo = new TestCaseExplorerPanel.NodeInfo(name, 1, parentInfo.id);
@@ -316,12 +305,9 @@ public class ExplorerContextMenu extends DefaultActionGroup {
             if (name == null || name.isBlank()) return;
 
             sql db = new sql();
-            try {
-                db.execute("INSERT INTO tree (name, type, created_by, created_at) VALUES (?, ?, ?, datetime('now'))",
-                        name, 0, System.getProperty("user.name"));
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
+            db.execute("INSERT INTO tree (name, type, created_by, created_at) VALUES (?, ?, ?, datetime('now'))",
+                    name, 0, System.getProperty("user.name"));
+
 
             int newId = db.get("SELECT id FROM tree WHERE name = ?", name).as(Tree.class).getId();
             TestCaseExplorerPanel.NodeInfo newProject = new TestCaseExplorerPanel.NodeInfo(name, 0, newId);
@@ -334,7 +320,6 @@ public class ExplorerContextMenu extends DefaultActionGroup {
             tree.scrollPathToVisible(new TreePath(newProjectNode.getPath()));
         }
     }
-
 
 
 }
