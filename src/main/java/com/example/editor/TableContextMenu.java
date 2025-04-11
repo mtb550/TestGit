@@ -1,7 +1,6 @@
 package com.example.editor;
 
 import com.example.Runner.TestNGRunnerByClassName;
-import com.example.Runner.TestNGRunnerBySuite;
 import com.example.demo.TestCaseToolWindow;
 import com.example.pojo.TestCase;
 import com.example.util.Notifier;
@@ -9,18 +8,20 @@ import com.example.util.Tools;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.ui.JBMenuItem;
+import com.intellij.openapi.ui.JBPopupMenu;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 
 public class TableContextMenu {
-    public static JPopupMenu create(JList<TestCase> list,
-                                    DefaultListModel<TestCase> model,
-                                    TestCase tc) {
-        JPopupMenu menu = new JPopupMenu();
+    public static JBPopupMenu create(JList<TestCase> list,
+                                     DefaultListModel<TestCase> model,
+                                     TestCase tc) {
+        JBPopupMenu menu = new JBPopupMenu();
 
-        JMenuItem copyItem = new JMenuItem("📋 Copy");
+        JBMenuItem copyItem = new JBMenuItem("📋 Copy");
         copyItem.addActionListener(e -> {
             String text = "Title: " + tc.getTitle() + "\nSteps: " + tc.getSteps() + "\nExpected: " + tc.getExpectedResult();
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
@@ -28,14 +29,14 @@ public class TableContextMenu {
 
         menu.add(copyItem);
 
-        JMenuItem runItem = new JMenuItem("▶ Run Test");
+        JBMenuItem runItem = new JBMenuItem("▶ Run Test");
         runItem.addActionListener(e -> {
             String ref = tc.getAutomationRef();
             Project project = ProjectManager.getInstance().getOpenProjects()[0];
             if (ref != null && !ref.isBlank()) {
                 Tools.printTestSourceRoots(project);
                 TestNGRunnerByClassName.runTestClass(project, ref);
-                TestNGRunnerBySuite.runTestSuite(project, "test.testng.xml");
+                //TestNGRunnerBySuite.runTestSuite(project, "test.testng.xml");
                 Notifier.notify(project, "Test Case Notifications", "Running TestNG class: ", ref, NotificationType.INFORMATION);
             } else {
                 Notifier.notify(project,
@@ -46,11 +47,11 @@ public class TableContextMenu {
         });
         menu.add(runItem);
 
-        JMenuItem viewItem = new JMenuItem("🔍 View Details");
+        JBMenuItem viewItem = new JBMenuItem("🔍 View Details");
         viewItem.addActionListener(e -> TestCaseToolWindow.show(tc));
         menu.add(viewItem);
 
-        JMenuItem deleteItem = new JMenuItem("🗑 Delete");
+        JBMenuItem deleteItem = new JBMenuItem("🗑 Delete");
         deleteItem.addActionListener(e -> {
             int idx = model.indexOf(tc);
             if (idx >= 0) {

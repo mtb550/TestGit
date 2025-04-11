@@ -4,6 +4,7 @@ import com.example.pojo.Tree;
 import com.example.util.ShortcutRegistry;
 import com.example.util.sql;
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.ui.SimpleColoredComponent;
 import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.components.JBScrollPane;
@@ -30,6 +31,7 @@ public class TestCaseExplorerPanel {
         tree.setShowsRootHandles(true);
         tree.setCellRenderer(new IntelliJRenderer());
         tree.addMouseListener(new TestCaseTreeMouseAdapter(tree));
+        TestCaseTreeKeyAdapter.register(tree, ProjectManager.getInstance().getOpenProjects()[0]);
 
         // Enable drag and drop
         tree.setDragEnabled(true);
@@ -132,10 +134,20 @@ public class TestCaseExplorerPanel {
                     case 1 -> comp.setIcon(AllIcons.Nodes.Folder);
                     case 2 -> comp.setIcon(AllIcons.Nodes.Class);
                 }
+
+                // Dim color for cut nodes
+                if (TestCaseTreeKeyAdapter.isCutNode(info.id)) {
+                    comp.append(text, SimpleTextAttributes.GRAYED_ATTRIBUTES);
+                } else {
+                    comp.append(text, SimpleTextAttributes.REGULAR_ATTRIBUTES);
+                }
+            } else {
+                comp.append(text, SimpleTextAttributes.REGULAR_ATTRIBUTES);
             }
 
-            comp.append(text, SimpleTextAttributes.REGULAR_ATTRIBUTES);
             return comp;
         }
     }
+
+
 }

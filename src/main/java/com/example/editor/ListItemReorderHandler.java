@@ -1,6 +1,9 @@
 package com.example.editor;
 
 import com.example.pojo.TestCase;
+import com.intellij.ui.components.JBList;
+import com.intellij.util.ui.ImageUtil;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,7 +29,7 @@ public class ListItemReorderHandler extends TransferHandler {
     @Override
     protected Transferable createTransferable(JComponent c) {
         @SuppressWarnings("unchecked")
-        JList<TestCase> list = (JList<TestCase>) c;
+        JBList<TestCase> list = (JBList<TestCase>) c;
         draggedIndices = list.getSelectedIndices();
         draggedItems = list.getSelectedValuesList();
 
@@ -37,7 +40,7 @@ public class ListItemReorderHandler extends TransferHandler {
                     .getListCellRendererComponent(list, tc, draggedIndices[0], true, false);
             Rectangle cellBounds = list.getCellBounds(draggedIndices[0], draggedIndices[0]);
             renderer.setSize(cellBounds.getSize());
-            BufferedImage img = new BufferedImage(
+            BufferedImage img = ImageUtil.createImage(
                     renderer.getWidth(), renderer.getHeight(),
                     BufferedImage.TYPE_INT_ARGB
             );
@@ -60,7 +63,7 @@ public class ListItemReorderHandler extends TransferHandler {
             }
 
             @Override
-            public Object getTransferData(DataFlavor flavor)
+            public @NotNull Object getTransferData(DataFlavor flavor)
                     throws UnsupportedFlavorException {
                 if (!isDataFlavorSupported(flavor)) {
                     throw new UnsupportedFlavorException(flavor);
@@ -89,7 +92,7 @@ public class ListItemReorderHandler extends TransferHandler {
             @SuppressWarnings("unchecked")
             List<TestCase> dropped = (List<TestCase>) support.getTransferable()
                     .getTransferData(TESTCASE_LIST_FLAVOR);
-            JList.DropLocation dl = (JList.DropLocation) support.getDropLocation();
+            JBList.DropLocation dl = (JBList.DropLocation) support.getDropLocation();
             int index = dl.getIndex();
 
             // 1) remove originals (highest to lowest)
@@ -112,7 +115,7 @@ public class ListItemReorderHandler extends TransferHandler {
             return true;
 
         } catch (UnsupportedFlavorException | IOException ex) {
-            ex.printStackTrace();
+            ex.printStackTrace(System.out);
             return false;
         } finally {
             // clean up

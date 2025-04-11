@@ -16,8 +16,14 @@ public class sql {
 
     @SneakyThrows
     public sql() {
-        connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/mmoghyiri/Documents/Repo/iintellij-plugin-tc/autofy.db");
-        //connection = DriverManager.getConnection("jdbc:sqlite:/home/mtb/IdeaProjects/demo/autofy.db");
+
+        boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+
+        if (isWindows)
+            connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/mmoghyiri/Documents/Repo/iintellij-plugin-tc/autofy.db");
+        else
+            connection = DriverManager.getConnection("jdbc:sqlite:/home/mtb/IdeaProjects/demo/autofy.db");
+
     }
 
     public void close() {

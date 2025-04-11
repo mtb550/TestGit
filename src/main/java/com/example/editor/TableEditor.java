@@ -24,7 +24,7 @@ import java.util.List;
  * Displays your TestCase list as draggable, multi​-selectable cards with working context​-menu & double​-click.
  */
 public class TableEditor extends UserDataHolderBase implements FileEditor {
-    private final JPanel panel;
+    private final JBPanel<?> panel;
     private final VirtualFile file;
 
 

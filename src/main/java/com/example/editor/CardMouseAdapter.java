@@ -2,6 +2,7 @@ package com.example.editor;
 
 import com.example.demo.TestCaseToolWindow;
 import com.example.pojo.TestCase;
+import com.intellij.openapi.ui.JBPopupMenu;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,10 +11,10 @@ import java.awt.event.MouseEvent;
 
 public class CardMouseAdapter extends MouseAdapter {
     private final JComponent card;
-    private final JPopupMenu menu;
+    private final JBPopupMenu menu;
     private final TestCase tc; // Assuming TestCase is a type used in your project
 
-    public CardMouseAdapter(JComponent card, JPopupMenu menu, TestCase tc) {
+    public CardMouseAdapter(JComponent card, JBPopupMenu menu, TestCase tc) {
         this.card = card;
         this.menu = menu;
         this.tc = tc;
