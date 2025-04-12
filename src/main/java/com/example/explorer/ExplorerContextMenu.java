@@ -35,6 +35,7 @@ public class ExplorerContextMenu extends DefaultActionGroup {
         add(new RenameNodeAction());
         addSeparator();
         add(new RunFeatureAction());
+
         addSeparator();
 
         DefaultActionGroup exportGroup = new DefaultActionGroup("📥 Export", true);
@@ -44,10 +45,18 @@ public class ExplorerContextMenu extends DefaultActionGroup {
         exportGroup.add(new ExportJsonAction());
         add(exportGroup);
 
-        add(new ImportAction());
+        add(new ImportAction()); // change it to group, add import from csv, json.
+
+        DefaultActionGroup integrationGroup = new DefaultActionGroup("📥 Integrate", true);
+        integrationGroup.add(new IntegrateTestRailAction());
+        integrationGroup.add(new IntegrateJiraAction());
+        integrationGroup.add(new IntegrateAzureAction());
+        add(integrationGroup);
+
         addSeparator();
         add(new OpenOldVersionsAction());
         add(new ViewCommitsAction());
+        add(new TestPlansAction());
     }
 
     public static class ViewCommitsAction extends AnAction {
@@ -318,6 +327,51 @@ public class ExplorerContextMenu extends DefaultActionGroup {
 
             model.insertNodeInto(newProjectNode, root, root.getChildCount());
             tree.scrollPathToVisible(new TreePath(newProjectNode.getPath()));
+        }
+    }
+
+    public static class TestPlansAction extends AnAction {
+        public TestPlansAction() {
+            super("🧪 Test Plans");
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent e) {
+            Messages.showInfoMessage("Test Plans feature coming soon!", "Info");
+            // TODO: You can replace the above with real logic when ready.
+        }
+    }
+
+    public static class IntegrateAzureAction extends AnAction {
+        public IntegrateAzureAction() {
+            super("From Azure DevOps");
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent e) {
+            // TODO: Export test cases to CSV
+        }
+    }
+
+    public static class IntegrateTestRailAction extends AnAction {
+        public IntegrateTestRailAction() {
+            super("From Test Rail");
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent e) {
+            // TODO: Export test cases to CSV
+        }
+    }
+
+    public static class IntegrateJiraAction extends AnAction {
+        public IntegrateJiraAction() {
+            super("From Jira");
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent e) {
+            // TODO: Export test cases to CSV
         }
     }
 
