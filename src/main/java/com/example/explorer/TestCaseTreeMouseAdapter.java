@@ -35,9 +35,6 @@ public class TestCaseTreeMouseAdapter extends MouseAdapter {
             popupMenu.getComponent().show(e.getComponent(), e.getX(), e.getY());
 
         } else if (e.getClickCount() == 2 && treeItem.getType() == 2) {
-            System.out.println(((Tree) userObject).getName());
-            System.out.println(((Tree) userObject).getType());
-            System.out.println(((Tree) userObject).getId());
             TestCaseEditor.open(((Tree) userObject).getId());
         }
     }
