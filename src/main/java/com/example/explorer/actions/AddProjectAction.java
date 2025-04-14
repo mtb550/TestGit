@@ -2,6 +2,7 @@ package com.example.explorer.actions;
 
 import com.example.explorer.ExplorerPanel;
 import com.example.pojo.Tree;
+import com.example.util.NodeType;
 import com.example.util.sql;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -31,12 +32,12 @@ public class AddProjectAction extends AnAction {
 
         int newProjectId = new sql().get(
                 "INSERT INTO tree (name, type, created_by) VALUES (?, ?, ?) RETURNING id;",
-                name, 0, System.getProperty("user.name")
+                name, NodeType.PROJECT.getCode(), System.getProperty("user.name")
         ).asType(Integer.class);
 
         Tree newProject = new Tree()
                 .setName(name)
-                .setType(0)
+                .setType(NodeType.PROJECT.getCode())
                 .setId(newProjectId);
 
         DefaultTreeModel model = (DefaultTreeModel) tree.getModel();

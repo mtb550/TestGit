@@ -2,10 +2,11 @@ package com.example.explorer;
 
 import com.example.editor.TestCaseEditor;
 import com.example.pojo.Tree;
-import com.example.util.ActionHistory;
-import com.example.util.StatusUtil;
-import com.example.util.UiDialogs;
-import com.example.util.sql;
+import com.example.util.*;
+import com.intellij.openapi.actionSystem.ActionGroup;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionPlaces;
+import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.MessageType;
@@ -51,6 +52,8 @@ public class TestCaseTreeKeyAdapter {
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, InputEvent.SHIFT_DOWN_MASK), "renameNode");
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "clearClipboard");
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK), "addNewNode");
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_CONTEXT_MENU, 0), "showContextMenu"); //TODO:: not working
+
 
 
         am.put("openTestCase", new AbstractAction() {
@@ -61,7 +64,7 @@ public class TestCaseTreeKeyAdapter {
 
                 Object userObject = ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
                 if (userObject instanceof Tree treeItem) {
-                    if (treeItem.getType() == 2) {
+                    if (treeItem.getType() == NodeType.FEATURE.getCode()) {
                         TestCaseEditor.open(treeItem.getId());
                         System.out.printf("[ENTER] Opened test case: %s%n", treeItem.getName());
                     }
@@ -338,17 +341,17 @@ public class TestCaseTreeKeyAdapter {
 
                 int parentId = 0;
 
-                if (newType == 1 && (selectedInfo == null || selectedInfo.getType() != 0)) {
+                if (newType == NodeType.SUITE.getCode() && (selectedInfo == null || selectedInfo.getType() != NodeType.PROJECT.getCode())) {
                     JOptionPane.showMessageDialog(tree, "Please select a project to add a suite.");
                     return;
                 }
 
-                if (newType == 2 && (selectedInfo == null || selectedInfo.getType() != 1)) {
+                if (newType == NodeType.FEATURE.getCode() && (selectedInfo == null || selectedInfo.getType() != NodeType.SUITE.getCode())) {
                     JOptionPane.showMessageDialog(tree, "Please select a suite to add a feature.");
                     return;
                 }
 
-                if (newType == 1 || newType == 2) {
+                if (newType == NodeType.SUITE.getCode() || newType == NodeType.FEATURE.getCode()) {
                     parentId = selectedInfo.getId();
                 }
 
@@ -369,6 +372,25 @@ public class TestCaseTreeKeyAdapter {
                 TreePath newPath = new TreePath(newNode.getPath());
                 tree.setSelectionPath(newPath);
                 tree.scrollPathToVisible(newPath);
+            }
+        });
+
+        am.put("showContextMenu", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                TreePath path = tree.getSelectionPath();
+                if (path == null) return;
+
+                Rectangle bounds = tree.getPathBounds(path);
+                if (bounds == null) return;
+
+                // Use bounds to show popup at center of selected row
+                int x = bounds.x + bounds.width / 2;
+                int y = bounds.y + bounds.height / 2;
+
+                ActionGroup group = (ActionGroup) ActionManager.getInstance().getAction("TestTreeContextMenuGroup");
+                ActionPopupMenu popup = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, group);
+                popup.getComponent().show(tree, x, y);
             }
         });
 

@@ -33,7 +33,7 @@ public class ExplorerPanel {
         tree.addMouseListener(new TestCaseTreeMouseAdapter(tree));
         TestCaseTreeKeyAdapter.register(tree, ProjectManager.getInstance().getOpenProjects()[0]);
 
-        // Enable drag and drop
+        // enable drag and drop
         tree.setDragEnabled(true);
         tree.setDropMode(DropMode.ON_OR_INSERT);
         tree.setTransferHandler(new TreeTransferHandler(tree));
@@ -65,7 +65,7 @@ public class ExplorerPanel {
                     case 2 -> comp.setIcon(AllIcons.Nodes.Class);
                 }
 
-                // Dim color for cut nodes
+                // dim color for cut nodes
                 if (TestCaseTreeKeyAdapter.isCutNode(treeItem.getId())) {
                     comp.append(text, SimpleTextAttributes.GRAYED_ATTRIBUTES);
                 } else {

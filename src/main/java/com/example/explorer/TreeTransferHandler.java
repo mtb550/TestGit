@@ -1,6 +1,7 @@
 package com.example.explorer;
 
 import com.example.pojo.Tree;
+import com.example.util.NodeType;
 import com.example.util.sql;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
@@ -75,7 +76,8 @@ public class TreeTransferHandler extends TransferHandler {
             if (!(obj instanceof Tree draggedInfo)) return false;
 
             // Block project moving or dropping into a feature
-            if (draggedInfo.getType() == 0 || targetType == 2) return false;
+            if (draggedInfo.getType() == NodeType.PROJECT.getCode() || targetType == NodeType.FEATURE.getCode())
+                return false;
 
             // Block no-op
             if (node.getParent() == targetNode) return false;

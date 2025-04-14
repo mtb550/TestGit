@@ -53,7 +53,7 @@
 
         </action>
         <action id="TestTreeContextMenuGroup"
-                class="com.example.explorer.ExplorerContextMenu"
+                class="com.example.explorer.ExplorerContext"
                 text="Test Tree Context Menu"
                 popup="true"/>
     </actions>

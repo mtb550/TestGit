@@ -2,6 +2,7 @@ package com.example.explorer;
 
 import com.example.editor.TestCaseEditor;
 import com.example.pojo.Tree;
+import com.example.util.NodeType;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPlaces;
@@ -34,7 +35,7 @@ public class TestCaseTreeMouseAdapter extends MouseAdapter {
             ActionPopupMenu popupMenu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, group);
             popupMenu.getComponent().show(e.getComponent(), e.getX(), e.getY());
 
-        } else if (e.getClickCount() == 2 && treeItem.getType() == 2) {
+        } else if (e.getClickCount() == NodeType.FEATURE.getCode() && treeItem.getType() == NodeType.FEATURE.getCode()) {
             TestCaseEditor.open(((Tree) userObject).getId());
         }
     }
