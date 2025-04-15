@@ -47,14 +47,43 @@ public class ExplorerPanel {
         JBScrollPane scrollPane = new JBScrollPane(tree);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        // add a dropdown selector (below toolbar)
-        //JPanel topBar = new JPanel(new BorderLayout());
-        //topBar.add(new ComboBoxProjectSelector(this).getComponent(), BorderLayout.WEST);
+        // TOP BAR: Project Selector + Switchers (Test Cases, Test Plans, Automation)
+        JPanel topBar = new JPanel(new BorderLayout());
+        topBar.add(new ComboBoxProjectSelector(this).getComponent(), BorderLayout.NORTH);
 
-        //panel.add(topBar, BorderLayout.NORTH);
-        panel.add(new ComboBoxProjectSelector(this).getComponent(), BorderLayout.NORTH);
-        panel.add(scrollPane, BorderLayout.CENTER);
+        // Switcher buttons panel
+        JPanel switchers = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        ButtonGroup switcherGroup = new ButtonGroup();
 
+        JToggleButton btnTestCases = new JToggleButton("Test Cases");
+        JToggleButton btnTestPlans = new JToggleButton("Test Plans");
+        JToggleButton btnAutomation = new JToggleButton("Automation");
+
+        switcherGroup.add(btnTestCases);
+        switcherGroup.add(btnTestPlans);
+        switcherGroup.add(btnAutomation);
+
+        switchers.add(btnTestCases);
+        switchers.add(btnTestPlans);
+        switchers.add(btnAutomation);
+
+        topBar.add(switchers, BorderLayout.SOUTH);
+        panel.add(topBar, BorderLayout.NORTH);
+
+        // Content area controlled by switchers
+        JPanel contentPanel = new JPanel(new CardLayout());
+        contentPanel.add(scrollPane, "Test Cases");
+        contentPanel.add(new JLabel("Test Plans content coming soon..."), "Test Plans");
+        contentPanel.add(new JLabel("Automation content coming soon..."), "Automation");
+
+        panel.add(contentPanel, BorderLayout.CENTER);
+
+        CardLayout cardLayout = (CardLayout) contentPanel.getLayout();
+        btnTestCases.setSelected(true);
+
+        btnTestCases.addActionListener(e -> cardLayout.show(contentPanel, "Test Cases"));
+        btnTestPlans.addActionListener(e -> cardLayout.show(contentPanel, "Test Plans"));
+        btnAutomation.addActionListener(e -> cardLayout.show(contentPanel, "Automation"));
     }
 
     public void loadAllProjects() {
