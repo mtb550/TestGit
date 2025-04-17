@@ -98,6 +98,11 @@ public class TestPlanPopup {
                     }
                 }, rootNode);
 
+                // Expand all
+                for (int i = 0; i < checkboxTree.getRowCount(); i++) {
+                    checkboxTree.expandRow(i);
+                }
+
                 JBScrollPane scrollPane = new JBScrollPane(checkboxTree);
                 scrollPane.setPreferredSize(new Dimension(500, 380));
                 panel.add(scrollPane, BorderLayout.CENTER);
@@ -196,6 +201,7 @@ public class TestPlanPopup {
 
             private void buildTreeRecursive(Tree treeItem, CheckedTreeNode parentNode) {
                 CheckedTreeNode currentNode = new CheckedTreeNode(treeItem);
+                currentNode.setChecked(false);
                 parentNode.add(currentNode);
 
                 if (treeItem.getType() == NodeType.FEATURE.getCode()) {
@@ -205,6 +211,7 @@ public class TestPlanPopup {
 
                     for (TestCase tc : testCases) {
                         CheckedTreeNode testCaseNode = new CheckedTreeNode(tc);
+                        testCaseNode.setChecked(false);
                         allTestCaseNodes.add(testCaseNode);
                         currentNode.add(testCaseNode);
                     }
