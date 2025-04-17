@@ -3,21 +3,28 @@ package com.example.explorer;
 import com.example.pojo.TestPlan;
 import com.example.pojo.Tree;
 import com.example.pojo.TestCase;
+import com.example.pojo.GroupType;
 import com.example.util.NodeType;
 import com.example.util.sql;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.popup.ListPopup;
+import com.intellij.openapi.ui.popup.PopupStep;
+import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
 import com.intellij.ui.CheckboxTree;
 import com.intellij.ui.CheckedTreeNode;
+import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.popup.list.ListPopupImpl;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.*;
 import java.util.List;
 
 public class TestPlanPopup {
@@ -27,6 +34,8 @@ public class TestPlanPopup {
             private CheckboxTree checkboxTree;
             private CheckedTreeNode rootNode;
             private JTextField buildField;
+            private List<CheckedTreeNode> allTestCaseNodes = new ArrayList<>();
+            private Set<GroupType> selectedGroups = new HashSet<>();
 
             {
                 init();
@@ -36,16 +45,29 @@ public class TestPlanPopup {
             @Override
             protected JComponent createCenterPanel() {
                 JBPanel<?> panel = new JBPanel<>(new BorderLayout(10, 10));
-                panel.setPreferredSize(new Dimension(500, 550));
+                panel.setPreferredSize(new Dimension(550, 600));
 
-                // Build Number
+                // Build number
                 JBPanel<?> buildPanel = new JBPanel<>(new BorderLayout(5, 5));
                 buildPanel.add(new JBLabel("🔢 Build Number:"), BorderLayout.NORTH);
                 buildField = new JTextField();
                 buildPanel.add(buildField, BorderLayout.CENTER);
                 panel.add(buildPanel, BorderLayout.NORTH);
 
-                // Load Test Case Tree
+                // Group selector toolbar
+                JBPanel<?> toolbar = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
+                JButton groupButton = new JButton("Groups ▼");
+                groupButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        showGroupPopup(groupButton);
+                    }
+                });
+                toolbar.add(new JBLabel("Filter by Groups:"));
+                toolbar.add(groupButton);
+                panel.add(toolbar, BorderLayout.BEFORE_FIRST_LINE);
+
+                // Load test case tree
                 rootNode = new CheckedTreeNode("Test Cases");
                 Tree root = new sql().get("SELECT * FROM tree WHERE id = ?", plan.getProject_id()).as(Tree.class);
                 if (root != null) {
@@ -62,6 +84,15 @@ public class TestPlanPopup {
                                 getTextRenderer().append(treeNode.getName());
                             } else if (userObject instanceof TestCase testCase) {
                                 getTextRenderer().append("🧪 " + testCase.getTitle());
+                                if (testCase.getGroups() != null && !testCase.getGroups().isEmpty()) {
+                                    getTextRenderer().append("  [");
+                                    for (int i = 0; i < testCase.getGroups().size(); i++) {
+                                        getTextRenderer().append(testCase.getGroups().get(i).name());
+                                        if (i < testCase.getGroups().size() - 1)
+                                            getTextRenderer().append(", ");
+                                    }
+                                    getTextRenderer().append("]", SimpleTextAttributes.GRAYED_ATTRIBUTES);
+                                }
                             } else {
                                 getTextRenderer().append(value.toString());
                             }
@@ -70,10 +101,10 @@ public class TestPlanPopup {
                 }, rootNode);
 
                 JBScrollPane scrollPane = new JBScrollPane(checkboxTree);
-                scrollPane.setPreferredSize(new Dimension(480, 380));
+                scrollPane.setPreferredSize(new Dimension(500, 380));
                 panel.add(scrollPane, BorderLayout.CENTER);
 
-                // Add Button
+                // Add button
                 JButton addButton = new JButton("➕ Add");
                 addButton.addActionListener(e -> onAdd(plan));
                 JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -81,6 +112,51 @@ public class TestPlanPopup {
                 panel.add(bottomPanel, BorderLayout.SOUTH);
 
                 return panel;
+            }
+
+            private void showGroupPopup(JComponent anchor) {
+                List<GroupType> allGroups = Arrays.asList(GroupType.values());
+
+                BaseListPopupStep<GroupType> step = new BaseListPopupStep<GroupType>("Select Groups", allGroups) {
+                    @Override
+                    public PopupStep<?> onChosen(GroupType selectedValue, boolean finalChoice) {
+                        if (selectedGroups.contains(selectedValue)) {
+                            selectedGroups.remove(selectedValue);
+                        } else {
+                            selectedGroups.add(selectedValue);
+                        }
+                        autoCheckGroups();
+                        return PopupStep.FINAL_CHOICE;
+                    }
+
+                    public boolean isSelected(GroupType value) {
+                        return selectedGroups.contains(value);
+                    }
+
+                    @Override
+                    public boolean isSelectable(GroupType value) {
+                        return true;
+                    }
+
+                    @Override
+                    public String getTextFor(GroupType value) {
+                        return value.name();
+                    }
+                };
+
+                ListPopup popup = new ListPopupImpl(step);
+                popup.showUnderneathOf(anchor);
+            }
+
+            private void autoCheckGroups() {
+                for (CheckedTreeNode node : allTestCaseNodes) {
+                    Object userObject = node.getUserObject();
+                    if (userObject instanceof TestCase testCase && testCase.getGroups() != null) {
+                        boolean shouldCheck = testCase.getGroups().stream().anyMatch(selectedGroups::contains);
+                        node.setChecked(shouldCheck);
+                    }
+                }
+                checkboxTree.repaint();
             }
 
             private void onAdd(TestPlan plan) {
@@ -115,13 +191,13 @@ public class TestPlanPopup {
                 parentNode.add(currentNode);
 
                 if (treeItem.getType() == NodeType.FEATURE.getCode()) {
-                    // Load test cases from nafath_tc
                     TestCase[] testCases = new sql().get(
                             "SELECT * FROM nafath_tc WHERE module = ? ORDER BY sort", treeItem.getId()
                     ).as(TestCase[].class);
 
                     for (TestCase tc : testCases) {
                         CheckedTreeNode testCaseNode = new CheckedTreeNode(tc);
+                        allTestCaseNodes.add(testCaseNode);
                         currentNode.add(testCaseNode);
                     }
 
