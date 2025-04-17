@@ -1,6 +1,7 @@
 package com.example.explorer;
 
 import com.example.editor.TestCaseEditor;
+import com.example.pojo.TestPlan;
 import com.example.pojo.Tree;
 import com.example.util.NodeType;
 import com.intellij.openapi.actionSystem.ActionGroup;
@@ -28,6 +29,21 @@ public class TestCaseTreeMouseAdapter extends MouseAdapter {
 
         Object userObject = ((DefaultMutableTreeNode) selPath.getLastPathComponent()).getUserObject();
 
+        // CASE: it's a TestPlan node (folder)
+        if (userObject instanceof TestPlan plan) {
+            if (SwingUtilities.isRightMouseButton(e)) {
+                // Future: right-click context menu
+                return;
+            } else if (plan.getType() == 0 && e.getClickCount() == 1 && SwingUtilities.isLeftMouseButton(e)) {
+                // ⬅️ open popup when clicking on folder (type 0)
+                //JOptionPane.showMessageDialog(tree, "You clicked folder: " + plan.getName(), "Folder Clicked", JOptionPane.INFORMATION_MESSAGE);
+                TestPlanPopup.showFolderInfo(plan, tree);
+
+            }
+            return;
+        }
+
+        // Existing logic for tree test case nodes
         if (!(userObject instanceof Tree treeItem)) return;
 
         if (SwingUtilities.isRightMouseButton(e)) {
@@ -36,7 +52,10 @@ public class TestCaseTreeMouseAdapter extends MouseAdapter {
             popupMenu.getComponent().show(e.getComponent(), e.getX(), e.getY());
 
         } else if (e.getClickCount() == NodeType.FEATURE.getCode() && treeItem.getType() == NodeType.FEATURE.getCode()) {
-            TestCaseEditor.open(((Tree) userObject).getId());
+            TestCaseEditor.open(treeItem.getId());
         }
     }
+
+
+
 }
