@@ -56,6 +56,4 @@ public class TestCaseTreeMouseAdapter extends MouseAdapter {
         }
     }
 
-
-
 }

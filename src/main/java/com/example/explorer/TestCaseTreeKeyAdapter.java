@@ -54,8 +54,6 @@ public class TestCaseTreeKeyAdapter {
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK), "addNewNode");
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_CONTEXT_MENU, 0), "showContextMenu"); //TODO:: not working
 
-
-
         am.put("openTestCase", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {

@@ -1,6 +1,5 @@
 package com.example.explorer;
 
-//import com.example.editor.TestPlanEditor;
 import com.example.pojo.TestPlan;
 import com.example.pojo.Tree;
 import com.example.util.ShortcutRegistry;
@@ -18,7 +17,9 @@ import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Getter;
 
 import javax.swing.*;
-import javax.swing.tree.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
 import java.util.prefs.Preferences;
 

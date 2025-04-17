@@ -1,26 +1,24 @@
 package com.example.explorer;
 
+import com.example.pojo.GroupType;
+import com.example.pojo.TestCase;
 import com.example.pojo.TestPlan;
 import com.example.pojo.Tree;
-import com.example.pojo.TestCase;
-import com.example.pojo.GroupType;
 import com.example.util.NodeType;
 import com.example.util.sql;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.ui.popup.ListPopup;
-import com.intellij.openapi.ui.popup.PopupStep;
-import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
+import com.intellij.openapi.ui.popup.JBPopup;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.ui.CheckboxTree;
 import com.intellij.ui.CheckedTreeNode;
 import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.popup.list.ListPopupImpl;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -115,36 +113,46 @@ public class TestPlanPopup {
             }
 
             private void showGroupPopup(JComponent anchor) {
-                List<GroupType> allGroups = Arrays.asList(GroupType.values());
+                // Create JBList with all groups
+                JBList<GroupType> groupList = new JBList<>(GroupType.values());
+                groupList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
-                BaseListPopupStep<GroupType> step = new BaseListPopupStep<GroupType>("Select Groups", allGroups) {
+                // Custom cell renderer with checkbox
+                groupList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
+                    JCheckBox checkBox = new JCheckBox(value.name(), selectedGroups.contains(value));
+                    checkBox.setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
+                    checkBox.setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
+                    checkBox.setFont(list.getFont());
+                    return checkBox;
+                });
+
+                // Toggle selectedGroups when clicked
+                groupList.addMouseListener(new MouseAdapter() {
                     @Override
-                    public PopupStep<?> onChosen(GroupType selectedValue, boolean finalChoice) {
-                        if (selectedGroups.contains(selectedValue)) {
-                            selectedGroups.remove(selectedValue);
-                        } else {
-                            selectedGroups.add(selectedValue);
+                    public void mouseClicked(MouseEvent e) {
+                        int index = groupList.locationToIndex(e.getPoint());
+                        if (index >= 0) {
+                            GroupType group = groupList.getModel().getElementAt(index);
+                            if (selectedGroups.contains(group)) {
+                                selectedGroups.remove(group);
+                            } else {
+                                selectedGroups.add(group);
+                            }
+                            groupList.repaint();
+                            autoCheckGroups(); // update the tree view
                         }
-                        autoCheckGroups();
-                        return PopupStep.FINAL_CHOICE;
                     }
+                });
 
-                    public boolean isSelected(GroupType value) {
-                        return selectedGroups.contains(value);
-                    }
+                // Create popup from JBList
+                JBPopup popup = JBPopupFactory.getInstance()
+                        .createComponentPopupBuilder(new JBScrollPane(groupList), null)
+                        .setTitle("Select Groups")
+                        .setResizable(true)
+                        .setMovable(true)
+                        .setRequestFocus(true)
+                        .createPopup();
 
-                    @Override
-                    public boolean isSelectable(GroupType value) {
-                        return true;
-                    }
-
-                    @Override
-                    public String getTextFor(GroupType value) {
-                        return value.name();
-                    }
-                };
-
-                ListPopup popup = new ListPopupImpl(step);
                 popup.showUnderneathOf(anchor);
             }
 
@@ -221,6 +229,18 @@ public class TestPlanPopup {
                         }
                         collectSelectedTestCases(ctNode, output);
                     }
+                }
+            }
+
+            private class GroupTypeRenderer implements ListCellRenderer<GroupType> {
+                @Override
+                public Component getListCellRendererComponent(JList<? extends GroupType> list, GroupType value,
+                                                              int index, boolean isSelected, boolean cellHasFocus) {
+                    JCheckBox checkBox = new JCheckBox(value.name(), selectedGroups.contains(value));
+                    checkBox.setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
+                    checkBox.setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
+                    checkBox.setFont(list.getFont());
+                    return checkBox;
                 }
             }
         };
