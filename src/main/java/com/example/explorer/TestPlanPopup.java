@@ -6,6 +6,7 @@ import com.example.pojo.TestPlan;
 import com.example.pojo.Tree;
 import com.example.util.NodeType;
 import com.example.util.sql;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.JBPopup;
@@ -19,6 +20,8 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -107,12 +110,43 @@ public class TestPlanPopup {
                 scrollPane.setPreferredSize(new Dimension(500, 380));
                 panel.add(scrollPane, BorderLayout.CENTER);
 
-                // Add button
-                JButton addButton = new JButton("➕ Add");
-                addButton.addActionListener(e -> onAdd(plan));
-                JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-                bottomPanel.add(addButton);
-                panel.add(bottomPanel, BorderLayout.SOUTH);
+                // === Configuration Panel
+                JBPanel<?> configPanel = new JBPanel<>(new GridLayout(4, 2, 10, 5));
+
+                // 🧱 Platform
+                configPanel.add(new JBLabel("🧱 Platform:"));
+                ComboBox<String> platformCombo = new ComboBox<>(new String[]{"","api", "web", "mobile"});
+                configPanel.add(platformCombo);
+
+                // 🌍 Language
+                configPanel.add(new JBLabel("🌍 Language:"));
+                ComboBox<String> languageCombo = new ComboBox<>(new String[]{"","en", "ar"});
+                configPanel.add(languageCombo);
+
+                // 🌐 Browser
+                configPanel.add(new JBLabel("🌐 Browser:"));
+                ComboBox<String> browserCombo = new ComboBox<>(new String[]{"","chrome", "safari"});
+                configPanel.add(browserCombo);
+
+                // 📱 Device Type
+                configPanel.add(new JBLabel("📱 Device Type:"));
+                ComboBox<String> deviceCombo = new ComboBox<>(new String[]{"","iPhone", "Android", "Huawei"});
+                configPanel.add(deviceCombo);
+
+                panel.add(configPanel, BorderLayout.AFTER_LAST_LINE);
+
+// Behavior: Disable browser/device if platform = api
+                platformCombo.addActionListener(e -> {
+                    String selected = (String) platformCombo.getSelectedItem();
+                    boolean isApi = "api".equalsIgnoreCase(selected);
+                    boolean isWeb = "web".equalsIgnoreCase(selected);
+                    boolean isMobile = "mobile".equalsIgnoreCase(selected);
+
+                    browserCombo.setVisible(!isApi && !isMobile);
+                    deviceCombo.setVisible(!isApi && !isWeb);
+
+                });
+
 
                 return panel;
             }

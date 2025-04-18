@@ -27,19 +27,24 @@ public class TestCaseTreeMouseAdapter extends MouseAdapter {
         TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
         if (selPath == null) return;
 
-        Object userObject = ((DefaultMutableTreeNode) selPath.getLastPathComponent()).getUserObject();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
+        Object userObject = node.getUserObject();
 
         // CASE: it's a TestPlan node (folder)
         if (userObject instanceof TestPlan plan) {
             if (SwingUtilities.isRightMouseButton(e)) {
                 // Future: right-click context menu
+                JPopupMenu popup = TestPlanContextMenu.create(tree, plan, node);
+                popup.show(tree, e.getX(), e.getY());
                 return;
-            } else if (plan.getType() == 0 && e.getClickCount() == 1 && SwingUtilities.isLeftMouseButton(e)) {
+            }
+
+            /*else if (plan.getType() == 0 && e.getClickCount() == 1 && SwingUtilities.isLeftMouseButton(e)) {
                 // ⬅️ open popup when clicking on folder (type 0)
                 //JOptionPane.showMessageDialog(tree, "You clicked folder: " + plan.getName(), "Folder Clicked", JOptionPane.INFORMATION_MESSAGE);
                 TestPlanPopup.showFolderInfo(plan, tree);
 
-            }
+            }*/
             return;
         }
 
