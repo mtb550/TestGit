@@ -14,14 +14,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class GroupFilterHandler {
     private final Set<GroupType> selectedGroups = new HashSet<>();
     @Setter
     private CheckboxTree checkboxTree;
+    @Setter
+    private List<CheckedTreeNode> allTestCaseNodes;
 
     public JComponent createToolbar() {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -82,18 +84,16 @@ public class GroupFilterHandler {
     }
 
     private void autoCheckGroups() {
-        CheckedTreeNode root = (CheckedTreeNode) checkboxTree.getModel().getRoot();
-        Enumeration<?> enumeration = root.children();
-        while (enumeration.hasMoreElements()) {
-            Object child = enumeration.nextElement();
-            if (child instanceof CheckedTreeNode ctNode) {
-                Object userObject = ctNode.getUserObject();
+        if (allTestCaseNodes != null) {
+            for (CheckedTreeNode node : allTestCaseNodes) {
+                Object userObject = node.getUserObject();
                 if (userObject instanceof TestCase testCase && testCase.getGroups() != null) {
-                    boolean shouldCheck = testCase.getGroups().stream().anyMatch(selectedGroups::contains);
-                    ctNode.setChecked(shouldCheck);
+                    boolean shouldCheck = testCase.getGroups().stream()
+                            .anyMatch(selectedGroups::contains);
+                    node.setChecked(shouldCheck);
                 }
             }
+            checkboxTree.repaint();
         }
-        checkboxTree.repaint();
     }
 }

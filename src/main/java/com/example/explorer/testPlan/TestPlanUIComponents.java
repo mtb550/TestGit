@@ -46,6 +46,7 @@ public class TestPlanUIComponents {
         }
 
         groupFilterHandler.setCheckboxTree(checkboxTree);
+        groupFilterHandler.setAllTestCaseNodes(treeBuilder.getAllTestCaseNodes()); // Add this line
         actionHandler.setCheckboxTree(checkboxTree);
         actionHandler.setRootNode(rootNode);
 

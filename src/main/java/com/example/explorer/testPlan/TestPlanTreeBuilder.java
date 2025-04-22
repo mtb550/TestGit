@@ -6,12 +6,14 @@ import com.example.pojo.Tree;
 import com.example.util.NodeType;
 import com.example.util.sql;
 import com.intellij.ui.CheckedTreeNode;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TestPlanTreeBuilder {
     private final TestPlan plan;
+    @Getter
     private final List<CheckedTreeNode> allTestCaseNodes = new ArrayList<>();
 
     public TestPlanTreeBuilder(TestPlan plan) {
@@ -48,4 +50,5 @@ public class TestPlanTreeBuilder {
             buildTreeRecursive(child, currentNode);
         }
     }
+
 }
