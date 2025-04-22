@@ -1,4 +1,4 @@
-package com.example.explorer;
+package com.example.explorer.testPlan;
 
 import com.example.explorer.actions.TestPlanInfoPopup;
 import com.example.pojo.TestPlan;
@@ -46,8 +46,6 @@ public class TestPlanContextMenu {
         JMenuItem moreInfo = new JMenuItem("ℹ More Info");
         moreInfo.addActionListener(e -> TestPlanInfoPopup.show(plan));
         menu.add(moreInfo);
-
-
 
 
         // add above
