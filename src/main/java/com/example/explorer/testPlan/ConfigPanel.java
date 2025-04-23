@@ -7,6 +7,7 @@ import com.intellij.util.ui.JBUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 public class ConfigPanel {
     private ComboBox<String> platformCombo;
@@ -88,18 +89,18 @@ public class ConfigPanel {
     }
 
     public String getPlatform() {
-        return platformCombo.getSelectedItem().toString();
+        return Objects.requireNonNull(platformCombo.getSelectedItem()).toString();
     }
 
     public String getLanguage() {
-        return languageCombo.getSelectedItem().toString();
+        return Objects.requireNonNull(languageCombo.getSelectedItem()).toString();
     }
 
     public String getBrowser() {
-        return browserCombo.isVisible() ? browserCombo.getSelectedItem().toString() : null;
+        return browserCombo.isVisible() ? Objects.requireNonNull(browserCombo.getSelectedItem()).toString() : null;
     }
 
     public String getDeviceType() {
-        return deviceCombo.isVisible() ? deviceCombo.getSelectedItem().toString() : null;
+        return deviceCombo.isVisible() ? Objects.requireNonNull(deviceCombo.getSelectedItem()).toString() : null;
     }
 }

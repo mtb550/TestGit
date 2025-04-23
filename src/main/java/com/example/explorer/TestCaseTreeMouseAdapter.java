@@ -2,6 +2,7 @@ package com.example.explorer;
 
 import com.example.editor.TestCaseEditor;
 import com.example.explorer.testPlan.TestPlanContextMenu;
+import com.example.explorer.testPlan.TestRunEditor;
 import com.example.pojo.TestPlan;
 import com.example.pojo.Tree;
 import com.example.util.NodeType;
@@ -31,25 +32,22 @@ public class TestCaseTreeMouseAdapter extends MouseAdapter {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
         Object userObject = node.getUserObject();
 
-        // CASE: it's a TestPlan node (folder)
+        // CASE: it's a TestPlan node (folder or test run)
         if (userObject instanceof TestPlan plan) {
             if (SwingUtilities.isRightMouseButton(e)) {
-                // Future: right-click context menu
                 JPopupMenu popup = TestPlanContextMenu.create(tree, plan, node);
                 popup.show(tree, e.getX(), e.getY());
                 return;
             }
 
-            /*else if (plan.getType() == 0 && e.getClickCount() == 1 && SwingUtilities.isLeftMouseButton(e)) {
-                // ⬅️ open popup when clicking on folder (type 0)
-                //JOptionPane.showMessageDialog(tree, "You clicked folder: " + plan.getName(), "Folder Clicked", JOptionPane.INFORMATION_MESSAGE);
-                TestPlanPopup.showFolderInfo(plan, tree);
+            if (plan.getType() == 1 && SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+                TestRunEditor.open(plan.getId(), plan.getName());
+            }
 
-            }*/
             return;
         }
 
-        // Existing logic for tree test case nodes
+        // CASE: regular test case nodes
         if (!(userObject instanceof Tree treeItem)) return;
 
         if (SwingUtilities.isRightMouseButton(e)) {
