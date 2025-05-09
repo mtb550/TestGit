@@ -1,6 +1,5 @@
 package com.example.explorer.testPlan;
 
-import com.example.editor.TestCaseCard;
 import com.example.pojo.TestCase;
 import com.example.util.sql;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -40,7 +39,9 @@ public class TestRunEditor {
                 """, testRunId).as(TestCase[].class);
 
         for (int i = 0; i < testCases.length; i++) {
-            panel.add(new TestCaseCard(i, testCases[i]));
+            //panel.add(new TestCaseCardTP(i, testCases[i]));
+            panel.add(new TestCaseCardWrapper(i, testCases[i]));
+
             panel.add(Box.createVerticalStrut(8));
         }
 
