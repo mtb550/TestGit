@@ -5,11 +5,11 @@ import com.example.pojo.Tree;
 import com.example.util.ShortcutRegistry;
 import com.example.util.sql;
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.ui.SimpleColoredComponent;
 import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.tabs.JBTabs;
 import com.intellij.ui.tabs.TabInfo;
 import com.intellij.ui.tabs.TabsListener;
 import com.intellij.ui.tabs.impl.JBTabsImpl;
@@ -31,79 +31,44 @@ public class ExplorerPanel {
 
     public ExplorerPanel() {
         panel = new JPanel(new BorderLayout());
+
         projectTree = new SimpleTree();
         testPlanTree = new SimpleTree();
 
-        // === Load Test Case Tree ===
-        ExplorerTree.build();
+        setupTestCaseTree();
+        setupTestPlanTree();
 
-        projectTree.setModel(ExplorerTree.getTreeModel());
-
-        projectTree.setRootVisible(true);
-        projectTree.setShowsRootHandles(true);
-        projectTree.setCellRenderer(new IntelliJRenderer());
-        projectTree.addMouseListener(new TestCaseTreeMouseAdapter(projectTree));
-        TestCaseTreeKeyAdapter.register(projectTree, ProjectManager.getInstance().getOpenProjects()[0]);
-
-        // enable drag and drop
-        projectTree.setDragEnabled(true);
-        projectTree.setDropMode(DropMode.ON_OR_INSERT);
-        projectTree.setTransferHandler(new TreeTransferHandler(projectTree));
-
-        // register all keyboard shortcuts
-        ShortcutRegistry.Explorer(projectTree);
-
-        // tree scroll view
-        JBScrollPane scrollPane = new JBScrollPane(projectTree);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-
-        // === Load Test Plans Tree ===
-        DefaultMutableTreeNode planRoot = new DefaultMutableTreeNode("Test Plans");
-        TestPlan[] plans = new sql().get("SELECT * FROM nafath_tp_tree").as(TestPlan[].class);
-        for (TestPlan plan : plans) {
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(plan);
-            planRoot.add(node);
-        }
-        DefaultTreeModel testPlanModel = new DefaultTreeModel(planRoot);
-        testPlanTree.setModel(testPlanModel);
-        testPlanTree.setRootVisible(true);
-        testPlanTree.setShowsRootHandles(true);
-        testPlanTree.setCellRenderer(new IntelliJRenderer());
-        testPlanTree.addTreeSelectionListener(e -> {
-            DefaultMutableTreeNode selected = (DefaultMutableTreeNode) testPlanTree.getLastSelectedPathComponent();
-            if (selected != null && selected.getUserObject() instanceof TestPlan plan && plan.getType() == 1) {
-                // TestPlanEditor.open(plan.getId());
-            }
-        });
-        testPlanTree.addMouseListener(new TestCaseTreeMouseAdapter(testPlanTree));
+        // === Create Scroll Panes ===
+        JBScrollPane testCaseScrollPane = new JBScrollPane(projectTree);
         JBScrollPane testPlanScrollPane = new JBScrollPane(testPlanTree);
-        testPlanScrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        // === Project Selector + Tabs ===
+        // === Project Selector Bar ===
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.add(new ComboBoxProjectSelector(this).getComponent(), BorderLayout.NORTH);
         panel.add(topBar, BorderLayout.NORTH);
 
-        // === IntelliJ-Style Tabbed Content ===
-        JBTabs tabs = new JBTabsImpl(ProjectManager.getInstance().getOpenProjects()[0]);
+        // === Tabs ===
+        Project project = ProjectManager.getInstance().getOpenProjects()[0];
+        JBTabsImpl tabs = new JBTabsImpl(project);
 
-        TabInfo testCaseTab = new TabInfo(scrollPane).setText("Test Cases").setIcon(AllIcons.Nodes.Folder);
-        TabInfo testPlanTab = new TabInfo(testPlanScrollPane).setText("Test Plans").setIcon(AllIcons.Nodes.Artifact);
-        //TabInfo automationTab = new TabInfo(new JLabel("Automation content coming soon...")).setText("Automation").setIcon(AllIcons.Nodes.Plugin);
+        TabInfo testCasesTab = new TabInfo(testCaseScrollPane)
+                .setText("Test Cases")
+                .setIcon(AllIcons.Nodes.Folder);
 
-        tabs.addTab(testCaseTab);
-        tabs.addTab(testPlanTab);
-        //tabs.addTab(automationTab);
+        TabInfo testPlansTab = new TabInfo(testPlanScrollPane)
+                .setText("Test Plans")
+                .setIcon(AllIcons.Nodes.Artifact);
 
-        // === Persist tab selection ===
+        tabs.addTab(testCasesTab);
+        tabs.addTab(testPlansTab);
+
+        // === Tab selection persistence ===
         Preferences prefs = Preferences.userRoot().node("TestBind");
         String lastTab = prefs.get("activeTab", "Test Cases");
-
-        // Select previously selected tab
-        switch (lastTab) {
-            case "Test Plans" -> tabs.select(testPlanTab, true);
-            //case "Automation" -> tabs.select(automationTab, true);
-            default -> tabs.select(testCaseTab, true);
+        if ("Test Plans".equals(lastTab)) {
+            tabs.select(testPlansTab, true);
+        } else {
+            tabs.select(testCasesTab, true);
         }
 
         tabs.addListener(new TabsListener() {
@@ -116,11 +81,45 @@ public class ExplorerPanel {
         panel.add(tabs.getComponent(), BorderLayout.CENTER);
     }
 
-    public void loadAllProjects() {
-        ExplorerTree.build(); // Rebuild the whole tree
+    private void setupTestCaseTree() {
+        ExplorerTree.build();
         projectTree.setModel(ExplorerTree.getTreeModel());
         projectTree.setRootVisible(true);
-        //tree.expandRow(0);
+        projectTree.setShowsRootHandles(true);
+        projectTree.setCellRenderer(new IntelliJRenderer());
+        projectTree.addMouseListener(new TestCaseTreeMouseAdapter(projectTree));
+        TestCaseTreeKeyAdapter.register(projectTree, ProjectManager.getInstance().getOpenProjects()[0]);
+        projectTree.setDragEnabled(true);
+        projectTree.setDropMode(DropMode.ON_OR_INSERT);
+        projectTree.setTransferHandler(new TreeTransferHandler(projectTree));
+        ShortcutRegistry.Explorer(projectTree);
+    }
+
+    private void setupTestPlanTree() {
+        DefaultMutableTreeNode planRoot = new DefaultMutableTreeNode("Test Plans");
+        TestPlan[] plans = new sql().get("SELECT * FROM nafath_tp_tree").as(TestPlan[].class);
+        for (TestPlan plan : plans) {
+            planRoot.add(new DefaultMutableTreeNode(plan));
+        }
+
+        DefaultTreeModel testPlanModel = new DefaultTreeModel(planRoot);
+        testPlanTree.setModel(testPlanModel);
+        testPlanTree.setRootVisible(true);
+        testPlanTree.setShowsRootHandles(true);
+        testPlanTree.setCellRenderer(new IntelliJRenderer());
+        testPlanTree.addTreeSelectionListener(e -> {
+            DefaultMutableTreeNode selected = (DefaultMutableTreeNode) testPlanTree.getLastSelectedPathComponent();
+            if (selected != null && selected.getUserObject() instanceof TestPlan plan && plan.getType() == 1) {
+                // TestPlanEditor.open(plan.getId());
+            }
+        });
+        testPlanTree.addMouseListener(new TestCaseTreeMouseAdapter(testPlanTree));
+    }
+
+    public void loadAllProjects() {
+        ExplorerTree.build();
+        projectTree.setModel(ExplorerTree.getTreeModel());
+        projectTree.setRootVisible(true);
     }
 
     public void filterByProject(int projectId) {
@@ -132,7 +131,6 @@ public class ExplorerPanel {
         ExplorerTree.treeModel = new DefaultTreeModel(root);
         projectTree.setModel(ExplorerTree.treeModel);
         projectTree.setRootVisible(true);
-        //tree.expandRow(0);
     }
 
     static class IntelliJRenderer implements TreeCellRenderer {
@@ -142,7 +140,6 @@ public class ExplorerPanel {
                                                       boolean leaf, int row, boolean hasFocus) {
             SimpleColoredComponent comp = new SimpleColoredComponent();
             comp.setOpaque(false);
-            comp.setBorder(null);
 
             Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
             String text = value.toString();
@@ -159,7 +156,6 @@ public class ExplorerPanel {
                 } else {
                     comp.append(text, SimpleTextAttributes.REGULAR_ATTRIBUTES);
                 }
-
             } else if (userObject instanceof TestPlan plan) {
                 text = plan.getName();
                 switch (plan.getType()) {
@@ -174,6 +170,4 @@ public class ExplorerPanel {
             return comp;
         }
     }
-
-
 }
