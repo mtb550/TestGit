@@ -45,6 +45,18 @@ public class TableEditor extends UserDataHolderBase implements FileEditor {
         list.setDropMode(DropMode.INSERT);
         list.setTransferHandler(new ListItemReorderHandler(model));
 
+        // === Auto-update TestCaseDetails tool window when selection changes ===
+        list.addListSelectionListener(e -> {
+            // Prevent double-triggering during list model adjustments
+            if (!e.getValueIsAdjusting()) {
+                int idx = list.getSelectedIndex();
+                if (idx >= 0) {
+                    // Show the selected test case in the details tool window
+                    TestCaseToolWindow.show(model.getElementAt(idx));
+                }
+            }
+        });
+
         // 3) Render each TestCase as a TestCaseCard
         list.setCellRenderer((JList<? extends TestCase> l,
                               TestCase tc,

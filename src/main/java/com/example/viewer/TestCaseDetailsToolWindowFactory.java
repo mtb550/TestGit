@@ -5,14 +5,17 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
-public class TestCaseDetailsToolWindowFactory implements ToolWindowFactory {
-    private static TestCaseDetailsPanel instance;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
-    public static TestCaseDetailsPanel getInstance() {
-        return instance;
-    }
+public class TestCaseDetailsToolWindowFactory implements ToolWindowFactory {
+    @Getter
+    private static TestCaseDetailsPanel instance;
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
@@ -26,7 +29,24 @@ public class TestCaseDetailsToolWindowFactory implements ToolWindowFactory {
         toolWindow.getContentManager().addContent(detailsTab);
         toolWindow.getContentManager().addContent(historyTab);
         toolWindow.getContentManager().addContent(bugsTab);
+
+        // === F2 Shortcut Binding ===
+        JComponent root = instance.getPanel();
+        KeyStroke f2 = KeyStroke.getKeyStroke("F2");
+
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
+            if (e.getID() == KeyEvent.KEY_PRESSED && e.getKeyCode() == KeyEvent.VK_F2) {
+                instance.toggleEditMode(true);
+                return true;
+            }
+            return false;
+        });
+
+        root.getActionMap().put("editMode", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                instance.toggleEditMode(true); // enables editing
+            }
+        });
     }
-
-
 }

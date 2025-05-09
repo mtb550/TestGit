@@ -3,54 +3,152 @@ package com.example.viewer;
 import com.example.pojo.DB;
 import com.example.pojo.TestCase;
 import com.example.pojo.TestCaseHistory;
-import com.intellij.ui.JBColor;
 import com.intellij.ui.components.*;
+import com.intellij.util.ui.JBUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 
 public class TestCaseDetailsPanel {
-    private final JBPanel mainPanel;
+    private final JBPanel<?> mainPanel;
     private final JBTabbedPane tabbedPane;
 
-    private final JBPanel detailTab;
-    private final JBPanel historyTab;
-    private final JBPanel bugTab;
+    private final JBPanel<?> detailTab;
+    private final JBPanel<?> historyTab;
+    private final JBPanel<?> bugTab;
+
+    private JBTextField titleField;
+    private JBTextField expectedArea;
+    private JBTextField stepsArea;
+    private JBTextField priorityField;
+
+    private JBLabel titleLabel;
+    private JBLabel expectedLabel;
+    private JBLabel stepsLabel;
+    private JBLabel priorityLabel;
+
+    private JButton saveButton;
+
+    private TestCase currentTestCase;
+    private boolean isEditing = false;
 
     public TestCaseDetailsPanel() {
-        mainPanel = new JBPanel(new BorderLayout());
+        mainPanel = new JBPanel<>(new BorderLayout());
         tabbedPane = new JBTabbedPane();
 
-        detailTab = new JBPanel(new GridLayout(4, 1));
-        historyTab = new JBPanel(new BorderLayout());
-        bugTab = new JBPanel(new BorderLayout());
+        detailTab = new JBPanel<>(new GridBagLayout());
+        historyTab = new JBPanel<>(new BorderLayout());
+        bugTab = new JBPanel<>(new BorderLayout());
 
         tabbedPane.addTab("Details", detailTab);
         tabbedPane.addTab("History", historyTab);
         tabbedPane.addTab("Open Bugs", bugTab);
 
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
+
+        // ESC → cancel edit and return to view mode
+        mainPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ESCAPE"), "cancelEdit");
+        mainPanel.getActionMap().put("cancelEdit", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isEditing) {
+                    toggleEditMode(false);
+                }
+            }
+        });
     }
 
     public void update(TestCase testCase) {
-        detailTab.removeAll();
-        historyTab.removeAll();
-        bugTab.removeAll();
+        this.currentTestCase = testCase;
+        toggleEditMode(false); // always start in view mode
+        loadHistoryAndBugs();
+    }
 
-        detailTab.setLayout(new GridBagLayout());
+    public void toggleEditMode(boolean editable) {
+        isEditing = editable;
+        detailTab.removeAll();
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 16, 8, 16);
+        gbc.insets = JBUI.insets(8, 16);
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
 
         int row = 0;
-        addStyledRow("📝 Title:", testCase.getTitle(), detailTab, gbc, row++);
-        addStyledRow("🎯 Expected Result:", testCase.getExpectedResult(), detailTab, gbc, row++);
-        addStyledRow("🪜 Steps:", testCase.getSteps(), detailTab, gbc, row++);
-        addStyledRow("🏷 Priority:", testCase.getPriority(), detailTab, gbc, row++);
 
-        // === History tab ===
+        if (editable) {
+            // === Create and render editable fields ===
+            titleField = new JBTextField(currentTestCase.getTitle());
+            expectedArea = new JBTextField(currentTestCase.getExpectedResult());
+            stepsArea = new JBTextField(currentTestCase.getSteps());
+            priorityField = new JBTextField(currentTestCase.getPriority());
+
+            expectedArea.setFocusTraversalKeysEnabled(true);
+            stepsArea.setFocusTraversalKeysEnabled(true);
+
+            addRow("📝 Title:", titleField, detailTab, gbc, row++);
+            addRow("🎯 Expected Result:", expectedArea, detailTab, gbc, row++);
+            addRow("🪜 Steps:", stepsArea, detailTab, gbc, row++);
+            addRow("🏷 Priority:", priorityField, detailTab, gbc, row++);
+
+            // === Save button ===
+            saveButton = new JButton("Save");
+            saveButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+            saveButton.setVisible(true);
+            saveButton.addActionListener(e -> onSave());
+
+            saveButton.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "save");
+            saveButton.getActionMap().put("save", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    onSave();
+                }
+            });
+
+            gbc.gridx = 1;
+            gbc.gridy = row;
+            gbc.anchor = GridBagConstraints.EAST;
+            detailTab.add(saveButton, gbc);
+
+            SwingUtilities.invokeLater(() -> titleField.requestFocusInWindow());
+
+        } else {
+            // === Create and render label view ===
+            titleLabel = createValueLabel(currentTestCase.getTitle());
+            expectedLabel = createValueLabel(currentTestCase.getExpectedResult());
+            stepsLabel = createValueLabel(currentTestCase.getSteps());
+            priorityLabel = createValueLabel(currentTestCase.getPriority());
+
+            addRow("📝 Title:", titleLabel, detailTab, gbc, row++);
+            addRow("🎯 Expected Result:", expectedLabel, detailTab, gbc, row++);
+            addRow("🪜 Steps:", stepsLabel, detailTab, gbc, row++);
+            addRow("🏷 Priority:", priorityLabel, detailTab, gbc, row++);
+
+            // If saveButton exists from previous edit, hide it
+            if (saveButton != null) {
+                saveButton.setVisible(false);
+            }
+        }
+
+        detailTab.revalidate();
+        detailTab.repaint();
+    }
+
+    private void onSave() {
+        currentTestCase.setTitle(titleField.getText().trim());
+        currentTestCase.setExpectedResult(expectedArea.getText().trim());
+        currentTestCase.setSteps(stepsArea.getText().trim());
+        currentTestCase.setPriority(priorityField.getText().trim());
+
+        toggleEditMode(false);
+        JOptionPane.showMessageDialog(mainPanel, "✅ Test case saved successfully.", "Saved", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void loadHistoryAndBugs() {
+        historyTab.removeAll();
+        bugTab.removeAll();
+
         DefaultListModel<String> model = new DefaultListModel<>();
         for (TestCaseHistory history : DB.loadTestCaseHistory()) {
             model.addElement(history.getTimestamp() + " - " + history.getChangeSummary());
@@ -59,23 +157,27 @@ public class TestCaseDetailsPanel {
         historyList.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         historyTab.add(new JBScrollPane(historyList), BorderLayout.CENTER);
 
-        // === Bug tab ===
         bugTab.add(new JBLabel("🐞 Bug list will be shown here."), BorderLayout.NORTH);
-
-        tabbedPane.setSelectedIndex(0);
-        mainPanel.revalidate();
-        mainPanel.repaint();
     }
 
-    private void addStyledRow(String label, String value, JPanel panel, GridBagConstraints gbc, int row) {
+    private JBLabel createValueLabel(String text) {
+        JBLabel label = new JBLabel(text);
+        label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        return label;
+    }
+
+    private JBTextArea createTextArea(String text) {
+        JBTextArea area = new JBTextArea(text, 3, 30);
+        area.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+        return area;
+    }
+
+    private void addRow(String label, JComponent input, JPanel panel, GridBagConstraints gbc, int row) {
         JBLabel keyLabel = new JBLabel(label);
         keyLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         keyLabel.setHorizontalAlignment(SwingConstants.LEFT);
-
-        JBLabel valueLabel = new JBLabel(value);
-        valueLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        valueLabel.setForeground(JBColor.foreground());
-        valueLabel.setHorizontalAlignment(SwingConstants.LEFT);
 
         gbc.gridx = 0;
         gbc.gridy = row;
@@ -86,16 +188,7 @@ public class TestCaseDetailsPanel {
         gbc.gridx = 1;
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(valueLabel, gbc);
-    }
-
-    private void addLabelAndValue(String label, String value, JPanel panel, GridBagConstraints gbc, int row) {
-        gbc.gridx = 0;
-        gbc.gridy = row;
-        panel.add(new JBLabel(label), gbc);
-
-        gbc.gridx = 1;
-        panel.add(new JBLabel(value), gbc);
+        panel.add(input, gbc);
     }
 
     public JPanel getPanel() {
@@ -113,5 +206,4 @@ public class TestCaseDetailsPanel {
     public JPanel getBugPanel() {
         return bugTab;
     }
-
 }
