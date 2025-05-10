@@ -5,3 +5,4 @@ DONE - implement class runner
 DONE - implement method runner
 implement class debugger
 implement method debugger
+persist session for test case explorer and test plan explorer. once open intellij, explorer should show last opened hierarchy with focus in module.
