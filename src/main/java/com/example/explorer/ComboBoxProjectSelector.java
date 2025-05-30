@@ -1,6 +1,6 @@
 package com.example.explorer;
 
-import com.example.pojo.Tree;
+import com.example.pojo.Projects;
 import com.example.util.sql;
 import com.intellij.openapi.ui.ComboBox;
 
@@ -21,18 +21,21 @@ public class ComboBoxProjectSelector {
         this.comboBox = new ComboBox<>(model);
         comboBox.setFocusable(false);
 
-        // Load only actual projects (type = 0)
-        Tree[] projects = new sql().get("SELECT * FROM tree WHERE type = 0").as(Tree[].class);
-        for (Tree project : projects) {
-            model.addElement(project.getName());
-            nameToId.put(project.getName(), project.getId());
-        }
+        Projects[] projects = new sql().get("SELECT * FROM projects").as(Projects[].class);
 
-        comboBox.addActionListener(this::onSelection);
+// Only populate if there are projects
+        if (projects.length > 0) {
+            for (Projects project : projects) {
+                model.addElement(project.getName());
+                nameToId.put(project.getName(), project.getId());
+            }
 
-        // Select first project by default
-        if (model.getSize() > 0) {
+            // Only add listener *after* population
+            comboBox.addActionListener(this::onSelection);
             comboBox.setSelectedIndex(0); // triggers onSelection
+        } else {
+            comboBox.addItem("No projects found");
+            comboBox.setEnabled(false); // Optional: disable to prevent user confusion
         }
     }
 

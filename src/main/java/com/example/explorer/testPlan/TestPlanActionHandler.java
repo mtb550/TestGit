@@ -115,7 +115,7 @@ public class TestPlanActionHandler {
 
     private void addTestCasesToRun(sql db, int testRunId, List<String> selectedCaseIds, String configJson) throws Exception {
         for (int i = 0; i < selectedCaseIds.size(); i++) {
-            db.execute("INSERT INTO nafath_tp_testcases (plan_id, test_case_id, config, run_order) VALUES (?, ?, ?, ?)",
+            db.execute("INSERT INTO nafath_tp (plan_id, test_case_id, config, run_order) VALUES (?, ?, ?, ?)",
                     testRunId, selectedCaseIds.get(i), configJson, i + 1);
         }
     }

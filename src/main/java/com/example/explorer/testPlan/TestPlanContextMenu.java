@@ -35,7 +35,7 @@ public class TestPlanContextMenu {
         delete.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(tree, "Delete this plan and its test cases?");
             if (confirm == JOptionPane.YES_OPTION) {
-                new sql().execute("DELETE FROM nafath_tp_testcases WHERE plan_id = ?", plan.getId());
+                new sql().execute("DELETE FROM nafath_tp WHERE plan_id = ?", plan.getId());
                 new sql().execute("DELETE FROM nafath_tp_tree WHERE id = ?", plan.getId());
                 ((DefaultTreeModel) tree.getModel()).removeNodeFromParent(node);
             }

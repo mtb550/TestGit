@@ -33,7 +33,7 @@ public class TestRunEditor {
 
         TestCase[] testCases = new sql().get("""
                     SELECT t.* FROM nafath_tc t
-                    JOIN nafath_tp_testcases map ON map.test_case_id = t.tc_id
+                    JOIN nafath_tp map ON map.test_case_id = t.tc_id
                     WHERE map.plan_id = ?
                     ORDER BY map.run_order
                 """, testRunId).as(TestCase[].class);

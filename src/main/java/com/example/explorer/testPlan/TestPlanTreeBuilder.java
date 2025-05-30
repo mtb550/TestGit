@@ -22,7 +22,7 @@ public class TestPlanTreeBuilder {
 
     public CheckedTreeNode buildTree() {
         CheckedTreeNode rootNode = new CheckedTreeNode("Test Cases");
-        Tree root = new sql().get("SELECT * FROM tree WHERE id = ?", plan.getProject_id()).as(Tree.class);
+        Tree root = new sql().get("SELECT * FROM nafath_tc_tree WHERE id = ?", plan.getProject_id()).as(Tree.class);
         if (root != null) {
             buildTreeRecursive(root, rootNode);
         }
@@ -45,7 +45,7 @@ public class TestPlanTreeBuilder {
             return;
         }
 
-        Tree[] children = new sql().get("SELECT * FROM tree WHERE link = ?", treeItem.getId()).as(Tree[].class);
+        Tree[] children = new sql().get("SELECT * FROM nafath_tc_tree WHERE link = ?", treeItem.getId()).as(Tree[].class);
         for (Tree child : children) {
             buildTreeRecursive(child, currentNode);
         }

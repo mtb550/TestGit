@@ -151,7 +151,7 @@ public class TestCaseTreeKeyAdapter {
                                 // Undo: remove the newly inserted node from model and DB
                                 () -> {
                                     model.removeNodeFromParent(newNode);
-                                    new sql().execute("DELETE FROM tree WHERE id = ?", treeItem.getId());
+                                    new sql().execute("DELETE FROM nafath_tc_tree WHERE id = ?", treeItem.getId());
                                     tree.repaint();
                                 },
                                 // Redo: re-insert the same node again into model and DB
@@ -222,7 +222,7 @@ public class TestCaseTreeKeyAdapter {
                         int index = parent.getIndex(node);
 
                         model.removeNodeFromParent(node);
-                        new sql().execute("DELETE FROM tree WHERE id = ?", treeItem.getId());
+                        new sql().execute("DELETE FROM nafath_tc_tree WHERE id = ?", treeItem.getId());
 
                         ActionHistory.register(
                                 // Undo: restore the deleted node
@@ -235,7 +235,7 @@ public class TestCaseTreeKeyAdapter {
                                 // Redo: remove it again
                                 () -> {
                                     model.removeNodeFromParent(node);
-                                    new sql().execute("DELETE FROM tree WHERE id = ?", treeItem.getId());
+                                    new sql().execute("DELETE FROM nafath_tc_tree WHERE id = ?", treeItem.getId());
                                     tree.repaint();
                                 }
                         );
@@ -400,7 +400,7 @@ public class TestCaseTreeKeyAdapter {
                 db.execute("INSERT INTO tree (name, type, link, created_by) VALUES (?, ?, ?, ?)",
                         name, newType, parentId, System.getProperty("user.name"));
 
-                Tree newInfo = db.get("SELECT TOP 1 * FROM tree WHERE name = ? ORDER BY created_at DESC", name).as(Tree.class);
+                Tree newInfo = db.get("SELECT TOP 1 * FROM nafath_tc_tree WHERE name = ? ORDER BY created_at DESC", name).as(Tree.class);
                 DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newInfo);
 
                 if (newType == 0) {

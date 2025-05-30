@@ -5,6 +5,8 @@ import com.example.pojo.Tree;
 import com.example.util.ShortcutRegistry;
 import com.example.util.sql;
 import com.intellij.icons.AllIcons;
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.ui.SimpleColoredComponent;
@@ -50,6 +52,18 @@ public class ExplorerPanel {
         // === Tabs ===
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
         JBTabsImpl tabs = new JBTabsImpl(project);
+
+
+        NotificationGroupManager.getInstance()
+                .getNotificationGroup("Test Case Notifications") // define this name once
+                .createNotification("Test case TC-001 has been approved", NotificationType.INFORMATION)
+                .notify(project);  // you must pass a valid `Project` instance
+
+        NotificationGroupManager.getInstance()
+                .getNotificationGroup("Test Case Notifications") // define this name once
+                .createNotification("ARHBOWWWW our new friend SAAD!!", NotificationType.INFORMATION)
+                .notify(project);  // you must pass a valid `Project` instance
+
 
         TabInfo testCasesTab = new TabInfo(testCaseScrollPane)
                 .setText("Test Cases")
@@ -124,7 +138,8 @@ public class ExplorerPanel {
 
     public void filterByProject(int projectId) {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Test Cases");
-        Tree selectedProject = new sql().get("SELECT * FROM tree WHERE id = ?", projectId).as(Tree.class);
+        String name = new sql().get("select name from projects where project_id = ?", projectId).asType(String.class);
+        Tree selectedProject = new sql().get("SELECT * FROM " + name + "_tc_tree").as(Tree.class);
         DefaultMutableTreeNode node = ExplorerTree.buildSubTree(selectedProject);
         root.add(node);
 

@@ -45,7 +45,7 @@ public class DeleteAction extends AnAction {
 
             // Delete from DB
             String inClause = idsToDelete.stream().map(id -> "?").collect(Collectors.joining(","));
-            db.execute("DELETE FROM tree WHERE id IN (" + inClause + ")", idsToDelete.toArray());
+            db.execute("DELETE FROM nafath_tc_tree WHERE id IN (" + inClause + ")", idsToDelete.toArray());
 
             // Remove from UI
             DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
@@ -58,7 +58,7 @@ public class DeleteAction extends AnAction {
 
     private void collectIdsRecursively(int id, sql db, List<Integer> out) throws SQLException {
         out.add(id);
-        Tree[] children = db.get("SELECT * FROM tree WHERE link = ?", id).as(Tree[].class);
+        Tree[] children = db.get("SELECT * FROM nafath_tc_tree WHERE link = ?", id).as(Tree[].class);
         for (Tree child : children) {
             collectIdsRecursively(child.getId(), db, out);
         }

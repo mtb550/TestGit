@@ -1,7 +1,6 @@
 package com.example.explorer;
 
 import com.example.pojo.Tree;
-import com.example.util.NodeType;
 import com.example.util.sql;
 import lombok.Getter;
 
@@ -18,7 +17,7 @@ public class ExplorerTree {
     public static void build() {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Test Cases");
 
-        Tree[] rootNodes = new sql().get("SELECT * FROM tree WHERE type = ?", NodeType.PROJECT.getCode()).as(Tree[].class);
+        Tree[] rootNodes = new sql().get("SELECT * FROM nafath_tc_tree WHERE link = 0").as(Tree[].class);
 
         for (Tree treeItem : rootNodes) {
             DefaultMutableTreeNode node = buildSubTree(treeItem);
@@ -32,7 +31,7 @@ public class ExplorerTree {
     static DefaultMutableTreeNode buildSubTree(Tree treeItem) {
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(treeItem);
 
-        Tree[] children = new sql().get("SELECT * FROM tree WHERE link = ?", treeItem.getId()).as(Tree[].class);
+        Tree[] children = new sql().get("SELECT * FROM nafath_tc_tree WHERE link = ?", treeItem.getId()).as(Tree[].class);
 
         for (Tree childItem : children) {
             node.add(buildSubTree(childItem));

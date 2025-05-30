@@ -25,7 +25,7 @@ public class TestPlanInfoPopup {
                 JBPanel<?> panel = new JBPanel<>(new GridLayout(0, 1, 6, 6));
                 panel.setPreferredSize(new Dimension(400, 300));
 
-                int count = new sql().get("SELECT COUNT(*) FROM nafath_tp_testcases WHERE plan_id = ?", plan.getId())
+                int count = new sql().get("SELECT COUNT(*) FROM nafath_tp WHERE plan_id = ?", plan.getId())
                         .asType(Integer.class);
 
                 panel.add(new JBLabel("📁 Name: " + plan.getName()));
