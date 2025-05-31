@@ -12,10 +12,16 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.util.EventObject;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class SettingsAction extends AnAction {
+    private final Map<Integer, ProjectRow> originalProjects = new LinkedHashMap<>();
+
     public SettingsAction() {
         super("Settings", "Configure tree", AllIcons.General.Settings);
     }
@@ -31,18 +37,23 @@ public class SettingsAction extends AnAction {
 
         // --- Projects Tab ---
         JBPanel<?> projectPanel = new JBPanel<>(new BorderLayout());
-        JBTable projectTable = new JBTable();
+        DefaultTableModel projectModel = new DefaultTableModel(new String[]{"ID", "Name", "Active"}, 0);
+        JBTable projectTable = new JBTable(projectModel) {
+            public boolean isCellEditable(int row, int column) {
+                return column == 1 || column == 2;
+            }
+        };
+
+        projectTable.getColumnModel().getColumn(2).setCellRenderer(new ToggleRenderer());
+        projectTable.getColumnModel().getColumn(2).setCellEditor(new ToggleEditor());
+
         JBScrollPane projectScroll = new JBScrollPane(projectTable);
         projectPanel.add(projectScroll, BorderLayout.CENTER);
 
-        JPanel projectButtons = new JPanel();
-        JButton addProject = new JButton("Add");
-        JButton editProject = new JButton("Edit");
-        JButton deleteProject = new JButton("Delete");
-        projectButtons.add(addProject);
-        projectButtons.add(editProject);
-        projectButtons.add(deleteProject);
-        projectPanel.add(projectButtons, BorderLayout.SOUTH);
+        JButton saveProjects = new JButton("Save");
+        JPanel savePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        savePanel.add(saveProjects);
+        projectPanel.add(savePanel, BorderLayout.SOUTH);
 
         tabbedPane.add("Projects", projectPanel);
 
@@ -70,14 +81,31 @@ public class SettingsAction extends AnAction {
         loadProjects(projectTable);
         loadUsers(userTable);
 
-        // Button actions
-        addProject.addActionListener(evt -> showProjectDialog(null, projectTable));
-        editProject.addActionListener(evt -> {
-            int row = projectTable.getSelectedRow();
-            if (row != -1) showProjectDialog(getRowId(projectTable, row), projectTable);
-        });
-        deleteProject.addActionListener(evt -> softDeleteProject(projectTable));
+        saveProjects.addActionListener(evt -> {
+            DefaultTableModel model = (DefaultTableModel) projectTable.getModel();
+            for (int i = 0; i < model.getRowCount(); i++) {
+                Object idObj = model.getValueAt(i, 0);
+                String name = String.valueOf(model.getValueAt(i, 1));
+                int active = (boolean) model.getValueAt(i, 2) ? 1 : 0;
 
+                if (name == null || name.isBlank()) continue;
+
+                if (idObj == null || idObj.toString().isBlank()) {
+                    // New record
+                    new sql().execute("INSERT INTO projects (name, active) VALUES (?, ?)", name, active);
+                } else {
+                    int id = Integer.parseInt(idObj.toString());
+                    ProjectRow original = originalProjects.get(id);
+                    if (original != null && (!original.name.equals(name) || original.active != active)) {
+                        new sql().execute("UPDATE projects SET name = ?, active = ? WHERE project_id = ?", name, active, id);
+                    }
+                }
+            }
+            JOptionPane.showMessageDialog(null, "Changes saved.");
+            loadProjects(projectTable);
+        });
+
+        // Users
         addUser.addActionListener(evt -> showUserDialog(null, userTable));
         editUser.addActionListener(evt -> {
             int row = userTable.getSelectedRow();
@@ -98,17 +126,23 @@ public class SettingsAction extends AnAction {
     }
 
     private void loadProjects(JTable table) {
-        DefaultTableModel model = new DefaultTableModel(new String[]{"ID", "Name", "Active"}, 0);
-        sql db = new sql().get("SELECT project_id, name, active FROM projects");
+        originalProjects.clear();
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        model.setRowCount(0);
 
+        sql db = new sql().get("SELECT project_id, name, active FROM projects");
         for (HashMap<String, Object> row : db.dbResult) {
-            model.addRow(new Object[]{
-                    row.get("project_id"),
-                    row.get("name"),
-                    row.get("active")
-            });
+            int id = (int) row.get("project_id");
+            String name = row.get("name").toString();
+            boolean active = Integer.parseInt(row.get("active").toString()) == 1;
+            model.addRow(new Object[]{id, name, active});
+            originalProjects.put(id, new ProjectRow(name, active ? 1 : 0));
         }
-        table.setModel(model);
+
+        // Add empty row for new entry
+        model.addRow(new Object[]{null, "", Boolean.TRUE});
+
+        table.setAutoCreateRowSorter(true);
     }
 
     private void loadUsers(JTable table) {
@@ -124,34 +158,9 @@ public class SettingsAction extends AnAction {
                     row.get("enabled")
             });
         }
+
         table.setModel(model);
-    }
-
-    private void softDeleteProject(JTable table) {
-        int row = table.getSelectedRow();
-        if (row == -1) return;
-        int id = getRowId(table, row);
-        new sql().execute("UPDATE projects SET active = 0 WHERE project_id = ?", id);
-        loadProjects(table);
-    }
-
-    private void showProjectDialog(Integer id, JTable table) {
-        String name = "";
-        if (id != null) {
-            sql db = new sql().get("SELECT name FROM projects WHERE project_id = ?", id);
-            if (!db.dbResult.isEmpty()) {
-                name = String.valueOf(db.dbResult.get(0).get("name"));
-            }
-        }
-
-        String input = JOptionPane.showInputDialog(null, "Project Name:", name);
-        if (input != null && !input.isBlank()) {
-            if (id == null)
-                new sql().execute("INSERT INTO projects (name, active) VALUES (?, 1)", input);
-            else
-                new sql().execute("UPDATE projects SET name = ? WHERE project_id = ?", input, id);
-            loadProjects(table);
-        }
+        table.setAutoCreateRowSorter(true);
     }
 
     private void showUserDialog(Integer id, JTable table) {
@@ -194,6 +203,55 @@ public class SettingsAction extends AnAction {
                 ex.printStackTrace(System.err);
             }
             loadUsers(table);
+        }
+    }
+
+    private static class ProjectRow {
+        String name;
+        int active;
+
+        ProjectRow(String name, int active) {
+            this.name = name;
+            this.active = active;
+        }
+    }
+
+    private static class ToggleRenderer extends JCheckBox implements TableCellRenderer {
+        public ToggleRenderer() {
+            setHorizontalAlignment(JLabel.CENTER);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                                                       boolean hasFocus, int row, int column) {
+            setSelected(Boolean.TRUE.equals(value));
+            return this;
+        }
+    }
+
+    private static class ToggleEditor extends DefaultCellEditor {
+        private final JCheckBox checkBox;
+
+        public ToggleEditor() {
+            super(new JCheckBox());
+            checkBox = (JCheckBox) getComponent();
+            checkBox.setHorizontalAlignment(JLabel.CENTER);
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            checkBox.setSelected(Boolean.TRUE.equals(value));
+            return checkBox;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return checkBox.isSelected();
+        }
+
+        @Override
+        public boolean isCellEditable(EventObject e) {
+            return true;
         }
     }
 }
