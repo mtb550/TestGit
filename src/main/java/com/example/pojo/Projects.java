@@ -18,4 +18,6 @@ public class Projects {
     private Integer id;
 
     private String name;
+
+    private Integer active;
 }

@@ -12,7 +12,7 @@ import java.util.HashMap;
 public class sql {
     private final static ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private final Connection connection;
-    private ArrayList<HashMap<String, Object>> dbResult;
+    public ArrayList<HashMap<String, Object>> dbResult;
 
     @SneakyThrows
     public sql() {

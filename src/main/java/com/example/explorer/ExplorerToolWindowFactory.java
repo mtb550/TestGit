@@ -1,6 +1,9 @@
 package com.example.explorer;
 
-import com.example.explorer.actions.*;
+import com.example.explorer.actions.CollapseAllAction;
+import com.example.explorer.actions.ExpandAllAction;
+import com.example.explorer.actions.RefreshAction;
+import com.example.explorer.actions.SettingsAction;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.project.Project;
@@ -36,7 +39,7 @@ public class ExplorerToolWindowFactory implements ToolWindowFactory {
         group.addSeparator();
         group.add(new RefreshAction(panel));
         group.add(new SettingsAction());
-        group.add(new AddProjectAction(panel));
+        //group.add(new AddProjectAction(panel));
 
         return group;
     }
