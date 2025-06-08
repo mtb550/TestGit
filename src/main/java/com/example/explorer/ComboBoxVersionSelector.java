@@ -18,9 +18,19 @@ public class ComboBoxVersionSelector {
         this.model = new DefaultComboBoxModel<>();
         this.comboBox = new ComboBox<>(model);
         comboBox.setFocusable(false);
+        loadVersions(projectId);
+    }
+
+    private void onSelection(ActionEvent e) {
+        // Optional: notify panel on version change
+    }
+
+    private void loadVersions(int projectId) {
+        model.removeAllElements();
+        nameToVersion.clear();
 
         Version[] versions = new sql().get(
-                "SELECT version, latest FROM nafath_version WHERE project_id = ? ORDER BY version DESC",
+                "SELECT * FROM nafath_version WHERE project_id = ? ORDER BY version DESC",
                 projectId
         ).as(Version[].class);
 
@@ -30,6 +40,7 @@ public class ComboBoxVersionSelector {
                 model.addElement(versionStr);
                 nameToVersion.put(versionStr, version.getVersion());
             }
+            comboBox.setEnabled(true);
             comboBox.addActionListener(this::onSelection);
             comboBox.setSelectedIndex(0);
         } else {
@@ -38,8 +49,8 @@ public class ComboBoxVersionSelector {
         }
     }
 
-    private void onSelection(ActionEvent e) {
-        // For future enhancements
+    public void setProjectId(int projectId) {
+        loadVersions(projectId);
     }
 
     public JComponent getComponent() {

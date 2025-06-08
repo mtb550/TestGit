@@ -31,6 +31,9 @@ public class ExplorerPanel {
     private final SimpleTree projectTree;
     private final SimpleTree testPlanTree;
 
+    // ✅ Add version selector field so it can be updated later
+    private final ComboBoxVersionSelector versionSelector;
+
     public ExplorerPanel() {
         panel = new JPanel(new BorderLayout());
 
@@ -46,8 +49,16 @@ public class ExplorerPanel {
 
         // === Project Selector Bar ===
         JPanel topBar = new JPanel(new BorderLayout());
-        topBar.add(new ComboBoxProjectSelector(this).getComponent(), BorderLayout.NORTH);
-        topBar.add(new ComboBoxVersionSelector(1).getComponent(), BorderLayout.SOUTH);
+
+        ComboBoxProjectSelector projectSelector = new ComboBoxProjectSelector(this);
+        topBar.add(projectSelector.getComponent(), BorderLayout.NORTH);
+
+        int selectedProjectId = projectSelector.getSelectedProjectId();
+
+        // ✅ Assign to field so we can refresh it on project change
+        versionSelector = new ComboBoxVersionSelector(selectedProjectId);
+        topBar.add(versionSelector.getComponent(), BorderLayout.SOUTH);
+
         panel.add(topBar, BorderLayout.NORTH);
 
         // === Tabs ===
@@ -138,6 +149,11 @@ public class ExplorerPanel {
     }
 
     public void filterByProject(int projectId) {
+        // ✅ Refresh the version list dynamically
+        if (versionSelector != null) {
+            versionSelector.setProjectId(projectId);
+        }
+
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Test Cases");
         String name = new sql().get("select name from projects where project_id = ?", projectId).asType(String.class);
         Tree selectedProject = new sql().get("SELECT * FROM " + name + "_tc_tree").as(Tree.class);

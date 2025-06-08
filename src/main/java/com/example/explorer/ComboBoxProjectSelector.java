@@ -21,30 +21,33 @@ public class ComboBoxProjectSelector {
         this.comboBox = new ComboBox<>(model);
         comboBox.setFocusable(false);
 
-        Projects[] projects = new sql().get("SELECT * FROM projects").as(Projects[].class);
-
-// Only populate if there are projects
+        Projects[] projects = new sql().get("SELECT * FROM projects WHERE active = 1 ORDER BY name").as(Projects[].class);
         if (projects.length > 0) {
             for (Projects project : projects) {
                 model.addElement(project.getName());
                 nameToId.put(project.getName(), project.getId());
             }
-
-            // Only add listener *after* population
             comboBox.addActionListener(this::onSelection);
-            comboBox.setSelectedIndex(0); // triggers onSelection
+            comboBox.setSelectedIndex(0);
         } else {
             comboBox.addItem("No projects found");
-            comboBox.setEnabled(false); // Optional: disable to prevent user confusion
+            comboBox.setEnabled(false);
         }
     }
 
     private void onSelection(ActionEvent e) {
         String selected = (String) comboBox.getSelectedItem();
-        panel.filterByProject(nameToId.get(selected));
+        if (selected != null && nameToId.containsKey(selected)) {
+            panel.filterByProject(nameToId.get(selected));
+        }
     }
 
     public JComponent getComponent() {
         return comboBox;
+    }
+
+    public int getSelectedProjectId() {
+        String selected = (String) comboBox.getSelectedItem();
+        return nameToId.getOrDefault(selected, -1);
     }
 }
