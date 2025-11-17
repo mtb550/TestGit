@@ -31,6 +31,13 @@
                 icon="/icons/ant_dark.svg"
                 secondary="false"/>
 
+        <!-- 🔍 Right-side tool window: Create Test Case -->
+        <toolWindow id="AddTestCase"
+                    secondary="false"
+                    icon="AllIcons.General.Add"
+                    anchor="bottom"
+                    factoryClass="com.example.viewer.AddTestCaseToolWindowFactory"/>
+
         <!-- 📝 File editor providers -->
         <fileEditorProvider implementation="com.example.editor.EditorProvider"/>
         <fileEditorProvider implementation="com.example.explorer.testPlan.TestRunFileEditorProvider"/>

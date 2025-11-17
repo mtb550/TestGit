@@ -1,11 +1,14 @@
 package com.example.editor;
 
-import com.example.viewer.TestCaseToolWindow;
 import com.example.pojo.TestCase;
+import com.example.viewer.TestCaseToolWindow;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorState;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
@@ -65,7 +68,7 @@ public class TableEditor extends UserDataHolderBase implements FileEditor {
                               boolean cellHasFocus) -> {
             TestCaseCard card = new TestCaseCard(index, tc);
             if (isSelected) {
-                card.setBorder(BorderFactory.createLineBorder(Color.CYAN, 2));
+                card.setBorder(BorderFactory.createLineBorder(JBColor.CYAN, 2)); /// change all from Color to JBColor
             }
             return card;
         });
@@ -111,7 +114,7 @@ public class TableEditor extends UserDataHolderBase implements FileEditor {
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        // Ctrl + M → Prompt for title and add new test case
+        // Ctrl + M → Open AddTestCase tool window
         KeyStroke ctrlM = KeyStroke.getKeyStroke("control M");
         InputMap inputMap = list.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         ActionMap actionMap = list.getActionMap();
@@ -120,20 +123,37 @@ public class TableEditor extends UserDataHolderBase implements FileEditor {
         actionMap.put("addTestCase", new AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
-                String title = JOptionPane.showInputDialog(list, "Enter title for new test case:", "New Test Case", JOptionPane.PLAIN_MESSAGE);
-                if (title != null && !title.trim().isEmpty()) {
-                    TestCase newCase = new TestCase();
-                    newCase.setTitle(title.trim());
-                    newCase.setSteps("Step 1: ...");
-                    newCase.setExpectedResult("Expected result...");
-                    newCase.setPriority("medium");
-                    newCase.setAutomationRef("");
+                // === OLD CODE - Simple dialog ===
+                // String title = JOptionPane.showInputDialog(list, "Enter title for new test case:", "New Test Case", JOptionPane.PLAIN_MESSAGE);
+                // if (title != null && !title.trim().isEmpty()) {
+                //     TestCase newCase = new TestCase();
+                //     newCase.setTitle(title.trim());
+                //     newCase.setSteps("Step 1: ...");
+                //     newCase.setExpectedResult("Expected result...");
+                //     newCase.setPriority("medium");
+                //     newCase.setAutomationRef("");
+                //     newCase.setSort(model.getSize() + 1);
+                //
+                //     model.addElement(newCase);
+                //     list.ensureIndexIsVisible(model.getSize() - 1);
+                //     list.setSelectedIndex(model.getSize() - 1);
+                // }
+
+                // === NEW CODE - Show AddTestCase tool window ===
+                TestCaseToolWindow.addTestCase(newCase -> {
+                    // Set the sort order
                     newCase.setSort(model.getSize() + 1);
 
+                    // Add to the list model
                     model.addElement(newCase);
+
+                    // Scroll to and select the new test case
                     list.ensureIndexIsVisible(model.getSize() - 1);
                     list.setSelectedIndex(model.getSize() - 1);
-                }
+
+                    // Show in details panel
+                    TestCaseToolWindow.show(newCase);
+                });
             }
         });
 
