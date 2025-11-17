@@ -74,6 +74,31 @@ public class TableContextMenu {
         });
         menu.add(redoItem);
 
+        // === ➕ Add Test Case button
+        JBMenuItem addItem = new JBMenuItem("➕ Add Test Case");
+        addItem.addActionListener(e -> {
+            String title = JOptionPane.showInputDialog(list,
+                    "Enter title for new test case:",
+                    "New Test Case",
+                    JOptionPane.PLAIN_MESSAGE);
+
+            if (title != null && !title.trim().isEmpty()) {
+                TestCase newCase = new TestCase();
+                newCase.setTitle(title.trim());
+                newCase.setSteps("Step 1: ...");
+                newCase.setExpectedResult("Expected result...");
+                newCase.setPriority("medium");
+                newCase.setAutomationRef("");
+                newCase.setSort(model.getSize() + 1);
+
+                model.addElement(newCase);
+                list.ensureIndexIsVisible(model.getSize() - 1);
+                list.setSelectedIndex(model.getSize() - 1);
+            }
+        });
+        menu.add(addItem);
+
+
         return menu;
     }
 
