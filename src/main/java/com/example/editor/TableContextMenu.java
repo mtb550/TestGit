@@ -1,7 +1,7 @@
 package com.example.editor;
 
 import com.example.Runner.TestNGRunnerByClassName;
-import com.example.demo.TestCaseToolWindow;
+import com.example.viewer.TestCaseToolWindow;
 import com.example.pojo.TestCase;
 import com.example.util.ActionHistory;
 import com.example.util.Notifier;
