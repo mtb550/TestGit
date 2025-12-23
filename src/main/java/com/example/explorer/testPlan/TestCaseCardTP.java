@@ -5,163 +5,94 @@ import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class TestCaseCardTP extends JPanel {
+
     public TestCaseCardTP(int index, TestCase tc) {
-        setLayout(new BorderLayout(10, 10));
+        // استخدام BorderLayout مع هوامش محسنة
+        setLayout(new BorderLayout());
+        setOpaque(true);
 
+        // تحسين الألوان باستخدام درجات متوافقة مع Darcula و Light themes
         setBackground(index % 2 == 0
-                ? new JBColor(Gray._245, Gray._60)  // even row
-                : new JBColor(Gray._230, Gray._45)  // odd row
+                ? JBColor.namedColor("Table.alternateRowBackground", new JBColor(Gray._245, Gray._60))
+                : JBColor.namedColor("Table.background", new JBColor(Gray._230, Gray._45)));
 
-        );
-        setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Gray._60),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, 140));
-
-        JBLabel title = new JBLabel("#" + (index + 1) + ". " + tc.getTitle());
-        title.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        title.setForeground(new JBColor(
-                Color.DARK_GRAY,   // for light theme
-                Color.LIGHT_GRAY   // for dark theme
+        setBorder(JBUI.Borders.compound(
+                JBUI.Borders.customLine(JBColor.border(), 0, 0, 1, 0), // خط سفلي فقط للفصل
+                JBUI.Borders.empty(12, 15) // هوامش داخلية مريحة للعين
         ));
 
-        // Align the component to the left
-        title.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JBLabel expected = new JBLabel("Expected: " + tc.getExpectedResult());
-        expected.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        expected.setForeground(new JBColor(
-                Color.DARK_GRAY,   // for light theme
-                Color.LIGHT_GRAY   // for dark theme
-        ));
-        expected.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JBLabel steps = new JBLabel("Steps: " + tc.getSteps());
-        steps.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        steps.setForeground(new JBColor(
-                Color.DARK_GRAY,   // for light theme
-                Color.LIGHT_GRAY   // for dark theme
-        ));
-        steps.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JBLabel automationRef = new JBLabel("Automation Ref: " + tc.getAutomationRef());
-        automationRef.setFont(new Font("Segoe UI", Font.ITALIC, 12));
-        automationRef.setForeground(new JBColor(
-                Color.DARK_GRAY,   // for light theme
-                Color.LIGHT_GRAY   // for dark theme
-        ));
-        automationRef.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JBLabel priorityBadge = getJbLabel(tc);
-
-        // Panel for the title and priority side-by-side
-        JBPanel<?> titleLine = new JBPanel<>();
-        titleLine.setLayout(new BoxLayout(titleLine, BoxLayout.X_AXIS));
-        titleLine.setOpaque(false);
-        // Ensure the line itself is left-aligned
-        titleLine.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        titleLine.add(title);
-        titleLine.add(Box.createHorizontalStrut(8));
-        titleLine.add(priorityBadge);
-
-        // Main content panel stacked vertically
-        JBPanel<?> content = new JBPanel<>();
-        content.setOpaque(false);
-        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-        // Ensure content panel is left-aligned
-        content.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        // Add components in vertical order
-        content.add(titleLine);
-        content.add(Box.createVerticalStrut(6));
-        content.add(expected);
-        content.add(steps);
-        content.add(automationRef);
-
-        // Add the content panel to the main panel
+        // محتوى البطاقة (النصوص)
+        JBPanel<?> content = createContentPanel(index, tc);
         add(content, BorderLayout.CENTER);
 
-        // === Hover Action Buttons Panel ===
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
-        buttonPanel.setOpaque(false);
+        // منع البطاقة من التمدد بشكل مفرط
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
+    }
 
-        JButton btnPassed = createStatusButton("PASSED", new JBColor(
-                new Color(0, 128, 0, 180),     // light mode
-                new Color(0, 200, 0, 150)      // dark mode
-        ));
+    private JBPanel<?> createContentPanel(int index, TestCase tc) {
+        JBPanel<?> content = new JBPanel<>(new GridBagLayout());
+        content.setOpaque(false);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        gbc.gridx = 0;
 
-        JButton btnFailed = createStatusButton("FAILED", new JBColor(
-                new Color(200, 0, 0, 180),
-                new Color(255, 80, 80, 150)
-        ));
+        // 1. العنوان والـ Badge
+        JBPanel<?> titleLine = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        titleLine.setOpaque(false);
 
-        JButton btnBlocked = createStatusButton("BLOCKED", new JBColor(
-                new Color(255, 140, 0, 180),
-                new Color(255, 165, 0, 150)
-        ));
+        JBLabel title = new JBLabel("#" + (index + 1) + ". " + tc.getTitle());
+        title.setFont(JBUI.Fonts.label(13).asBold());
 
+        titleLine.add(title);
+        titleLine.add(Box.createHorizontalStrut(10));
+        titleLine.add(createPriorityBadge(tc));
 
-        buttonPanel.add(btnPassed);
-        buttonPanel.add(btnFailed);
-        buttonPanel.add(btnBlocked);
-        buttonPanel.setVisible(false);  // Initially hidden
+        // 2. النتائج المتوقعة
+        JBLabel expected = createSubLabel("Expected: " + tc.getExpectedResult(), false);
+        // 3. الخطوات
+        JBLabel steps = createSubLabel("Steps: " + tc.getSteps(), false);
+        // 4. مرجع الأتمتة
+        JBLabel autoRef = createSubLabel("Automation Ref: " + tc.getAutomationRef(), true);
 
-        add(buttonPanel, BorderLayout.NORTH);
+        // إضافة العناصر للـ GridBag
+        gbc.gridy = 0; content.add(titleLine, gbc);
+        gbc.gridy = 1; gbc.insets = JBUI.insetsTop(4); content.add(expected, gbc);
+        gbc.gridy = 2; content.add(steps, gbc);
+        gbc.gridy = 3; gbc.insets = JBUI.insetsTop(2); content.add(autoRef, gbc);
 
-        // === Hover Events to Show/Hide Buttons ===
-        addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                buttonPanel.setVisible(true);
-            }
+        return content;
+    }
 
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                buttonPanel.setVisible(false);
-            }
+    private JBLabel createSubLabel(String text, boolean italic) {
+        JBLabel label = new JBLabel(text);
+        label.setFont(JBUI.Fonts.label(11).asItalic());
+        label.setForeground(JBColor.namedColor("Label.infoForeground", new JBColor(Gray._100, Gray._160)));
+        return label;
+    }
+
+    private @NotNull JBLabel createPriorityBadge(TestCase tc) {
+        String priority = tc.getPriority().toUpperCase();
+        JBLabel badge = new JBLabel(priority);
+        badge.setFont(JBUI.Fonts.label(10).asBold());
+        badge.setOpaque(true);
+        badge.setForeground(JBColor.WHITE);
+
+        // استخدام ألوان هادئة للـ Badge
+        badge.setBackground(switch (priority.toLowerCase()) {
+            case "high" -> new JBColor(new Color(194, 84, 80), new Color(139, 58, 55));
+            case "medium" -> new JBColor(new Color(81, 145, 171), new Color(52, 93, 110));
+            default -> new JBColor(new Color(103, 169, 103), new Color(69, 114, 69));
         });
 
+        badge.setBorder(JBUI.Borders.empty(1, 6));
+        return badge;
     }
-
-    private static @NotNull JBLabel getJbLabel(TestCase tc) {
-        JBLabel priorityBadge = new JBLabel(tc.getPriority().toUpperCase());
-        priorityBadge.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        priorityBadge.setOpaque(true);
-        priorityBadge.setForeground(new JBColor(
-                Color.DARK_GRAY,   // for light theme
-                Color.LIGHT_GRAY   // for dark theme
-        ));
-        priorityBadge.setBackground(switch (tc.getPriority().toLowerCase()) {
-            case "high" -> JBColor.ORANGE;
-            case "medium" -> JBColor.magenta;
-            default -> JBColor.green;
-        });
-        priorityBadge.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
-        priorityBadge.setHorizontalAlignment(SwingConstants.CENTER);
-        priorityBadge.setAlignmentX(Component.LEFT_ALIGNMENT);
-        return priorityBadge;
-    }
-
-    private JButton createStatusButton(String label, JBColor background) {
-        JButton button = new JButton(label);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(true);
-        button.setOpaque(true);
-        button.setBackground(background);
-        button.setForeground(JBColor.WHITE);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(80, 26));
-        return button;
-    }
-
-
 }
