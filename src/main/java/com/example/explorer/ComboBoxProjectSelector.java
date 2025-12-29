@@ -1,7 +1,6 @@
 package com.example.explorer;
 
 import com.example.pojo.Projects;
-import com.example.util.sql;
 import com.intellij.openapi.ui.ComboBox;
 
 import javax.swing.*;
@@ -23,15 +22,7 @@ public class ComboBoxProjectSelector {
         this.comboBox = new ComboBox<>(model);
         comboBox.setFocusable(false);
 
-        //Projects[] projects = new sql().get("SELECT * FROM projects WHERE active = 1 ORDER BY name").as(Projects[].class);
         File testCasesFolder = new File("/home/mtb/IdeaProjects/untitled/TestGit");
-
-// Get directory names as String array
-//        String[] projects = testCasesFolder.list((dir, name) ->
-//
-//                new File(dir, name).isDirectory()
-//        );
-
         File[] dirs = testCasesFolder.listFiles(File::isDirectory);
 
         Projects[] projects = (dirs == null) ? new Projects[0] : Arrays.stream(dirs)
@@ -58,13 +49,12 @@ public class ComboBoxProjectSelector {
             //java.util.Arrays.sort(projects);
 
             // Now you have: ["ibram", "nafath", ...]
-            System.out.println("Found projects: " + java.util.Arrays.toString(projects));
+            System.out.println("Found projects: " + Arrays.toString(projects));
         }
 
         if (projects.length > 0) {
             for (Projects project : projects) {
                 model.addElement(project.getName());
-                //nameToId.put(project.getName(), project.getId());
             }
             comboBox.addActionListener(this::onSelection);
             comboBox.setSelectedIndex(0);

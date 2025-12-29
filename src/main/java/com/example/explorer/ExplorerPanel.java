@@ -65,7 +65,7 @@ public class ExplorerPanel {
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
         JBTabsImpl tabs = new JBTabsImpl(project);
 
-
+        /*
         NotificationGroupManager.getInstance()
                 .getNotificationGroup("Test Case Notifications") // define this name once
                 .createNotification("Test case TC-001 has been approved", NotificationType.INFORMATION)
@@ -75,6 +75,8 @@ public class ExplorerPanel {
                 .getNotificationGroup("Test Case Notifications") // define this name once
                 .createNotification("ARHBOWWWW our new friend SAAD!!", NotificationType.INFORMATION)
                 .notify(project);  // you must pass a valid `Project` instance
+
+         */
 
 
         TabInfo testCasesTab = new TabInfo(testCaseScrollPane)
@@ -108,7 +110,7 @@ public class ExplorerPanel {
     }
 
     private void setupTestCaseTree() {
-        ExplorerTree.build_NEW();
+        ExplorerTree.buildTree();
         projectTree.setModel(ExplorerTree.getTreeModel());
         projectTree.setRootVisible(true);
         projectTree.setShowsRootHandles(true);
@@ -143,7 +145,7 @@ public class ExplorerPanel {
     }
 
     public void loadAllProjects() {
-        ExplorerTree.build_NEW();
+        ExplorerTree.buildTree();
         projectTree.setModel(ExplorerTree.getTreeModel());
         projectTree.setRootVisible(true);
     }

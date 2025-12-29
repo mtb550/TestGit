@@ -1,7 +1,6 @@
 package com.example.explorer;
 
 import com.example.pojo.Tree;
-import com.example.util.sql;
 import lombok.Getter;
 
 import javax.swing.event.TreeModelEvent;
@@ -15,61 +14,17 @@ public class ExplorerTree {
     @Getter
     public static DefaultTreeModel treeModel;
 
-    public static void build() {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Test Cases");
-
-        Tree[] rootNodes = new sql().get("SELECT * FROM nafath_tc_tree WHERE link = 0").as(Tree[].class);
-
-        for (Tree treeItem : rootNodes) {
-            DefaultMutableTreeNode node = buildSubTree(treeItem);
-            root.add(node);
-        }
-
-        treeModel = new DefaultTreeModel(root);
-        treeModel.addTreeModelListener(new ReloadAllOnInsertListener());
-    }
-
-    static DefaultMutableTreeNode buildSubTree(Tree treeItem) {
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode(treeItem);
-
-        Tree[] children = new sql().get("SELECT * FROM nafath_tc_tree WHERE link = ?", treeItem.getId()).as(Tree[].class);
-
-        for (Tree childItem : children) {
-            node.add(buildSubTree(childItem));
-        }
-
-        return node;
-    }
-
-    public static void build_NEW() {
-        // Absolute path from project root
-        String projectRoot = System.getProperty("user.dir");
+    public static void buildTree() {
+        // Absolute path from project root.
+        /// to be updated to get file path from config file or dynamically.
         File rootFolder = new File("/home/mtb/IdeaProjects/untitled/TestGit");
-
-        if (!rootFolder.exists()) {
-            System.out.println("❌ Folder not found!");
-            System.out.println(projectRoot);
-            System.out.println("Looking at: " + rootFolder.getAbsolutePath());
-            System.out.println("❌ Folder not found!");
-            return;
-        }
-
-        System.out.println("✓ Found Test Cases folder");
-        System.out.println("Path: " + rootFolder.getAbsolutePath());
-        System.out.println("rootFolder.getName(): "+rootFolder.getName());
 
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("TEST CASES A");
 
         for (File child : rootFolder.listFiles()) {
             if (child.isDirectory()) {
-                String[] name = child.getName().split("_");
-                Tree tree = new Tree()
-                        .setFile(child)
-                        .setId(Integer.parseInt(name[0]))
-                        .setType(Integer.parseInt(name[2]))
-                        .setName(name[1]);
-
-                rootNode.add(buildSubTree2(tree));
+                Tree tree = mapFolderToTree(child);
+                rootNode.add(buildSubTree(tree));
             }
         }
 
@@ -77,17 +32,16 @@ public class ExplorerTree {
         treeModel.addTreeModelListener(new ReloadAllOnInsertListener());
     }
 
-    static DefaultMutableTreeNode buildSubTree2(Tree folder) {
+    public static DefaultMutableTreeNode buildSubTree(Tree folder) {
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(folder);
 
-        System.out.println("#122 " + folder.getName());
-
         File[] children = folder.getFile().listFiles();
+
         if (children != null) {
             for (File childFile : children) {
                 if (childFile.isDirectory()) {
                     Tree childTree = mapFolderToTree(childFile);
-                    node.add(buildSubTree2(childTree));
+                    node.add(buildSubTree(childTree));
                 }
             }
         }
@@ -120,28 +74,27 @@ public class ExplorerTree {
     }
 
     private static class ReloadAllOnInsertListener implements TreeModelListener {
-
         @Override
         public void treeNodesChanged(TreeModelEvent e) {
-            //treeModel.reload();
+            treeModel.reload();
         }
 
         @Override
         public void treeNodesInserted(TreeModelEvent e) {
-            //treeModel.reload();
+            treeModel.reload();
 
         }
 
         @Override
         public void treeNodesRemoved(TreeModelEvent e) {
-            //treeModel.reload();
+            treeModel.reload();
 
         }
 
         @Override
         public void treeStructureChanged(TreeModelEvent e) {
-            //treeModel.reload();
-
+            treeModel.reload();
         }
+
     }
 }
