@@ -22,37 +22,22 @@ public class ComboBoxProjectSelector {
         File testCasesFolder = new File("/home/mtb/IdeaProjects/untitled/TestGit");
         File[] dirs = testCasesFolder.listFiles(File::isDirectory);
 
-        // التغيير هنا: استخدم الواجهة Directory في مصفوفة البداية والنهاية
         Directory[] projects = (dirs == null) ? new Directory[0] : Arrays.stream(dirs)
                 .map(dir -> {
                     String fullName = dir.getName();
-                    String[] parts = fullName.split("_", 3);
+                    String[] parts = fullName.split("_", 4);
 
-                    // استخدام كائن Project وتعبئته
-                    Directory p = new Directory();
-                    p.setFile(dir);
-                    p.setName(fullName); // اسم افتراضي
-                    p.setActive(1);      // نشط افتراضياً
+                    return new Directory()
+                            .setFile(dir)
+                            .setFileName(fullName)
+                            .setType(Integer.parseInt(parts[0]))
+                            .setId(Integer.parseInt(parts[1]))
+                            .setName(parts[2])
+                            .setActive(Integer.parseInt(parts[3]));
 
-                    try {
-                        if (parts.length >= 2) {
-                            p.setId(Integer.parseInt(parts[0]));
-                            p.setName(parts[1]);
-                            if (parts.length > 2) {
-                                p.setActive(Integer.parseInt(parts[2]));
-                            }
-                        }
-                    } catch (NumberFormatException e) {
-                        // في حال فشل الأرقام، سيبقى الاسم هو fullName والنشاط 1
-                    }
-
-                    return p; // تحويل صريح للواجهة لضمان توافق الـ Stream
                 })
-                .filter(p -> {
-                    // بما أن الفلتر يحتاج الوصول لـ active، نحتاج تحويله لـ Project مؤقتاً
-                    return p.getActive() == 1;
-                })
-                .toArray(Directory[]::new); // التخزين في مصفوفة Directory
+                .filter(p -> p.getActive() == 1)
+                .toArray(Directory[]::new);
 
         // Sort alphabetically
         //java.util.Arrays.sort(projects);

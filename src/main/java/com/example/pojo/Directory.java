@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 
 @Setter
@@ -24,7 +25,11 @@ public class Directory {
 
     private Integer active;
 
+    private Path filePath;
+
     private File file;
+
+    private String fileName;
 
     private Integer type;
 

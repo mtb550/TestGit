@@ -174,8 +174,6 @@ public class ExplorerPanel {
             Object userObject = null;
             if (value instanceof DefaultMutableTreeNode node) {
                 userObject = node.getUserObject();
-                System.out.println(userObject + "%%%");
-                System.out.println(userObject.getClass() + "%%%");
             }
 
             // 1. حالة الـ Directory (المشاريع والمجلدات)

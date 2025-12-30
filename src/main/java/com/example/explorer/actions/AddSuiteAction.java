@@ -2,7 +2,6 @@ package com.example.explorer.actions;
 
 import com.example.pojo.Directory;
 import com.example.util.NodeType;
-import com.example.util.sql;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
@@ -12,6 +11,10 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static com.intellij.openapi.actionSystem.PlatformCoreDataKeys.CONTEXT_COMPONENT;
 
@@ -36,16 +39,25 @@ public class AddSuiteAction extends AnAction {
         String name = Messages.showInputDialog("Enter suite name:", "Add Suite", null);
         if (name == null || name.isBlank()) return;
 
-        sql db = new sql();
-        int newNodeId = db.get("INSERT INTO tree (name, type, link, created_by) VALUES (?, ?, ?, ?) RETURNING id;",
-                name, NodeType.SUITE.getCode(), treeItem.getId(), System.getProperty("user.name")).asType(Integer.class);
+        // دمج المسار الأساسي مع اسم المجلد الجديد
+        Path fullPath = treeItem.getFilePath().resolve(name);
 
         // Build new node and insert it
+        String[] parts = name.split("_", 4);
         Directory newSuite = new Directory()
-                .setType(NodeType.SUITE.getCode()).
-                setLink(treeItem.getId())
-                .setId(newNodeId);
-        newSuite.setName(name);
+                .setType(NodeType.SUITE.getCode())
+                .setId(Integer.parseInt(parts[1]))
+                .setName(parts[2])
+                .setFileName(name)
+                .setFile(new File(name))
+                .setFilePath(fullPath);
+
+        try {
+            Files.createDirectories(fullPath);
+            System.out.println("Success! Path created: " + fullPath);
+        } catch (IOException ee) {
+            System.err.println("Could not create folder: " + ee.getMessage());
+        }
 
         DefaultMutableTreeNode newSuiteNode = new DefaultMutableTreeNode(newSuite);
         DefaultTreeModel model = (DefaultTreeModel) tree.getModel();

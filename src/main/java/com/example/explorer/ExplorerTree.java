@@ -14,16 +14,17 @@ public class ExplorerTree {
     @Getter
     public static DefaultTreeModel treeModel;
 
+    public static File rootFolder = new File("/home/mtb/IdeaProjects/untitled/TestGit");
+
     public static void buildTree() {
         // Absolute path from project root.
         /// to be updated to get file path from config file or dynamically.
-        File rootFolder = new File("/home/mtb/IdeaProjects/untitled/TestGit");
 
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("TEST CASES A");
 
         for (File child : rootFolder.listFiles()) {
             if (child.isDirectory()) {
-                Directory tree = mapFolderToDirectory(child);
+                Directory tree = mapProjectToDirectory(child);
                 rootNode.add(buildSubTree(tree));
             }
         }
@@ -40,7 +41,7 @@ public class ExplorerTree {
         if (children != null) {
             for (File childFile : children) {
                 if (childFile.isDirectory()) {
-                    Directory childTree = mapFolderToDirectory(childFile);
+                    Directory childTree = mapSuiteToDirectory(childFile);
                     node.add(buildSubTree(childTree));
                 }
             }
@@ -49,19 +50,31 @@ public class ExplorerTree {
         return node;
     }
 
-    // دالة مساعدة لتحويل File إلى Tree بناءً على الاسم (ID_Name_Type)
-    private static Directory mapFolderToDirectory(File file) {
+    private static Directory mapProjectToDirectory(File file) {
+        String fileName = file.getName();
+        String[] parts = fileName.split("_", 4);
+
+        return new Directory()
+                .setFile(file)
+                .setFilePath(file.getAbsoluteFile().toPath())
+                .setFileName(fileName)
+                .setType(Integer.parseInt(parts[0]))
+                .setId(Integer.parseInt(parts[1]))
+                .setName(parts[2])
+                .setActive(Integer.parseInt(parts[3]));
+    }
+
+    private static Directory mapSuiteToDirectory(File file) {
         String fullName = file.getName();
         String[] parts = fullName.split("_", 3);
 
-        Directory t = new Directory();
-        t.setFile(file); // تخزين مرجع الملف الفعلي
-        //t.setName(fullName); // اسم افتراضي في حال فشل التقسيم
-        t.setId(Integer.parseInt(parts[0]));
-        t.setName(parts[1]); // الاسم النظيف بدون أرقام
-        t.setType(Integer.parseInt(parts[2]));
-
-        return t;
+        return new Directory()
+                .setFile(file)
+                .setFilePath(file.getAbsoluteFile().toPath())
+                .setFileName(file.getName())
+                .setType(Integer.parseInt(parts[0]))
+                .setId(Integer.parseInt(parts[1]))
+                .setName(parts[2]);
     }
 
     private static class ReloadAllOnInsertListener implements TreeModelListener {
@@ -72,19 +85,19 @@ public class ExplorerTree {
 
         @Override
         public void treeNodesInserted(TreeModelEvent e) {
-            // treeModel.reload();
+            treeModel.reload();
 
         }
 
         @Override
         public void treeNodesRemoved(TreeModelEvent e) {
-            //  treeModel.reload();
+            treeModel.reload();
 
         }
 
         @Override
         public void treeStructureChanged(TreeModelEvent e) {
-            //   treeModel.reload();
+            treeModel.reload();
         }
 
     }
