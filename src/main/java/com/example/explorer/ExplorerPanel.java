@@ -110,7 +110,7 @@ public class ExplorerPanel {
     private void setupTestCaseTree() {
         ExplorerTree.buildTree();
         projectTree.setModel(ExplorerTree.getTreeModel());
-        projectTree.setRootVisible(true);
+        projectTree.setRootVisible(false);
         projectTree.setShowsRootHandles(true);
         projectTree.setCellRenderer(new IntelliJRenderer());
         projectTree.addMouseListener(new TestCaseTreeMouseAdapter(projectTree));
@@ -130,7 +130,7 @@ public class ExplorerPanel {
 
         DefaultTreeModel testPlanModel = new DefaultTreeModel(planRoot);
         testPlanTree.setModel(testPlanModel);
-        testPlanTree.setRootVisible(true);
+        testPlanTree.setRootVisible(false);
         testPlanTree.setShowsRootHandles(true);
         testPlanTree.setCellRenderer(new IntelliJRenderer());
         testPlanTree.addTreeSelectionListener(e -> {
@@ -145,7 +145,7 @@ public class ExplorerPanel {
     public void loadAllProjects() {
         ExplorerTree.buildTree();
         projectTree.setModel(ExplorerTree.getTreeModel());
-        projectTree.setRootVisible(true);
+        projectTree.setRootVisible(false);
     }
 
     public void filterByProject(Directory project) {
@@ -160,7 +160,7 @@ public class ExplorerPanel {
 
         ExplorerTree.treeModel = new DefaultTreeModel(root);
         projectTree.setModel(ExplorerTree.treeModel);
-        projectTree.setRootVisible(true);
+        projectTree.setRootVisible(false);
         //projectTree.setCellRenderer(new IntelliJRenderer());
     }
 

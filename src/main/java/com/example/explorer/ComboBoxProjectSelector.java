@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Arrays;
 
+import static com.example.pojo.Config.rootFolder;
+
 public class ComboBoxProjectSelector {
     private static ComboBox<Directory> comboBox = null;
     public ExplorerPanel panel;
@@ -19,8 +21,7 @@ public class ComboBoxProjectSelector {
         comboBox = new ComboBox<>(model);
         comboBox.setFocusable(false);
 
-        File testCasesFolder = new File("/home/mtb/IdeaProjects/untitled/TestGit");
-        File[] dirs = testCasesFolder.listFiles(File::isDirectory);
+        File[] dirs = rootFolder.listFiles(File::isDirectory);
 
         Directory[] projects = (dirs == null) ? new Directory[0] : Arrays.stream(dirs)
                 .map(dir -> {
@@ -30,6 +31,7 @@ public class ComboBoxProjectSelector {
                     return new Directory()
                             .setFile(dir)
                             .setFileName(fullName)
+                            .setFilePath(rootFolder.toPath().resolve(fullName))
                             .setType(Integer.parseInt(parts[0]))
                             .setId(Integer.parseInt(parts[1]))
                             .setName(parts[2])

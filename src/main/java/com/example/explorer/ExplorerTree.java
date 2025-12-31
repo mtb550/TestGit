@@ -1,5 +1,6 @@
 package com.example.explorer;
 
+import com.example.pojo.Config;
 import com.example.pojo.Directory;
 import lombok.Getter;
 
@@ -14,15 +15,13 @@ public class ExplorerTree {
     @Getter
     public static DefaultTreeModel treeModel;
 
-    public static File rootFolder = new File("/home/mtb/IdeaProjects/untitled/TestGit");
-
     public static void buildTree() {
         // Absolute path from project root.
         /// to be updated to get file path from config file or dynamically.
 
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("TEST CASES A");
 
-        for (File child : rootFolder.listFiles()) {
+        for (File child : Config.rootFolder.listFiles()) {
             if (child.isDirectory()) {
                 Directory tree = mapProjectToDirectory(child);
                 rootNode.add(buildSubTree(tree));
