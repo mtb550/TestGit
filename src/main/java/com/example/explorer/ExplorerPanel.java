@@ -5,6 +5,8 @@ import com.example.pojo.TestPlan;
 import com.example.util.ShortcutRegistry;
 import com.example.util.sql;
 import com.intellij.icons.AllIcons;
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.ui.SimpleColoredComponent;
@@ -23,13 +25,16 @@ import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
 import java.util.prefs.Preferences;
 
+import static com.example.util.Tools.refreshPath;
+
 @Getter
 public class ExplorerPanel {
     private final JPanel panel;
     private final SimpleTree projectTree;
     private final SimpleTree testPlanTree;
 
-    // ✅ Add version selector field so it can be updated later
+    @Getter
+    private final ComboBoxProjectSelector projectSelector;
     private final ComboBoxVersionSelector versionSelector;
 
     public ExplorerPanel() {
@@ -48,7 +53,7 @@ public class ExplorerPanel {
         // === Project Selector Bar ===
         JPanel topBar = new JPanel(new BorderLayout());
 
-        ComboBoxProjectSelector projectSelector = new ComboBoxProjectSelector(this);
+        projectSelector = new ComboBoxProjectSelector(this);
         topBar.add(projectSelector.getComponent(), BorderLayout.NORTH);
 
         Directory selectedProject = ComboBoxProjectSelector.getSelectedProject();
@@ -63,7 +68,6 @@ public class ExplorerPanel {
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
         JBTabsImpl tabs = new JBTabsImpl(project);
 
-        /*
         NotificationGroupManager.getInstance()
                 .getNotificationGroup("Test Case Notifications") // define this name once
                 .createNotification("Test case TC-001 has been approved", NotificationType.INFORMATION)
@@ -73,8 +77,6 @@ public class ExplorerPanel {
                 .getNotificationGroup("Test Case Notifications") // define this name once
                 .createNotification("ARHBOWWWW our new friend SAAD!!", NotificationType.INFORMATION)
                 .notify(project);  // you must pass a valid `Project` instance
-
-         */
 
 
         TabInfo testCasesTab = new TabInfo(testCaseScrollPane)
@@ -149,10 +151,12 @@ public class ExplorerPanel {
     }
 
     public void filterByProject(Directory project) {
+        refreshPath(project.getFilePath());
+
         // ✅ Refresh the version list dynamically
-        if (versionSelector != null) {
+        //if (versionSelector != null) {
             //versionSelector.setProjectId(projectId);
-        }
+        //}
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Test Cases");
         DefaultMutableTreeNode node = ExplorerTree.buildSubTree(project);
@@ -161,7 +165,6 @@ public class ExplorerPanel {
         ExplorerTree.treeModel = new DefaultTreeModel(root);
         projectTree.setModel(ExplorerTree.treeModel);
         projectTree.setRootVisible(false);
-        //projectTree.setCellRenderer(new IntelliJRenderer());
     }
 
     static class IntelliJRenderer extends SimpleColoredComponent implements TreeCellRenderer {

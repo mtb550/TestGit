@@ -12,15 +12,23 @@ import java.util.Arrays;
 import static com.example.pojo.Config.rootFolder;
 
 public class ComboBoxProjectSelector {
-    private static ComboBox<Directory> comboBox = null;
+    private static ComboBox<Directory> comboBox;
+    private final DefaultComboBoxModel<Directory> model;
     public ExplorerPanel panel;
 
-    public ComboBoxProjectSelector(ExplorerPanel panel) {
+    public ComboBoxProjectSelector(final ExplorerPanel panel) {
         this.panel = panel;
-        DefaultComboBoxModel<Directory> model = new DefaultComboBoxModel<>();
+        model = new DefaultComboBoxModel<>();
         comboBox = new ComboBox<>(model);
         comboBox.setFocusable(false);
+        loadModel();
+    }
 
+    public static Directory getSelectedProject() {
+        return (Directory) comboBox.getSelectedItem();
+    }
+
+    public void loadModel() {
         File[] dirs = rootFolder.listFiles(File::isDirectory);
 
         Directory[] projects = (dirs == null) ? new Directory[0] : Arrays.stream(dirs)
@@ -51,6 +59,7 @@ public class ComboBoxProjectSelector {
             for (Directory project : projects) {
                 model.addElement(project);
             }
+
             comboBox.addActionListener(this::onSelection);
             comboBox.setSelectedIndex(0);
         } else {
@@ -68,13 +77,18 @@ public class ComboBoxProjectSelector {
         });
     }
 
-    public static Directory getSelectedProject() {
-        return (Directory) comboBox.getSelectedItem();
+    public void addAndSelectProject(Directory project) {
+        if (!comboBox.isEnabled()) {
+            comboBox.setEnabled(true);
+        }
+        model.addElement(project);
+        comboBox.setSelectedItem(project); // This triggers focus/selection
     }
 
     private void onSelection(ActionEvent e) {
         Directory selected = (Directory) comboBox.getSelectedItem();
-        panel.filterByProject(selected);
+        if (selected != null)
+            panel.filterByProject(selected);
 
     }
 

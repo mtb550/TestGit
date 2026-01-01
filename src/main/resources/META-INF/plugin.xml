@@ -53,9 +53,10 @@
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
 
-        <action id="TestTreeContextMenuGroup"
-                class="com.example.explorer.ExplorerContext"
-                text="Test Tree Context Menu"
-                popup="true"/>
+        <group id="TestTreeContextMenuGroup"
+               class="com.example.explorer.ExplorerContext"
+               text="Test Tree Context Menu"
+               popup="true">
+        </group>
     </actions>
 </idea-plugin>

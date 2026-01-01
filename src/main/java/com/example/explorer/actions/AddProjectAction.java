@@ -8,33 +8,26 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import static com.example.util.Tools.refreshPath;
+
 public class AddProjectAction extends AnAction {
-    private final ExplorerPanel panel;
-    private final SimpleTree tree;
+    public final ExplorerPanel panel;
 
     public AddProjectAction(ExplorerPanel panel) {
         super("New Project", "Add new project", AllIcons.General.Add);
         this.panel = panel;
-        this.tree = this.panel.getProjectTree();
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         String name = Messages.showInputDialog("Enter project name:", "Add New Project", null);
         if (name == null || name.isBlank()) return;
-
-        // دمج المسار الأساسي مع اسم المجلد الجديد
-        //Path fullPath = Config.rootFolder.toPath().resolve(name);
 
         Directory newProject = new Directory()
                 .setType(NodeType.PROJECT.getCode())
@@ -48,18 +41,14 @@ public class AddProjectAction extends AnAction {
         try {
             Files.createDirectories(newProject.getFilePath());
             System.out.println("Success! Path created: " + newProject.getFilePath());
-        } catch (IOException ee) {
-            System.err.println("Could not create folder: " + ee.getMessage());
+            refreshPath(newProject.getFilePath());
+
+            if (panel.getProjectSelector() != null) {
+                panel.getProjectSelector().addAndSelectProject(newProject);
+            }
+
+        } catch (IOException ex) {
+            System.err.println("Could not create folder: " + ex.getMessage());
         }
-
-        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
-        DefaultMutableTreeNode newProjectNode = new DefaultMutableTreeNode(newProject);
-
-        model.insertNodeInto(newProjectNode, root, root.getChildCount());
-
-        TreePath path = new TreePath(newProjectNode.getPath());
-        tree.scrollPathToVisible(path);
-        tree.setSelectionPath(path);
     }
 }

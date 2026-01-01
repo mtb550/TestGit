@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import static com.example.util.Tools.refreshPath;
 import static com.intellij.openapi.actionSystem.PlatformCoreDataKeys.CONTEXT_COMPONENT;
 
 public class AddSuiteAction extends AnAction {
@@ -46,6 +47,7 @@ public class AddSuiteAction extends AnAction {
         try {
             Files.createDirectories(newSuite.getFilePath());
             System.out.println("Success! Path created: " + newSuite.getFilePath());
+            refreshPath(newSuite.getFilePath());
         } catch (IOException ee) {
             System.err.println("Could not create folder: " + ee.getMessage());
         }

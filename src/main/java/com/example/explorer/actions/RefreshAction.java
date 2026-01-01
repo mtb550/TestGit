@@ -1,28 +1,35 @@
 package com.example.explorer.actions;
 
+import com.example.explorer.ComboBoxProjectSelector;
 import com.example.explorer.ExplorerPanel;
-import com.example.explorer.ExplorerTree;
+import com.example.pojo.Directory;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
+
+import static com.example.pojo.Config.rootFolder;
+import static com.example.util.Tools.refreshPath;
 
 public class RefreshAction extends AnAction {
     private final ExplorerPanel panel;
-    private final SimpleTree tree;
 
     public RefreshAction(ExplorerPanel panel) {
         super("Refresh", "Reload tree", AllIcons.Actions.Refresh);
         this.panel = panel;
-        this.tree = this.panel.getProjectTree();
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        //ExplorerTree.build();
-        //tree.setModel(ExplorerTree.getTreeModel());
-        ExplorerTree.getTreeModel().reload(); //TODO:: try this may it is better than code above
-        panel.loadAllProjects();
+        refreshPath(rootFolder.toPath());
+        Directory selectedProject = ComboBoxProjectSelector.getSelectedProject();
+
+        if (selectedProject != null) {
+            panel.filterByProject(selectedProject);
+            System.out.println("refresh project: " + selectedProject.getName());
+        } else {
+            panel.loadAllProjects();
+            System.out.println("refresh all projects");
+        }
     }
 }
