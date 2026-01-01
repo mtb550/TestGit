@@ -1,43 +1,65 @@
 package com.example.editor;
 
 import com.example.demo.TestCaseVirtualFile;
+import com.example.pojo.Config;
 import com.example.pojo.TestCase;
-import com.example.util.sql;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.vfs.VirtualFile;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class TestCaseEditor {
 
-    public static void open(int moduleId) {
-        sql DB = new sql();
+    public static void open(Path featurePath) {
+        FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
 
-        Project ideProject = ProjectManager.getInstance().getOpenProjects()[0];
-        FileEditorManager editorManager = FileEditorManager.getInstance(ideProject);
+        List<TestCase> testCases = new ArrayList<>();
+        File folder = featurePath.toFile();
 
-        List<TestCase> testCases = List.of(DB.get(
-                "SELECT * FROM nafath_tc WHERE module = ? ORDER BY sort", moduleId
-        ).as(TestCase[].class));
+        if (folder.exists() && folder.isDirectory()) {
+            File[] jsonFiles = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
+
+            if (jsonFiles != null) {
+                for (File file : jsonFiles) {
+                    try {
+                        TestCase tc = mapper.readValue(file, TestCase.class);
+                        testCases.add(tc);
+                    } catch (Exception e) {
+                        System.err.println("Error parsing file: " + file.getName() + " -> " + e.getMessage());
+                    }
+                }
+            }
+        }
+
+        testCases.sort(Comparator.comparingInt(TestCase::getSort));
 
         if (testCases.isEmpty()) {
-            System.out.println("No test cases found for module ID: " + moduleId);
+            System.out.println("No test cases found in path: " + featurePath);
             return;
         }
 
-        // Check if a tab for this module ID is already open
+        // 1. التحقق مما إذا كان هناك تبويب مفتوح لهذا المسار (Feature Path)
         for (VirtualFile openFile : editorManager.getOpenFiles()) {
+            // نفترض أننا قمنا بتحديث getModulePath() لتعيد String أو Path
             if (openFile instanceof TestCaseVirtualFile existing &&
-                    existing.getModuleId() == moduleId) {
+                    existing.getFeaturePath().equals(featurePath.toString())) {
+
                 editorManager.openFile(existing, true);
                 return;
             }
         }
 
-        // Open a new editor tab for this module ID
-        VirtualFile virtualFile = new TestCaseVirtualFile(moduleId, testCases);
+// 2. فتح تبويب محرر جديد باستخدام مسار المجلد وقائمة حالات الاختبار
+// قمنا باستبدال moduleId بـ featurePath.toString()
+        VirtualFile virtualFile = new TestCaseVirtualFile(featurePath.toString(), testCases);
         editorManager.openFile(virtualFile, true);
     }
 }

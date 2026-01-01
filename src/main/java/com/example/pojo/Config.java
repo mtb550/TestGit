@@ -1,6 +1,7 @@
 package com.example.pojo;
 
 import com.example.settings.AppSettingsState;
+import com.intellij.openapi.project.Project;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,11 @@ public class Config {
     @Setter
     @Getter
     private static String projectBasePath;
+
+    @Setter
+    @Getter
+    private static Project project;
+
     private static File rootFolder;
 
     public static void setRootFolder() {

@@ -63,7 +63,7 @@ public class TestCaseTreeKeyAdapter {
                 Object userObject = ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
                 if (userObject instanceof Directory treeItem) {
                     if (treeItem.getType() == NodeType.FEATURE.getCode()) {
-                        TestCaseEditor.open(treeItem.getId());
+                        TestCaseEditor.open(treeItem.getFilePath());
                         System.out.printf("[ENTER] Opened test case: %s%n", treeItem.getName());
                     }
                 }

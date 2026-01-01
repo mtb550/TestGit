@@ -14,6 +14,7 @@ public class PluginPostStartupActivity implements ProjectActivity {
     public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
         System.out.println("PluginPostStartupActivity.execute()");
 
+        Config.setProject(project);
         Config.setProjectBasePath(project.getBasePath());
         Config.setRootFolder();
         return Unit.INSTANCE;
