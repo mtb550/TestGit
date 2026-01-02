@@ -5,12 +5,14 @@ import com.intellij.ui.CheckboxTree;
 import com.intellij.ui.CheckedTreeNode;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.components.JBTextField;
+import com.intellij.ui.treeStructure.SimpleTree;
 
 import javax.swing.*;
 
 public class TestPlanUIComponents {
     private final TestPlan plan;
-    private final JComponent parent;
+    private final SimpleTree parent;
     private final TestPlanTreeBuilder treeBuilder;
     private final GroupFilterHandler groupFilterHandler;
     private final ConfigPanel configPanel;
@@ -18,9 +20,9 @@ public class TestPlanUIComponents {
 
     private CheckboxTree checkboxTree;
     private CheckedTreeNode rootNode;
-    private JTextField buildField;
+    private JBTextField buildField;
 
-    public TestPlanUIComponents(TestPlan plan, JComponent parent) {
+    public TestPlanUIComponents(TestPlan plan, SimpleTree parent) {
         this.plan = plan;
         this.parent = parent;
         this.treeBuilder = new TestPlanTreeBuilder(plan);

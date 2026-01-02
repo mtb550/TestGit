@@ -10,6 +10,7 @@ import com.example.util.NodeType;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionPopupMenu;
+import com.intellij.ui.treeStructure.SimpleTree;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -18,12 +19,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class TestCaseTreeMouseAdapter extends MouseAdapter {
-    private final JTree tree;
+    private final SimpleTree tree;
     private final ExplorerPanel panel;
 
-    public TestCaseTreeMouseAdapter(JTree tree, ExplorerPanel panel) {
-        this.tree = tree;
+    public TestCaseTreeMouseAdapter(final ExplorerPanel panel) {
         this.panel = panel;
+        this.tree = panel.getTestCaseTree();
     }
 
     @Override

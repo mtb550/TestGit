@@ -5,24 +5,25 @@ import com.example.util.sql;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
-import static com.intellij.openapi.actionSystem.PlatformCoreDataKeys.CONTEXT_COMPONENT;
 
 public class DisableAction extends AnAction {
-    public DisableAction() {
+    private final SimpleTree tree;
+
+    public DisableAction(final SimpleTree tree) {
         super("✏️ Rename");
+        this.tree = tree;
     }
 
     /// To Be updated. Disable Action for projects - Explorer, Test Cases
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        JTree tree = e.getData(CONTEXT_COMPONENT) instanceof JTree jTree ? jTree : null;
         if (tree == null) return;
 
         TreePath path = tree.getSelectionPath();

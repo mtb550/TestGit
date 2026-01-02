@@ -7,9 +7,12 @@ import com.google.gson.Gson;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.CheckboxTree;
 import com.intellij.ui.CheckedTreeNode;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBPanel;
+import com.intellij.ui.components.JBTextField;
+import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Setter;
 
-import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
@@ -19,7 +22,7 @@ import java.util.List;
 public class TestPlanActionHandler {
     private final TestPlan plan;
     private final ConfigPanel configPanel;
-    private JTextField buildField;
+    private JBTextField buildField;
     @Setter
     private CheckboxTree checkboxTree;
     @Setter
@@ -30,15 +33,15 @@ public class TestPlanActionHandler {
         this.configPanel = configPanel;
     }
 
-    public JComponent createBuildNumberPanel() {
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-        panel.add(new JLabel("🔢 Build Number:"), BorderLayout.NORTH);
-        buildField = new JTextField();
+    public JBPanel createBuildNumberPanel() {
+        JBPanel panel = new JBPanel(new BorderLayout(5, 5));
+        panel.add(new JBLabel("🔢 Build Number:"), BorderLayout.NORTH);
+        buildField = new JBTextField();
         panel.add(buildField, BorderLayout.CENTER);
         return panel;
     }
 
-    public void handleOkAction(JComponent parent) {
+    public void handleOkAction(SimpleTree parent) {
         if (!validateInputs()) return;
 
         List<String> selectedCaseIds = collectSelectedTestCases();
@@ -83,7 +86,7 @@ public class TestPlanActionHandler {
         }
     }
 
-    private void createTestRun(List<String> selectedCaseIds, JComponent parent) {
+    private void createTestRun(List<String> selectedCaseIds, SimpleTree parent) {
         sql db = new sql();
         try {
             String configJson = createConfigJson();
@@ -120,16 +123,15 @@ public class TestPlanActionHandler {
         }
     }
 
-    private void updateParentTree(JComponent parent) {
-        if (parent instanceof JTree tree) {
-            DefaultMutableTreeNode newRoot = new DefaultMutableTreeNode("Test Plans");
-            TestPlan[] updatedPlans = new sql().get("SELECT * FROM nafath_tp_tree").as(TestPlan[].class);
-            for (TestPlan updatedPlan : updatedPlans) {
-                newRoot.add(new DefaultMutableTreeNode(updatedPlan));
-            }
-            DefaultTreeModel updatedModel = new DefaultTreeModel(newRoot);
-            tree.setModel(updatedModel);
-            tree.setRootVisible(true);
+    private void updateParentTree(SimpleTree tree) {
+        DefaultMutableTreeNode newRoot = new DefaultMutableTreeNode("Test Plans");
+        TestPlan[] updatedPlans = new sql().get("SELECT * FROM nafath_tp_tree").as(TestPlan[].class);
+        for (TestPlan updatedPlan : updatedPlans) {
+            newRoot.add(new DefaultMutableTreeNode(updatedPlan));
         }
+        DefaultTreeModel updatedModel = new DefaultTreeModel(newRoot);
+        tree.setModel(updatedModel);
+        tree.setRootVisible(true);
+
     }
 }

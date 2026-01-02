@@ -34,8 +34,8 @@ public class ExplorerToolWindowFactory implements ToolWindowFactory {
     private DefaultActionGroup contextMenu(ExplorerPanel panel) {
         DefaultActionGroup group = new DefaultActionGroup();
 
-        group.add(new ExpandAllAction(panel));
-        group.add(new CollapseAllAction(panel));
+        group.add(new ExpandAllAction(panel.getTestCaseTree()));
+        group.add(new CollapseAllAction(panel.getTestCaseTree()));
         group.addSeparator();
         group.add(new RefreshAction(panel));
         ///group.add(new SettingsAction()); // no need anymore. to be removed with its class

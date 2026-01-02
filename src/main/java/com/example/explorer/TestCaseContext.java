@@ -6,9 +6,9 @@ import com.example.util.NodeType;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
@@ -19,7 +19,8 @@ public class TestCaseContext extends DefaultActionGroup {
     DefaultActionGroup addGroup = new DefaultActionGroup("➕ Add", true) {
         @Override
         public void update(@NotNull AnActionEvent e) {
-            JTree tree = e.getData(CONTEXT_COMPONENT) instanceof JTree jTree ? jTree : null;
+            ///  find a way to replace it with getting tree from constructor.
+            SimpleTree tree = e.getData(CONTEXT_COMPONENT) instanceof SimpleTree simpleTree ? simpleTree : null;
 
             boolean enabled = true;
 
@@ -50,13 +51,13 @@ public class TestCaseContext extends DefaultActionGroup {
 
         add(new OpenFeatureActionContext(panel.getTestCaseTree()));
         addGroup.add(new AddSuiteAction(panel.getTestCaseTree()));
-        addGroup.add(new AddFeatureAction());
+        addGroup.add(new AddFeatureAction(panel.getTestCaseTree()));
         add(addGroup);
         addSeparator();
         add(new DeleteAction(panel));
         add(new RenameAction(panel));
         addSeparator();
-        add(new RunAction());
+        add(new RunAction(panel.getTestCaseTree()));
 
         addSeparator();
 

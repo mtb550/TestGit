@@ -12,6 +12,7 @@ import com.intellij.openapi.ui.MessageType;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBTextField;
+import com.intellij.ui.treeStructure.SimpleTree;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -35,7 +36,7 @@ public class Shortcuts {
         return cutNodeIds.contains(id);
     }
 
-    public static void register(JTree tree, Project project) {
+    public static void register(SimpleTree tree, Project project) {
         System.out.println("Shortcuts.register()");
 
         InputMap inputMap = tree.getInputMap(JComponent.WHEN_FOCUSED);

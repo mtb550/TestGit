@@ -5,15 +5,15 @@ import com.example.pojo.Directory;
 import com.example.util.NodeType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class OpenFeatureActionContext extends AnAction {
-    private final JTree tree;
+    private final SimpleTree tree;
 
-    public OpenFeatureActionContext(final JTree tree) {
+    public OpenFeatureActionContext(final SimpleTree tree) {
         super("▢ Open");
         this.tree = tree;
     }

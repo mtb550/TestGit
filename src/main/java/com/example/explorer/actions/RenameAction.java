@@ -5,9 +5,9 @@ import com.example.pojo.Directory;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -15,20 +15,20 @@ import java.io.File;
 import java.nio.file.Path;
 
 import static com.example.util.Tools.refreshPath;
-import static com.intellij.openapi.actionSystem.PlatformCoreDataKeys.CONTEXT_COMPONENT;
 
 public class RenameAction extends AnAction {
     private final ExplorerPanel panel;
+    private final SimpleTree tree;
 
     // استقبال الـ panel عبر الـ Constructor كما فعلنا في DeleteAction
     public RenameAction(final ExplorerPanel panel) {
         super("✏️ Rename");
         this.panel = panel;
+        this.tree = panel.getTestCaseTree();
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        JTree tree = e.getData(CONTEXT_COMPONENT) instanceof JTree jTree ? jTree : null;
         if (tree == null) return;
 
         TreePath path = tree.getSelectionPath();

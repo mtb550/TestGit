@@ -32,8 +32,8 @@ import static com.example.util.Tools.refreshPath;
 @Getter
 public class ExplorerPanel {
     private final JPanel panel;
-    private final JTree testCaseTree;
-    private final JTree testPlanTree;
+    private final SimpleTree testCaseTree;
+    private final SimpleTree testPlanTree;
 
     @Getter
     private final ComboBoxProjectSelector projectSelector;
@@ -117,7 +117,7 @@ public class ExplorerPanel {
         testCaseTree.setRootVisible(false);
         testCaseTree.setShowsRootHandles(true);
         testCaseTree.setCellRenderer(new IntelliJRenderer());
-        testCaseTree.addMouseListener(new TestCaseTreeMouseAdapter(testCaseTree, this));
+        testCaseTree.addMouseListener(new TestCaseTreeMouseAdapter(this));
         Shortcuts.register(testCaseTree, Config.getProject());
         OpenFeatureAction.register(testCaseTree);
         testCaseTree.setDragEnabled(true);
@@ -144,7 +144,7 @@ public class ExplorerPanel {
             // TestPlanEditor.open(plan.getId());
             //}
         });
-        testPlanTree.addMouseListener(new TestCaseTreeMouseAdapter(testPlanTree, this));
+        testPlanTree.addMouseListener(new TestCaseTreeMouseAdapter(this));
     }
 
     public void loadAllProjects() {

@@ -3,16 +3,17 @@ package com.example.explorer.testPlan;
 import com.example.pojo.TestPlan;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.ui.treeStructure.SimpleTree;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class TestPlanDialog extends DialogWrapper {
     private final TestPlan plan;
-    private final JComponent parent;
+    private final SimpleTree parent;
     private final TestPlanUIComponents uiComponents;
 
-    public TestPlanDialog(TestPlan plan, JComponent parent) {
+    public TestPlanDialog(TestPlan plan, SimpleTree parent) {
         super(true);
         this.plan = plan;
         this.parent = parent;

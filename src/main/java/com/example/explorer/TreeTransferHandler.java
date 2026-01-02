@@ -3,6 +3,7 @@ package com.example.explorer;
 import com.example.pojo.Directory;
 import com.example.util.NodeType;
 import com.example.util.sql;
+import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,10 +28,10 @@ public class TreeTransferHandler extends TransferHandler {
         }
     }
 
-    private final JTree tree;
+    private final SimpleTree tree;
     private DefaultMutableTreeNode[] draggedNodes;
 
-    public TreeTransferHandler(JTree tree) {
+    public TreeTransferHandler(SimpleTree tree) {
         this.tree = tree;
         tree.setDropMode(DropMode.ON);
         tree.setDragEnabled(true);
@@ -62,7 +63,7 @@ public class TreeTransferHandler extends TransferHandler {
     public boolean canImport(TransferSupport support) {
         if (!support.isDrop() || !support.isDataFlavorSupported(NODE_FLAVOR)) return false;
 
-        TreePath dropPath = ((JTree.DropLocation) support.getDropLocation()).getPath();
+        TreePath dropPath = ((SimpleTree.DropLocation) support.getDropLocation()).getPath();
         if (dropPath == null) return false;
 
         DefaultMutableTreeNode targetNode = (DefaultMutableTreeNode) dropPath.getLastPathComponent();
@@ -94,7 +95,7 @@ public class TreeTransferHandler extends TransferHandler {
         Transferable t = support.getTransferable();
         DefaultMutableTreeNode[] nodes = (DefaultMutableTreeNode[]) t.getTransferData(NODE_FLAVOR);
 
-        TreePath dropPath = ((JTree.DropLocation) support.getDropLocation()).getPath();
+        TreePath dropPath = ((SimpleTree.DropLocation) support.getDropLocation()).getPath();
         DefaultMutableTreeNode newParent = (DefaultMutableTreeNode) dropPath.getLastPathComponent();
 
         Object parentObj = newParent.getUserObject();

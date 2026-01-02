@@ -5,9 +5,9 @@ import com.example.util.NodeType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -16,18 +16,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import static com.example.util.Tools.refreshPath;
-import static com.intellij.openapi.actionSystem.PlatformCoreDataKeys.CONTEXT_COMPONENT;
 
 public class AddFeatureAction extends AnAction {
-    public AddFeatureAction() {
+    private final SimpleTree tree;
+
+    public AddFeatureAction(final SimpleTree tree) {
         super("➕ New Feature");
+        this.tree = tree;
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         System.out.println("AddFeatureAction.actionPerformed()");
-
-        JTree tree = e.getData(CONTEXT_COMPONENT) instanceof JTree jTree ? jTree : null;
         if (tree == null) return;
 
         TreePath path = tree.getSelectionPath();

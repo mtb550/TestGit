@@ -5,9 +5,9 @@ import com.example.util.NodeType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -18,9 +18,9 @@ import java.nio.file.Files;
 import static com.example.util.Tools.refreshPath;
 
 public class AddSuiteAction extends AnAction {
-    private final JTree tree;
+    private final SimpleTree tree;
 
-    public AddSuiteAction(final JTree tree) {
+    public AddSuiteAction(final SimpleTree tree) {
         super("➕ New Suite");
         this.tree = tree;
     }

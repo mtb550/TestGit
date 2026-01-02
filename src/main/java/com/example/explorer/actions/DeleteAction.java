@@ -7,28 +7,28 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.io.File;
 
 import static com.example.util.Tools.refreshPath;
-import static com.intellij.openapi.actionSystem.PlatformCoreDataKeys.CONTEXT_COMPONENT;
 
 public class DeleteAction extends AnAction {
     private final ExplorerPanel panel;
+    private final SimpleTree tree;
 
     public DeleteAction(final ExplorerPanel panel) {
         super("❌ Delete");
         this.panel = panel;
+        this.tree = panel.getTestCaseTree();
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        JTree tree = e.getData(CONTEXT_COMPONENT) instanceof JTree jTree ? jTree : null;
         if (tree == null) return;
 
         TreePath path = tree.getSelectionPath();

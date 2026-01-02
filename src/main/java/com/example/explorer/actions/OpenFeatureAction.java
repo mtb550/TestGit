@@ -3,6 +3,7 @@ package com.example.explorer.actions;
 import com.example.editor.TestCaseEditor;
 import com.example.pojo.Directory;
 import com.example.util.NodeType;
+import com.intellij.ui.treeStructure.SimpleTree;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -10,17 +11,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 public class OpenFeatureAction extends AbstractAction {
-    private final JTree tree;
+    private final SimpleTree tree;
     private final KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
 
-    public OpenFeatureAction(JTree tree) {
+    public OpenFeatureAction(SimpleTree tree) {
         this.tree = tree;
     }
 
     /**
      * تسجيل الأكشن ليعمل مع مفتاح Enter
      */
-    public static void register(JTree tree) {
+    public static void register(SimpleTree tree) {
         OpenFeatureAction action = new OpenFeatureAction(tree);
         tree.getInputMap(JComponent.WHEN_FOCUSED).put(action.key, "openFeature");
         tree.getActionMap().put("openFeature", action);

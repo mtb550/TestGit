@@ -1,11 +1,10 @@
 package com.example.explorer.testPlan;
 
 import com.example.pojo.TestPlan;
-
-import javax.swing.*;
+import com.intellij.ui.treeStructure.SimpleTree;
 
 public class TestPlanPopup {
-    public static void showFolderInfo(TestPlan plan, JComponent parent) {
+    public static void showFolderInfo(TestPlan plan, SimpleTree parent) {
         new TestPlanDialog(plan, parent).show();
     }
 }

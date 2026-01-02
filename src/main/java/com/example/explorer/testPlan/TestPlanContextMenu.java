@@ -3,6 +3,7 @@ package com.example.explorer.testPlan;
 import com.example.explorer.actions.TestPlanInfoPopup;
 import com.example.pojo.TestPlan;
 import com.example.util.sql;
+import com.intellij.ui.treeStructure.SimpleTree;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -10,7 +11,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 public class TestPlanContextMenu {
 
-    public static JPopupMenu create(JTree tree, TestPlan plan, DefaultMutableTreeNode node) {
+    public static JPopupMenu create(SimpleTree tree, TestPlan plan, DefaultMutableTreeNode node) {
         JPopupMenu menu = new JPopupMenu();
 
         // 🧪 New Test Run

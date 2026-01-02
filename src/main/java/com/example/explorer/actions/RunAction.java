@@ -5,22 +5,23 @@ import com.example.util.NodeType;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import static com.intellij.openapi.actionSystem.PlatformCoreDataKeys.CONTEXT_COMPONENT;
 
 public class RunAction extends AnAction {
-    public RunAction() {
+    private final SimpleTree tree;
+
+    public RunAction(final SimpleTree tree) {
         super("▶ Run Feature");
+        this.tree = tree;
     }
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        JTree tree = e.getData(CONTEXT_COMPONENT) instanceof JTree jTree ? jTree : null;
         if (tree == null) {
             e.getPresentation().setEnabled(false);
             return;
