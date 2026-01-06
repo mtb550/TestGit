@@ -27,10 +27,9 @@ import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
 import java.util.prefs.Preferences;
 
-import static com.example.util.Tools.refreshPath;
 
 @Getter
-public class ExplorerPanel {
+public class Panel {
     private final JPanel panel;
     private final SimpleTree testCaseTree;
     private final SimpleTree testPlanTree;
@@ -39,7 +38,8 @@ public class ExplorerPanel {
     private final ComboBoxProjectSelector projectSelector;
     private final ComboBoxVersionSelector versionSelector;
 
-    public ExplorerPanel() {
+    public Panel() {
+        System.out.println("Panel.Panel()");
         panel = new JPanel(new BorderLayout());
 
         testCaseTree = new SimpleTree();
@@ -56,7 +56,7 @@ public class ExplorerPanel {
         JPanel topBar = new JPanel(new BorderLayout());
 
         projectSelector = new ComboBoxProjectSelector(this);
-        topBar.add(projectSelector.getComponent(), BorderLayout.NORTH);
+        topBar.add(projectSelector.selected(), BorderLayout.NORTH);
 
         Directory selectedProject = ComboBoxProjectSelector.getSelectedProject();
 
@@ -112,6 +112,8 @@ public class ExplorerPanel {
     }
 
     private void setupTestCaseTree() {
+        System.out.println("Panel.setupTestCaseTree()");
+
         ExplorerTree.buildTree();
         testCaseTree.setModel(ExplorerTree.getTreeModel());
         testCaseTree.setRootVisible(false);
@@ -127,6 +129,8 @@ public class ExplorerPanel {
     }
 
     private void setupTestPlanTree() {
+        System.out.println("Panel.setupTestPlanTree()");
+
         DefaultMutableTreeNode planRoot = new DefaultMutableTreeNode("Test Plans");
         TestPlan[] plans = new sql().get("SELECT * FROM nafath_tp_tree").as(TestPlan[].class);
         for (TestPlan plan : plans) {
@@ -148,13 +152,17 @@ public class ExplorerPanel {
     }
 
     public void loadAllProjects() {
-        ExplorerTree.buildTree();
-        testCaseTree.setModel(ExplorerTree.getTreeModel());
-        testCaseTree.setRootVisible(false);
+        System.out.println("Panel.loadAllProjects()");
+
+        //ExplorerTree.buildTree();
+        //testCaseTree.setModel(ExplorerTree.getTreeModel());
+        //testCaseTree.setRootVisible(false);
     }
 
     public void filterByProject(Directory project) {
-        refreshPath(project.getFilePath());
+        System.out.println("Panel.filterByProject()");
+
+        //refreshPath(project.getFilePath());
 
         // ✅ Refresh the version list dynamically
         //if (versionSelector != null) {
@@ -172,9 +180,8 @@ public class ExplorerPanel {
 
     static class IntelliJRenderer extends SimpleColoredComponent implements TreeCellRenderer {
         @Override
-        public Component getTreeCellRendererComponent(JTree tree, Object value,
-                                                      boolean selected, boolean expanded,
-                                                      boolean leaf, int row, boolean hasFocus) {
+        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+            System.out.println("Panel.getTreeCellRendererComponent()");
             this.clear(); // مسح الحالة السابقة (ضروري جداً)
 
             Object userObject = null;

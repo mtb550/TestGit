@@ -16,21 +16,24 @@ import static com.example.explorer.ExplorerTree.mapProjectToDirectory;
 public class ComboBoxProjectSelector {
     public static ComboBox<Directory> comboBox;
     private final DefaultComboBoxModel<Directory> model;
-    public ExplorerPanel panel;
+    public Panel panel;
 
-    public ComboBoxProjectSelector(final ExplorerPanel panel) {
+    public ComboBoxProjectSelector(final Panel panel) {
         this.panel = panel;
         model = new DefaultComboBoxModel<>();
         comboBox = new ComboBox<>(model);
         comboBox.setFocusable(false);
-        loadModel();
+        loadProjects();
     }
 
     public static Directory getSelectedProject() {
+        System.out.println("ComboBoxProjectSelector.getSelectedProject()");
+
         return (Directory) comboBox.getSelectedItem();
     }
 
-    public void loadModel() {
+    public void loadProjects() {
+        System.out.println("ComboBoxProjectSelector.loadModel()");
         File[] dirs = Config.getRootFolder().listFiles(File::isDirectory);
 
         Directory[] projects = (dirs == null) ? new Directory[0] : Arrays.stream(dirs)
@@ -89,6 +92,8 @@ public class ComboBoxProjectSelector {
     }
 
     public void addAndSelectProject(Directory project) {
+        System.out.println("ComboBoxProjectSelector.addAndSelectProject()");
+
         if (!comboBox.isEnabled()) {
             comboBox.setEnabled(true);
         }
@@ -99,6 +104,8 @@ public class ComboBoxProjectSelector {
     }
 
     private void onSelection(ActionEvent e) {
+        System.out.println("ComboBoxProjectSelector.onSelection()");
+
         Directory selected = (Directory) comboBox.getSelectedItem();
         if (selected != null) {
             panel.filterByProject(selected);
@@ -108,11 +115,15 @@ public class ComboBoxProjectSelector {
         }
     }
 
-    public JComponent getComponent() {
+    public JComboBox<Directory> selected() {
+        System.out.println("ComboBoxProjectSelector.selected()");
+
         return comboBox;
     }
 
     public void reloadProjects() {
+        System.out.println("ComboBoxProjectSelector.reloadProjects()");
+
         // مسح العناصر القديمة من القائمة المنسدلة
         model.removeAllElements();
 

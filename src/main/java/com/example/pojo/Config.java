@@ -1,21 +1,31 @@
 package com.example.pojo;
 
 import com.example.settings.AppSettingsState;
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.swing.*;
 import java.io.File;
 
 public class Config {
+    public static Icon porject = AllIcons.Nodes.Project;       // 📦 Project
+    public static Icon folder = AllIcons.Nodes.Folder;       // 📁 Folder
+    public static Icon clazz = AllIcons.Nodes.Class;     // 📄 Class
+    public static Icon java = AllIcons.FileTypes.Java;     // ☕ Java file
+    public static Icon json = AllIcons.FileTypes.Json;     // {} JSON
+    public static Icon xml = AllIcons.FileTypes.Xml;     // <> XML
+    public static Icon text = AllIcons.FileTypes.Text;     // 📝 Text
+    public static Icon branch = AllIcons.Vcs.Branch;     // 🌿 Branch
+    public static Icon add = AllIcons.General.Add;     // ➕ Add
+    public static Icon remove = AllIcons.General.Remove;     // ➖ Remove
     @Setter
     @Getter
     private static String projectBasePath;
-
     @Setter
     @Getter
     private static Project project;
-
     private static File rootFolder;
 
     public static void setRootFolder() {

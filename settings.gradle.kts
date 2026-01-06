@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "tc-plugin"
+rootProject.name = "TestGit"

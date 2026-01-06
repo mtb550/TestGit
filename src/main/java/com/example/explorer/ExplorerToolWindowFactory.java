@@ -18,7 +18,7 @@ import java.util.List;
 public class ExplorerToolWindowFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        ExplorerPanel panel = new ExplorerPanel();
+        Panel panel = new Panel();
         Content content = ContentFactory.getInstance().createContent(panel.getPanel(), null, false);
         toolWindow.getContentManager().addContent(content);
         toolWindow.setTitleActions(List.of(contextMenu(panel).getChildren(null)));
@@ -31,7 +31,7 @@ public class ExplorerToolWindowFactory implements ToolWindowFactory {
         //toolWindow.setTitleActions(List.of(group.getChildren(null)));
     }
 
-    private DefaultActionGroup contextMenu(ExplorerPanel panel) {
+    private DefaultActionGroup contextMenu(Panel panel) {
         DefaultActionGroup group = new DefaultActionGroup();
 
         group.add(new ExpandAllAction(panel.getTestCaseTree()));

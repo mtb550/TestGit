@@ -1,6 +1,7 @@
 plugins {
     id("java")
     id("org.jetbrains.intellij") version "1.17.4"
+    //id("org.jetbrains.intellij.platform") version "2.1.0"
 }
 
 group = "com.example"

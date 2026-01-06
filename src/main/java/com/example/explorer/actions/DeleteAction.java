@@ -1,7 +1,7 @@
 package com.example.explorer.actions;
 
 import com.example.explorer.ComboBoxProjectSelector;
-import com.example.explorer.ExplorerPanel;
+import com.example.explorer.Panel;
 import com.example.pojo.Directory;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -15,13 +15,11 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.io.File;
 
-import static com.example.util.Tools.refreshPath;
-
 public class DeleteAction extends AnAction {
-    private final ExplorerPanel panel;
+    private final Panel panel;
     private final SimpleTree tree;
 
-    public DeleteAction(final ExplorerPanel panel) {
+    public DeleteAction(final Panel panel) {
         super("❌ Delete");
         this.panel = panel;
         this.tree = panel.getTestCaseTree();
@@ -51,7 +49,7 @@ public class DeleteAction extends AnAction {
 
                 if (success) {
                     System.out.println("Success! Deleted: " + treeItem.getFilePath());
-                    refreshPath(treeItem.getFilePath().getParent());
+                    //refreshPath(treeItem.getFilePath().getParent());
 
                 } else {
                     System.out.println("Could not delete folder. It might be in use. Delete Failed.");
@@ -65,7 +63,7 @@ public class DeleteAction extends AnAction {
             // بعد نجاح الحذف، حدث الـ ComboBox بسهولة
             if (panel.getProjectSelector() != null) {
                 panel.getProjectSelector().reloadProjects();
-                panel.loadAllProjects();
+                //panel.loadAllProjects();
                 panel.filterByProject(ComboBoxProjectSelector.comboBox.getItem());
             }
 

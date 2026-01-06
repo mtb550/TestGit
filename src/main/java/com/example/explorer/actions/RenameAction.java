@@ -1,6 +1,6 @@
 package com.example.explorer.actions;
 
-import com.example.explorer.ExplorerPanel;
+import com.example.explorer.Panel;
 import com.example.pojo.Directory;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -14,14 +14,12 @@ import javax.swing.tree.TreePath;
 import java.io.File;
 import java.nio.file.Path;
 
-import static com.example.util.Tools.refreshPath;
-
 public class RenameAction extends AnAction {
-    private final ExplorerPanel panel;
+    private final Panel panel;
     private final SimpleTree tree;
 
     // استقبال الـ panel عبر الـ Constructor كما فعلنا في DeleteAction
-    public RenameAction(final ExplorerPanel panel) {
+    public RenameAction(final Panel panel) {
         super("✏️ Rename");
         this.panel = panel;
         this.tree = panel.getTestCaseTree();
@@ -55,8 +53,8 @@ public class RenameAction extends AnAction {
 
                 // 4. تحديث الواجهة (Tree & VFS)
                 ((DefaultTreeModel) tree.getModel()).nodeChanged(node);
-                refreshPath(newFilePath);
-                refreshPath(newFilePath.getParent());
+                //refreshPath(newFilePath);
+                //refreshPath(newFilePath.getParent());
 
                 // 5. تحديث الـ ComboBox إذا كان العنصر "مشروع" (Type 0)
                 if (treeItem.getType() == 0 && panel.getProjectSelector() != null) {

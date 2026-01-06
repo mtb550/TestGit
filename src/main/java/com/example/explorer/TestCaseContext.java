@@ -46,7 +46,7 @@ public class TestCaseContext extends DefaultActionGroup {
     public TestCaseContext() {
     }
 
-    public TestCaseContext(ExplorerPanel panel) {
+    public TestCaseContext(Panel panel) {
         super("Test Case Context Menu", true);
 
         add(new OpenFeatureActionContext(panel.getTestCaseTree()));
@@ -74,7 +74,7 @@ public class TestCaseContext extends DefaultActionGroup {
         importGroup.add(new ImportJsonAction());
         add(importGroup);
 
-        DefaultActionGroup integrationGroup = new DefaultActionGroup("📥 Integrate", true);
+        DefaultActionGroup integrationGroup = new DefaultActionGroup("🔗 Integrate", true);
         integrationGroup.add(new IntegrateTestRailAction());
         integrationGroup.add(new IntegrateJiraAction());
         integrationGroup.add(new IntegrateAzureAction());

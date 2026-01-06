@@ -20,9 +20,9 @@ import java.awt.event.MouseEvent;
 
 public class TestCaseTreeMouseAdapter extends MouseAdapter {
     private final SimpleTree tree;
-    private final ExplorerPanel panel;
+    private final Panel panel;
 
-    public TestCaseTreeMouseAdapter(final ExplorerPanel panel) {
+    public TestCaseTreeMouseAdapter(final Panel panel) {
         this.panel = panel;
         this.tree = panel.getTestCaseTree();
     }

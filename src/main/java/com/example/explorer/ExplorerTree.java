@@ -15,6 +15,7 @@ public class ExplorerTree {
     public static DefaultTreeModel treeModel;
 
     public static void buildTree() {
+        System.out.println("ExplorerTree.buildTree()");
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("TEST CASES");
         File[] children = Config.getRootFolder().listFiles(File::isDirectory);
 
@@ -25,10 +26,11 @@ public class ExplorerTree {
             }
         }
         treeModel = new DefaultTreeModel(rootNode);
-        // تم إزالة المستمع القديم لأنه كان يسبب تحديثات لا نهائية
     }
 
     static DefaultMutableTreeNode buildSubTree(Directory folder) {
+        System.out.println("ExplorerTree.buildSubTree()");
+
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(folder);
         File[] children = folder.getFilePath().toFile().listFiles(File::isDirectory);
 
@@ -42,6 +44,8 @@ public class ExplorerTree {
     }
 
     public static Directory mapProjectToDirectory(File file) {
+        System.out.println("ExplorerTree.mapProjectToDirectory()");
+
         String fileName = file.getName();
         String[] parts = fileName.split("_", 4);
 
@@ -56,6 +60,8 @@ public class ExplorerTree {
     }
 
     private static Directory mapSuiteToDirectory(File file) {
+        System.out.println("ExplorerTree.mapSuiteToDirectory()");
+
         String fullName = file.getName();
         String[] parts = fullName.split("_", 3);
 
@@ -71,24 +77,31 @@ public class ExplorerTree {
     private static class ReloadAllOnInsertListener implements TreeModelListener {
         @Override
         public void treeNodesChanged(TreeModelEvent e) {
-            //treeModel.reload();
+            System.out.println("ExplorerTree.treeNodesChanged()");
         }
 
         @Override
         public void treeNodesInserted(TreeModelEvent e) {
-            treeModel.reload();
+            System.out.println("ExplorerTree.treeNodesInserted()");
+            // NEVER call treeModel.reload() here; it causes the flicker.
 
+            // Extract the actual file system path from the parent node
+            //DefaultMutableTreeNode lastComponent = (DefaultMutableTreeNode) e.getTreePath().getLastPathComponent();
+            //Directory dirNode = (Directory) lastComponent.getUserObject();
+            // Use your Tools class to refresh the VFS for the parent folder
+            //Tools.refreshFileSystem(dirNode.getFile());
         }
 
         @Override
         public void treeNodesRemoved(TreeModelEvent e) {
-            treeModel.reload();
+            System.out.println("ExplorerTree.treeNodesRemoved()");
 
         }
 
         @Override
         public void treeStructureChanged(TreeModelEvent e) {
-            treeModel.reload();
+            System.out.println("ExplorerTree.treeStructureChanged()");
+
         }
 
     }

@@ -1,6 +1,6 @@
 package com.example.util;
 
-import com.example.explorer.ExplorerPanel;
+import com.example.explorer.Panel;
 import com.example.explorer.actions.DeleteAction;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.CustomShortcutSet;
@@ -11,7 +11,7 @@ import java.awt.event.KeyEvent;
 
 public class ShortcutRegistry {
 
-    public static void Explorer(SimpleTree tree, ExplorerPanel panel) {
+    public static void Explorer(SimpleTree tree, Panel panel) {
         registerShortcut(tree, new DeleteAction(panel), KeyEvent.VK_DELETE);
         // Add more shortcuts below as needed
         // registerShortcut(tree, new RunFeatureAction(), KeyEvent.VK_F5);

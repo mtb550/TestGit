@@ -4,7 +4,10 @@ import com.example.pojo.Directory;
 import com.example.util.NodeType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,9 +16,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-
-import static com.example.util.Tools.refreshPath;
 
 public class AddSuiteAction extends AnAction {
     private final SimpleTree tree;
@@ -45,17 +45,28 @@ public class AddSuiteAction extends AnAction {
         newSuite.setFilePath(treeItem.getFilePath().resolve(newSuite.getFileName()));
         newSuite.setFile(new File(newSuite.getFileName()));
 
-        try {
-            Files.createDirectories(newSuite.getFilePath());
-            System.out.println("Success! suite created: " + newSuite.getFilePath());
-            refreshPath(newSuite.getFilePath());
-        } catch (IOException ee) {
-            System.err.println("Could not create suite: " + ee.getMessage());
-        }
+        WriteAction.run(() -> {
+            try {
+                // 1. Get the parent directory as a VirtualFile
+                VirtualFile parentDir = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(treeItem.getFilePath());
 
-        DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newSuite);
-        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-        model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
-        tree.scrollPathToVisible(new TreePath(newNode.getPath()));
+                if (parentDir != null) {
+                    // 2. Create the directory using IntelliJ's API
+                    // This triggers VFS events correctly and prevents the "watcher" clash
+                    VirtualFile newDir = parentDir.createChildDirectory(this, newSuite.getFileName());
+
+                    // 3. Update your Tree Model immediately inside the same WriteAction
+                    DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newSuite);
+                    model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
+
+                    // 4. Ensure UI visibility
+                    tree.scrollPathToVisible(new TreePath(newNode.getPath()));
+                }
+            } catch (IOException ex) {
+                System.err.println("unable to create suite: " + newSuite);
+            }
+        });
+
     }
 }
