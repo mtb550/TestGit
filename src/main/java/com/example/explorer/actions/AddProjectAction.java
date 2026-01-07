@@ -70,19 +70,14 @@ public class AddProjectAction extends AnAction {
                 System.out.println("parentDir: " + parentDir);
 
                 if (parentDir != null) {
-                    // 2. Create the directory using IntelliJ's API
-                    // This triggers VFS events correctly and prevents the "watcher" clash
-                    VirtualFile newDir = parentDir.createChildDirectory(this, newProject.getFileName());
-
+                    parentDir.createChildDirectory(this, newProject.getFileName());
                     projectPanel.getProjectSelector().addAndSelectProject(newProject);
 
-                    // 3. Update your Tree Model immediately inside the same WriteAction
                     DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newProject);
                     DefaultTreeModel model = (DefaultTreeModel) projectPanel.getTestCaseTree().getModel();
                     model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
                     tree.scrollPathToVisible(new TreePath(newNode.getPath()));
 
-                    // 4. Ensure UI visibility
                     tree.scrollPathToVisible(new TreePath(newNode.getPath()));
                 }
             } catch (IOException ex) {

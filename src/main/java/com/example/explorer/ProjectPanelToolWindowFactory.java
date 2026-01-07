@@ -24,7 +24,7 @@ public class ProjectPanelToolWindowFactory implements ToolWindowFactory {
         toolWindow.setTitleActions(List.of(contextMenu(projectPanel).getChildren(null)));
 
         toolWindow.setAutoHide(false);
-        toolWindow.setTitle("TestGit");
+        //toolWindow.setTitle("TestGit");
         toolWindow.setIcon(AllIcons.Debugger.Db_array);
     }
 

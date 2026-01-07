@@ -181,7 +181,7 @@ public class ProjectPanel {
     static class IntelliJRenderer extends SimpleColoredComponent implements TreeCellRenderer {
         @Override
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-            System.out.println("Panel.getTreeCellRendererComponent()");
+            //System.out.println("Panel.getTreeCellRendererComponent()");
             this.clear(); // مسح الحالة السابقة (ضروري جداً)
 
             Object userObject = null;

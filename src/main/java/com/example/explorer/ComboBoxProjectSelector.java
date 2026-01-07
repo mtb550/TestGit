@@ -68,7 +68,7 @@ public class ComboBoxProjectSelector {
             comboBox.setSelectedIndex(0);
 
         } else {
-            comboBox.addItem(new Directory().setName("No projects found"));
+            //comboBox.addItem(new Directory().setName("No projects found"));
             comboBox.setEnabled(false);
             comboBox.setVisible(true);
         }
