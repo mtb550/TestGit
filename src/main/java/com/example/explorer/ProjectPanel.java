@@ -114,8 +114,8 @@ public class ProjectPanel {
     private void setupTestCaseTree() {
         System.out.println("Panel.setupTestCaseTree()");
 
-        ExplorerTree.buildTree();
-        testCaseTree.setModel(ExplorerTree.getTreeModel());
+        DirectoryMapper.buildTree();
+        testCaseTree.setModel(DirectoryMapper.getTreeModel());
         testCaseTree.setRootVisible(false);
         testCaseTree.setShowsRootHandles(true);
         testCaseTree.setCellRenderer(new IntelliJRenderer());
@@ -170,11 +170,11 @@ public class ProjectPanel {
         //}
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Test Cases");
-        DefaultMutableTreeNode node = ExplorerTree.buildSubTree(project);
+        DefaultMutableTreeNode node = DirectoryMapper.buildSubTree(project);
         root.add(node);
 
-        ExplorerTree.treeModel = new DefaultTreeModel(root);
-        testCaseTree.setModel(ExplorerTree.treeModel);
+        DirectoryMapper.treeModel = new DefaultTreeModel(root);
+        testCaseTree.setModel(DirectoryMapper.treeModel);
         testCaseTree.setRootVisible(false);
     }
 

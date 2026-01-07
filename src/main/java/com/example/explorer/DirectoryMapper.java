@@ -3,6 +3,8 @@ package com.example.explorer;
 import com.example.pojo.Config;
 import com.example.pojo.Directory;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -10,7 +12,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.io.File;
 
-public class ExplorerTree {
+public class DirectoryMapper {
     @Getter
     public static DefaultTreeModel treeModel;
 
@@ -21,14 +23,14 @@ public class ExplorerTree {
 
         if (children != null) {
             for (File child : children) {
-                Directory project = mapProjectToDirectory(child);
+                Directory project = mapProject(child);
                 rootNode.add(buildSubTree(project));
             }
         }
         treeModel = new DefaultTreeModel(rootNode);
     }
 
-    static DefaultMutableTreeNode buildSubTree(Directory folder) {
+    public static DefaultMutableTreeNode buildSubTree(final Directory folder) {
         System.out.println("ExplorerTree.buildSubTree()");
 
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(folder);
@@ -36,43 +38,53 @@ public class ExplorerTree {
 
         if (children != null) {
             for (File childFile : children) {
-                Directory childTree = mapSuiteToDirectory(childFile);
+                Directory childTree = mapSuite(childFile);
                 node.add(buildSubTree(childTree));
             }
         }
         return node;
     }
 
-    public static Directory mapProjectToDirectory(File file) {
-        System.out.println("ExplorerTree.mapProjectToDirectory()");
+    /**
+     * Map file to Project Directory
+     * Expected format: 0_100_ProjectName_1
+     * Type_Id_Name_Active
+     */
+    @Nullable
+    public static Directory mapProject(@NotNull final File file) {
+        System.out.println("DirectoryMapper.mapProject(): " + file.getName());
+        String[] parts = file.getName().split("_", 4);
 
-        String fileName = file.getName();
-        String[] parts = fileName.split("_", 4);
-
-        return new Directory()
-                .setFile(file)
-                .setFilePath(file.getAbsoluteFile().toPath())
-                .setFileName(fileName)
-                .setType(Integer.parseInt(parts[0]))
-                .setId(Integer.parseInt(parts[1]))
-                .setName(parts[2])
-                .setActive(Integer.parseInt(parts[3]));
+            return new Directory()
+                    .setFile(file)
+                    .setFilePath(file.toPath())
+                    .setFileName(file.getName())
+                    .setType(Integer.parseInt(parts[0]))
+                    .setId(Integer.parseInt(parts[1]))
+                    .setName(parts[2])
+                    .setActive(Integer.parseInt(parts[3]));
     }
 
-    private static Directory mapSuiteToDirectory(File file) {
-        System.out.println("ExplorerTree.mapSuiteToDirectory()");
+    /**
+     * Map file to Suite/Feature Directory
+     * Expected format: 1_200_SuiteName or 2_300_FeatureName
+     * Type_Id_Name
+     */
+    @Nullable
+    public static Directory mapSuite(@NotNull final File file) {
+        System.out.println("DirectoryMapper.mapSuite(): " + file.getName());
 
-        String fullName = file.getName();
-        String[] parts = fullName.split("_", 3);
+            String[] parts = file.getName().split("_", 3);
 
-        return new Directory()
-                .setFile(file)
-                .setFilePath(file.getAbsoluteFile().toPath())
-                .setFileName(file.getName())
-                .setType(Integer.parseInt(parts[0]))
-                .setId(Integer.parseInt(parts[1]))
-                .setName(parts[2]);
+            return new Directory()
+                    .setFile(file)
+                    .setFilePath(file.toPath())
+                    .setFileName(file.getName())
+                    .setType(Integer.parseInt(parts[0]))
+                    .setId(Integer.parseInt(parts[1]))
+                    .setName(parts[2]);
     }
+
 
     private static class ReloadAllOnInsertListener implements TreeModelListener {
         @Override
@@ -83,13 +95,6 @@ public class ExplorerTree {
         @Override
         public void treeNodesInserted(TreeModelEvent e) {
             System.out.println("ExplorerTree.treeNodesInserted()");
-            // NEVER call treeModel.reload() here; it causes the flicker.
-
-            // Extract the actual file system path from the parent node
-            //DefaultMutableTreeNode lastComponent = (DefaultMutableTreeNode) e.getTreePath().getLastPathComponent();
-            //Directory dirNode = (Directory) lastComponent.getUserObject();
-            // Use your Tools class to refresh the VFS for the parent folder
-            //Tools.refreshFileSystem(dirNode.getFile());
         }
 
         @Override

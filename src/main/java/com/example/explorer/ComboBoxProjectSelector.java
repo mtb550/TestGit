@@ -11,7 +11,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import static com.example.explorer.ExplorerTree.mapProjectToDirectory;
+import static com.example.explorer.DirectoryMapper.mapProject;
 
 public class ComboBoxProjectSelector {
     public static ComboBox<Directory> comboBox;
@@ -130,7 +130,7 @@ public class ComboBoxProjectSelector {
         File[] dirs = Config.getRootFolder().listFiles(File::isDirectory);
         if (dirs != null) {
             for (File dir : dirs) { ///  make for parallel
-                Directory p = mapProjectToDirectory(dir); // الدالة التي تستخدمها لتحويل المجلد لكائن
+                Directory p = mapProject(dir); // الدالة التي تستخدمها لتحويل المجلد لكائن
                 if (p != null && p.getActive() == 1) {
                     model.addElement(p);
                 }
