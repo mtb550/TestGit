@@ -15,19 +15,21 @@ import java.io.IOException;
 import java.util.List;
 
 public class ListItemReorderHandler extends TransferHandler {
-    private static final DataFlavor TESTCASE_LIST_FLAVOR =
-            new DataFlavor(List.class, "List of TestCase");
+    private static final DataFlavor TESTCASE_LIST_FLAVOR = new DataFlavor(List.class, "List of TestCase");
 
     private final DefaultListModel<TestCase> model;
     private int[] draggedIndices;
     private List<TestCase> draggedItems;
 
     public ListItemReorderHandler(DefaultListModel<TestCase> model) {
+        System.out.println("ListItemReorderHandler.ListItemReorderHandler()");
         this.model = model;
     }
 
     @Override
     protected Transferable createTransferable(JComponent c) {
+        System.out.println("ListItemReorderHandler.createTransferable()");
+
         @SuppressWarnings("unchecked")
         JBList<TestCase> list = (JBList<TestCase>) c;
         draggedIndices = list.getSelectedIndices();
@@ -54,11 +56,13 @@ public class ListItemReorderHandler extends TransferHandler {
         return new Transferable() {
             @Override
             public DataFlavor[] getTransferDataFlavors() {
+                System.out.println("ListItemReorderHandler.getTransferDataFlavors()");
                 return new DataFlavor[]{TESTCASE_LIST_FLAVOR};
             }
 
             @Override
             public boolean isDataFlavorSupported(DataFlavor flavor) {
+                System.out.println("ListItemReorderHandler.isDataFlavorSupported()");
                 return TESTCASE_LIST_FLAVOR.equals(flavor);
             }
 
@@ -75,17 +79,20 @@ public class ListItemReorderHandler extends TransferHandler {
 
     @Override
     public int getSourceActions(JComponent c) {
+        //System.out.println("ListItemReorderHandler.getSourceActions()");
         return MOVE;
     }
 
     @Override
     public boolean canImport(TransferSupport support) {
+        System.out.println("ListItemReorderHandler.canImport()");
         return support.isDrop()
                 && support.isDataFlavorSupported(TESTCASE_LIST_FLAVOR);
     }
 
     @Override
     public boolean importData(TransferSupport support) {
+        System.out.println("ListItemReorderHandler.importData()");
         if (!canImport(support)) return false;
 
         try {

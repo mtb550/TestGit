@@ -18,7 +18,7 @@ import java.util.List;
 public class ProjectPanelToolWindowFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        ProjectPanel projectPanel = new ProjectPanel();
+        ProjectPanel projectPanel = new ProjectPanel(project);
         Content content = ContentFactory.getInstance().createContent(projectPanel.getPanel(), null, false);
         toolWindow.getContentManager().addContent(content);
         toolWindow.setTitleActions(List.of(contextMenu(projectPanel).getChildren(null)));

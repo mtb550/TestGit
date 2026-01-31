@@ -12,6 +12,8 @@ import java.awt.*;
 
 public class TestCaseCard extends JPanel {
     public TestCaseCard(int index, TestCase tc) {
+        // infinite sout
+        //System.out.println("TestCaseCard.TestCaseCard()");
         setLayout(new BorderLayout(10, 10));
 
         setBackground(index % 2 == 0
@@ -90,6 +92,9 @@ public class TestCaseCard extends JPanel {
     }
 
     private static @NotNull JBLabel getJbLabel(TestCase tc) {
+        // infinite sout
+        //System.out.println("TestCaseCard.getJbLabel()");
+
         JBLabel priorityBadge = new JBLabel(tc.getPriority().toUpperCase());
         priorityBadge.setFont(new Font("Segoe UI", Font.BOLD, 11));
         priorityBadge.setOpaque(true);

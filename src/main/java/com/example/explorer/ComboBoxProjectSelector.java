@@ -33,7 +33,8 @@ public class ComboBoxProjectSelector {
     }
 
     public void loadProjects() {
-        System.out.println("ComboBoxProjectSelector.loadModel()");
+        System.out.println("ComboBoxProjectSelector.loadProjects()");
+        comboBox.removeAllItems();
         File[] dirs = Config.getRootFolder().listFiles(File::isDirectory);
 
         Directory[] projects = (dirs == null) ? new Directory[0] : Arrays.stream(dirs)

@@ -10,26 +10,31 @@ public class EditorModel extends AbstractTableModel {
     private final List<TestCase> testCases;
 
     public EditorModel(List<TestCase> testCases) {
+        System.out.println("EditorModel.EditorModel()");
         this.testCases = testCases;
     }
 
     @Override
     public int getRowCount() {
+        System.out.println("EditorModel.getRowCount()");
         return testCases.size();
     }
 
     @Override
     public int getColumnCount() {
+        System.out.println("EditorModel.getColumnCount()");
         return columnNames.length;
     }
 
     @Override
     public String getColumnName(int column) {
+        System.out.println("EditorModel.getColumnName()");
         return columnNames[column];
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
+        System.out.println("EditorModel.getValueAt()");
         TestCase tc = testCases.get(rowIndex);
         return switch (columnIndex) {
             case 0 -> rowIndex + 1;
@@ -43,6 +48,7 @@ public class EditorModel extends AbstractTableModel {
     }
 
     public TestCase getTestCaseAt(int rowIndex) {
+        System.out.println("EditorModel.getTestCaseAt()");
         return testCases.get(rowIndex);
     }
 }

@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
@@ -29,7 +30,12 @@ public class TableEditor extends UserDataHolderBase implements FileEditor {
     private final VirtualFile file;
 
 
-    public TableEditor(@NotNull List<TestCase> testCases, @NotNull VirtualFile file) {
+    public TableEditor(@NotNull List<TestCase> testCases, @NotNull String featurePath, @NotNull VirtualFile file) {
+        System.out.println("TableEditor.TableEditor(). file: " + file.getPath());
+        System.out.println("TableEditor.TableEditor(). file: " + file.getCanonicalPath());
+        System.out.println("TableEditor.TableEditor(). file: " + file);
+
+        testCases.forEach(testCase -> System.out.println(testCase.getTitle()));
         panel = new JBPanel<>(new BorderLayout());
         this.file = file;
 
@@ -74,6 +80,8 @@ public class TableEditor extends UserDataHolderBase implements FileEditor {
         // 4) Global mouse listener for context​-menu & double​-click
         list.addMouseListener(new MouseAdapter() {
             private void maybeShowPopup(MouseEvent e) {
+                //System.out.println("TableEditor.maybeShowPopup()");
+
                 if (!e.isPopupTrigger()) return;
                 int idx = list.locationToIndex(e.getPoint());
                 if (idx < 0) return;
@@ -81,22 +89,27 @@ public class TableEditor extends UserDataHolderBase implements FileEditor {
                     list.setSelectedIndex(idx);
                 }
                 TestCase tc = model.getElementAt(idx);
-                JPopupMenu menu = TableContextMenu.create(list, model, tc);
+                JPopupMenu menu = TableContextMenu.create(featurePath, file, list, model, tc);
                 menu.show(list, e.getX(), e.getY());
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
+                //System.out.println("TableEditor.mousePressed()");
+
                 maybeShowPopup(e);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                //System.out.println("TableEditor.mouseReleased()");
                 maybeShowPopup(e);
             }
 
             @Override
             public void mouseClicked(MouseEvent e) {
+                //System.out.println("TableEditor.mouseClicked()");
+
                 if (e.getClickCount() == 2
                         && SwingUtilities.isLeftMouseButton(e)) {
                     int idx = list.locationToIndex(e.getPoint());
@@ -120,7 +133,8 @@ public class TableEditor extends UserDataHolderBase implements FileEditor {
         inputMap.put(ctrlM, "addTestCase");
         actionMap.put("addTestCase", new AbstractAction() {
             @Override
-            public void actionPerformed(java.awt.event.ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("TableEditor.actionPerformed()");
                 // === OLD CODE - Simple dialog ===
                 // String title = JOptionPane.showInputDialog(list, "Enter title for new test case:", "New Test Case", JOptionPane.PLAIN_MESSAGE);
                 // if (title != null && !title.trim().isEmpty()) {
@@ -159,47 +173,61 @@ public class TableEditor extends UserDataHolderBase implements FileEditor {
 
     @Override
     public @NotNull JComponent getComponent() {
+        //System.out.println("TableEditor.getComponent()");
+
         return panel;
     }
 
     @Override
     public @Nullable JComponent getPreferredFocusedComponent() {
+        //System.out.println("TableEditor.getPreferredFocusedComponent()");
         return panel;
     }
 
     @Override
     public @NotNull String getName() {
+        System.out.println("TableEditor.getName()");
         return "Test Case Cards";
     }
 
     @Override
     public void dispose() {
+        System.out.println("TableEditor.dispose()");
+
     }
 
     @Override
     public void addPropertyChangeListener(@NotNull PropertyChangeListener listener) {
+        System.out.println("TableEditor.addPropertyChangeListener()");
     }
 
     @Override
     public void removePropertyChangeListener(@NotNull PropertyChangeListener listener) {
+        System.out.println("TableEditor.removePropertyChangeListener()");
     }
 
     @Override
     public void setState(@NotNull FileEditorState state) {
+        System.out.println("TableEditor.setState()");
     }
 
     @Override
     public boolean isModified() {
+        System.out.println("TableEditor.isModified()");
         return false;
     }
 
     @Override
     public boolean isValid() {
+        // infinite sout
+        //System.out.println("TableEditor.isValid()");
         return true;
     }
 
     @Override
     public @NotNull VirtualFile getFile() {
+        // infinite sout
+        //System.out.println("TableEditor.getFile()");
         return file;
     }
 }

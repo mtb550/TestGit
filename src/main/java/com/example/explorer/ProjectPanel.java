@@ -10,7 +10,6 @@ import com.intellij.icons.AllIcons;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.ui.SimpleColoredComponent;
 import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.components.JBScrollPane;
@@ -33,12 +32,11 @@ public class ProjectPanel {
     private final JPanel panel;
     private final SimpleTree testCaseTree;
     private final SimpleTree testPlanTree;
-
-    @Getter
     private final ComboBoxProjectSelector projectSelector;
     private final ComboBoxVersionSelector versionSelector;
+    private final JBTabsImpl tabs;
 
-    public ProjectPanel() {
+    public ProjectPanel(final Project project) {
         System.out.println("Panel.Panel()");
         panel = new JPanel(new BorderLayout());
 
@@ -67,8 +65,7 @@ public class ProjectPanel {
         panel.add(topBar, BorderLayout.NORTH);
 
         // === Tabs ===
-        Project project = ProjectManager.getInstance().getOpenProjects()[0];
-        JBTabsImpl tabs = new JBTabsImpl(project);
+        tabs = new JBTabsImpl(project);
 
         NotificationGroupManager.getInstance()
                 .getNotificationGroup("Test Case Notifications") // define this name once
@@ -111,7 +108,7 @@ public class ProjectPanel {
         panel.add(tabs.getComponent(), BorderLayout.CENTER);
     }
 
-    private void setupTestCaseTree() {
+    public void setupTestCaseTree() {
         System.out.println("Panel.setupTestCaseTree()");
 
         DirectoryMapper.buildTree();
@@ -151,15 +148,24 @@ public class ProjectPanel {
         testPlanTree.addMouseListener(new TestCaseTreeMouseAdapter(this));
     }
 
-    public void loadAllProjects() {
-        System.out.println("Panel.loadAllProjects()");
+    public void refreshTestCaseTree() {
+        System.out.println("Panel.refreshTestCaseTree()");
 
-        //ExplorerTree.buildTree();
-        //testCaseTree.setModel(ExplorerTree.getTreeModel());
-        //testCaseTree.setRootVisible(false);
+        DirectoryMapper.buildTree();
+        testCaseTree.setModel(DirectoryMapper.getTreeModel());
     }
 
-    public void filterByProject(Directory project) {
+    public void refreshTestPlanTree() {
+        System.out.println("Panel.refreshTestPlanTree()");
+
+    }
+
+    public void refreshProjects() {
+        System.out.println("Panel.refreshProjects()");
+
+    }
+
+    public void filterByProject(final Directory project) {
         System.out.println("Panel.filterByProject()");
 
         //refreshPath(project.getFilePath());

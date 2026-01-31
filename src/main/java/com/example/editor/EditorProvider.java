@@ -12,21 +12,25 @@ import org.jetbrains.annotations.NotNull;
 public class EditorProvider implements FileEditorProvider, DumbAware {
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
+        System.out.println("EditorProvider.accept()");
         return file instanceof TestCaseVirtualFile;
     }
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        return new TableEditor(((TestCaseVirtualFile) file).getTestCases(), file);
+        System.out.println("EditorProvider.createEditor()");
+        return new TableEditor(((TestCaseVirtualFile) file).getTestCases(), ((TestCaseVirtualFile) file).getFeaturePath(), file);
     }
 
     @Override
     public @NotNull String getEditorTypeId() {
+        //System.out.println("EditorProvider.getEditorTypeId()");
         return "test-case-editor";
     }
 
     @Override
     public @NotNull FileEditorPolicy getPolicy() {
+        System.out.println("EditorProvider.getPolicy()");
         return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
     }
 }

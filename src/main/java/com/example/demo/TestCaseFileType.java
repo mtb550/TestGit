@@ -12,29 +12,38 @@ public class TestCaseFileType extends LanguageFileType {
 
     private TestCaseFileType() {
         super(TestCaseLanguage.INSTANCE);
+        System.out.println("TestCaseFileType.TestCaseFileType()");
     }
 
     @NotNull
     @Override
     public String getName() {
+        //System.out.println("TestCaseFileType.getName()");
+
         return "TestCaseFile";
     }
 
     @NotNull
     @Override
     public String getDescription() {
+        System.out.println("TestCaseFileType.getDescription()");
+
         return "Teat Cases table file";
     }
 
     @NotNull
     @Override
     public String getDefaultExtension() {
+        System.out.println("TestCaseFileType.getDefaultExtension()");
+
         return "tc table";
     }
 
     @Nullable
     @Override
     public Icon getIcon() {
+        //System.out.println("TestCaseFileType.getIcon()");
+
         return AllIcons.Nodes.DataTables;
     }
 }

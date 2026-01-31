@@ -16,7 +16,9 @@ import java.util.List;
 
 public class TestCaseEditor {
 
-    public static void open(Path featurePath) {
+    public static void open(final Path featurePath) {
+        System.out.println("TestCaseEditor.open() , path: " + featurePath);
+
         FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -24,6 +26,7 @@ public class TestCaseEditor {
         List<TestCase> testCases = new ArrayList<>();
         File folder = featurePath.toFile();
 
+        // Load files if the directory exists
         if (folder.exists() && folder.isDirectory()) {
             File[] jsonFiles = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
 
@@ -39,26 +42,18 @@ public class TestCaseEditor {
             }
         }
 
+        // Sort if we found any, otherwise it just stays an empty list
         testCases.sort(Comparator.comparingInt(TestCase::getSort));
 
-        if (testCases.isEmpty()) {
-            System.out.println("No test cases found in path: " + featurePath);
-            return;
-        }
-
-        // 1. التحقق مما إذا كان هناك تبويب مفتوح لهذا المسار (Feature Path)
+        // 1. Check if a tab for this path is already open
         for (VirtualFile openFile : editorManager.getOpenFiles()) {
-            // نفترض أننا قمنا بتحديث getModulePath() لتعيد String أو Path
-            if (openFile instanceof TestCaseVirtualFile existing &&
-                    existing.getFeaturePath().equals(featurePath.toString())) {
-
+            if (openFile instanceof TestCaseVirtualFile existing && existing.getFeaturePath().equals(featurePath.toString())) {
+                System.out.println("open feature: " + existing.getFeaturePath());
                 editorManager.openFile(existing, true);
                 return;
             }
         }
 
-// 2. فتح تبويب محرر جديد باستخدام مسار المجلد وقائمة حالات الاختبار
-// قمنا باستبدال moduleId بـ featurePath.toString()
         VirtualFile virtualFile = new TestCaseVirtualFile(featurePath.toString(), testCases);
         editorManager.openFile(virtualFile, true);
     }

@@ -19,6 +19,7 @@ public class TestCaseVirtualFile extends LightVirtualFile {
         super(extractFolderName(featurePath), TestCaseFileType.INSTANCE, "");
         this.featurePath = featurePath;
         this.testCases = testCases;
+        System.out.println("TestCaseVirtualFile.TestCaseVirtualFile()");
     }
 
     /**
@@ -26,6 +27,7 @@ public class TestCaseVirtualFile extends LightVirtualFile {
      * مثال: /home/user/Test/Login -> يعيد Login
      */
     private static String extractFolderName(String path) {
+        System.out.println("TestCaseVirtualFile.extractFolderName()");
         try {
             Path p = Paths.get(path);
             return p.getFileName().toString();
@@ -36,6 +38,8 @@ public class TestCaseVirtualFile extends LightVirtualFile {
 
     @Override
     public boolean equals(Object o) {
+        // infinite sout
+        //System.out.println("TestCaseVirtualFile.equals()");
         if (this == o) return true;
         if (!(o instanceof TestCaseVirtualFile that)) return false;
         // المقارنة الآن تعتمد على المسار لضمان عدم تكرار فتح نفس المجلد
@@ -44,6 +48,8 @@ public class TestCaseVirtualFile extends LightVirtualFile {
 
     @Override
     public int hashCode() {
+        // infinite sout
+        //System.out.println("TestCaseVirtualFile.hashCode()");
         return Objects.hash(featurePath);
     }
 }

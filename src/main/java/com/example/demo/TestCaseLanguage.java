@@ -7,5 +7,6 @@ public class TestCaseLanguage extends Language {
 
     private TestCaseLanguage() {
         super("TestCase");
+        System.out.println("TestCaseLanguage.TestCaseLanguage()");
     }
 }

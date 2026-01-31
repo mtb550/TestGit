@@ -1,5 +1,6 @@
 package com.example.viewer;
 
+import com.example.pojo.Config;
 import com.example.pojo.TestCase;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
@@ -12,7 +13,9 @@ import java.util.function.Consumer;
 public class TestCaseToolWindow {
 
     public static void addTestCase(Consumer<TestCase> onSaveCallback) {
-        Project project = ProjectManager.getInstance().getOpenProjects()[0];
+        System.out.println("TestCaseToolWindow.addTestCase()");
+
+        Project project = Config.getProject();
         ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("Details"); // in plugin.xml <toolWindow id="TestCaseDetails"
 
         if (toolWindow != null) {
@@ -37,6 +40,8 @@ public class TestCaseToolWindow {
     }
 
     public static void show(TestCase testCase) {
+        //System.out.println("TestCaseToolWindow.show()");
+
         Project project = ProjectManager.getInstance().getOpenProjects()[0];
         ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("Details"); // in plugin.xml <toolWindow id="TestCaseDetails"
 
