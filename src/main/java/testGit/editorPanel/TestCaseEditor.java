@@ -7,11 +7,11 @@ import com.intellij.openapi.vfs.VirtualFile;
 import testGit.demo.TestCaseVirtualFile;
 import testGit.pojo.Config;
 import testGit.pojo.TestCase;
+import testGit.util.TestCaseSorter;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class TestCaseEditor {
@@ -43,7 +43,8 @@ public class TestCaseEditor {
         }
 
         // Sort if we found any, otherwise it just stays an empty list
-        testCases.sort(Comparator.comparingInt(TestCase::getSort));
+        //testCases.sort(Comparator.comparingInt(TestCase::getSort));
+        testCases = TestCaseSorter.sortTestCases(testCases);
 
         // 1. Check if a tab for this path is already open
         for (VirtualFile openFile : editorManager.getOpenFiles()) {

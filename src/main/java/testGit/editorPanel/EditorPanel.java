@@ -22,7 +22,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Comparator;
 import java.util.List;
 
 public class EditorPanel extends UserDataHolderBase implements FileEditor {
@@ -41,8 +40,8 @@ public class EditorPanel extends UserDataHolderBase implements FileEditor {
 
         // 1) Build a sorted, mutable list model
         DefaultListModel<TestCase> model = new DefaultListModel<>();
-        testCases.stream()
-                .sorted(Comparator.comparingInt(TestCase::getSort))
+        testCases
+                //.sorted(Comparator.comparingInt(TestCase::getSort))
                 .forEach(model::addElement);
 
         // 2) JList with multi​-select and drag​-to​-reorder

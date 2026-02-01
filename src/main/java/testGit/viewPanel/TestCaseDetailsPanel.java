@@ -1,7 +1,5 @@
 package testGit.viewPanel;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.ui.components.*;
 import com.intellij.util.ui.JBUI;
 import testGit.pojo.DB;
@@ -19,7 +17,6 @@ public class TestCaseDetailsPanel {
     private final JBPanel<?> detailTab;
     private final JBPanel<?> historyTab;
     private final JBPanel<?> bugTab;
-    Project project = ProjectManager.getInstance().getOpenProjects()[0];
     private JBTextField titleField;
     private JBTextField expectedArea;
     private JBTextField stepsArea;
@@ -34,7 +31,8 @@ public class TestCaseDetailsPanel {
     private JBLabel stepsLabel;
     private JBLabel priorityLabel;
     private JBLabel autoRefLabel, busiRefLabel, groupsLabel;
-    private JBLabel uidLabel, sortLabel, moduleLabel, createdByLabel, updatedByLabel, createdAtLabel;
+    private JBLabel uidLabel, /*sortLabel,*/
+            moduleLabel, createdByLabel, updatedByLabel, createdAtLabel;
     private JBLabel updatedAtLabel, validFromLabel, validToLabel;
 
     private JButton saveButton;
@@ -140,7 +138,7 @@ public class TestCaseDetailsPanel {
         }
 
         uidLabel = createValueLabel(String.valueOf(currentTestCase.getUid()));
-        sortLabel = createValueLabel(String.valueOf(currentTestCase.getSort()));
+        //sortLabel = createValueLabel(String.valueOf(currentTestCase.getSort()));
         moduleLabel = createValueLabel(currentTestCase.getModule());
         createdByLabel = createValueLabel(currentTestCase.getCreateBy());
         updatedByLabel = createValueLabel(currentTestCase.getUpdateBy());
@@ -150,7 +148,7 @@ public class TestCaseDetailsPanel {
         validToLabel = createValueLabel(currentTestCase.getValidTo() != null ? currentTestCase.getValidTo().toString() : "-");
 
         addRow("🆔 UID:", uidLabel, detailTab, gbc, row++);
-        addRow("🔢 Sort:", sortLabel, detailTab, gbc, row++);
+        //addRow("🔢 Sort:", sortLabel, detailTab, gbc, row++);
         addRow("📁 Module:", moduleLabel, detailTab, gbc, row++);
         addRow("👤 Created By:", createdByLabel, detailTab, gbc, row++);
         addRow("✍️ Updated By:", updatedByLabel, detailTab, gbc, row++);

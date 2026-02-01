@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -18,6 +19,10 @@ public class TestCase {
     private int uid;
 
     private int sort;
+
+    private UUID next;
+
+    private Boolean isHead;
 
     private String id;
 
