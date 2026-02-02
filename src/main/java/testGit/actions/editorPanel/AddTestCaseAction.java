@@ -11,6 +11,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
 import testGit.pojo.TestCase;
+import testGit.ui.AddNewTestCaseDialog;
 import testGit.util.Notifier;
 
 import javax.swing.*;
@@ -19,85 +20,57 @@ import java.io.IOException;
 import java.util.UUID;
 
 public class AddTestCaseAction extends AnAction {
-    TestCase tc;
-    JList<TestCase> list;
-    String featurePath;
-    VirtualFile file;
-    DefaultListModel<TestCase> model;
+    private final JList<TestCase> list;
+    private final String featurePath;
+    private final DefaultListModel<TestCase> model;
 
-    public AddTestCaseAction(String featurePath, @NotNull VirtualFile file, JList<TestCase> list, DefaultListModel<TestCase> model, TestCase tc) {
+    public AddTestCaseAction(String featurePath, @NotNull VirtualFile file, JList<TestCase> list, DefaultListModel<TestCase> model) {
         super("➕ Add Test Case");
-        this.tc = tc;
         this.list = list;
-        this.file = file;
         this.featurePath = featurePath;
         this.model = model;
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        String title = JOptionPane.showInputDialog(list,
-                "Enter title for new test case:",
-                "New Test Case",
-                JOptionPane.PLAIN_MESSAGE);
+        AddNewTestCaseDialog dialog = new AddNewTestCaseDialog();
 
-        if (title != null && !title.trim().isEmpty()) {
+        if (dialog.showAndGet()) {
+            saveTestCase(dialog.getInput());
+        }
+    }
 
-            // 1. Setup the new TestCase
-            TestCase newCase = new TestCase();
-            newCase.setTitle(title.trim());
-            //newCase.setSteps("Step 1: ...");
-            //newCase.setExpectedResult("Expected result...");
-            newCase.setPriority("LOW");
-            //newCase.setAutomationRef("");
-            //newCase.setSort(model.getSize() + 1);
-            newCase.setNext(null);
-            newCase.setId(UUID.randomUUID().toString());
+    private void saveTestCase(String title) {
+        TestCase newCase = new TestCase();
+        newCase.setTitle(title);
+        newCase.setPriority("LOW");
+        newCase.setNext(null);
+        newCase.setId(UUID.randomUUID().toString());
 
-            /// here create json file
-            ObjectMapper mapper = new ObjectMapper()
-                    .registerModule(new JavaTimeModule())
-                    .enable(SerializationFeature.INDENT_OUTPUT);
-            try {
-                System.out.println(featurePath);
+        ObjectMapper mapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .enable(SerializationFeature.INDENT_OUTPUT);
+        try {
+            if (model.isEmpty()) {
+                newCase.setIsHead(true);
+            } else {
+                newCase.setIsHead(false);
+                TestCase lastItem = model.getElementAt(model.getSize() - 1);
+                lastItem.setNext(UUID.fromString(newCase.getId()));
 
-                // 2. Handle the linking logic
-                if (model.isEmpty()) {
-                    // First item in the folder
-                    newCase.setIsHead(true);
-                } else {
-                    // Chain the previous last item to this new item
-                    newCase.setIsHead(false);
-
-                    TestCase lastItem = model.getElementAt(model.getSize() - 1);
-                    lastItem.setNext(UUID.fromString(newCase.getId()));
-
-                    // We MUST update the previous last item's JSON file on disk
-                    File lastItemFile = new File(featurePath, lastItem.getId() + ".json");
-                    mapper.writeValue(lastItemFile, lastItem);
-                }
-
-                // 3. Save the new TestCase JSON
-                File targetFile = new File(featurePath, newCase.getId() + ".json");
-                mapper.writeValue(targetFile, newCase);
-
-                // 4. Update UI and VFS
-                LocalFileSystem.getInstance().refreshAndFindFileByIoFile(targetFile);
-
-                model.addElement(newCase);
-                list.ensureIndexIsVisible(model.getSize() - 1);
-                list.setSelectedIndex(model.getSize() - 1);
-
-                System.out.println("JSON file created successfully!");
-
-            } catch (IOException ex) {
-                ex.printStackTrace(System.err);
-                Notifier.notify(Config.getProject(), "Test Case Notifications",
-                        "Error", "Failed to save test case: " + ex.getMessage(),
-                        NotificationType.ERROR);
+                File lastItemFile = new File(featurePath, lastItem.getId() + ".json");
+                mapper.writeValue(lastItemFile, lastItem);
             }
 
+            File targetFile = new File(featurePath, newCase.getId() + ".json");
+            mapper.writeValue(targetFile, newCase);
 
+            LocalFileSystem.getInstance().refreshAndFindFileByIoFile(targetFile);
+            model.addElement(newCase);
+            list.ensureIndexIsVisible(model.getSize() - 1);
+
+        } catch (IOException ex) {
+            Notifier.notify(Config.getProject(), "Test Case Notifications", "Error", ex.getMessage(), NotificationType.ERROR);
         }
     }
 }

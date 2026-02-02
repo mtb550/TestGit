@@ -21,7 +21,7 @@ public class ContextMenu extends DefaultActionGroup {
         addSeparator();
 
         add(new DeleteTestCaseAction(tc, model));
-        add(new AddTestCaseAction(featurePath, file, list, model, tc));
+        add(new AddTestCaseAction(featurePath, file, list, model));
 
     }
 
