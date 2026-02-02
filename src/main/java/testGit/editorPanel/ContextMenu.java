@@ -12,6 +12,7 @@ public class ContextMenu extends DefaultActionGroup {
         super("Test Case Actions", false);
 
         add(new CopyTestCaseAction(tc));
+        add(new GenerateTestCaseAction(tc));
         add(new RunTestCaseAction(tc));
         add(new ViewDetailsAction(tc));
 
