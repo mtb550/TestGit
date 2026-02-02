@@ -1,7 +1,6 @@
 package testGit.viewPanel;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
@@ -42,8 +41,7 @@ public class TestCaseToolWindow {
     public static void show(TestCase testCase) {
         //System.out.println("TestCaseToolWindow.show()");
 
-        Project project = ProjectManager.getInstance().getOpenProjects()[0];
-        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("Details"); // in plugin.xml <toolWindow id="TestCaseDetails"
+        ToolWindow toolWindow = ToolWindowManager.getInstance(Config.getProject()).getToolWindow("Details"); // in plugin.xml <toolWindow id="TestCaseDetails"
 
         if (toolWindow != null) {
             if (!toolWindow.isVisible()) {

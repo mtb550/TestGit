@@ -4,6 +4,8 @@ import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.TestCase;
 
@@ -12,104 +14,90 @@ import java.awt.*;
 
 public class TestCaseCard extends JPanel {
     public TestCaseCard(int index, TestCase tc) {
-        // infinite sout
-        //System.out.println("TestCaseCard.TestCaseCard()");
-        setLayout(new BorderLayout(10, 10));
+        // Use JBUI.Borders for proper scaling on High-DPI screens
+        setLayout(new BorderLayout(JBUI.scale(12), JBUI.scale(12)));
 
+        // Theme-aware background alternating
         setBackground(index % 2 == 0
-                ? new JBColor(Gray._245, Gray._60)  // even row
-                : new JBColor(Gray._230, Gray._45)  // odd row
-
+                ? new JBColor(Gray._245, Gray._60)
+                : new JBColor(Gray._230, Gray._45)
         );
-        setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Gray._60),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, 140));
 
-        JBLabel title = new JBLabel("#" + (index + 1) + ". " + tc.getTitle());
-        title.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        title.setForeground(new JBColor(
-                Color.DARK_GRAY,   // for light theme
-                Color.LIGHT_GRAY   // for dark theme
+        // Compound border using IDE standard line colors
+        setBorder(JBUI.Borders.compound(
+                JBUI.Borders.customLine(JBColor.border(), 1, 0, 1, 0), // Top/Bottom border only
+                JBUI.Borders.empty(12)
         ));
 
-        // Align the component to the left
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, JBUI.scale(160)));
+
+        // --- TITLE SECTION ---
+        // Using FontSize.BIGGER to make the title prominent as requested
+        JBLabel title = new JBLabel("#" + (index + 1) + ". " + tc.getTitle());
+        title.setFont(UIUtil.getLabelFont(UIUtil.FontSize.NORMAL).deriveFont(Font.BOLD));
+        title.setForeground(UIUtil.getLabelForeground());
         title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JBLabel expected = new JBLabel("Expected: " + tc.getExpectedResult());
-        expected.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        expected.setForeground(new JBColor(
-                Color.DARK_GRAY,   // for light theme
-                Color.LIGHT_GRAY   // for dark theme
-        ));
-        expected.setAlignmentX(Component.LEFT_ALIGNMENT);
+        // --- DETAILS SECTION ---
+        // Use getContextHelpForeground or getInactiveTextColor for secondary info
+        JBLabel expected = createDetailLabel("Expected: " + tc.getExpectedResult(), false);
+        JBLabel steps = createDetailLabel("Steps: " + tc.getSteps(), false);
+        JBLabel automationRef = createDetailLabel("Automation Ref: " + tc.getAutomationRef(), true);
 
-        JBLabel steps = new JBLabel("Steps: " + tc.getSteps());
-        steps.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        steps.setForeground(new JBColor(
-                Color.DARK_GRAY,   // for light theme
-                Color.LIGHT_GRAY   // for dark theme
-        ));
-        steps.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JBLabel priorityBadge = getPriorityBadge(tc);
 
-        JBLabel automationRef = new JBLabel("Automation Ref: " + tc.getAutomationRef());
-        automationRef.setFont(new Font("Segoe UI", Font.ITALIC, 12));
-        automationRef.setForeground(new JBColor(
-                Color.DARK_GRAY,   // for light theme
-                Color.LIGHT_GRAY   // for dark theme
-        ));
-        automationRef.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JBLabel priorityBadge = getJbLabel(tc);
-
-        // Panel for the title and priority side-by-side
-        JBPanel<?> titleLine = new JBPanel<>();
-        titleLine.setLayout(new BoxLayout(titleLine, BoxLayout.X_AXIS));
+        // Layout: Title and Badge
+        JBPanel<?> titleLine = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(10), 0));
         titleLine.setOpaque(false);
-        // Ensure the line itself is left-aligned
         titleLine.setAlignmentX(Component.LEFT_ALIGNMENT);
-
         titleLine.add(title);
-        titleLine.add(Box.createHorizontalStrut(8));
         titleLine.add(priorityBadge);
 
-        // Main content panel stacked vertically
+        // Layout: Vertical Content Stack
         JBPanel<?> content = new JBPanel<>();
         content.setOpaque(false);
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-        // Ensure content panel is left-aligned
         content.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Add components in vertical order
         content.add(titleLine);
-        content.add(Box.createVerticalStrut(6));
+        content.add(Box.createVerticalStrut(JBUI.scale(8)));
         content.add(expected);
         content.add(steps);
+        content.add(Box.createVerticalStrut(JBUI.scale(4)));
         content.add(automationRef);
 
-        // Add the content panel to the main panel
         add(content, BorderLayout.CENTER);
     }
 
-    private static @NotNull JBLabel getJbLabel(TestCase tc) {
-        // infinite sout
-        //System.out.println("TestCaseCard.getJbLabel()");
-
+    private static @NotNull JBLabel getPriorityBadge(TestCase tc) {
         JBLabel priorityBadge = new JBLabel(tc.getPriority().toUpperCase());
-        priorityBadge.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        // Small bold font for the badge
+        priorityBadge.setFont(UIUtil.getLabelFont(UIUtil.FontSize.SMALL).deriveFont(Font.BOLD));
         priorityBadge.setOpaque(true);
-        priorityBadge.setForeground(new JBColor(
-                Color.DARK_GRAY,   // for light theme
-                Color.LIGHT_GRAY   // for dark theme
-        ));
+
+        // Ensure contrast against the colored background
+        priorityBadge.setForeground(JBColor.WHITE);
+
         priorityBadge.setBackground(switch (tc.getPriority().toLowerCase()) {
-            case "high" -> JBColor.ORANGE;
-            case "medium" -> JBColor.magenta;
-            default -> JBColor.green;
+            case "high" -> JBColor.RED; // Red is more standard for High
+            case "medium" -> JBColor.BLUE;
+            default -> new JBColor(new Color(40, 167, 69), new Color(40, 167, 69)); // Forest Green
         });
-        priorityBadge.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
+
+        priorityBadge.setBorder(JBUI.Borders.empty(2, 8));
         priorityBadge.setHorizontalAlignment(SwingConstants.CENTER);
-        priorityBadge.setAlignmentX(Component.LEFT_ALIGNMENT);
         return priorityBadge;
+    }
+
+    private JBLabel createDetailLabel(String text, boolean italic) {
+        JBLabel label = new JBLabel(text);
+        // Use standard label font but slightly larger than default
+        label.setFont(UIUtil.getLabelFont(UIUtil.FontSize.NORMAL));
+        label.setForeground(UIUtil.getContextHelpForeground()); // Better for different themes
+        if (italic) {
+            label.setFont(label.getFont().deriveFont(Font.ITALIC));
+        }
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return label;
     }
 }
