@@ -194,7 +194,6 @@ public class AddTestCasePanel {
         newTestCase.setUpdateBy("current_user");
         newTestCase.setCreateAt(LocalDateTime.now());
         newTestCase.setUpdateAt(LocalDateTime.now());
-        newTestCase.setValidFrom(LocalDateTime.now());
 
         // Register undo/redo action
         ActionHistory.register(

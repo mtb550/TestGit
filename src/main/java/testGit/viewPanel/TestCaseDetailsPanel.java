@@ -31,9 +31,9 @@ public class TestCaseDetailsPanel {
     private JBLabel stepsLabel;
     private JBLabel priorityLabel;
     private JBLabel autoRefLabel, busiRefLabel, groupsLabel;
-    private JBLabel uidLabel, /*sortLabel,*/
+    private JBLabel uidLabel,
             moduleLabel, createdByLabel, updatedByLabel, createdAtLabel;
-    private JBLabel updatedAtLabel, validFromLabel, validToLabel;
+    private JBLabel updatedAtLabel;
 
     private JButton saveButton;
 
@@ -138,24 +138,18 @@ public class TestCaseDetailsPanel {
         }
 
         uidLabel = createValueLabel(String.valueOf(currentTestCase.getUid()));
-        //sortLabel = createValueLabel(String.valueOf(currentTestCase.getSort()));
         moduleLabel = createValueLabel(currentTestCase.getModule());
         createdByLabel = createValueLabel(currentTestCase.getCreateBy());
         updatedByLabel = createValueLabel(currentTestCase.getUpdateBy());
         createdAtLabel = createValueLabel(currentTestCase.getCreateAt() != null ? currentTestCase.getCreateAt().toString() : "-");
         updatedAtLabel = createValueLabel(currentTestCase.getUpdateAt() != null ? currentTestCase.getUpdateAt().toString() : "-");
-        validFromLabel = createValueLabel(currentTestCase.getValidFrom() != null ? currentTestCase.getValidFrom().toString() : "-");
-        validToLabel = createValueLabel(currentTestCase.getValidTo() != null ? currentTestCase.getValidTo().toString() : "-");
 
         addRow("🆔 UID:", uidLabel, detailTab, gbc, row++);
-        //addRow("🔢 Sort:", sortLabel, detailTab, gbc, row++);
         addRow("📁 Module:", moduleLabel, detailTab, gbc, row++);
         addRow("👤 Created By:", createdByLabel, detailTab, gbc, row++);
         addRow("✍️ Updated By:", updatedByLabel, detailTab, gbc, row++);
         addRow("🕒 Created At:", createdAtLabel, detailTab, gbc, row++);
         addRow("🕓 Updated At:", updatedAtLabel, detailTab, gbc, row++);
-        addRow("📅 Valid From:", validFromLabel, detailTab, gbc, row++);
-        addRow("📅 Valid To:", validToLabel, detailTab, gbc, row++);
 
         if (editable) {
             saveButton = new JButton("Save");

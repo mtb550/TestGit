@@ -15,14 +15,14 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
 
-public class ListItemReorderHandler extends TransferHandler {
+public class DragDropHandler extends TransferHandler {
     private static final DataFlavor TESTCASE_LIST_FLAVOR = new DataFlavor(List.class, "List of TestCase");
 
     private final CollectionListModel<TestCase> model;
     private int[] draggedIndices;
     private List<TestCase> draggedItems;
 
-    public ListItemReorderHandler(CollectionListModel<TestCase> model) {
+    public DragDropHandler(CollectionListModel<TestCase> model) {
         System.out.println("ListItemReorderHandler.ListItemReorderHandler()");
         this.model = model;
     }

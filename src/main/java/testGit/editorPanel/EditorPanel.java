@@ -44,7 +44,7 @@ public class EditorPanel extends UserDataHolderBase implements FileEditor {
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         list.setDragEnabled(true);
         list.setDropMode(DropMode.INSERT);
-        list.setTransferHandler(new ListItemReorderHandler(model));
+        list.setTransferHandler(new DragDropHandler(model));
         list.addMouseListener(new MouseAdapter(list, model, featurePath));
         ShortcutHandler.register(featurePath, list, model);
 

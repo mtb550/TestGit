@@ -18,8 +18,6 @@ public class TestCase {
 
     private int uid;
 
-    private int sort;
-
     private UUID next;
 
     private Boolean isHead;
@@ -51,11 +49,5 @@ public class TestCase {
     private LocalDateTime updateAt;
 
     private String module;
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime validFrom;
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime validTo;
 
 }
