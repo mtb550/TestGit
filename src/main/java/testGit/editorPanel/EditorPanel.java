@@ -33,11 +33,19 @@ public class EditorPanel extends UserDataHolderBase implements FileEditor {
 
         // 2) Initialize JBList with Multi-Selection support
         JBList<TestCase> list = new JBList<>(model);
+
+        // This is critical: it makes the list background clickable even when empty
+        list.getEmptyText().setText("No test cases.");
+        list.getEmptyText().appendLine("Right-click to add your first test case.");
+        list.getEmptyText().appendLine("or click Ctrl+M");
+
+        // Ensure the list component fills the viewport so it can catch mouse events
+        list.setOpaque(true);
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         list.setDragEnabled(true);
         list.setDropMode(DropMode.INSERT);
         list.setTransferHandler(new ListItemReorderHandler(model));
-        list.addMouseListener(new CardMouseAdapter(list, model, featurePath));
+        list.addMouseListener(new MouseAdapter(list, model, featurePath));
         ShortcutHandler.register(featurePath, list, model);
 
         // 3) Auto-update details window on selection change
