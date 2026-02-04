@@ -3,6 +3,7 @@ package testGit.editorPanel;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import testGit.pojo.TestCase;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -10,20 +11,19 @@ import java.awt.*;
  * Handles the rendering of each TestCase card within the JBList.
  */
 public class CardCellRenderer implements ListCellRenderer<TestCase> {
+    private final TestCaseCard rendererCard = new TestCaseCard();
+
     @Override
     public Component getListCellRendererComponent(final JList<? extends TestCase> list, final TestCase tc, final int index, final boolean isSelected, final boolean cellHasFocus) {
-        // Create the custom card UI
-        TestCaseCard card = new TestCaseCard(index, tc);
-        card.getAccessibleContext().setAccessibleName("Test Case: " + tc.getTitle());
+        rendererCard.updateData(index, tc);
 
-        // Apply theme-aware selection border
+        // Selection Border
         if (isSelected) {
-            // Use blue for selection to match IntelliJ's native feel
-            card.setBorder(JBUI.Borders.customLine(JBColor.blue, 1));
+            rendererCard.setBorder(JBUI.Borders.customLine(JBColor.blue, 1));
         } else {
-            card.setBorder(JBUI.Borders.empty(1));
+            rendererCard.setBorder(JBUI.Borders.empty(1));
         }
 
-        return card;
+        return rendererCard;
     }
 }

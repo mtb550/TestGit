@@ -4,9 +4,9 @@ import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
-import org.jetbrains.annotations.NotNull;
 import testGit.pojo.GroupType;
 import testGit.pojo.TestCase;
 
@@ -15,116 +15,131 @@ import java.awt.*;
 import java.util.List;
 
 public class TestCaseCard extends JPanel {
-    public TestCaseCard(int index, TestCase tc) {
-        // Use JBUI.Borders for proper scaling on High-DPI screens
-        setLayout(new BorderLayout(JBUI.scale(12), JBUI.scale(12)));
+    private final JBLabel titleLabel = new JBLabel();
+    private final JPanel badgePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, JBUI.scale(10), 0));
+    private final JBLabel expectedLabel = createDetailLabel();
+    private final JBLabel stepsLabel = createDetailLabel();
+    private final JBLabel automationRefLabel = createDetailLabel();
 
-        // Theme-aware background alternating
-        setBackground(index % 2 == 0
-                ? new JBColor(Gray._245, Gray._60)
-                : new JBColor(Gray._230, Gray._45)
-        );
-
-        // Compound border using IDE standard line colors
-        setBorder(JBUI.Borders.compound(
-                JBUI.Borders.customLine(JBColor.border(), 1, 0, 1, 0), // Top/Bottom border only
-                JBUI.Borders.empty(12)
-        ));
-
+    public TestCaseCard() {
+        // إعداد الهيكل الأساسي
+        setLayout(new BorderLayout()); // استخدام BorderLayout للطبقة الخارجية
+        setOpaque(true);
         setMaximumSize(new Dimension(Integer.MAX_VALUE, JBUI.scale(160)));
 
-        // --- TITLE SECTION ---
-        // Using FontSize.BIGGER to make the title prominent as requested
-        JBLabel title = new JBLabel("#" + (index + 1) + ". " + tc.getTitle());
-        title.setFont(UIUtil.getLabelFont(UIUtil.FontSize.NORMAL).deriveFont(Font.BOLD));
-        title.setForeground(UIUtil.getLabelForeground());
-        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+        Font titleFont = JBFont.label().deriveFont(Font.PLAIN, UIUtil.getLabelFont().getSize() + 6.0f);
+        titleLabel.setFont(titleFont);
+        titleLabel.setForeground(UIUtil.getLabelForeground());
+        badgePanel.setOpaque(false);
 
-        // --- DETAILS SECTION ---
-        // Use getContextHelpForeground or getInactiveTextColor for secondary info
-        JBLabel expected = createDetailLabel("Expected: " + tc.getExpectedResult(), false);
-        JBLabel steps = createDetailLabel("Steps: " + tc.getSteps(), false);
-        JBLabel automationRef = createDetailLabel("Automation Ref: " + tc.getAutomationRef(), true);
-
-        JBLabel priorityBadge = getPriorityBadge(tc);
-        List<GroupType> groups = tc.getGroups();
-
-        // Layout: Title and Badge
-        JBPanel<?> titleLine = new JBPanel<>();
-        //titleLine.setLayout(new FlowLayout(FlowLayout.LEFT, JBUI.scale(10), 0));
-        titleLine.setLayout(new FlowLayout(FlowLayout.LEFT, JBUI.scale(8), 0)); // استخدام FlowLayout لترتيب العناصر أفقياً
+        JBPanel<?> titleLine = new JBPanel<>(new BorderLayout());
         titleLine.setOpaque(false);
+
         titleLine.setAlignmentX(Component.LEFT_ALIGNMENT);
-        titleLine.add(title);
-        titleLine.add(priorityBadge);
 
-        // 3. إضافة ملصق لكل مجموعة
-        if (groups != null && !groups.isEmpty()) {
-            for (GroupType groupName : groups) {
-                JBLabel groupBadge = createGroupBadge(groupName.name());
-                titleLine.add(groupBadge);
-            }
-        }
+        titleLine.add(titleLabel, BorderLayout.WEST);
+        titleLine.add(badgePanel, BorderLayout.CENTER);
 
-        // Layout: Vertical Content Stack
         JBPanel<?> content = new JBPanel<>();
         content.setOpaque(false);
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+
         content.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         content.add(titleLine);
         content.add(Box.createVerticalStrut(JBUI.scale(8)));
-        content.add(expected);
-        content.add(steps);
+        content.add(expectedLabel);
+        content.add(stepsLabel);
         content.add(Box.createVerticalStrut(JBUI.scale(4)));
-        content.add(automationRef);
+        content.add(automationRefLabel);
 
-        add(content, BorderLayout.CENTER);
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setOpaque(false);
+        wrapper.setBorder(JBUI.Borders.empty(12));
+        wrapper.add(content, BorderLayout.CENTER);
+
+        add(wrapper, BorderLayout.CENTER);
     }
 
-    private static @NotNull JBLabel getPriorityBadge(TestCase tc) {
-        JBLabel priorityBadge = new JBLabel(tc.getPriority().toUpperCase());
-        // Small bold font for the badge
-        priorityBadge.setFont(UIUtil.getLabelFont(UIUtil.FontSize.SMALL).deriveFont(Font.BOLD));
-        priorityBadge.setOpaque(true);
+    public void updateData(int index, TestCase tc) {
+        titleLabel.setText((index + 1) + ". " + tc.getTitle());
+        expectedLabel.setText("Expected Result: " + tc.getExpectedResult());
+        stepsLabel.setText("Steps: " + tc.getSteps());
+        automationRefLabel.setText("Automation Reference: " + tc.getAutomationRef());
 
-        // Ensure contrast against the colored background
-        priorityBadge.setForeground(JBColor.WHITE);
+        setBackground(index % 2 == 0 ? new JBColor(Gray._245, Gray._60) : new JBColor(Gray._230, Gray._45));
+        setBorder(JBUI.Borders.customLine(JBColor.border(), 1, 0, 1, 0));
 
-        priorityBadge.setBackground(switch (tc.getPriority().toLowerCase()) {
-            case "high" -> JBColor.RED; // Red is more standard for High
-            case "medium" -> JBColor.BLUE;
-            default -> new JBColor(new Color(40, 167, 69), new Color(40, 167, 69)); // Forest Green
-        });
-
-        priorityBadge.setBorder(JBUI.Borders.empty(2, 8));
-        priorityBadge.setHorizontalAlignment(SwingConstants.CENTER);
-        return priorityBadge;
-    }
-
-    // 4. دالة مساعدة لإنشاء ملصق المجموعة (Group Badge)
-    private static @NotNull JBLabel createGroupBadge(String groupName) {
-        JBLabel badge = new JBLabel(groupName.toUpperCase());
-        badge.setFont(UIUtil.getLabelFont(UIUtil.FontSize.SMALL).deriveFont(Font.BOLD));
-        badge.setOpaque(true);
-
-        // استخدام لون مميز للمجموعات (مثلاً أزرق سماوي متوافق مع IntelliJ)
-        badge.setForeground(JBColor.WHITE);
-        badge.setBackground(new JBColor(new Color(0, 120, 215), new Color(30, 80, 160)));
-
-        badge.setBorder(JBUI.Borders.empty(2, 8));
-        return badge;
-    }
-
-    private JBLabel createDetailLabel(String text, boolean italic) {
-        JBLabel label = new JBLabel(text);
-        // Use standard label font but slightly larger than default
-        label.setFont(UIUtil.getLabelFont(UIUtil.FontSize.NORMAL));
-        label.setForeground(UIUtil.getContextHelpForeground()); // Better for different themes
-        if (italic) {
-            label.setFont(label.getFont().deriveFont(Font.ITALIC));
+        badgePanel.removeAll();
+        badgePanel.add(createPriorityBadge(tc));
+        List<GroupType> groups = tc.getGroups();
+        if (groups != null) {
+            for (GroupType groupName : groups) {
+                badgePanel.add(createGroupBadge(groupName));
+            }
         }
+    }
+
+    private JBLabel createPriorityBadge(TestCase tc) {
+        Color bg = switch (tc.getPriority().toLowerCase()) {
+            case "high" -> JBColor.CYAN;
+            case "medium" -> JBColor.magenta;
+            default -> JBColor.lightGray;
+        };
+        //JBLabel badge = new JBLabel(tc.getPriority().toUpperCase());
+        //setupBadgeStyle(badge, bg);
+        //return badge;
+        return new RoundedBadge(tc.getPriority(), bg, 20);
+    }
+
+    private JBLabel createGroupBadge(GroupType groupName) {
+        //JBLabel badge = new JBLabel(groupName.name());
+        //setupBadgeStyle(badge, JBColor.darkGray);
+        return new RoundedBadge(groupName.name(), JBColor.darkGray, 20);
+        //return badge;
+    }
+
+//    private void setupBadgeStyle(JBLabel badge, Color bg) {
+//        badge.setFont(UIUtil.getLabelFont(UIUtil.FontSize.SMALL).deriveFont(Font.BOLD));
+//        badge.setOpaque(true);
+//        badge.setForeground(JBColor.WHITE);
+//        badge.setBackground(bg);
+//        badge.setBorder(JBUI.Borders.empty(2, 8));
+//    }
+
+
+    private JBLabel createDetailLabel() {
+        JBLabel label = new JBLabel();
+        label.setFont(UIUtil.getLabelFont(UIUtil.FontSize.NORMAL));
+        label.setForeground(UIUtil.getContextHelpForeground());
+
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         return label;
+    }
+
+    private static class RoundedBadge extends JBLabel {
+        private final int radius;
+
+        RoundedBadge(String text, Color bg, int radius) {
+            super(text.toUpperCase());
+            this.radius = radius;
+            setOpaque(false);
+            setBackground(bg);
+            setForeground(JBColor.WHITE);
+            setFont(UIUtil.getLabelFont(UIUtil.FontSize.SMALL).deriveFont(Font.BOLD));
+            setBorder(JBUI.Borders.empty(2, 10));
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(getBackground());
+            // رسم الخلفية المنحنية
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
+            g2.dispose();
+            super.paintComponent(g);
+        }
     }
 }

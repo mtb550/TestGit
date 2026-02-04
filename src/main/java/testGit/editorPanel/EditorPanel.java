@@ -8,7 +8,6 @@ import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.pojo.TestCase;
@@ -22,33 +21,27 @@ public class EditorPanel extends UserDataHolderBase implements FileEditor {
     private final JBPanel<?> panel;
     private final VirtualFile file;
 
-    public EditorPanel(final @NotNull List<TestCase> testCases, final @NotNull String featurePath, @NotNull VirtualFile file) {
+    public EditorPanel(@NotNull List<TestCase> testCases, @NotNull String featurePath, @NotNull VirtualFile file) {
         this.file = file;
         this.panel = new JBPanel<>(new BorderLayout());
 
         CollectionListModel<TestCase> model = new CollectionListModel<>(testCases);
         JBList<TestCase> list = new JBList<>(model);
 
-        list.getEmptyText().setText("No test cases.");
-        list.getEmptyText().appendLine("Create your first test case.");
-        list.getEmptyText().appendLine("Ctrl + M");
-
+        list.getEmptyText().setText("No test cases found").appendLine("Press Ctrl+M to add");
         list.setOpaque(true);
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         list.setDragEnabled(true);
         list.setDropMode(DropMode.INSERT);
-        list.setTransferHandler(new DragDropHandler(model));
-        list.addMouseListener(new MouseAdapter(list, model, featurePath));
-        ShortcutHandler.register(featurePath, list, model);
+
         list.setCellRenderer(new CardCellRenderer());
         list.addListSelectionListener(new CardSelectionListener(list));
+        list.addMouseListener(new MouseAdapter(list, model, featurePath));
+        list.setTransferHandler(new DragDropHandler(model));
+        ShortcutHandler.register(featurePath, list, model);
 
-        // Wrap in ScrollPane with no border for a flat New UI look
-        JBScrollPane scrollPane = new JBScrollPane(list);
-        scrollPane.setBorder(JBUI.Borders.empty());
-        panel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(new JBScrollPane(list), BorderLayout.CENTER);
     }
-
 
     @Override
     public @NotNull JComponent getComponent() {
