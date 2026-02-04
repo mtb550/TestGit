@@ -37,7 +37,7 @@ public class EditorPanel extends UserDataHolderBase implements FileEditor {
         list.setCellRenderer(new CardCellRenderer());
         list.addListSelectionListener(new CardSelectionListener(list));
         list.addMouseListener(new MouseAdapter(list, model, featurePath));
-        list.setTransferHandler(new DragDropHandler(model));
+        list.setTransferHandler(new DragDropHandler(featurePath, model));
         ShortcutHandler.register(featurePath, list, model);
 
         panel.add(new JBScrollPane(list), BorderLayout.CENTER);
