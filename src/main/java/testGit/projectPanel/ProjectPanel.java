@@ -17,6 +17,7 @@ import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.pojo.TestPlan;
 import testGit.projectPanel.testCase.TestCaseMouseAdapter;
+import testGit.projectPanel.testPlan.TestPlanMouseAdapter;
 import testGit.util.ShortcutRegistry;
 
 import javax.swing.*;
@@ -134,6 +135,7 @@ public class ProjectPanel {
         DirectoryMapper.buildTestPlansTree();
         testPlanTree.setModel(DirectoryMapper.getTestPlansTreeModel());
         //testPlanTree.setRootVisible(false);
+        testPlanTree.addMouseListener(new TestPlanMouseAdapter(this));
         testPlanTree.setShowsRootHandles(true);
         testPlanTree.setCellRenderer(new IntelliJRenderer());
         testPlanTree.addTreeSelectionListener(e -> {
@@ -142,7 +144,6 @@ public class ProjectPanel {
             // TestPlanEditor.open(plan.getId());
             //}
         });
-        testPlanTree.addMouseListener(new TestCaseMouseAdapter(this));
     }
 
     public void refreshTestCaseTree() {
@@ -227,6 +228,8 @@ public class ProjectPanel {
                         case P -> AllIcons.Nodes.Project;
                         case S -> AllIcons.Nodes.Folder;
                         case F -> AllIcons.Nodes.Class;
+                        case TP -> AllIcons.Nodes.WebFolder;
+                        case TR -> AllIcons.Nodes.AbstractMethod;
                         default -> AllIcons.Nodes.AbstractException;
                     };
                 }

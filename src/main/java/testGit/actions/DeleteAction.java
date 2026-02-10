@@ -19,10 +19,10 @@ public class DeleteAction extends AnAction {
     private final ProjectPanel projectPanel;
     private final SimpleTree tree;
 
-    public DeleteAction(final ProjectPanel projectPanel) {
+    public DeleteAction(final ProjectPanel projectPanel, final SimpleTree tree) {
         super("❌ Delete");
         this.projectPanel = projectPanel;
-        this.tree = projectPanel.getTestCaseTree();
+        this.tree = tree;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class DeleteAction extends AnAction {
 
             // بعد نجاح الحذف، حدث الـ ComboBox بسهولة
             if (projectPanel.getProjectSelector() != null) {
-                projectPanel.getProjectSelector().reloadProjects();
+                projectPanel.getProjectSelector().loadProjectList();
                 //panel.loadAllProjects();
                 projectPanel.filterByProject(ComboBoxProjectSelector.comboBox.getItem());
             }

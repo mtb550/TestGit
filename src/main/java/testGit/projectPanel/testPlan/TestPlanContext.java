@@ -1,52 +1,69 @@
 package testGit.projectPanel.testPlan;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.treeStructure.SimpleTree;
-import testGit.actions.TestPlanInfoPopup;
-import testGit.pojo.TestPlan;
+import org.jetbrains.annotations.NotNull;
+import testGit.actions.AddTestPlanAction;
+import testGit.actions.AddTestRunAction;
+import testGit.actions.DeleteAction;
+import testGit.actions.RenameAction;
+import testGit.pojo.Directory;
+import testGit.pojo.DirectoryType;
+import testGit.projectPanel.ProjectPanel;
 
-import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
-public class TestPlanContext {
+import static com.intellij.openapi.actionSystem.PlatformCoreDataKeys.CONTEXT_COMPONENT;
 
-    public static JPopupMenu create(SimpleTree tree, TestPlan plan, DefaultMutableTreeNode node) {
-        JPopupMenu menu = new JPopupMenu();
+public class TestPlanContext extends DefaultActionGroup {
 
-        // 🧪 New Test Run
-        JMenuItem newRun = new JMenuItem("🧪 New Test Run");
-        newRun.addActionListener(e -> TestPlanPopup.showFolderInfo(plan, tree));
-        menu.add(newRun);
+        public TestPlanContext(ProjectPanel projectPanel) {
+            // نص المجموعة (يظهر إذا وضعت المجموعة داخل قائمة أخرى)
+            super("Test Plan Context Menu", true);
 
-        // ✏ Rename
-        JMenuItem rename = new JMenuItem("✏ Rename");
-        rename.addActionListener(e -> {
-            String newName = JOptionPane.showInputDialog("Rename Test Plan:", plan.getName());
-            if (newName != null && !newName.isBlank()) {
-                plan.setName(newName);
-                ((DefaultTreeModel) tree.getModel()).nodeChanged(node);
-            }
-        });
-        menu.add(rename);
+            DefaultActionGroup addGroup = new DefaultActionGroup("➕ Add", true){
+                @Override
+                public void update(@NotNull AnActionEvent e) {
+                    ///  find a way to replace it with getting tree from constructor.
+                    SimpleTree tree = e.getData(CONTEXT_COMPONENT) instanceof SimpleTree simpleTree ? simpleTree : null;
 
-        // 🗑 Delete
-        JMenuItem delete = new JMenuItem("🗑 Delete");
-        delete.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(tree, "Delete this plan and its test cases?");
-            if (confirm == JOptionPane.YES_OPTION) {
-                ((DefaultTreeModel) tree.getModel()).removeNodeFromParent(node);
-            }
-        });
-        menu.add(delete);
+                    boolean enabled = true;
+                    if (tree != null) {
+                        TreePath path = tree.getSelectionPath();
+                        if (path != null) {
+                            Object userObject = ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
+                            if (userObject instanceof Directory treeItem && treeItem.getType() == DirectoryType.TR) {
+                                enabled = false;
+                            }
+                        }
+                    }
 
-        // ℹ More Info
-        JMenuItem moreInfo = new JMenuItem("ℹ More Info");
-        moreInfo.addActionListener(e -> TestPlanInfoPopup.show(plan));
-        menu.add(moreInfo);
+                    e.getPresentation().setEnabled(enabled);
+                }
 
+                @Override
+                public @NotNull ActionUpdateThread getActionUpdateThread() {
+                    // ضروري لأننا نلمس الشجرة (Swing Component)
+                    return ActionUpdateThread.EDT;
+                }
+            };
+            // 1. إضافة الأكشنز المرتبة
+            addGroup.add(new AddTestPlanAction(projectPanel.getTestPlanTree()));
+            addGroup.add(new AddTestRunAction(projectPanel.getTestPlanTree()));
 
-        // add above
-        return menu;
+            add(addGroup);
+            addSeparator(); // فاصل بين العمليات الأساسية والإدارة
+
+            add(new RenameAction(projectPanel, projectPanel.getTestPlanTree()));
+            add(new DeleteAction(projectPanel, projectPanel.getTestPlanTree()));
+
+            //addSeparator();
+
+            //add(new TestPlanInfoAction(plan));
+        }
+
     }
 
-}

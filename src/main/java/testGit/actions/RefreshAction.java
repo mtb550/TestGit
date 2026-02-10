@@ -19,7 +19,7 @@ public class RefreshAction extends AnAction {
         System.out.println("RefreshAction.actionPerformed()");
 
         // سيقوم بمسح القديم، تحميل الجديد من القرص، واختيار "All Projects"
-        projectPanel.getProjectSelector().reloadProjects();
+        projectPanel.getProjectSelector().loadProjectList();
     }
 
 }

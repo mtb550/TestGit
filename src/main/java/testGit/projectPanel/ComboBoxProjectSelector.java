@@ -25,7 +25,7 @@ public class ComboBoxProjectSelector {
         setupSelectionListener();
 
         // 2. تحميل البيانات
-        loadProjects();
+        loadProjectList();
     }
 
     public static Directory getSelectedProject() {
@@ -58,7 +58,7 @@ public class ComboBoxProjectSelector {
         });
     }
 
-    public void loadProjects() {
+    public void loadProjectList() {
         System.out.println("ComboBoxProjectSelector.loadProjects()");
 
         // تنظيف البيانات دون حذف الـ Listener أو الـ Renderer
@@ -82,11 +82,6 @@ public class ComboBoxProjectSelector {
         // ✅ تأكد من تفعيل الكومبو بوكس دائماً طالما يوجد عنصر واحد على الأقل
         comboBox.setEnabled(model.getSize() > 0);
         comboBox.setSelectedIndex(0);
-    }
-
-    public void reloadProjects() {
-        // التحديث الآن يعني إعادة تحميل البيانات فقط، والـ Listener سيتكفل بالباقي
-        loadProjects();
     }
 
     public JComboBox<Directory> selected() {

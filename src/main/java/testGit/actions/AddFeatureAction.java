@@ -41,6 +41,7 @@ public class AddFeatureAction extends AnAction {
 
         String name = Messages.showInputDialog("Enter feature name:", "Add Feature", null);
         if (name == null || name.isBlank()) return;
+        name = name.replace("_"," ");
 
         Directory newFeature = new Directory()
                 .setType(DirectoryType.F)

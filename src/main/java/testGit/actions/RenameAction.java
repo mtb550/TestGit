@@ -1,5 +1,6 @@
 package testGit.actions;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
@@ -20,10 +21,10 @@ public class RenameAction extends AnAction {
     private final SimpleTree tree;
 
     // استقبال الـ panel عبر الـ Constructor كما فعلنا في DeleteAction
-    public RenameAction(final ProjectPanel projectPanel) {
-        super("✏️ Rename");
+    public RenameAction(final ProjectPanel projectPanel, final SimpleTree tree) {
+        super("Rename", "Description...", AllIcons.Actions.InlayRenameInComments);
         this.projectPanel = projectPanel;
-        this.tree = projectPanel.getTestCaseTree();
+        this.tree = tree;
     }
 
     @Override
@@ -59,7 +60,7 @@ public class RenameAction extends AnAction {
 
                 // 5. تحديث الـ ComboBox إذا كان العنصر "مشروع" (Type 0)
                 if (treeItem.getType() == DirectoryType.P && projectPanel.getProjectSelector() != null) {
-                    projectPanel.getProjectSelector().reloadProjects();
+                    projectPanel.getProjectSelector().loadProjectList();
                 }
 
                 System.out.println("Success! Renamed to: " + newFileName);

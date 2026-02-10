@@ -18,19 +18,19 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class AddSuiteAction extends AnAction {
+public class AddTestRunAction extends AnAction {
     private final SimpleTree tree;
 
-    public AddSuiteAction(final SimpleTree tree) {
-        super("➕ New Suite","Create a new execution run for this plan", AllIcons.RunConfigurations.TestState.Run);
-        this.tree = tree;
+    public AddTestRunAction(final SimpleTree tree) {
+        super("New Test Run","Create a new execution run for this plan", AllIcons.CodeStyle.AddNewSectionRule);
+        this.tree=tree;
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         TreePath path = tree.getSelectionPath();
         if (path == null) {
-            System.out.println("path is null!!");
+            System.out.println("path is null !!");
             return;
         }
 
@@ -38,28 +38,30 @@ public class AddSuiteAction extends AnAction {
         Object userObject = parentNode.getUserObject();
 
         // التحقق من أننا لا نضيف Suite داخل Feature
-        if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.F) return;
+        if (!(userObject instanceof Directory treeItem) ||
+                treeItem.getType() == DirectoryType.TR ||
+                treeItem.getType() == DirectoryType.P)
+            return;
 
-        String name = Messages.showInputDialog("Enter suite name:", "Add Suite", null);
+        String name = Messages.showInputDialog("Enter test run name:", "Add Test Run", AllIcons.RunConfigurations.TestState.Red2);
         if (name == null || name.isBlank()) return;
         name = name.replace("_"," ");
 
+
         // 1. تحديد مكان الإنشاء الفعلي على القرص
-        Path parentPath = (treeItem.getType() == DirectoryType.P)
-                ? treeItem.getFilePath().resolve("testCases")
-                : treeItem.getFilePath();
+        Path parentPath = treeItem.getFilePath();
 
         // 2. بناء بيانات الـ Suite الجديد
-        Directory newSuite = new Directory()
-                .setType(DirectoryType.S)
+        Directory newTestRun = new Directory()
+                .setType(DirectoryType.TR)
                 .setName(name)
                 .setActive(1);
 
         // استخدام الدالة المحسنة لاسم الملف
-        String folderName = String.format("%s_%s_%d", newSuite.getType().name().toLowerCase(), newSuite.getName(), newSuite.getActive());
+        String folderName = String.format("%s_%s_%d", newTestRun.getType().name().toLowerCase(), newTestRun.getName(), newTestRun.getActive());
         Path fullPath = parentPath.resolve(folderName);
 
-        newSuite.setFileName(folderName)
+        newTestRun.setFileName(folderName)
                 .setFilePath(fullPath)
                 .setFile(fullPath.toFile()); // ✅ مسار كامل Absolute Path
 
@@ -75,7 +77,7 @@ public class AddSuiteAction extends AnAction {
 
                     // تحديث الـ Tree Model
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newSuite);
+                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newTestRun);
 
                     // إضافة النود وتنبيه المستمعين
                     model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());

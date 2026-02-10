@@ -12,7 +12,7 @@ import java.awt.event.KeyEvent;
 public class ShortcutRegistry {
 
     public static void Explorer(SimpleTree tree, ProjectPanel projectPanel) {
-        registerShortcut(tree, new DeleteAction(projectPanel), KeyEvent.VK_DELETE);
+        registerShortcut(tree, new DeleteAction(projectPanel, null), KeyEvent.VK_DELETE);
         // Add more shortcuts below as needed
         // registerShortcut(tree, new RunFeatureAction(), KeyEvent.VK_F5);
     }

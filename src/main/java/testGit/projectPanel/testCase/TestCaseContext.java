@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.treeStructure.SimpleTree;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import testGit.actions.*;
 import testGit.pojo.Directory;
@@ -15,37 +16,8 @@ import javax.swing.tree.TreePath;
 
 import static com.intellij.openapi.actionSystem.PlatformCoreDataKeys.CONTEXT_COMPONENT;
 
+@NoArgsConstructor
 public class TestCaseContext extends DefaultActionGroup {
-
-    DefaultActionGroup addGroup = new DefaultActionGroup("➕ Add", true) {
-        @Override
-        public void update(@NotNull AnActionEvent e) {
-            ///  find a way to replace it with getting tree from constructor.
-            SimpleTree tree = e.getData(CONTEXT_COMPONENT) instanceof SimpleTree simpleTree ? simpleTree : null;
-
-            boolean enabled = true;
-
-            if (tree != null) {
-                TreePath path = tree.getSelectionPath();
-                if (path != null) {
-                    Object userObject = ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
-                    if (userObject instanceof Directory treeItem && treeItem.getType() == DirectoryType.F) {
-                        enabled = false;
-                    }
-                }
-            }
-
-            e.getPresentation().setEnabled(enabled);
-        }
-
-        @Override
-        public @NotNull ActionUpdateThread getActionUpdateThread() {
-            return ActionUpdateThread.EDT;
-        }
-    };
-
-    public TestCaseContext() {
-    }
 
     public TestCaseContext(ProjectPanel projectPanel) {
         super("Test Case Context Menu", true);
@@ -55,8 +27,8 @@ public class TestCaseContext extends DefaultActionGroup {
         addGroup.add(new AddFeatureAction(projectPanel.getTestCaseTree()));
         add(addGroup);
         addSeparator();
-        add(new DeleteAction(projectPanel));
-        add(new RenameAction(projectPanel));
+        add(new DeleteAction(projectPanel,projectPanel.getTestCaseTree()));
+        add(new RenameAction(projectPanel, projectPanel.getTestCaseTree()));
         addSeparator();
         add(new RunAction(projectPanel.getTestCaseTree()));
 
@@ -87,4 +59,30 @@ public class TestCaseContext extends DefaultActionGroup {
         add(new TestPlansAction());
     }
 
+    DefaultActionGroup addGroup = new DefaultActionGroup("➕ Add", true) {
+        @Override
+        public void update(@NotNull AnActionEvent e) {
+            ///  find a way to replace it with getting tree from constructor.
+            SimpleTree tree = e.getData(CONTEXT_COMPONENT) instanceof SimpleTree simpleTree ? simpleTree : null;
+
+            boolean enabled = true;
+
+            if (tree != null) {
+                TreePath path = tree.getSelectionPath();
+                if (path != null) {
+                    Object userObject = ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
+                    if (userObject instanceof Directory treeItem && treeItem.getType() == DirectoryType.F) {
+                        enabled = false;
+                    }
+                }
+            }
+
+            e.getPresentation().setEnabled(enabled);
+        }
+
+        @Override
+        public @NotNull ActionUpdateThread getActionUpdateThread() {
+            return ActionUpdateThread.EDT;
+        }
+    };
 }

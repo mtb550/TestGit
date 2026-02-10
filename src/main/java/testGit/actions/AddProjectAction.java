@@ -33,6 +33,7 @@ public class AddProjectAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         String name = Messages.showInputDialog("Enter project name:", "Add New Project", null);
         if (name == null || name.isBlank()) return;
+        name = name.replace("_"," ");
 
         // 1. إعداد بيانات المشروع الجديد
         Directory newProject = new Directory()
