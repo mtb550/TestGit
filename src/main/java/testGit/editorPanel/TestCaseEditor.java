@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
-import testGit.demo.TestCaseVirtualFile;
 import testGit.pojo.Config;
 import testGit.pojo.TestCase;
 import testGit.util.TestCaseSorter;

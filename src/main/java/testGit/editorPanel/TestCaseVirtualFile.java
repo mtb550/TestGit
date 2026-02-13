@@ -1,7 +1,8 @@
-package testGit.demo;
+package testGit.editorPanel;
 
 import com.intellij.testFramework.LightVirtualFile;
 import lombok.Getter;
+import testGit.demo.TestCaseFileType;
 import testGit.pojo.TestCase;
 
 import java.nio.file.Path;

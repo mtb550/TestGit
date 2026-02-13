@@ -2,7 +2,8 @@ package testGit.projectPanel;
 
 import com.intellij.openapi.ui.ComboBox;
 import testGit.pojo.Config;
-import testGit.util.Directory;
+import testGit.pojo.Directory;
+import testGit.util.DirectoryMapper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,8 +29,8 @@ public class ProjectSelector {
         loadProjectList();
     }
 
-    public static testGit.pojo.Directory getSelectedProject() {
-        return (testGit.pojo.Directory) comboBox.getSelectedItem();
+    public static Directory getSelectedProject() {
+        return (Directory) comboBox.getSelectedItem();
     }
 
     private void setupRenderer() {
@@ -48,7 +49,6 @@ public class ProjectSelector {
     }
 
     private void setupSelectionListener() {
-        // إضافة الـ Listener مرة واحدة فقط في الـ Constructor
         comboBox.addActionListener(e -> {
             testGit.pojo.Directory selected = (testGit.pojo.Directory) comboBox.getSelectedItem();
             if (selected != null) {
@@ -61,25 +61,22 @@ public class ProjectSelector {
     public void loadProjectList() {
         System.out.println("ComboBoxProjectSelector.loadProjects()");
 
-        // تنظيف البيانات دون حذف الـ Listener أو الـ Renderer
         model.removeAllElements();
 
         File root = Config.getRootFolderFile();
         File[] dirs = root.listFiles(File::isDirectory);
 
-        // إضافة خيار "All Projects" دائماً في البداية
         testGit.pojo.Directory allProjects = new testGit.pojo.Directory().setName("All Projects");
         model.addElement(allProjects);
 
         if (dirs != null) {
             Arrays.stream(dirs)
                     .filter(dir -> !dir.getName().equals(".git") && dir.getName().contains("_"))
-                    .map(Directory::map)
+                    .map(DirectoryMapper::map)
                     .filter(p -> p != null && p.getActive() == 1)
                     .forEach(model::addElement);
         }
 
-        // ✅ تأكد من تفعيل الكومبو بوكس دائماً طالما يوجد عنصر واحد على الأقل
         comboBox.setEnabled(model.getSize() > 0);
         comboBox.setSelectedIndex(0);
     }
@@ -91,15 +88,11 @@ public class ProjectSelector {
     public void addAndSelectProject(testGit.pojo.Directory project) {
         System.out.println("ComboBoxProjectSelector.addAndSelectProject()");
 
-        // 1. التأكد من تفعيل الكومبو بوكس
         if (!comboBox.isEnabled()) {
             comboBox.setEnabled(true);
         }
 
-        // 2. إضافة المشروع للموديل
         model.addElement(project);
-
-        // 3. اختياره في الواجهة (سيقوم الـ Listener تلقائياً باستدعاء filterByProject)
         comboBox.setSelectedItem(project);
     }
 }

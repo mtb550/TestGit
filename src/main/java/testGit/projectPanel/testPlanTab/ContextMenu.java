@@ -17,7 +17,7 @@ public class ContextMenu extends DefaultActionGroup {
         super("Test Plan Context", true);
         SimpleTree tree = projectPanel.getTestPlanTree();
 
-        add(new AddPlanGroup(tree));
+        add(new AddPlanGroup(tree, projectPanel));
         addSeparator();
         add(new RenameAction(projectPanel, tree));
         add(new Delete(projectPanel, tree));
@@ -28,11 +28,11 @@ public class ContextMenu extends DefaultActionGroup {
      * كلاس داخلي لفصل منطق "Add" والتحكم في حالته (Disabled vs Enabled)
      */
     private static class AddPlanGroup extends DefaultActionGroup {
-        public AddPlanGroup(SimpleTree tree) {
+        public AddPlanGroup(SimpleTree tree, ProjectPanel projectPanel) {
             super("Add", "Add test plan items", AllIcons.General.Add);
             setPopup(true);
             add(new AddTestPlan(tree));
-            add(new AddTestRun(tree));
+            add(new AddTestRun(tree, projectPanel));
         }
 
 

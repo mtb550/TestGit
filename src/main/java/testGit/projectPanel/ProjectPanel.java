@@ -14,10 +14,11 @@ import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Getter;
 import testGit.actions.OpenFeatureAction;
 import testGit.pojo.Config;
+import testGit.pojo.Directory;
 import testGit.pojo.TestPlan;
 import testGit.projectPanel.testCaseTab.MouseAdapter;
 import testGit.projectPanel.testPlanTab.TestPlanMouseAdapter;
-import testGit.util.Directory;
+import testGit.util.DirectoryMapper;
 import testGit.util.ShortcutRegistry;
 
 import javax.swing.*;
@@ -59,7 +60,7 @@ public class ProjectPanel {
 
         topBar.add(projectSelector.selected(), BorderLayout.NORTH);
 
-        testGit.pojo.Directory selectedProject = ProjectSelector.getSelectedProject();
+        Directory selectedProject = ProjectSelector.getSelectedProject();
 
         // ✅ Assign to field so we can refresh it on project change
         versionSelector = new VersionSelector(selectedProject);
@@ -115,8 +116,8 @@ public class ProjectPanel {
     public void setupTestCaseTree() {
         System.out.println("Panel.setupTestCaseTree()");
 
-        Directory.buildTestCasesTree();
-        testCaseTree.setModel(Directory.getTestCasesTreeModel());
+        DirectoryMapper.buildTestCasesTree();
+        testCaseTree.setModel(DirectoryMapper.getTestCasesTreeModel());
         //testCaseTree.setRootVisible(false);
         testCaseTree.setShowsRootHandles(true);
         testCaseTree.setCellRenderer(new IntelliJRenderer());
@@ -132,8 +133,8 @@ public class ProjectPanel {
     private void setupTestPlanTree() {
         System.out.println("Panel.setupTestPlanTree()");
 
-        Directory.buildTestPlansTree();
-        testPlanTree.setModel(Directory.getTestPlansTreeModel());
+        DirectoryMapper.buildTestPlansTree();
+        testPlanTree.setModel(DirectoryMapper.getTestPlansTreeModel());
         //testPlanTree.setRootVisible(false);
         testPlanTree.addMouseListener(new TestPlanMouseAdapter(this));
         testPlanTree.setShowsRootHandles(true);
@@ -149,10 +150,10 @@ public class ProjectPanel {
     public void refreshTestCaseTree() {
         System.out.println("Panel.refreshTestCaseTree()");
 
-        Directory.buildTestCasesTree();
-        Directory.buildTestPlansTree();
-        testCaseTree.setModel(Directory.getTestCasesTreeModel());
-        testPlanTree.setModel(Directory.getTestPlansTreeModel());
+        DirectoryMapper.buildTestCasesTree();
+        DirectoryMapper.buildTestPlansTree();
+        testCaseTree.setModel(DirectoryMapper.getTestCasesTreeModel());
+        testPlanTree.setModel(DirectoryMapper.getTestPlansTreeModel());
     }
 
     public void refreshTestPlanTree() {
@@ -170,12 +171,12 @@ public class ProjectPanel {
 
         if (project.getName().equals("All Projects")) {
             // 1. إعادة بناء البيانات الشاملة
-            Directory.buildTestCasesTree();
-            Directory.buildTestPlansTree();
+            DirectoryMapper.buildTestCasesTree();
+            DirectoryMapper.buildTestPlansTree();
 
             // 2. تحديث الموديل أولاً
-            testCaseTree.setModel(Directory.getTestCasesTreeModel());
-            testPlanTree.setModel(Directory.getTestPlansTreeModel());
+            testCaseTree.setModel(DirectoryMapper.getTestCasesTreeModel());
+            testPlanTree.setModel(DirectoryMapper.getTestPlansTreeModel());
 
             // 3. إخفاء الجذر (كلمة TEST CASES)
             testCaseTree.setRootVisible(false);
@@ -183,15 +184,15 @@ public class ProjectPanel {
 
         } else {
             // 1. بناء العقد للمشروع المختار
-            DefaultMutableTreeNode casesRoot = Directory.buildNodeRecursive(project, "testCases");
-            DefaultMutableTreeNode plansRoot = Directory.buildNodeRecursive(project, "testPlans");
+            DefaultMutableTreeNode casesRoot = DirectoryMapper.buildNodeRecursive(project, "testCases");
+            DefaultMutableTreeNode plansRoot = DirectoryMapper.buildNodeRecursive(project, "testPlans");
 
             // 2. إنشاء الموديلات الجديدة وتحديثها
-            Directory.setTestCasesTreeModel(new DefaultTreeModel(casesRoot));
-            Directory.setTestPlansTreeModel(new DefaultTreeModel(plansRoot));
+            DirectoryMapper.setTestCasesTreeModel(new DefaultTreeModel(casesRoot));
+            DirectoryMapper.setTestPlansTreeModel(new DefaultTreeModel(plansRoot));
 
-            testCaseTree.setModel(Directory.getTestCasesTreeModel());
-            testPlanTree.setModel(Directory.getTestPlansTreeModel());
+            testCaseTree.setModel(DirectoryMapper.getTestCasesTreeModel());
+            testPlanTree.setModel(DirectoryMapper.getTestPlansTreeModel());
 
             // 3. إظهار الجذر (ليظهر اسم المشروع في القمة)
             testCaseTree.setRootVisible(true);

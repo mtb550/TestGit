@@ -18,7 +18,6 @@ public class DeleteTestCaseDialog {
         if (selected.size() == 1) {
             message = "Are you sure you want to delete\n'" + selected.get(0).getTitle() + "'?";
         } else {
-            // Limit the display to first 5 items so the dialog doesn't overflow
             String displayedTitles = selected.stream()
                     .map(tc -> "• " + tc.getTitle())
                     .collect(Collectors.joining("\n"));

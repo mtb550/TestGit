@@ -7,7 +7,6 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
-import testGit.demo.TestCaseVirtualFile;
 
 public class Provider implements FileEditorProvider, DumbAware {
     @Override

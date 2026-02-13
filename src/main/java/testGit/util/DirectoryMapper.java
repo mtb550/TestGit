@@ -13,7 +13,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class Directory {
+public class DirectoryMapper {
     @Getter
     @Setter
     private static DefaultTreeModel testCasesTreeModel;
@@ -45,7 +45,7 @@ public class Directory {
         if (projects != null) {
             Arrays.stream(projects)
                     .filter(file -> !file.getName().startsWith(".")) // تجاهل .git والمجلدات المخفية
-                    .map(Directory::map)
+                    .map(DirectoryMapper::map)
                     .filter(Objects::nonNull)
                     .forEach(dir -> rootNode.add(buildNodeRecursive(dir, subFolderName)));
         }
