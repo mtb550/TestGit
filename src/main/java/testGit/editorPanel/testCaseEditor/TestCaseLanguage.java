@@ -1,4 +1,4 @@
-package testGit.demo;
+package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.lang.Language;
 

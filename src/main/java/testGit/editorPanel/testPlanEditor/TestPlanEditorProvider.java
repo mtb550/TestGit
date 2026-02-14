@@ -1,35 +1,32 @@
-package testGit.editorPanel;
+package testGit.editorPanel.testPlanEditor;
 
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
-import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
-public class Provider implements FileEditorProvider, DumbAware {
+public class TestPlanEditorProvider implements FileEditorProvider {
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
-        System.out.println("EditorProvider.accept()");
-        return file instanceof TestCaseVirtualFile;
+        // This MUST be true for the UI to load
+        return file instanceof TestPlanVirtualFile;
     }
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        System.out.println("EditorProvider.createEditor()");
-        return new EditorPanel(((TestCaseVirtualFile) file).getTestCases(), ((TestCaseVirtualFile) file).getFeaturePath(), file);
+        return new TestPlanFileEditor((TestPlanVirtualFile) file);
     }
 
     @Override
     public @NotNull String getEditorTypeId() {
-        //System.out.println("EditorProvider.getEditorTypeId()");
-        return "test-case-editor";
+        return "test-plan-checklist-editor";
     }
 
     @Override
     public @NotNull FileEditorPolicy getPolicy() {
-        System.out.println("EditorProvider.getPolicy()");
+        // Hides the standard text editor so only your checklist shows
         return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
     }
 }

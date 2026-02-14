@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.ui.treeStructure.SimpleTree;
-import testGit.editorPanel.TestCaseEditor;
+import testGit.editorPanel.testCaseEditor.TestCaseEditor;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
 import testGit.projectPanel.ProjectPanel;

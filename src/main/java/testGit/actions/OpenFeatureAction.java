@@ -1,7 +1,7 @@
 package testGit.actions;
 
 import com.intellij.ui.treeStructure.SimpleTree;
-import testGit.editorPanel.TestCaseEditor;
+import testGit.editorPanel.testCaseEditor.TestCaseEditor;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
 

@@ -1,4 +1,4 @@
-package testGit.editorPanel;
+package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.FilePath;

@@ -1,4 +1,4 @@
-package testGit.editorPanel;
+package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorState;

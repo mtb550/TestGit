@@ -1,4 +1,4 @@
-package testGit.editorPanel;
+package testGit.editorPanel.testCaseEditor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

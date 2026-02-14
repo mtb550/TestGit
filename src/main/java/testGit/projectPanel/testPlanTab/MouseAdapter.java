@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.ui.treeStructure.SimpleTree;
-import testGit.editorPanel.TestPlanEditor;
+import testGit.editorPanel.testPlanEditor.TestPlanEditor;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
 import testGit.projectPanel.ProjectPanel;
@@ -12,14 +12,13 @@ import testGit.projectPanel.ProjectPanel;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class TestPlanMouseAdapter extends MouseAdapter {
+public class MouseAdapter extends java.awt.event.MouseAdapter {
     private final SimpleTree tree;
     private final ProjectPanel projectPanel;
 
-    public TestPlanMouseAdapter(final ProjectPanel projectPanel) {
+    public MouseAdapter(final ProjectPanel projectPanel) {
         this.projectPanel = projectPanel;
         this.tree = projectPanel.getTestPlanTree();
     }
@@ -34,8 +33,8 @@ public class TestPlanMouseAdapter extends MouseAdapter {
             return;
         }
 
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
-        Object userObject = node.getUserObject();
+        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selPath.getLastPathComponent();
+        Object userObject = parentNode.getUserObject();
 
         if (!(userObject instanceof Directory treeItem)) {
             System.out.println("userObject not instanceof Directory");
@@ -44,20 +43,19 @@ public class TestPlanMouseAdapter extends MouseAdapter {
 
         if (SwingUtilities.isRightMouseButton(e)) {
             System.out.println("right click test plan");
-            TestPlanEditor.open(treeItem.getFilePath(), projectPanel);
 
             int row = tree.getClosestRowForLocation(e.getX(), e.getY());
             tree.setSelectionRow(row);
 
             ContextMenu contextMenu = new ContextMenu(projectPanel);
-
             ActionPopupMenu popupMenu = ActionManager.getInstance()
                     .createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, contextMenu);
 
             popupMenu.getComponent().show(e.getComponent(), e.getX(), e.getY());
+
         } else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e) && treeItem.getType() == DirectoryType.TR) {
-            System.out.println("double click test plan");
-            TestPlanEditor.open(treeItem.getFilePath(), projectPanel);
+            System.out.println("double left click test plan");
+            TestPlanEditor.open(treeItem.getFilePath(), projectPanel, parentNode);
         }
 
     }

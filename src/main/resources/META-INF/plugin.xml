@@ -35,9 +35,9 @@
                 secondary="false"/>
 
         <!-- 📝 File editor providers -->
-        <fileEditorProvider implementation="testGit.editorPanel.Provider"/>
+        <fileEditorProvider implementation="testGit.editorPanel.testCaseEditor.Provider"/>
         <fileEditorProvider implementation="testGit.projectPanel.testPlanTab.TestRunFileEditorProvider"/>
-
+        <fileEditorProvider implementation="testGit.editorPanel.testPlanEditor.TestPlanEditorProvider"/>
         <!-- 🔔 Notification group -->
         <notificationGroup id="Test Case Notifications"
                            displayType="BALLOON"

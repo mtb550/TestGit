@@ -1,4 +1,4 @@
-package testGit.editorPanel;
+package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.CollectionListModel;

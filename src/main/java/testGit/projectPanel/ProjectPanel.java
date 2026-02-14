@@ -16,8 +16,7 @@ import testGit.actions.OpenFeatureAction;
 import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.pojo.TestPlan;
-import testGit.projectPanel.testCaseTab.MouseAdapter;
-import testGit.projectPanel.testPlanTab.TestPlanMouseAdapter;
+import testGit.projectPanel.testPlanTab.MouseAdapter;
 import testGit.util.DirectoryMapper;
 import testGit.util.ShortcutRegistry;
 
@@ -50,11 +49,9 @@ public class ProjectPanel {
         setupTestCaseTree();
         setupTestPlanTree();
 
-        // === Create Scroll Panes ===
         JBScrollPane testCaseScrollPane = new JBScrollPane(testCaseTree);
         JBScrollPane testPlanScrollPane = new JBScrollPane(testPlanTree);
 
-        // === Project Selector Bar ===
         JPanel topBar = new JPanel(new BorderLayout());
 
 
@@ -62,13 +59,11 @@ public class ProjectPanel {
 
         Directory selectedProject = ProjectSelector.getSelectedProject();
 
-        // ✅ Assign to field so we can refresh it on project change
         versionSelector = new VersionSelector(selectedProject);
         topBar.add(versionSelector.getComponent(), BorderLayout.SOUTH);
 
         panel.add(topBar, BorderLayout.NORTH);
 
-        // === Tabs ===
         tabs = new JBTabsImpl(project);
 
         NotificationGroupManager.getInstance()
@@ -121,7 +116,7 @@ public class ProjectPanel {
         //testCaseTree.setRootVisible(false);
         testCaseTree.setShowsRootHandles(true);
         testCaseTree.setCellRenderer(new IntelliJRenderer());
-        testCaseTree.addMouseListener(new MouseAdapter(this));
+        testCaseTree.addMouseListener(new testGit.projectPanel.testCaseTab.MouseAdapter(this));
         Shortcuts.register(testCaseTree, Config.getProject());
         OpenFeatureAction.register(testCaseTree);
         testCaseTree.setDragEnabled(true);
@@ -136,7 +131,7 @@ public class ProjectPanel {
         DirectoryMapper.buildTestPlansTree();
         testPlanTree.setModel(DirectoryMapper.getTestPlansTreeModel());
         //testPlanTree.setRootVisible(false);
-        testPlanTree.addMouseListener(new TestPlanMouseAdapter(this));
+        testPlanTree.addMouseListener(new MouseAdapter(this));
         testPlanTree.setShowsRootHandles(true);
         testPlanTree.setCellRenderer(new IntelliJRenderer());
         testPlanTree.addTreeSelectionListener(e -> {
@@ -147,64 +142,37 @@ public class ProjectPanel {
         });
     }
 
-    public void refreshTestCaseTree() {
-        System.out.println("Panel.refreshTestCaseTree()");
-
-        DirectoryMapper.buildTestCasesTree();
-        DirectoryMapper.buildTestPlansTree();
-        testCaseTree.setModel(DirectoryMapper.getTestCasesTreeModel());
-        testPlanTree.setModel(DirectoryMapper.getTestPlansTreeModel());
-    }
-
-    public void refreshTestPlanTree() {
-        System.out.println("Panel.refreshTestPlanTree()");
-
-    }
-
-    public void refreshProjects() {
-        System.out.println("Panel.refreshProjects()");
-
-    }
-
-    public void filterByProject(final testGit.pojo.Directory project) {
+    public void filterByProject(final Directory project) {
         System.out.println("Panel.filterByProject(): " + project.getName());
 
         if (project.getName().equals("All Projects")) {
-            // 1. إعادة بناء البيانات الشاملة
             DirectoryMapper.buildTestCasesTree();
             DirectoryMapper.buildTestPlansTree();
 
-            // 2. تحديث الموديل أولاً
             testCaseTree.setModel(DirectoryMapper.getTestCasesTreeModel());
             testPlanTree.setModel(DirectoryMapper.getTestPlansTreeModel());
 
-            // 3. إخفاء الجذر (كلمة TEST CASES)
             testCaseTree.setRootVisible(false);
             testPlanTree.setRootVisible(false);
 
         } else {
-            // 1. بناء العقد للمشروع المختار
             DefaultMutableTreeNode casesRoot = DirectoryMapper.buildNodeRecursive(project, "testCases");
             DefaultMutableTreeNode plansRoot = DirectoryMapper.buildNodeRecursive(project, "testPlans");
 
-            // 2. إنشاء الموديلات الجديدة وتحديثها
             DirectoryMapper.setTestCasesTreeModel(new DefaultTreeModel(casesRoot));
             DirectoryMapper.setTestPlansTreeModel(new DefaultTreeModel(plansRoot));
 
             testCaseTree.setModel(DirectoryMapper.getTestCasesTreeModel());
             testPlanTree.setModel(DirectoryMapper.getTestPlansTreeModel());
 
-            // 3. إظهار الجذر (ليظهر اسم المشروع في القمة)
             testCaseTree.setRootVisible(true);
             testPlanTree.setRootVisible(true);
         }
 
-        // 4. تحديث الواجهة وتوسيع العقد
         testCaseTree.revalidate();
         testPlanTree.revalidate();
         testCaseTree.repaint();
 
-        // تأكد من تفعيل هذه السطور لضمان فتح المجلدات فوراً
         //expandAllNodes(testCaseTree);
         //expandAllNodes(testPlanTree);
     }
@@ -213,17 +181,15 @@ public class ProjectPanel {
         @Override
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
             //System.out.println("Panel.getTreeCellRendererComponent()");
-            this.clear(); // مسح الحالة السابقة (ضروري جداً)
+            this.clear();
 
             Object userObject = null;
             if (value instanceof DefaultMutableTreeNode node) {
                 userObject = node.getUserObject();
             }
 
-            // 1. حالة الـ Directory (المشاريع والمجلدات)
-            if (userObject instanceof testGit.pojo.Directory dir) {
-                // تعيين الأيقونة بناءً على النوع
-                Icon icon = AllIcons.Nodes.Folder; // افتراضي
+            if (userObject instanceof Directory dir) {
+                Icon icon = AllIcons.Nodes.Folder;
                 if (dir.getType() != null) {
                     icon = switch (dir.getType()) {
                         case P -> AllIcons.Nodes.Project;
@@ -234,26 +200,19 @@ public class ProjectPanel {
                         default -> AllIcons.Nodes.AbstractException;
                     };
                 }
-                setIcon(icon); // ✅ تعيين الأيقونة
+                setIcon(icon);
 
-                // تعيين النص والستايل
                 SimpleTextAttributes style = SimpleTextAttributes.REGULAR_ATTRIBUTES;
                 if (dir.getFilePath() != null && Shortcuts.isCutNode(dir.getFilePath())) {
                     style = SimpleTextAttributes.GRAYED_ATTRIBUTES;
                 }
                 append(dir.getName(), style); // ✅ إضافة النص
-            }
-
-            // 2. حالة الـ TestPlan
-            else if (userObject instanceof TestPlan plan) {
+            } else if (userObject instanceof TestPlan plan) {
                 //Icon planIcon = (plan.getType() == 1) ? AllIcons.Nodes.Artifact : AllIcons.Nodes.Folder;
                 Icon planIcon = AllIcons.Nodes.Artifact;
                 setIcon(planIcon);
                 append(plan.getName(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
-            }
-
-            // 3. حالة النصوص العادية (مثل Root)
-            else {
+            } else {
                 setIcon(AllIcons.Nodes.Folder); // أيقونة اختيارية للـ Root
                 append(value.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
             }

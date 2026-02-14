@@ -1,0 +1,65 @@
+package testGit.editorPanel.testPlanEditor;
+
+import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.FileEditorState;
+import com.intellij.openapi.util.UserDataHolderBase;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import javax.swing.*;
+import java.beans.PropertyChangeListener;
+
+public class TestPlanFileEditor extends UserDataHolderBase implements FileEditor {
+    private final JComponent component;
+
+    public TestPlanFileEditor(TestPlanVirtualFile file) {
+        TestPlanUI ui = new TestPlanUI();
+        // Pass the model directly from the file and the path where it should save
+        this.component = ui.createEditorPanel(file.getTestCasesTreeModel(), file.getPlanPath());
+    }
+
+    @Override
+    public @NotNull JComponent getComponent() {
+        return component;
+    }
+
+    @Override
+    public @Nullable JComponent getPreferredFocusedComponent() {
+        return null;
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return "Test Plan Editor";
+    }
+
+    @Override
+    public void setState(@NotNull FileEditorState state) {
+
+    }
+
+    // ... rest of boilerplate remains same
+    @Override
+    public void dispose() {
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
+    public void addPropertyChangeListener(@NotNull PropertyChangeListener listener) {
+
+    }
+
+    @Override
+    public void removePropertyChangeListener(@NotNull PropertyChangeListener listener) {
+
+    }
+
+    @Override
+    public boolean isModified() {
+        return false;
+    }
+}

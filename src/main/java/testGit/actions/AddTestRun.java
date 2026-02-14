@@ -6,7 +6,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
-import testGit.editorPanel.TestPlanEditor;
+import testGit.editorPanel.testPlanEditor.TestPlanEditor;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
 import testGit.projectPanel.ProjectPanel;
@@ -41,56 +41,7 @@ public class AddTestRun extends AnAction {
                 treeItem.getType() == DirectoryType.P)
             return;
 
-        TestPlanEditor.open(treeItem.getFilePath(), projectPanel);
-
-
-//        String name = Messages.showInputDialog("Enter test run name:", "Add Test Run", AllIcons.RunConfigurations.TestState.Red2);
-//        if (name == null || name.isBlank()) return;
-//        name = name.replace("_", " ");
-//
-//
-//        // 1. تحديد مكان الإنشاء الفعلي على القرص
-//        Path parentPath = treeItem.getFilePath();
-//
-//        // 2. بناء بيانات الـ Suite الجديد
-//        Directory newTestRun = new Directory()
-//                .setType(DirectoryType.TR)
-//                .setName(name)
-//                .setActive(1);
-//
-//        // استخدام الدالة المحسنة لاسم الملف
-//        String folderName = String.format("%s_%s_%d", newTestRun.getType().name().toLowerCase(), newTestRun.getName(), newTestRun.getActive());
-//        Path fullPath = parentPath.resolve(folderName);
-//
-//        newTestRun.setFileName(folderName)
-//                .setFilePath(fullPath)
-//                .setFile(fullPath.toFile()); // ✅ مسار كامل Absolute Path
-//
-//        // 3. التنفيذ داخل WriteAction (مطلوب لتعديلات الملفات في IntelliJ)
-//        WriteAction.run(() -> {
-//            try {
-//                // تحديث نظام الملفات للعثور على المجلد الأب
-//                VirtualFile parentVf = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(parentPath);
-//
-//                if (parentVf != null && parentVf.isDirectory()) {
-//                    // إنشاء المجلد فعلياً
-//                    parentVf.createChildDirectory(this, folderName);
-//
-//                    // تحديث الـ Tree Model
-//                    DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-//                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newTestRun);
-//
-//                    // إضافة النود وتنبيه المستمعين
-//                    model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
-//
-//                    // توسيع الشجرة واختيار العنصر الجديد
-//                    tree.makeVisible(new TreePath(newNode.getPath()));
-//                    tree.setSelectionPath(new TreePath(newNode.getPath()));
-//                }
-//            } catch (IOException ex) {
-//                Messages.showErrorDialog("Could not create directory: " + ex.getMessage(), "Error");
-//            }
-//        });
+        TestPlanEditor.open(treeItem.getFilePath(), projectPanel, parentNode);
     }
 
     @Override

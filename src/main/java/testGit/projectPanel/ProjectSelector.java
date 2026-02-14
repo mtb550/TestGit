@@ -11,8 +11,8 @@ import java.io.File;
 import java.util.Arrays;
 
 public class ProjectSelector {
-    public static ComboBox<testGit.pojo.Directory> comboBox;
-    private final DefaultComboBoxModel<testGit.pojo.Directory> model;
+    public static ComboBox<Directory> comboBox;
+    private final DefaultComboBoxModel<Directory> model;
     public ProjectPanel projectPanel;
 
     public ProjectSelector(final ProjectPanel projectPanel) {
@@ -38,7 +38,7 @@ public class ProjectSelector {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof testGit.pojo.Directory dir) {
+                if (value instanceof Directory dir) {
                     setText(dir.getName());
                 } else if (model.getSize() == 0) {
                     setText("No projects found");
@@ -50,7 +50,7 @@ public class ProjectSelector {
 
     private void setupSelectionListener() {
         comboBox.addActionListener(e -> {
-            testGit.pojo.Directory selected = (testGit.pojo.Directory) comboBox.getSelectedItem();
+            Directory selected = (Directory) comboBox.getSelectedItem();
             if (selected != null) {
                 System.out.println("Selection changed to: " + selected.getName());
                 projectPanel.filterByProject(selected);
@@ -66,7 +66,7 @@ public class ProjectSelector {
         File root = Config.getRootFolderFile();
         File[] dirs = root.listFiles(File::isDirectory);
 
-        testGit.pojo.Directory allProjects = new testGit.pojo.Directory().setName("All Projects");
+        Directory allProjects = new Directory().setName("All Projects");
         model.addElement(allProjects);
 
         if (dirs != null) {
@@ -81,11 +81,11 @@ public class ProjectSelector {
         comboBox.setSelectedIndex(0);
     }
 
-    public JComboBox<testGit.pojo.Directory> selected() {
+    public JComboBox<Directory> selected() {
         return comboBox;
     }
 
-    public void addAndSelectProject(testGit.pojo.Directory project) {
+    public void addAndSelectProject(Directory project) {
         System.out.println("ComboBoxProjectSelector.addAndSelectProject()");
 
         if (!comboBox.isEnabled()) {

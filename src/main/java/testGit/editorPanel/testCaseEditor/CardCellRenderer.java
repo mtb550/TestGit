@@ -1,4 +1,4 @@
-package testGit.editorPanel;
+package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;

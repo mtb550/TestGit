@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Config;
+import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -44,7 +45,7 @@ public class DirectoryMapper {
 
         if (projects != null) {
             Arrays.stream(projects)
-                    .filter(file -> !file.getName().startsWith(".")) // تجاهل .git والمجلدات المخفية
+                    .filter(file -> !file.getName().startsWith("."))
                     .map(DirectoryMapper::map)
                     .filter(Objects::nonNull)
                     .forEach(dir -> rootNode.add(buildNodeRecursive(dir, subFolderName)));
@@ -55,10 +56,9 @@ public class DirectoryMapper {
     /**
      * دالة التكرار الذاتي (Recursion) الموحدة لكل أنواع الأشجار
      */
-    public static DefaultMutableTreeNode buildNodeRecursive(@NotNull testGit.pojo.Directory dir, @Nullable String subFolder) {
+    public static DefaultMutableTreeNode buildNodeRecursive(@NotNull Directory dir, @Nullable String subFolder) {
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(dir);
 
-        // إذا كان هناك مجلد وسيط (مثل testCases/testPlans) نبحث بداخله، وإلا نبحث في مجلد dir المباشر
         File folderToScan = (subFolder != null && dir.getFilePath() != null)
                 ? dir.getFilePath().resolve(subFolder).toFile()
                 : dir.getFile();
@@ -67,9 +67,8 @@ public class DirectoryMapper {
 
         if (children != null) {
             for (File childFile : children) {
-                testGit.pojo.Directory childDir = map(childFile);
+                Directory childDir = map(childFile);
                 if (childDir != null) {
-                    // نمرر null في المستوى التالي لأن الهيكل داخلياً متداخل مباشرة
                     node.add(buildNodeRecursive(childDir, null));
                 }
             }
@@ -81,11 +80,11 @@ public class DirectoryMapper {
      * تحويل File إلى كائن Directory مع معالجة الأخطاء
      */
     @Nullable
-    public static testGit.pojo.Directory map(@NotNull final File file) {
+    public static Directory map(@NotNull final File file) {
         try {
             String[] parts = file.getName().split("_", 3);
 
-            return new testGit.pojo.Directory()
+            return new Directory()
                     .setFile(file)
                     .setFilePath(file.toPath())
                     .setFileName(file.getName())
