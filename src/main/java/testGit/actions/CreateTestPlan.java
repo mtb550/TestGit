@@ -19,11 +19,11 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class AddModule extends AnAction {
+public class CreateTestPlan extends AnAction {
     private final SimpleTree tree;
 
-    public AddModule(final SimpleTree tree) {
-        super("New Module", "Create a new module for this project", AllIcons.Nodes.Package);
+    public CreateTestPlan(final SimpleTree tree) {
+        super("New Test Plan", "Create a new execution run for this plan", AllIcons.Actions.ListFiles);
         this.tree = tree;
     }
 
@@ -31,7 +31,7 @@ public class AddModule extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         TreePath path = tree.getSelectionPath();
         if (path == null) {
-            System.out.println("path is null!!");
+            System.out.println("path is null !!");
             return;
         }
 
@@ -39,28 +39,28 @@ public class AddModule extends AnAction {
         Object userObject = parentNode.getUserObject();
 
         // التحقق من أننا لا نضيف Suite داخل Feature
-        if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.F) return;
+        if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TR) return;
 
-        String name = Messages.showInputDialog("Enter suite name:", "Add Suite", null);
+        String name = Messages.showInputDialog("Enter test plan name:", "Add Test Plan", AllIcons.RunConfigurations.TestState.Run);
         if (name == null || name.isBlank()) return;
         name = name.replace("_", " ");
 
         // 1. تحديد مكان الإنشاء الفعلي على القرص
         Path parentPath = (treeItem.getType() == DirectoryType.P)
-                ? treeItem.getFilePath().resolve("testCases")
+                ? treeItem.getFilePath().resolve("testPlans")
                 : treeItem.getFilePath();
 
         // 2. بناء بيانات الـ Suite الجديد
-        Directory newSuite = new Directory()
-                .setType(DirectoryType.S)
+        Directory newTestPlan = new Directory()
+                .setType(DirectoryType.TP)
                 .setName(name)
                 .setActive(1);
 
         // استخدام الدالة المحسنة لاسم الملف
-        String folderName = String.format("%s_%s_%d", newSuite.getType().name().toLowerCase(), newSuite.getName(), newSuite.getActive());
+        String folderName = String.format("%s_%s_%d", newTestPlan.getType().name().toLowerCase(), newTestPlan.getName(), newTestPlan.getActive());
         Path fullPath = parentPath.resolve(folderName);
 
-        newSuite.setFileName(folderName)
+        newTestPlan.setFileName(folderName)
                 .setFilePath(fullPath)
                 .setFile(fullPath.toFile()); // ✅ مسار كامل Absolute Path
 
@@ -76,7 +76,7 @@ public class AddModule extends AnAction {
 
                     // تحديث الـ Tree Model
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newSuite);
+                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newTestPlan);
 
                     // إضافة النود وتنبيه المستمعين
                     model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
@@ -95,17 +95,18 @@ public class AddModule extends AnAction {
     public void update(@NotNull AnActionEvent e) {
         TreePath path = tree.getSelectionPath();
 
-        boolean isFeature = (path != null &&
+        boolean isTestPlan = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
                 node.getUserObject() instanceof Directory item &&
-                item.getType() == DirectoryType.F);
+                (item.getType() == DirectoryType.TP || item.getType() == DirectoryType.TR));
 
         e.getPresentation().setVisible(true);
-        e.getPresentation().setEnabled(!isFeature);
+        e.getPresentation().setEnabled(!isTestPlan);
     }
 
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
         return ActionUpdateThread.EDT;
     }
+
 }

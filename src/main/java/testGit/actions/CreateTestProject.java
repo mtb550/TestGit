@@ -21,11 +21,11 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.io.IOException;
 
-public class AddTestProject extends AnAction {
+public class CreateTestProject extends AnAction {
     public final ProjectPanel projectPanel;
     public SimpleTree tree;
 
-    public AddTestProject(ProjectPanel projectPanel) {
+    public CreateTestProject(ProjectPanel projectPanel) {
         super("New Test Project", "Create a new test project", AllIcons.General.Add);
         this.projectPanel = projectPanel;
         this.tree = projectPanel.getTestCaseTree();

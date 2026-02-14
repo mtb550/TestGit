@@ -7,9 +7,9 @@ import com.intellij.openapi.options.ShowSettingsUtil;
 import org.jetbrains.annotations.NotNull;
 import testGit.settings.AppSettingsConfigurable;
 
-public class SettingsAction extends AnAction {
+public class OpenSettings extends AnAction {
 
-    public SettingsAction() {
+    public OpenSettings() {
         super("Settings", "Configure TestGit settings", AllIcons.General.Settings);
     }
 

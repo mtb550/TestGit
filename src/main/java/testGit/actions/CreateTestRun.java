@@ -14,11 +14,11 @@ import testGit.projectPanel.ProjectPanel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-public class AddTestRun extends AnAction {
+public class CreateTestRun extends AnAction {
     private final SimpleTree tree;
     private final ProjectPanel projectPanel;
 
-    public AddTestRun(final SimpleTree tree, final ProjectPanel projectPanel) {
+    public CreateTestRun(final SimpleTree tree, final ProjectPanel projectPanel) {
         super("New Test Run", "Create a new execution run for this plan", AllIcons.Actions.GroupBy);
         this.tree = tree;
         this.projectPanel = projectPanel;

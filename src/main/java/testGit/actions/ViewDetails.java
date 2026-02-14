@@ -5,18 +5,18 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.TestCase;
+import testGit.viewPanel.ViewPanel;
 
-public class GenerateTestCaseAction extends AnAction {
-    private final TestCase tc;
+public class ViewDetails extends AnAction {
+    TestCase tc;
 
-    public GenerateTestCaseAction(TestCase tc) {
-        super("Generate Test", "", AllIcons.RunConfigurations.TestState.Run);
+    public ViewDetails(TestCase tc) {
+        super("View Details", "", AllIcons.Actions.PreviewDetails);
         this.tc = tc;
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        /// to be implemented
-        System.out.println(tc.getTitle());
+        ViewPanel.show(tc);
     }
 }

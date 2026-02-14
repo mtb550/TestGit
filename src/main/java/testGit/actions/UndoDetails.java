@@ -1,21 +1,22 @@
 package testGit.actions;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.TestCase;
-import testGit.viewPanel.ViewPanel;
+import testGit.util.ActionHistory;
 
-public class ViewDetailsAction extends AnAction {
+public class UndoDetails extends AnAction {
     TestCase tc;
 
-    public ViewDetailsAction(TestCase tc) {
-        super("🔍 View Details");
+    public UndoDetails(TestCase tc) {
+        super("Undo", "", AllIcons.Actions.Undo);
         this.tc = tc;
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        ViewPanel.show(tc);
+        ActionHistory.undo();
     }
 }

@@ -21,11 +21,11 @@ import java.io.File;
 import java.io.IOException;
 
 
-public class AddTestSet extends AnAction {
+public class CreateTestSet extends AnAction {
     private final SimpleTree tree;
 
-    public AddTestSet(final SimpleTree tree) {
-        super("New Test Set", "Create a new test set for selected module ", AllIcons.Nodes.Class);
+    public CreateTestSet(final SimpleTree tree) {
+        super("New Test Set", "Create a new test set", AllIcons.Nodes.Class);
         this.tree = tree;
     }
 
@@ -46,31 +46,31 @@ public class AddTestSet extends AnAction {
         if (name == null || name.isBlank()) return;
         name = name.replace("_", " ");
 
-        Directory newFeature = new Directory()
+        Directory newTestSet = new Directory()
                 .setType(DirectoryType.F)
                 .setName(name)
                 .setActive(1);
 
-        newFeature.setFileName(String.format("%s_%s_%d", newFeature.getType().toString().toLowerCase(), newFeature.getName(), newFeature.getActive()));
-        newFeature.setFilePath(treeItem.getFilePath().resolve(newFeature.getFileName()));
-        newFeature.setFile(new File(newFeature.getFileName()));
+        newTestSet.setFileName(String.format("%s_%s_%d", newTestSet.getType().toString().toLowerCase(), newTestSet.getName(), newTestSet.getActive()));
+        newTestSet.setFilePath(treeItem.getFilePath().resolve(newTestSet.getFileName()));
+        newTestSet.setFile(new File(newTestSet.getFileName()));
 
         WriteAction.run(() -> {
             try {
                 VirtualFile parentDir = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(treeItem.getType() == DirectoryType.P ? treeItem.getFilePath().resolve("testCases") : treeItem.getFilePath());
 
                 if (parentDir != null) {
-                    parentDir.createChildDirectory(this, newFeature.getFileName());
+                    parentDir.createChildDirectory(this, newTestSet.getFileName());
 
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newFeature);
+                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newTestSet);
                     model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
 
                     tree.scrollPathToVisible(new TreePath(newNode.getPath()));
-                    TestCaseEditor.open(treeItem.getFilePath());
+                    TestCaseEditor.open(newTestSet.getFilePath());
                 }
             } catch (IOException ex) {
-                System.err.println("unable to create test set: " + newFeature);
+                System.err.println("unable to create test set: " + newTestSet);
             }
         });
     }

@@ -4,10 +4,10 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.treeStructure.SimpleTree;
-import testGit.actions.AddTestPlan;
-import testGit.actions.AddTestRun;
+import testGit.actions.CreateTestPlan;
+import testGit.actions.CreateTestRun;
 import testGit.actions.Delete;
-import testGit.actions.RenameAction;
+import testGit.actions.Rename;
 import testGit.projectPanel.ProjectPanel;
 
 
@@ -19,7 +19,7 @@ public class ContextMenu extends DefaultActionGroup {
 
         add(new AddPlanGroup(tree, projectPanel));
         addSeparator();
-        add(new RenameAction(projectPanel, tree));
+        add(new Rename(projectPanel, tree));
         add(new Delete(projectPanel, tree));
         addSeparator();
     }
@@ -31,8 +31,8 @@ public class ContextMenu extends DefaultActionGroup {
         public AddPlanGroup(SimpleTree tree, ProjectPanel projectPanel) {
             super("Add", "Add test plan items", AllIcons.General.Add);
             setPopup(true);
-            add(new AddTestPlan(tree));
-            add(new AddTestRun(tree, projectPanel));
+            add(new CreateTestPlan(tree));
+            add(new CreateTestRun(tree, projectPanel));
         }
 
 

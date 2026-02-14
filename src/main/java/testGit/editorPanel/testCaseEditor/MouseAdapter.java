@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
-import testGit.actions.AddTestCaseAction;
+import testGit.actions.CreateTestCase;
 import testGit.pojo.TestCase;
 
 import java.awt.event.MouseEvent;
@@ -43,7 +43,7 @@ public class MouseAdapter extends java.awt.event.MouseAdapter {
             group.add(new ContextMenu(featurePath, list, model, model.getElementAt(idx)));
         } else {
             list.clearSelection();
-            group.add(new AddTestCaseAction(featurePath, list, model));
+            group.add(new CreateTestCase(featurePath, list, model));
         }
 
         ActionManager.getInstance()

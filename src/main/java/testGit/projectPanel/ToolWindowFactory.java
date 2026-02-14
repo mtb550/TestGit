@@ -27,11 +27,11 @@ public class ToolWindowFactory implements com.intellij.openapi.wm.ToolWindowFact
     private DefaultActionGroup contextMenu(ProjectPanel projectPanel) {
         DefaultActionGroup group = new DefaultActionGroup();
 
-        group.add(new SettingsAction());
+        group.add(new OpenSettings());
         group.add(new ExpandAll(projectPanel.getTestCaseTree()));
         group.add(new CollapseAll(projectPanel.getTestCaseTree()));
         group.add(new Refresh(projectPanel));
-        group.add(new AddTestProject(projectPanel));
+        group.add(new CreateTestProject(projectPanel));
 
         return group;
     }

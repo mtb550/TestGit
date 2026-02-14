@@ -8,10 +8,10 @@ import testGit.pojo.TestCase;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 
-public class CopyTestCaseAction extends AnAction {
+public class CopyTestCase extends AnAction {
     TestCase tc;
 
-    public CopyTestCaseAction(TestCase tc) {
+    public CopyTestCase(TestCase tc) {
         super("📋 Copy");
         this.tc = tc;
     }

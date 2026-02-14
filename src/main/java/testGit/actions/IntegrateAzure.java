@@ -3,19 +3,14 @@ package testGit.actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jetbrains.annotations.NotNull;
-import testGit.pojo.TestCase;
-import testGit.util.ActionHistory;
 
-public class RedoDetailsAction extends AnAction {
-    TestCase tc;
-
-    public RedoDetailsAction(TestCase tc) {
-        super("↪ Redo");
-        this.tc = tc;
+public class IntegrateAzure extends AnAction {
+    public IntegrateAzure() {
+        super("From Azure DevOps");
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        ActionHistory.redo();
+        // TODO: From Azure DevOps
     }
 }

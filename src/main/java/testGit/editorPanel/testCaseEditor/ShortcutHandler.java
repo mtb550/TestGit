@@ -3,8 +3,8 @@ package testGit.editorPanel.testCaseEditor;
 import com.intellij.openapi.actionSystem.CustomShortcutSet;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
-import testGit.actions.AddTestCaseAction;
-import testGit.actions.DeleteTestCaseAction;
+import testGit.actions.CreateTestCase;
+import testGit.actions.DeleteTestCase;
 import testGit.pojo.TestCase;
 
 import javax.swing.*;
@@ -15,12 +15,12 @@ public class ShortcutHandler {
 
         // Add
         KeyStroke ctrlM = KeyStroke.getKeyStroke("control M");
-        AddTestCaseAction addAction = new AddTestCaseAction(featurePath, list, model);
+        CreateTestCase addAction = new CreateTestCase(featurePath, list, model);
         addAction.registerCustomShortcutSet(new CustomShortcutSet(ctrlM), list);
 
         // Delete
         KeyStroke deleteKey = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
-        DeleteTestCaseAction deleteAction = new DeleteTestCaseAction(featurePath, list, model);
+        DeleteTestCase deleteAction = new DeleteTestCase(featurePath, list, model);
         deleteAction.registerCustomShortcutSet(new CustomShortcutSet(deleteKey), list);
     }
 }

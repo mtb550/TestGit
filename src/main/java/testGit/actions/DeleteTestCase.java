@@ -20,13 +20,13 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.UUID;
 
-public class DeleteTestCaseAction extends AnAction {
+public class DeleteTestCase extends AnAction {
     private final String featurePath;
     private final JBList<TestCase> list;
     private final CollectionListModel<TestCase> model;
     private final ObjectMapper mapper;
 
-    public DeleteTestCaseAction(String featurePath, JBList<TestCase> list, CollectionListModel<TestCase> model) {
+    public DeleteTestCase(String featurePath, JBList<TestCase> list, CollectionListModel<TestCase> model) {
         super("Delete", "Delete test case", AllIcons.Actions.DeleteTag);
         this.featurePath = featurePath;
         this.list = list;

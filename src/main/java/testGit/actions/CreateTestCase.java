@@ -11,20 +11,20 @@ import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.TestCase;
-import testGit.ui.AddNewTestCaseDialog;
+import testGit.ui.CreateNewTestCaseDialog;
 import testGit.util.Notifier;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
-public class AddTestCaseAction extends AnAction {
+public class CreateTestCase extends AnAction {
     private final JBList<TestCase> list;
     private final String featurePath;
     private final CollectionListModel<TestCase> model;
 
-    public AddTestCaseAction(String featurePath, JBList<TestCase> list, CollectionListModel<TestCase> model) {
-        super("Add Test Case", "Add new test case", AllIcons.Actions.AddToDictionary);
+    public CreateTestCase(String featurePath, JBList<TestCase> list, CollectionListModel<TestCase> model) {
+        super("Create Test Case", "Create new test case", AllIcons.Actions.AddToDictionary);
         this.list = list;
         this.featurePath = featurePath;
         this.model = model;
@@ -32,15 +32,15 @@ public class AddTestCaseAction extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        System.out.println("AddTestCaseAction.actionPerformed(). featurePath: " + featurePath);
-        AddNewTestCaseDialog dialog = new AddNewTestCaseDialog();
+        System.out.println("CreateTestCaseAction.actionPerformed(). featurePath: " + featurePath);
+        CreateNewTestCaseDialog dialog = new CreateNewTestCaseDialog();
 
         if (dialog.showAndGet()) {
             saveNewTestCase(dialog);
         }
     }
 
-    private void saveNewTestCase(AddNewTestCaseDialog dialog) {
+    private void saveNewTestCase(CreateNewTestCaseDialog dialog) {
         TestCase newCase = new TestCase();
         newCase.setId(UUID.randomUUID().toString());
         newCase.setTitle(dialog.getTitle());

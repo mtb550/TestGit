@@ -14,7 +14,6 @@ import testGit.projectPanel.ProjectPanel;
 public class ContextMenu extends DefaultActionGroup {
 
     public ContextMenu(ProjectPanel projectPanel) {
-        // نص المجموعة الرئيسي (يظهر في الإعدادات أو القوائم المتداخلة)
         super("Test Case Context", true);
 
         SimpleTree tree = projectPanel.getTestCaseTree();
@@ -23,17 +22,17 @@ public class ContextMenu extends DefaultActionGroup {
         add(new AddGroup(tree));
         addSeparator();
         add(new Delete(projectPanel, tree));
-        add(new RenameAction(projectPanel, tree));
+        add(new Rename(projectPanel, tree));
         addSeparator();
-        add(new RunAction(tree));
+        add(new Run(tree));
         addSeparator();
-        add(createSubGroup("Export", AllIcons.ToolbarDecorator.Export, new ExportCsv(), new ExportHtml(), new ExportExcel(), new ExportJsonAction()));
-        add(createSubGroup("Import", AllIcons.ToolbarDecorator.Import, new ImportCsvAction(), new ImportExcelAction(), new ImportJsonAction()));
-        add(createSubGroup("Integrate", AllIcons.Nodes.Related, new IntegrateTestRail(), new IntegrateJira(), new IntegrateAzureAction()));
+        add(createSubGroup("Export", AllIcons.ToolbarDecorator.Export, new ExportCsv(), new ExportHtml(), new ExportExcel(), new ExportJson()));
+        add(createSubGroup("Import", AllIcons.ToolbarDecorator.Import, new ImportCsv(), new ImportExcel(), new ImportJson()));
+        add(createSubGroup("Integrate", AllIcons.Nodes.Related, new IntegrateTestRail(), new IntegrateJira(), new IntegrateAzure()));
         addSeparator();
         add(new OpenOldVersions());
-        add(new ViewCommitsAction());
-        add(new TestPlansAction());
+        add(new ViewCommits());
+        add(new TestPlans());
     }
 
     /**
@@ -59,11 +58,11 @@ public class ContextMenu extends DefaultActionGroup {
     private static class AddGroup extends DefaultActionGroup {
 
         public AddGroup(SimpleTree tree) {
-            super("Add", "Add new items", AllIcons.General.Add);
+            super("Create", "Create new items", AllIcons.General.Add);
             setPopup(true);
 
-            add(new AddModule(tree));
-            add(new AddTestSet(tree));
+            add(new CreateModule(tree));
+            add(new CreateTestSet(tree));
         }
 
 

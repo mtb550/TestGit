@@ -6,8 +6,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 import org.jetbrains.annotations.NotNull;
 
-public class TestPlansAction extends AnAction {
-    public TestPlansAction() {
+public class TestPlans extends AnAction {
+    public TestPlans() {
         super("Test Plans", "", AllIcons.Actions.ListFiles);
     }
 

@@ -16,12 +16,11 @@ import javax.swing.tree.TreePath;
 import java.io.File;
 import java.nio.file.Path;
 
-public class RenameAction extends AnAction {
+public class Rename extends AnAction {
     private final ProjectPanel projectPanel;
     private final SimpleTree tree;
 
-    // استقبال الـ panel عبر الـ Constructor كما فعلنا في DeleteAction
-    public RenameAction(final ProjectPanel projectPanel, final SimpleTree tree) {
+    public Rename(final ProjectPanel projectPanel, final SimpleTree tree) {
         super("Rename", "Rename selected node", AllIcons.Actions.Edit);
         this.projectPanel = projectPanel;
         this.tree = tree;
@@ -37,7 +36,6 @@ public class RenameAction extends AnAction {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
         if (!(node.getUserObject() instanceof Directory treeItem)) return;
 
-        // 1. طلب الاسم الجديد من المستخدم
         String newName = Messages.showInputDialog("Enter new name:", "Rename", null, treeItem.getName(), null);
         if (newName == null || newName.isBlank() || newName.equals(treeItem.getName())) return;
 
@@ -48,17 +46,12 @@ public class RenameAction extends AnAction {
             File newFile = newFilePath.toFile();
 
             if (oldFile.renameTo(newFile)) {
-                // 3. تحديث بيانات الكائن (Object)
                 treeItem.setName(newName);
                 treeItem.setFileName(newFileName);
                 treeItem.setFilePath(newFilePath);
 
-                // 4. تحديث الواجهة (Tree & VFS)
                 ((DefaultTreeModel) tree.getModel()).nodeChanged(node);
-                //refreshPath(newFilePath);
-                //refreshPath(newFilePath.getParent());
 
-                // 5. تحديث الـ ComboBox إذا كان العنصر "مشروع" (Type 0)
                 if (treeItem.getType() == DirectoryType.P && projectPanel.getProjectSelector() != null) {
                     projectPanel.getProjectSelector().loadProjectList();
                 }

@@ -8,7 +8,7 @@ import com.intellij.ui.tabs.TabsListener;
 import com.intellij.ui.tabs.impl.JBTabsImpl;
 import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Getter;
-import testGit.actions.OpenFeatureAction;
+import testGit.actions.OpenTestSet;
 import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.projectPanel.projectSelector.ProjectSelector;
@@ -101,7 +101,7 @@ public class ProjectPanel {
         testCaseTree.setCellRenderer(new Renderer());
         testCaseTree.addMouseListener(new testGit.projectPanel.testCaseTab.MouseAdapter(this));
         Shortcuts.register(testCaseTree, Config.getProject());
-        OpenFeatureAction.register(testCaseTree);
+        OpenTestSet.register(testCaseTree);
         testCaseTree.setDragEnabled(true);
         testCaseTree.setDropMode(DropMode.ON_OR_INSERT);
         testCaseTree.setTransferHandler(new TransferHandler(testCaseTree));
