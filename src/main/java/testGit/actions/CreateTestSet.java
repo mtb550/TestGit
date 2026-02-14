@@ -57,7 +57,7 @@ public class CreateTestSet extends AnAction {
 
         WriteAction.run(() -> {
             try {
-                VirtualFile parentDir = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(treeItem.getType() == DirectoryType.P ? treeItem.getFilePath().resolve("testCases") : treeItem.getFilePath());
+                VirtualFile parentDir = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(treeItem.getFilePath());
 
                 if (parentDir != null) {
                     parentDir.createChildDirectory(this, newTestSet.getFileName());

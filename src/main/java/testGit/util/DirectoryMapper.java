@@ -26,20 +26,20 @@ public class DirectoryMapper {
      * بناء شجرة الحالات الاختبارية (Test Cases)
      */
     public static void buildTestCasesTree() {
-        testCasesTreeModel = new DefaultTreeModel(buildRoot("TEST CASES", "testCases"));
+        testCasesTreeModel = new DefaultTreeModel(buildRoot("TEST CASES"));
     }
 
     /**
      * بناء شجرة الخطط الاختبارية (Test Plans)
      */
     public static void buildTestPlansTree() {
-        testPlansTreeModel = new DefaultTreeModel(buildRoot("TEST PLANS", "testPlans"));
+        testPlansTreeModel = new DefaultTreeModel(buildRoot("TEST PLANS"));
     }
 
     /**
      * دالة عامة لبناء الجذر الأساسي لتجنب تكرار الكود
      */
-    private static DefaultMutableTreeNode buildRoot(String rootName, String subFolderName) {
+    private static DefaultMutableTreeNode buildRoot(String rootName) {
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(rootName);
         File[] projects = Config.getRootFolderFile().listFiles(File::isDirectory);
 
@@ -48,7 +48,7 @@ public class DirectoryMapper {
                     .filter(file -> !file.getName().startsWith("."))
                     .map(DirectoryMapper::map)
                     .filter(Objects::nonNull)
-                    .forEach(dir -> rootNode.add(buildNodeRecursive(dir, subFolderName)));
+                    .forEach(dir -> rootNode.add(buildNodeRecursive(dir)));
         }
         return rootNode;
     }
@@ -56,20 +56,16 @@ public class DirectoryMapper {
     /**
      * دالة التكرار الذاتي (Recursion) الموحدة لكل أنواع الأشجار
      */
-    public static DefaultMutableTreeNode buildNodeRecursive(@NotNull Directory dir, @Nullable String subFolder) {
+    public static DefaultMutableTreeNode buildNodeRecursive(@NotNull Directory dir) {
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(dir);
 
-        File folderToScan = (subFolder != null && dir.getFilePath() != null)
-                ? dir.getFilePath().resolve(subFolder).toFile()
-                : dir.getFile();
-
-        File[] children = folderToScan.listFiles(File::isDirectory);
+        File[] children = dir.getFile().listFiles(File::isDirectory);
 
         if (children != null) {
             for (File childFile : children) {
                 Directory childDir = map(childFile);
                 if (childDir != null) {
-                    node.add(buildNodeRecursive(childDir, null));
+                    node.add(buildNodeRecursive(childDir));
                 }
             }
         }

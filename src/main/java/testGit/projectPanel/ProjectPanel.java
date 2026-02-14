@@ -135,8 +135,8 @@ public class ProjectPanel {
             testPlanTree.setRootVisible(false);
 
         } else {
-            DefaultMutableTreeNode casesRoot = DirectoryMapper.buildNodeRecursive(project, "testCases");
-            DefaultMutableTreeNode plansRoot = DirectoryMapper.buildNodeRecursive(project, "testPlans");
+            DefaultMutableTreeNode casesRoot = DirectoryMapper.buildNodeRecursive(project);
+            DefaultMutableTreeNode plansRoot = DirectoryMapper.buildNodeRecursive(project);
 
             DirectoryMapper.setTestCasesTreeModel(new DefaultTreeModel(casesRoot));
             DirectoryMapper.setTestPlansTreeModel(new DefaultTreeModel(plansRoot));

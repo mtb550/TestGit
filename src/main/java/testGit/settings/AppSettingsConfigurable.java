@@ -49,7 +49,7 @@ public class AppSettingsConfigurable implements Configurable {
         System.out.println("AppSettingsConfigurable.apply()");
         AppSettingsState settings = AppSettingsState.getInstance();
         settings.rootFolderPath = rootPathField.getText();
-        Config.setRootFolder();
+        Config.initializePaths();
     }
 
     @Override

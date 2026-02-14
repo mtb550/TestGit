@@ -4,122 +4,89 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 import testGit.settings.AppSettingsState;
 
 import javax.swing.*;
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Configuration manager for the TestGit plugin.
+ * Handles path resolution and shared UI constants.
+ */
 public class Config {
-    public static Icon porject = AllIcons.Nodes.Project;       // 📦 Project
-    public static Icon folder = AllIcons.Nodes.Folder;       // 📁 Folder
-    public static Icon clazz = AllIcons.Nodes.Class;     // 📄 Class
-    public static Icon java = AllIcons.FileTypes.Java;     // ☕ Java file
-    public static Icon json = AllIcons.FileTypes.Json;     // {} JSON
-    public static Icon xml = AllIcons.FileTypes.Xml;     // <> XML
-    public static Icon text = AllIcons.FileTypes.Text;     // 📝 Text
-    public static Icon branch = AllIcons.Vcs.Branch;     // 🌿 Branch
-    public static Icon add = AllIcons.General.Add;     // ➕ Add
-    public static Icon remove = AllIcons.General.Remove;     // ➖ Remove
-    @Setter
-    @Getter
-    private static String projectBasePath;
-    @Setter
-    @Getter
-    private static Project project;
-    private static String rootFolder;
+
+    // --- Icons ---
+    public static final Icon PROJECT_ICON = AllIcons.Nodes.Project;
+    public static final Icon FOLDER_ICON  = AllIcons.Nodes.Folder;
+    public static final Icon CLASS_ICON   = AllIcons.Nodes.Class;
+    public static final Icon JAVA_ICON    = AllIcons.FileTypes.Java;
+    public static final Icon JSON_ICON    = AllIcons.FileTypes.Json;
+    public static final Icon XML_ICON     = AllIcons.FileTypes.Xml;
+    public static final Icon TEXT_ICON    = AllIcons.FileTypes.Text;
+    public static final Icon BRANCH_ICON  = AllIcons.Vcs.Branch;
+    public static final Icon ADD_ICON     = AllIcons.General.Add;
+    public static final Icon REMOVE_ICON  = AllIcons.General.Remove;
+
+    @Getter @Setter private static Project project;
+    @Getter @Setter private static String projectBasePath;
+
+    private static String rootFolderPath;
     private static File rootFolderFile;
-    private static File testCasesRootFolder;
-    private static File testPlansRootFolder;
 
-    public static void setRootFolder() {
-        System.out.println("Config.setRootFolder()");
-
-        String pathFromSettings = AppSettingsState.getInstance().rootFolderPath;
-        System.out.println("pathFromSettings: " + pathFromSettings);
-        System.out.println("projectBasePath: " + projectBasePath);
-
-        if (pathFromSettings == null || pathFromSettings.isEmpty()) {
-            rootFolder = projectBasePath + "/TestGit";
-            rootFolderFile = Paths.get(rootFolder).toFile();
-            System.out.println("rootFolder: " + rootFolder);
-            System.out.println("rootFolder file: " + rootFolderFile.getAbsolutePath());
-        } else {
-            rootFolder = pathFromSettings;
-            rootFolderFile = Paths.get(pathFromSettings).toFile();
-            System.out.println("rootFolder: " + rootFolder);
-            System.out.println("rootFolder file: " + rootFolderFile.getAbsolutePath());
-        }
-    }
-
-    public static void setTestCasesRootFolder(Directory selectedProject) {
-        System.out.println("Config.setTestCasesRootFolder()");
-
-        testCasesRootFolder = Paths.get(rootFolder, selectedProject.getFileName(), "testCases").toFile();
-        if (!testCasesRootFolder.exists()) {
-            boolean created = testCasesRootFolder.mkdirs();
-            if (created) {
-                System.out.println("Test Cases Root folder created at: " + testCasesRootFolder.getAbsolutePath());
-            }
-        } else {
-            System.out.println("Test Cases Root folder already exists at: " + testCasesRootFolder.getAbsolutePath());
-        }
-    }
-
-    public static void setTestPlansRootFolder(Directory selectedProject) {
-        System.out.println("Config.setTestPlansRootFolder()");
-
-        testPlansRootFolder = Paths.get(rootFolder, selectedProject.getFileName(), "testPlans").toFile();
-
-
-        if (!testPlansRootFolder.exists()) {
-            boolean created = testPlansRootFolder.mkdirs();
-            if (created) {
-                System.out.println("Test Plans Root folder created at: " + testPlansRootFolder.getAbsolutePath());
-            }
-        } else {
-            System.out.println("Test Plans Root folder already exists at: " + testPlansRootFolder.getAbsolutePath());
-        }
-    }
-
-    public static File getTestCasesRootFolder(Directory selectedProject) {
-        System.out.println("Config.getTestCasesRootFolder()");
-
-        if (testCasesRootFolder == null) {
-            setTestCasesRootFolder(selectedProject);
-        }
-
-        System.out.println("Config.getTestCasesRootFolder(): " + testCasesRootFolder);
-        return testCasesRootFolder;
-    }
-
-    public static File getTestPlansRootFolder(Directory selectedProject) {
-        System.out.println("Config.getTestPlansRootFolder()");
-
-        if (testPlansRootFolder == null) {
-            setTestPlansRootFolder(selectedProject);
-        }
-
-        System.out.println("Config.getTestPlansRootFolder(): " + testPlansRootFolder);
-        return testPlansRootFolder;
-    }
-
+    /**
+     * Retrieves the root directory for the plugin.
+     * Defaults to {projectPath}/TestGit if not configured in settings.
+     */
     public static File getRootFolderFile() {
-        System.out.println("Config.getRootFolderFile()");
-
         if (rootFolderFile == null) {
-            setRootFolder();
+            initializePaths();
         }
         return rootFolderFile;
     }
 
-    public static String getRootFolder() {
-        System.out.println("Config.getRootFolder()");
-
-        if (rootFolder == null) {
-            setRootFolder();
+    public static String getRootFolderPath() {
+        if (rootFolderPath == null) {
+            initializePaths();
         }
-        return rootFolder;
+        return rootFolderPath;
     }
 
+    /**
+     * Resolves the directory for a specific project directory.
+     * Since "testCases" and "testPlans" folders are removed, this returns the project directory.
+     */
+    public static File getProjectFolder(@NotNull Directory selectedProject) {
+        Path path = Paths.get(getRootFolderPath(), selectedProject.getFileName());
+        File folder = path.toFile();
+
+        if (!folder.exists()) {
+            if (folder.mkdirs()) {
+                System.out.println("Created project directory at: " + folder.getAbsolutePath());
+            }
+        }
+        return folder;
+    }
+
+    public static synchronized void initializePaths() {
+        if (rootFolderFile != null) return; // Double-check locking pattern
+
+        String pathFromSettings = AppSettingsState.getInstance().rootFolderPath;
+
+        if (pathFromSettings == null || pathFromSettings.trim().isEmpty()) {
+            // Default to projectBasePath/TestGit
+            if (projectBasePath == null) {
+                throw new IllegalStateException("Project base path must be set before accessing Config.");
+            }
+            rootFolderPath = Paths.get(projectBasePath, "TestGit").toString();
+        } else {
+            rootFolderPath = pathFromSettings;
+        }
+
+        rootFolderFile = new File(rootFolderPath);
+
+        System.out.println("[TestGit] Root Folder initialized at: " + rootFolderFile.getAbsolutePath());
+    }
 }

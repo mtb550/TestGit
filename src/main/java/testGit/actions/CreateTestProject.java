@@ -54,10 +54,7 @@ public class CreateTestProject extends AnAction {
                 VirtualFile rootVf = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(Config.getRootFolderFile());
 
                 if (rootVf != null) {
-                    VirtualFile projectDir = rootVf.createChildDirectory(this, folderName);
-
-                    projectDir.createChildDirectory(this, "testCases");
-                    projectDir.createChildDirectory(this, "testPlans");
+                    rootVf.createChildDirectory(this, folderName);
 
                     projectPanel.getProjectSelector().addAndSelectProject(newProject);
 

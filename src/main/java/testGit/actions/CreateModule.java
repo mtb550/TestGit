@@ -38,50 +38,37 @@ public class CreateModule extends AnAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        // التحقق من أننا لا نضيف Suite داخل Feature
         if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.F) return;
 
         String name = Messages.showInputDialog("Enter suite name:", "Add Suite", null);
         if (name == null || name.isBlank()) return;
         name = name.replace("_", " ");
 
-        // 1. تحديد مكان الإنشاء الفعلي على القرص
-        Path parentPath = (treeItem.getType() == DirectoryType.P)
-                ? treeItem.getFilePath().resolve("testCases")
-                : treeItem.getFilePath();
-
-        // 2. بناء بيانات الـ Suite الجديد
         Directory newSuite = new Directory()
                 .setType(DirectoryType.S)
                 .setName(name)
                 .setActive(1);
 
-        // استخدام الدالة المحسنة لاسم الملف
         String folderName = String.format("%s_%s_%d", newSuite.getType().name().toLowerCase(), newSuite.getName(), newSuite.getActive());
-        Path fullPath = parentPath.resolve(folderName);
+        Path fullPath = treeItem.getFilePath().resolve(folderName);
 
         newSuite.setFileName(folderName)
                 .setFilePath(fullPath)
-                .setFile(fullPath.toFile()); // ✅ مسار كامل Absolute Path
+                .setFile(fullPath.toFile());
 
-        // 3. التنفيذ داخل WriteAction (مطلوب لتعديلات الملفات في IntelliJ)
         WriteAction.run(() -> {
             try {
-                // تحديث نظام الملفات للعثور على المجلد الأب
-                VirtualFile parentVf = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(parentPath);
+                VirtualFile parentVf = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(treeItem.getFilePath());
 
                 if (parentVf != null && parentVf.isDirectory()) {
-                    // إنشاء المجلد فعلياً
+
                     parentVf.createChildDirectory(this, folderName);
 
-                    // تحديث الـ Tree Model
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
                     DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newSuite);
 
-                    // إضافة النود وتنبيه المستمعين
                     model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
 
-                    // توسيع الشجرة واختيار العنصر الجديد
                     tree.makeVisible(new TreePath(newNode.getPath()));
                     tree.setSelectionPath(new TreePath(newNode.getPath()));
                 }
