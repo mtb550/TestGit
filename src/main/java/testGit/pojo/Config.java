@@ -20,18 +20,22 @@ public class Config {
 
     // --- Icons ---
     public static final Icon PROJECT_ICON = AllIcons.Nodes.Project;
-    public static final Icon FOLDER_ICON  = AllIcons.Nodes.Folder;
-    public static final Icon CLASS_ICON   = AllIcons.Nodes.Class;
-    public static final Icon JAVA_ICON    = AllIcons.FileTypes.Java;
-    public static final Icon JSON_ICON    = AllIcons.FileTypes.Json;
-    public static final Icon XML_ICON     = AllIcons.FileTypes.Xml;
-    public static final Icon TEXT_ICON    = AllIcons.FileTypes.Text;
-    public static final Icon BRANCH_ICON  = AllIcons.Vcs.Branch;
-    public static final Icon ADD_ICON     = AllIcons.General.Add;
-    public static final Icon REMOVE_ICON  = AllIcons.General.Remove;
+    public static final Icon FOLDER_ICON = AllIcons.Nodes.Folder;
+    public static final Icon CLASS_ICON = AllIcons.Nodes.Class;
+    public static final Icon JAVA_ICON = AllIcons.FileTypes.Java;
+    public static final Icon JSON_ICON = AllIcons.FileTypes.Json;
+    public static final Icon XML_ICON = AllIcons.FileTypes.Xml;
+    public static final Icon TEXT_ICON = AllIcons.FileTypes.Text;
+    public static final Icon BRANCH_ICON = AllIcons.Vcs.Branch;
+    public static final Icon ADD_ICON = AllIcons.General.Add;
+    public static final Icon REMOVE_ICON = AllIcons.General.Remove;
 
-    @Getter @Setter private static Project project;
-    @Getter @Setter private static String projectBasePath;
+    @Getter
+    @Setter
+    private static Project project;
+    @Getter
+    @Setter
+    private static String projectBasePath;
 
     private static String rootFolderPath;
     private static File rootFolderFile;
