@@ -14,6 +14,7 @@ import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
 import testGit.projectPanel.ProjectPanel;
 import testGit.ui.AddNewTestProjectDialog;
+import testGit.util.Notifier;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -74,6 +75,9 @@ public class AddTestProject extends AnAction {
                     TreePath newPath = new TreePath(newNode.getPath());
                     tree.scrollPathToVisible(newPath);
                     tree.setSelectionPath(newPath);
+
+                    Notifier.information("New Test Project", String.format("Test Project %s has been approved", name));
+
                 }
             } catch (IOException ex) {
                 Messages.showErrorDialog("Error creating project structure: " + ex.getMessage(), "IO Error");

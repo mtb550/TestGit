@@ -1,8 +1,6 @@
 package testGit.projectPanel;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.notification.NotificationGroupManager;
-import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.SimpleColoredComponent;
 import com.intellij.ui.SimpleTextAttributes;
@@ -65,17 +63,6 @@ public class ProjectPanel {
         panel.add(topBar, BorderLayout.NORTH);
 
         tabs = new JBTabsImpl(project);
-
-        NotificationGroupManager.getInstance()
-                .getNotificationGroup("Test Case Notifications") // define this name once
-                .createNotification("Test case TC-001 has been approved", NotificationType.INFORMATION)
-                .notify(project);  // you must pass a valid `Project` instance
-
-        NotificationGroupManager.getInstance()
-                .getNotificationGroup("Test Case Notifications") // define this name once
-                .createNotification("ARHBOWWWW our new friend SAAD!!", NotificationType.INFORMATION)
-                .notify(project);  // you must pass a valid `Project` instance
-
 
         TabInfo testCasesTab = new TabInfo(testCaseScrollPane)
                 .setText("Test Cases")

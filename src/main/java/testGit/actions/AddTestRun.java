@@ -61,4 +61,5 @@ public class AddTestRun extends AnAction {
     public @NotNull ActionUpdateThread getActionUpdateThread() {
         return ActionUpdateThread.EDT;
     }
+
 }

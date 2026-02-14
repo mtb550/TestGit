@@ -3,14 +3,12 @@ package testGit.actions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
-import testGit.pojo.Config;
 import testGit.pojo.TestCase;
 import testGit.ui.AddNewTestCaseDialog;
 import testGit.util.Notifier;
@@ -73,7 +71,7 @@ public class AddTestCaseAction extends AnAction {
             list.ensureIndexIsVisible(model.getSize() - 1);
 
         } catch (IOException ex) {
-            Notifier.notify(Config.getProject(), "Test Case Notifications", "Error", ex.getMessage(), NotificationType.ERROR);
+            Notifier.error("Error", ex.getMessage());
         }
     }
 }

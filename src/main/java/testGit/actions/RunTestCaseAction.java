@@ -1,6 +1,5 @@
 package testGit.actions;
 
-import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
@@ -26,13 +25,10 @@ public class RunTestCaseAction extends AnAction {
         if (ref != null && !ref.isBlank()) {
             Tools.printTestSourceRoots(project);
             TestNGRunnerByClassName.runTestClass(project, ref);
-            Notifier.notify(project, "Test Case Notifications", "Running TestNG class: ", ref, NotificationType.INFORMATION);
+            Notifier.information("Running TestNG class: ", ref);
         } else {
             System.out.println("No automation reference found for this test case.");
-            Notifier.notify(project,
-                    "No automation reference found for this test case.",
-                    "", "",
-                    NotificationType.ERROR);
+            Notifier.warning("Note", "No automation reference found for this test case.");
         }
     }
 }

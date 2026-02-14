@@ -39,7 +39,7 @@
         <fileEditorProvider implementation="testGit.projectPanel.testPlanTab.TestRunFileEditorProvider"/>
         <fileEditorProvider implementation="testGit.editorPanel.testPlanEditor.TestPlanEditorProvider"/>
         <!-- 🔔 Notification group -->
-        <notificationGroup id="Test Case Notifications"
+        <notificationGroup id="TestGit Notifications"
                            displayType="BALLOON"
                            isLogByDefault="true"/>
 
