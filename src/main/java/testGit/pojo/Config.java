@@ -30,7 +30,7 @@ public class Config {
     private static String rootFolder;
     private static File rootFolderFile;
     private static File testCasesRootFolder;
-    private static File testPlansRootFolder;
+    private static File testRunsRootFolder;
 
     public static void setRootFolder() {
         System.out.println("Config.setRootFolder()");
@@ -66,19 +66,19 @@ public class Config {
         }
     }
 
-    public static void setTestPlansRootFolder(Directory selectedProject) {
-        System.out.println("Config.setTestPlansRootFolder()");
+    public static void setTestRunsRootFolder(Directory selectedProject) {
+        System.out.println("Config.setTestRunsRootFolder()");
 
-        testPlansRootFolder = Paths.get(rootFolder, selectedProject.getFileName(), "testPlans").toFile();
+        testRunsRootFolder = Paths.get(rootFolder, selectedProject.getFileName(), "testRuns").toFile();
 
 
-        if (!testPlansRootFolder.exists()) {
-            boolean created = testPlansRootFolder.mkdirs();
+        if (!testRunsRootFolder.exists()) {
+            boolean created = testRunsRootFolder.mkdirs();
             if (created) {
-                System.out.println("Test Plans Root folder created at: " + testPlansRootFolder.getAbsolutePath());
+                System.out.println("Test Runs Root folder created at: " + testRunsRootFolder.getAbsolutePath());
             }
         } else {
-            System.out.println("Test Plans Root folder already exists at: " + testPlansRootFolder.getAbsolutePath());
+            System.out.println("Test Runs Root folder already exists at: " + testRunsRootFolder.getAbsolutePath());
         }
     }
 
@@ -93,15 +93,15 @@ public class Config {
         return testCasesRootFolder;
     }
 
-    public static File getTestPlansRootFolder(Directory selectedProject) {
-        System.out.println("Config.getTestPlansRootFolder()");
+    public static File getTestRunsRootFolder(Directory selectedProject) {
+        System.out.println("Config.getTestRunsRootFolder()");
 
-        if (testPlansRootFolder == null) {
-            setTestPlansRootFolder(selectedProject);
+        if (testRunsRootFolder == null) {
+            setTestRunsRootFolder(selectedProject);
         }
 
-        System.out.println("Config.getTestPlansRootFolder(): " + testPlansRootFolder);
-        return testPlansRootFolder;
+        System.out.println("Config.getTestRunsRootFolder(): " + testRunsRootFolder);
+        return testRunsRootFolder;
     }
 
     public static File getRootFolderFile() {

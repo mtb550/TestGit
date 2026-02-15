@@ -12,14 +12,12 @@ import testGit.actions.OpenTestSet;
 import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.projectPanel.projectSelector.ProjectSelector;
-import testGit.projectPanel.testPlanTab.MouseAdapter;
+import testGit.projectPanel.testRunTab.MouseAdapter;
 import testGit.projectPanel.versionSelector.VersionSelector;
 import testGit.util.DirectoryMapper;
 import testGit.util.ShortcutRegistry;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.util.prefs.Preferences;
 
@@ -28,7 +26,7 @@ import java.util.prefs.Preferences;
 public class ProjectPanel {
     private final JPanel panel;
     private final SimpleTree testCaseTree;
-    private final SimpleTree testPlanTree;
+    private final SimpleTree testRunTree;
     private final ProjectSelector projectSelector;
     private final VersionSelector versionSelector;
     private final JBTabsImpl tabs;
@@ -38,15 +36,15 @@ public class ProjectPanel {
         panel = new JPanel(new BorderLayout());
 
         testCaseTree = new SimpleTree();
-        testPlanTree = new SimpleTree();
+        testRunTree = new SimpleTree();
 
         projectSelector = new ProjectSelector(this);
 
         setupTestCaseTree();
-        setupTestPlanTree();
+        setupTestRunTree();
 
         JBScrollPane testCaseScrollPane = new JBScrollPane(testCaseTree);
-        JBScrollPane testPlanScrollPane = new JBScrollPane(testPlanTree);
+        JBScrollPane testRunScrollPane = new JBScrollPane(testRunTree);
 
         JPanel topBar = new JPanel(new BorderLayout());
 
@@ -65,17 +63,17 @@ public class ProjectPanel {
                 .setText("Test Cases")
                 .setIcon(AllIcons.Nodes.Folder);
 
-        TabInfo testPlansTab = new TabInfo(testPlanScrollPane)
-                .setText("Test Plans")
+        TabInfo testRunsTab = new TabInfo(testRunScrollPane)
+                .setText("Test Runs")
                 .setIcon(AllIcons.Nodes.Artifact);
 
         tabs.addTab(testCasesTab);
-        tabs.addTab(testPlansTab);
+        tabs.addTab(testRunsTab);
 
         Preferences prefs = Preferences.userRoot().node("TestGit");
         String lastTab = prefs.get("activeTab", "Test Cases");
-        if ("Test Plans".equals(lastTab)) {
-            tabs.select(testPlansTab, true);
+        if ("Test Runs".equals(lastTab)) {
+            tabs.select(testRunsTab, true);
         } else {
             tabs.select(testCasesTab, true);
         }
@@ -96,7 +94,7 @@ public class ProjectPanel {
 
         DirectoryMapper.buildTestCasesTree();
         testCaseTree.setModel(DirectoryMapper.getTestCasesTreeModel());
-        //testCaseTree.setRootVisible(false);
+        testCaseTree.setRootVisible(true);
         testCaseTree.setShowsRootHandles(true);
         testCaseTree.setCellRenderer(new Renderer());
         testCaseTree.addMouseListener(new testGit.projectPanel.testCaseTab.MouseAdapter(this));
@@ -108,52 +106,17 @@ public class ProjectPanel {
         ShortcutRegistry.Explorer(testCaseTree, this);
     }
 
-    private void setupTestPlanTree() {
-        System.out.println("Panel.setupTestPlanTree()");
+    private void setupTestRunTree() {
+        System.out.println("Panel.setupTestRunTree()");
 
-        DirectoryMapper.buildTestPlansTree();
-        testPlanTree.setModel(DirectoryMapper.getTestPlansTreeModel());
-        //testPlanTree.setRootVisible(false);
-        testPlanTree.addMouseListener(new MouseAdapter(this));
-        testPlanTree.setShowsRootHandles(true);
-        testPlanTree.setCellRenderer(new Renderer());
-        testPlanTree.addTreeSelectionListener(e -> {
+        DirectoryMapper.buildTestRunsTree();
+        testRunTree.setModel(DirectoryMapper.getTestRunsTreeModel());
+        testRunTree.setRootVisible(true);
+        testRunTree.addMouseListener(new MouseAdapter(this));
+        testRunTree.setShowsRootHandles(true);
+        testRunTree.setCellRenderer(new Renderer());
+        testRunTree.addTreeSelectionListener(e -> {
         });
-    }
-
-    public void filterByProject(final Directory project) {
-        System.out.println("Panel.filterByProject(): " + project.getName());
-
-        if (project.getName().equals("All Projects")) {
-            DirectoryMapper.buildTestCasesTree();
-            DirectoryMapper.buildTestPlansTree();
-
-            testCaseTree.setModel(DirectoryMapper.getTestCasesTreeModel());
-            testPlanTree.setModel(DirectoryMapper.getTestPlansTreeModel());
-
-            testCaseTree.setRootVisible(false);
-            testPlanTree.setRootVisible(false);
-
-        } else {
-            DefaultMutableTreeNode casesRoot = DirectoryMapper.buildNodeRecursive(project, "testCases");
-            DefaultMutableTreeNode plansRoot = DirectoryMapper.buildNodeRecursive(project, "testPlans");
-
-            DirectoryMapper.setTestCasesTreeModel(new DefaultTreeModel(casesRoot));
-            DirectoryMapper.setTestPlansTreeModel(new DefaultTreeModel(plansRoot));
-
-            testCaseTree.setModel(DirectoryMapper.getTestCasesTreeModel());
-            testPlanTree.setModel(DirectoryMapper.getTestPlansTreeModel());
-
-            testCaseTree.setRootVisible(true);
-            testPlanTree.setRootVisible(true);
-        }
-
-        testCaseTree.revalidate();
-        testPlanTree.revalidate();
-        testCaseTree.repaint();
-
-        //expandAllNodes(testCaseTree);
-        //expandAllNodes(testPlanTree);
     }
 
 }

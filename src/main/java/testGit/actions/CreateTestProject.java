@@ -16,19 +16,16 @@ import testGit.projectPanel.ProjectPanel;
 import testGit.ui.AddNewTestProjectDialog;
 import testGit.util.Notifier;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 
 public class CreateTestProject extends AnAction {
     public final ProjectPanel projectPanel;
-    public SimpleTree tree;
+    public SimpleTree testCaseTree;
 
     public CreateTestProject(ProjectPanel projectPanel) {
         super("New Test Project", "Create a new test project", AllIcons.General.Add);
         this.projectPanel = projectPanel;
-        this.tree = projectPanel.getTestCaseTree();
+        this.testCaseTree = projectPanel.getTestCaseTree();
     }
 
     @Override
@@ -38,7 +35,7 @@ public class CreateTestProject extends AnAction {
         if (name == null) return;
 
         Directory newProject = new Directory()
-                .setType(DirectoryType.P)
+                .setType(DirectoryType.PR)
                 .setName(name)
                 .setActive(1);
 
@@ -57,19 +54,11 @@ public class CreateTestProject extends AnAction {
                     VirtualFile projectDir = rootVf.createChildDirectory(this, folderName);
 
                     projectDir.createChildDirectory(this, "testCases");
-                    projectDir.createChildDirectory(this, "testPlans");
+                    projectDir.createChildDirectory(this, "testRuns");
 
-                    projectPanel.getProjectSelector().addAndSelectProject(newProject);
-
-                    DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                    DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) model.getRoot();
-                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newProject);
-
-                    model.insertNodeInto(newNode, rootNode, rootNode.getChildCount());
-
-                    TreePath newPath = new TreePath(newNode.getPath());
-                    tree.scrollPathToVisible(newPath);
-                    tree.setSelectionPath(newPath);
+                    projectPanel.getProjectSelector().addProject(newProject);
+                    projectPanel.getProjectSelector().selectProject(newProject);
+                    projectPanel.getProjectSelector().filterByProject(newProject);
 
                     Notifier.information("New Test Project", String.format("Test Project %s has been added", name));
 

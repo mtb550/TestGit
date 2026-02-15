@@ -63,7 +63,7 @@ public class Delete extends AnAction {
             if (projectPanel.getProjectSelector() != null) {
                 projectPanel.getProjectSelector().loadProjectList();
                 //panel.loadAllProjects();
-                projectPanel.filterByProject(ProjectSelector.comboBox.getItem());
+                projectPanel.getProjectSelector().filterByProject(ProjectSelector.comboBox.getItem());
             }
 
         } catch (Exception ex) {

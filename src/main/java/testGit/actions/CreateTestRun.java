@@ -6,7 +6,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
-import testGit.editorPanel.testPlanEditor.TestPlanEditor;
+import testGit.editorPanel.testRunEditor.TestRunEditor;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
 import testGit.projectPanel.ProjectPanel;
@@ -19,7 +19,7 @@ public class CreateTestRun extends AnAction {
     private final ProjectPanel projectPanel;
 
     public CreateTestRun(final SimpleTree tree, final ProjectPanel projectPanel) {
-        super("New Test Run", "Create a new execution run for this plan", AllIcons.Actions.GroupBy);
+        super("New Test Run", "Create a new test run", AllIcons.Actions.GroupBy);
         this.tree = tree;
         this.projectPanel = projectPanel;
     }
@@ -35,13 +35,12 @@ public class CreateTestRun extends AnAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        // التحقق من أننا لا نضيف Suite داخل Feature
-        if (!(userObject instanceof Directory treeItem) ||
-                treeItem.getType() == DirectoryType.TR ||
-                treeItem.getType() == DirectoryType.P)
+        if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TR) {
+            System.out.println("!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TR");
             return;
+        }
 
-        TestPlanEditor.open(treeItem.getFilePath(), projectPanel, parentNode);
+        TestRunEditor.open(treeItem.getFilePath(), projectPanel, parentNode);
     }
 
     @Override

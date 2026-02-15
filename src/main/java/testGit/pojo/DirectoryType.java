@@ -6,10 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum DirectoryType {
-    P("Project"),
-    S("Suite"),
-    F("Feature"),
-    TP("Test Plan"),
+    PR("Project"),
+    PA("Package"),
+    TS("Test Set"),
     TR("Test Run");
 
     private final String description;

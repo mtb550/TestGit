@@ -40,7 +40,7 @@ public class MouseAdapter extends java.awt.event.MouseAdapter {
             ActionPopupMenu popupMenu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, contextMenu);
             popupMenu.getComponent().show(e.getComponent(), e.getX(), e.getY());
 
-        } else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e) && treeItem.getType() == DirectoryType.F)
+        } else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e) && treeItem.getType() == DirectoryType.TS)
             TestCaseEditor.open(treeItem.getFilePath());
 
 

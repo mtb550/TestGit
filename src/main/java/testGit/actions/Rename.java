@@ -52,7 +52,7 @@ public class Rename extends AnAction {
 
                 ((DefaultTreeModel) tree.getModel()).nodeChanged(node);
 
-                if (treeItem.getType() == DirectoryType.P && projectPanel.getProjectSelector() != null) {
+                if (treeItem.getType() == DirectoryType.PR && projectPanel.getProjectSelector() != null) {
                     projectPanel.getProjectSelector().loadProjectList();
                 }
 

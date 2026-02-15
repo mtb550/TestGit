@@ -35,7 +35,7 @@ public class Run extends AnAction {
         }
 
         Object userObject = ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
-        e.getPresentation().setEnabled(userObject instanceof Directory treeItem && treeItem.getType() == DirectoryType.F);
+        e.getPresentation().setEnabled(userObject instanceof Directory treeItem && treeItem.getType() == DirectoryType.TS);
     }
 
     @Override

@@ -40,24 +40,25 @@ public class CreateTestSet extends AnAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.F) return;
+        if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TS) return;
 
         String name = Messages.showInputDialog("Enter feature name:", "Add Feature", null);
         if (name == null || name.isBlank()) return;
         name = name.replace("_", " ");
 
         Directory newTestSet = new Directory()
-                .setType(DirectoryType.F)
+                .setType(DirectoryType.TS)
                 .setName(name)
                 .setActive(1);
 
         newTestSet.setFileName(String.format("%s_%s_%d", newTestSet.getType().toString().toLowerCase(), newTestSet.getName(), newTestSet.getActive()));
         newTestSet.setFilePath(treeItem.getFilePath().resolve(newTestSet.getFileName()));
+        System.out.println("AddTestSet.actionPerformed(): newTestSet = " + newTestSet.getFilePath());
         newTestSet.setFile(new File(newTestSet.getFileName()));
 
         WriteAction.run(() -> {
             try {
-                VirtualFile parentDir = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(treeItem.getType() == DirectoryType.P ? treeItem.getFilePath().resolve("testCases") : treeItem.getFilePath());
+                VirtualFile parentDir = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(treeItem.getType() == DirectoryType.PR ? treeItem.getFilePath().resolve("testCases") : treeItem.getFilePath());
 
                 if (parentDir != null) {
                     parentDir.createChildDirectory(this, newTestSet.getFileName());
@@ -82,7 +83,7 @@ public class CreateTestSet extends AnAction {
         boolean isFeature = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
                 node.getUserObject() instanceof Directory item &&
-                item.getType() == DirectoryType.F);
+                item.getType() == DirectoryType.TS);
 
         e.getPresentation().setVisible(true);
         e.getPresentation().setEnabled(!isFeature);

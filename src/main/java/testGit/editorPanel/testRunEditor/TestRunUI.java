@@ -1,4 +1,4 @@
-package testGit.editorPanel.testPlanEditor;
+package testGit.editorPanel.testRunEditor;
 
 import com.intellij.ui.CheckboxTree;
 import com.intellij.ui.CheckedTreeNode;
@@ -13,7 +13,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestPlanUI {
+public class TestRunUI {
     private CheckboxTree checklistTree;
 
     public JComponent createEditorPanel(DefaultTreeModel testCaseModel, String savePathString) {
@@ -36,7 +36,7 @@ public class TestPlanUI {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JBScrollPane(checklistTree), BorderLayout.CENTER);
 
-        JButton saveButton = new JButton("Save Test Plan");
+        JButton saveButton = new JButton("Save Test Run");
         saveButton.addActionListener(e -> saveSelectedToJSON(root, savePathString));
         panel.add(saveButton, BorderLayout.SOUTH);
 

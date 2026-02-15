@@ -46,10 +46,9 @@ public class Renderer extends SimpleColoredComponent implements TreeCellRenderer
 
     private Icon getIconForDirectory(Directory dir) {
         return switch (dir.getType()) {
-            case P -> AllIcons.Nodes.Project;
-            case S -> AllIcons.Nodes.Folder;
-            case F -> AllIcons.Nodes.Class;
-            case TP -> AllIcons.Nodes.WebFolder;
+            case PR -> AllIcons.Nodes.Project;
+            case PA -> AllIcons.Nodes.WebFolder;
+            case TS -> AllIcons.Nodes.Class;
             case TR -> AllIcons.Nodes.AbstractMethod;
         };
     }

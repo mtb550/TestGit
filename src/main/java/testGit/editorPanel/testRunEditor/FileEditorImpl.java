@@ -1,4 +1,4 @@
-package testGit.editorPanel.testPlanEditor;
+package testGit.editorPanel.testRunEditor;
 
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorState;
@@ -13,8 +13,8 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
     private final JComponent component;
 
     public FileEditorImpl(VirtualFileImpl virtualFileImpl) {
-        TestPlanUI ui = new TestPlanUI();
-        this.component = ui.createEditorPanel(virtualFileImpl.getTestCasesTreeModel(), virtualFileImpl.getPlanPath());
+        TestRunUI ui = new TestRunUI();
+        this.component = ui.createEditorPanel(virtualFileImpl.getTestCasesTreeModel(), virtualFileImpl.getRunPath());
     }
 
     @Override
@@ -29,7 +29,7 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
 
     @Override
     public @NotNull String getName() {
-        return "Test Plan Editor";
+        return "Test Run Editor";
     }
 
     @Override

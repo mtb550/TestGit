@@ -1,4 +1,4 @@
-package testGit.editorPanel.testPlanEditor;
+package testGit.editorPanel.testRunEditor;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import testGit.pojo.Config;
@@ -8,21 +8,21 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.nio.file.Path;
 
-public class TestPlanEditor {
+public class TestRunEditor {
 
-    public static void open(final Path planPath, ProjectPanel projectPanel, DefaultMutableTreeNode selectedNode) {
+    public static void open(final Path runPath, ProjectPanel projectPanel, DefaultMutableTreeNode selectedNode) {
         FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
 
         for (com.intellij.openapi.vfs.VirtualFile openFile : editorManager.getOpenFiles()) {
             if (openFile instanceof VirtualFileImpl existing &&
-                    existing.getPlanPath().equals(planPath.toString())) {
+                    existing.getRunPath().equals(runPath.toString())) {
                 editorManager.openFile(existing, true);
                 return;
             }
         }
 
         VirtualFileImpl virtualFile = new VirtualFileImpl(
-                planPath.toString(),
+                runPath.toString(),
                 (DefaultTreeModel) projectPanel.getTestCaseTree().getModel()
         );
 

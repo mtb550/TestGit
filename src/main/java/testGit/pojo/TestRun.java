@@ -3,7 +3,7 @@ package testGit.pojo;
 import lombok.Data;
 
 @Data
-public class TestPlan {
+public class TestRun {
     private Integer id;
     private String name;
 

@@ -18,9 +18,9 @@ public class Listener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() instanceof JComboBox<?> comboBox) {
             Directory selected = (Directory) comboBox.getSelectedItem();
-            if (selected != null) {
+            if (selected != null && projectPanel.getProjectSelector() != null) {
                 System.out.println("Selection changed to: " + selected.getName());
-                projectPanel.filterByProject(selected);
+                projectPanel.getProjectSelector().filterByProject(selected);
             }
         }
     }

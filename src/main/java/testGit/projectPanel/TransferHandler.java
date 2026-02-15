@@ -76,7 +76,7 @@ public class TransferHandler extends javax.swing.TransferHandler {
             if (!(obj instanceof Directory draggedInfo)) return false;
 
             // Block project moving or dropping into a feature
-            if (draggedInfo.getType() == DirectoryType.P || targetType == DirectoryType.F)
+            if (draggedInfo.getType() == DirectoryType.PR || targetType == DirectoryType.TS)
                 return false;
 
             // Block no-op

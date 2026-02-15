@@ -334,7 +334,7 @@ public class Shortcuts {
 
                 JBPanel<?> panel = new JBPanel<>(new BorderLayout(5, 5));
                 JBTextField nameField = new JBTextField();
-                String[] types = {"Project", "Suite", "Feature"};
+                String[] types = {"Project", "Package", "Test Set", "Test Run"};
                 JComboBox<String> typeCombo = new ComboBox<>(types);
 
                 panel.add(new JBLabel("Type:"), BorderLayout.NORTH);
@@ -366,27 +366,26 @@ public class Shortcuts {
 
                 String type = (String) typeCombo.getSelectedItem();
                 DirectoryType newType = switch (type) {
-                    case "Project" -> DirectoryType.P;
-                    case "Suite" -> DirectoryType.S;
-                    case "Feature" -> DirectoryType.F;
-                    case "Test Plan" -> DirectoryType.TP;
+                    case "Project" -> DirectoryType.PR;
+                    case "Package" -> DirectoryType.PA;
+                    case "Test Set" -> DirectoryType.TS;
                     case "Test Run" -> DirectoryType.TR;
                     default -> throw new Error("unknown type");
                 };
 
                 Path parentId = null;
 
-                if (newType == DirectoryType.S && (selectedInfo == null || selectedInfo.getType() != DirectoryType.P)) {
-                    JOptionPane.showMessageDialog(tree, "Please select a project to add a suite.");
+                if (newType == DirectoryType.PA && (selectedInfo == null || selectedInfo.getType() != DirectoryType.PR)) {
+                    JOptionPane.showMessageDialog(tree, "Please select a project to add a package.");
                     return;
                 }
 
-                if (newType == DirectoryType.F && (selectedInfo == null || selectedInfo.getType() != DirectoryType.S)) {
-                    JOptionPane.showMessageDialog(tree, "Please select a suite to add a feature.");
+                if (newType == DirectoryType.TS && (selectedInfo == null || selectedInfo.getType() != DirectoryType.PA)) {
+                    JOptionPane.showMessageDialog(tree, "Please select a package to add a test set.");
                     return;
                 }
 
-                if (newType == DirectoryType.S || newType == DirectoryType.F) {
+                if (newType == DirectoryType.PA || newType == DirectoryType.TS) {
                     parentId = selectedInfo.getFilePath();
                 }
 
@@ -395,7 +394,7 @@ public class Shortcuts {
                 Directory newInfo = null;
                 DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newInfo);
 
-                if (newType == DirectoryType.P) {
+                if (newType == DirectoryType.PR) {
                     ((DefaultTreeModel) tree.getModel()).insertNodeInto(newNode, (DefaultMutableTreeNode) tree.getModel().getRoot(), tree.getModel().getChildCount(tree.getModel().getRoot()));
                 } else {
                     ((DefaultTreeModel) tree.getModel()).insertNodeInto(newNode, selected, selected.getChildCount());

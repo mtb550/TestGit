@@ -1,4 +1,4 @@
-package testGit.editorPanel.testPlanEditor;
+package testGit.editorPanel.testRunEditor;
 
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
@@ -18,7 +18,7 @@ public class ProviderImpl implements FileEditorProvider {
 
     @Override
     public @NotNull String getEditorTypeId() {
-        return "test-plan-checklist-editor";
+        return "test-run-checklist-editor";
     }
 
     @Override

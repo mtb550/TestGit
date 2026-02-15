@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
+import testGit.projectPanel.projectSelector.ProjectSelector;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -20,20 +21,20 @@ public class DirectoryMapper {
     private static DefaultTreeModel testCasesTreeModel;
     @Getter
     @Setter
-    private static DefaultTreeModel testPlansTreeModel;
+    private static DefaultTreeModel testRunsTreeModel;
 
     /**
      * بناء شجرة الحالات الاختبارية (Test Cases)
      */
     public static void buildTestCasesTree() {
-        testCasesTreeModel = new DefaultTreeModel(buildRoot("TEST CASES", "testCases"));
+        testCasesTreeModel = new DefaultTreeModel(buildRoot(ProjectSelector.getSelectedProject().getName(), "testCases"));
     }
 
     /**
-     * بناء شجرة الخطط الاختبارية (Test Plans)
+     * بناء شجرة الخطط الاختبارية (Test Runs)
      */
-    public static void buildTestPlansTree() {
-        testPlansTreeModel = new DefaultTreeModel(buildRoot("TEST PLANS", "testPlans"));
+    public static void buildTestRunsTree() {
+        testRunsTreeModel = new DefaultTreeModel(buildRoot(ProjectSelector.getSelectedProject().getName(), "testRuns"));
     }
 
     /**

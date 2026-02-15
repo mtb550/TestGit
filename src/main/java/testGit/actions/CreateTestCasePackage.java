@@ -19,11 +19,11 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class CreateTestPlan extends AnAction {
+public class CreateTestCasePackage extends AnAction {
     private final SimpleTree tree;
 
-    public CreateTestPlan(final SimpleTree tree) {
-        super("New Test Plan", "Create a new execution run for this plan", AllIcons.Actions.ListFiles);
+    public CreateTestCasePackage(final SimpleTree tree) {
+        super("New Package", "Create a new package", AllIcons.Nodes.Package);
         this.tree = tree;
     }
 
@@ -31,57 +31,47 @@ public class CreateTestPlan extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         TreePath path = tree.getSelectionPath();
         if (path == null) {
-            System.out.println("path is null !!");
+            System.out.println("path is null!!");
             return;
         }
 
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        // التحقق من أننا لا نضيف Suite داخل Feature
-        if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TR) return;
+        if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TS) return;
 
-        String name = Messages.showInputDialog("Enter test plan name:", "Add Test Plan", AllIcons.RunConfigurations.TestState.Run);
+        String name = Messages.showInputDialog("Enter package name:", "Add Package", null);
         if (name == null || name.isBlank()) return;
         name = name.replace("_", " ");
 
-        // 1. تحديد مكان الإنشاء الفعلي على القرص
-        Path parentPath = (treeItem.getType() == DirectoryType.P)
-                ? treeItem.getFilePath().resolve("testPlans")
+        Path parentPath = (treeItem.getType() == DirectoryType.PR)
+                ? treeItem.getFilePath().resolve("testCases")
                 : treeItem.getFilePath();
 
-        // 2. بناء بيانات الـ Suite الجديد
-        Directory newTestPlan = new Directory()
-                .setType(DirectoryType.TP)
+        Directory newPackage = new Directory()
+                .setType(DirectoryType.PA)
                 .setName(name)
                 .setActive(1);
 
-        // استخدام الدالة المحسنة لاسم الملف
-        String folderName = String.format("%s_%s_%d", newTestPlan.getType().name().toLowerCase(), newTestPlan.getName(), newTestPlan.getActive());
+        String folderName = String.format("%s_%s_%d", newPackage.getType().name().toLowerCase(), newPackage.getName(), newPackage.getActive());
         Path fullPath = parentPath.resolve(folderName);
 
-        newTestPlan.setFileName(folderName)
+        newPackage.setFileName(folderName)
                 .setFilePath(fullPath)
-                .setFile(fullPath.toFile()); // ✅ مسار كامل Absolute Path
+                .setFile(fullPath.toFile());
 
-        // 3. التنفيذ داخل WriteAction (مطلوب لتعديلات الملفات في IntelliJ)
         WriteAction.run(() -> {
             try {
-                // تحديث نظام الملفات للعثور على المجلد الأب
                 VirtualFile parentVf = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(parentPath);
 
                 if (parentVf != null && parentVf.isDirectory()) {
-                    // إنشاء المجلد فعلياً
                     parentVf.createChildDirectory(this, folderName);
 
-                    // تحديث الـ Tree Model
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newTestPlan);
+                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newPackage);
 
-                    // إضافة النود وتنبيه المستمعين
                     model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
 
-                    // توسيع الشجرة واختيار العنصر الجديد
                     tree.makeVisible(new TreePath(newNode.getPath()));
                     tree.setSelectionPath(new TreePath(newNode.getPath()));
                 }
@@ -95,18 +85,17 @@ public class CreateTestPlan extends AnAction {
     public void update(@NotNull AnActionEvent e) {
         TreePath path = tree.getSelectionPath();
 
-        boolean isTestPlan = (path != null &&
+        boolean isFeature = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
                 node.getUserObject() instanceof Directory item &&
-                (item.getType() == DirectoryType.TP || item.getType() == DirectoryType.TR));
+                item.getType() == DirectoryType.TS);
 
         e.getPresentation().setVisible(true);
-        e.getPresentation().setEnabled(!isTestPlan);
+        e.getPresentation().setEnabled(!isFeature);
     }
 
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
         return ActionUpdateThread.EDT;
     }
-
 }

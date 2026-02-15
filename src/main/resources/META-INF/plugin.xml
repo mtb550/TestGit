@@ -31,7 +31,7 @@
                 secondary="false"/>
 
         <fileEditorProvider implementation="testGit.editorPanel.testCaseEditor.ProviderImpl"/>
-        <fileEditorProvider implementation="testGit.editorPanel.testPlanEditor.ProviderImpl"/>
+        <fileEditorProvider implementation="testGit.editorPanel.testRunEditor.ProviderImpl"/>
 
         <notificationGroup id="TestGit Notifications"
                            displayType="BALLOON"
@@ -51,7 +51,7 @@
         <action
                 id="testGit.demo.OpenTestTreeAction"
                 class="testGit.pojo.ShowTestTreeAction"
-                text="Open Test Plan Tree"
+                text="Open Test Run Tree"
                 description="Show test case explorer"
                 icon="/icons/t1.png">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
