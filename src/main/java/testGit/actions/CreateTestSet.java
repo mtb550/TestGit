@@ -17,7 +17,6 @@ import testGit.pojo.DirectoryType;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import java.io.File;
 import java.io.IOException;
 
 
@@ -52,9 +51,15 @@ public class CreateTestSet extends AnAction {
                 .setActive(1);
 
         newTestSet.setFileName(String.format("%s_%s_%d", newTestSet.getType().toString().toLowerCase(), newTestSet.getName(), newTestSet.getActive()));
-        newTestSet.setFilePath(treeItem.getFilePath().resolve(newTestSet.getFileName()));
+
+        if (treeItem.getType() == DirectoryType.PR)
+            newTestSet.setFilePath(treeItem.getFilePath().resolve("testCases").resolve(newTestSet.getFileName()));
+        else
+            newTestSet.setFilePath(treeItem.getFilePath().resolve(newTestSet.getFileName()));
+
+
         System.out.println("AddTestSet.actionPerformed(): newTestSet = " + newTestSet.getFilePath());
-        newTestSet.setFile(new File(newTestSet.getFileName()));
+        newTestSet.setFile(newTestSet.getFilePath().toFile());
 
         WriteAction.run(() -> {
             try {
@@ -68,7 +73,11 @@ public class CreateTestSet extends AnAction {
                     model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
 
                     tree.scrollPathToVisible(new TreePath(newNode.getPath()));
-                    TestCaseEditor.open(newTestSet.getFilePath());
+                    TestCaseEditor.open(newTestSet);
+
+//                    ApplicationManager.getApplication().invokeLater(() -> {
+//                        TestCaseEditor.open(newTestSet);
+//                    });
                 }
             } catch (IOException ex) {
                 System.err.println("unable to create test set: " + newTestSet);

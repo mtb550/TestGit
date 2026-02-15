@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
+import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
 import testGit.ui.CreateNewTestCaseDialog;
 import testGit.util.Notifier;
@@ -20,19 +21,19 @@ import java.util.UUID;
 
 public class CreateTestCase extends AnAction {
     private final JBList<TestCase> list;
-    private final String featurePath;
+    private final Directory dir;
     private final CollectionListModel<TestCase> model;
 
-    public CreateTestCase(String featurePath, JBList<TestCase> list, CollectionListModel<TestCase> model) {
+    public CreateTestCase(Directory dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
         super("Create Test Case", "Create new test case", AllIcons.Actions.AddToDictionary);
         this.list = list;
-        this.featurePath = featurePath;
+        this.dir = dir;
         this.model = model;
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        System.out.println("CreateTestCaseAction.actionPerformed(). featurePath: " + featurePath);
+        System.out.println("CreateTestCaseAction.actionPerformed(). dirPath: " + dir.getFilePath());
         CreateNewTestCaseDialog dialog = new CreateNewTestCaseDialog();
 
         if (dialog.showAndGet()) {
@@ -60,11 +61,11 @@ public class CreateTestCase extends AnAction {
                 TestCase lastItem = model.getElementAt(model.getSize() - 1);
                 lastItem.setNext(UUID.fromString(newCase.getId()));
 
-                File lastItemFile = new File(featurePath, lastItem.getId() + ".json");
+                File lastItemFile = new File(dir.getFile(), lastItem.getId() + ".json");
                 mapper.writeValue(lastItemFile, lastItem);
             }
 
-            File targetFile = new File(featurePath, newCase.getId() + ".json");
+            File targetFile = new File(dir.getFile(), newCase.getId() + ".json");
             mapper.writeValue(targetFile, newCase);
 
             LocalFileSystem.getInstance().refreshAndFindFileByIoFile(targetFile);

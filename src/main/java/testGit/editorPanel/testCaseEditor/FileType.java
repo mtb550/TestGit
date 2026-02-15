@@ -42,4 +42,5 @@ public class FileType extends LanguageFileType {
         //System.out.println("TestCaseFileType.getIcon()");
         return AllIcons.Nodes.DataTables;
     }
+
 }

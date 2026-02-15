@@ -11,6 +11,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
+import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
 import testGit.ui.DeleteTestCaseDialog;
 
@@ -18,17 +19,18 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class DeleteTestCase extends AnAction {
-    private final String featurePath;
+    private final Directory dir;
     private final JBList<TestCase> list;
     private final CollectionListModel<TestCase> model;
     private final ObjectMapper mapper;
 
-    public DeleteTestCase(String featurePath, JBList<TestCase> list, CollectionListModel<TestCase> model) {
+    public DeleteTestCase(Directory dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
         super("Delete", "Delete test case", AllIcons.Actions.DeleteTag);
-        this.featurePath = featurePath;
+        this.dir = dir;
         this.list = list;
         this.model = model;
         this.mapper = new ObjectMapper()
@@ -72,7 +74,7 @@ public class DeleteTestCase extends AnAction {
         for (int i = selectedItems.size() - 1; i >= 0; i--) {
             TestCase tc = selectedItems.get(i);
 
-            File file = new File(featurePath, tc.getId() + ".json");
+            File file = new File(dir.getFile(), tc.getId() + ".json");
             if (file.exists()) {
                 Files.delete(file.toPath());
             }
@@ -80,11 +82,11 @@ public class DeleteTestCase extends AnAction {
             model.remove(model.getElementIndex(tc));
         }
 
-        LocalFileSystem.getInstance().refreshIoFiles(List.of(new File(featurePath).listFiles()));
+        LocalFileSystem.getInstance().refreshIoFiles(List.of(Objects.requireNonNull(dir.getFile().listFiles())));
     }
 
     private void saveToFile(TestCase item) throws IOException {
-        File file = new File(featurePath, item.getId() + ".json");
+        File file = new File(dir.getFile(), item.getId() + ".json");
         mapper.writeValue(file, item);
     }
 }

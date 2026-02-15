@@ -6,6 +6,7 @@ import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import com.intellij.util.ui.ImageUtil;
 import org.jetbrains.annotations.NotNull;
+import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
 
 import javax.swing.*;
@@ -23,14 +24,14 @@ public class DragDropHandler extends TransferHandler {
     private static final DataFlavor TESTCASE_LIST_FLAVOR = new DataFlavor(List.class, "List of TestCase");
 
     private final CollectionListModel<TestCase> model;
-    private final String featurePath;
+    private final Directory dir;
     private int[] draggedIndices;
     private List<TestCase> draggedItems;
 
-    public DragDropHandler(final String featurePath, final CollectionListModel<TestCase> model) {
+    public DragDropHandler(final Directory dir, final CollectionListModel<TestCase> model) {
         //System.out.println("ListItemReorderHandler.ListItemReorderHandler()");
         this.model = model;
-        this.featurePath = featurePath;
+        this.dir = dir;
     }
 
     @Override
@@ -107,51 +108,39 @@ public class DragDropHandler extends TransferHandler {
             JBList.DropLocation dl = (JBList.DropLocation) support.getDropLocation();
             int index = dl.getIndex();
 
-            // 1) إزالة العناصر من موقعها القديم
             for (int i = draggedIndices.length - 1; i >= 0; i--) {
                 model.remove(draggedIndices[i]);
             }
 
-            // 2) حساب موقع الإدراج الجديد
             int removedBefore = 0;
             for (int idx : draggedIndices) {
                 if (idx < index) removedBefore++;
             }
             int insertAt = index - removedBefore;
 
-            // 3) إضافة العناصر المنقولة للموديل
             for (TestCase tc : dropped) {
                 model.add(insertAt++, tc);
             }
 
-            // --- منطق تحديث الروابط (UUID Chain Logic) ---
 
-            // أ. تحديث العنصر الذي أصبح الآن في بداية القائمة (Index 0)
             if (model.getSize() > 0) {
                 for (int i = 0; i < model.getSize(); i++) {
                     TestCase current = model.getElementAt(i);
 
-                    // تحديد هل هو الرأس (Head)؟
                     current.setIsHead(i == 0);
 
-                    // تحديد العنصر التالي (Next)
                     if (i < model.getSize() - 1) {
                         TestCase nextElement = model.getElementAt(i + 1);
-                        // تعيين UUID الخاص بالعنصر التالي في حقل next الحالي
-                        // ملاحظة: تأكد أن حقل id في TestCase هو الذي يحتوي على الـ UUID كـ String أو استخدم UUID.fromString
                         current.setNext(UUID.fromString(nextElement.getId()));
                     } else {
-                        // آخر عنصر في القائمة
                         current.setNext(null);
                     }
 
-                    // إخطار القائمة بتحديث البيانات للرسم
                     model.contentsChanged(current);
                 }
             }
 
-            // هنا يمكنك إضافة استدعاء لدالة حفظ الملفات JSON لتثبيت الترتيب الجديد
-            saveAllTestCasesToJson(featurePath);
+            saveAllTestCasesToJson(dir);
 
             return true;
 
@@ -164,12 +153,12 @@ public class DragDropHandler extends TransferHandler {
         }
     }
 
-    private void saveAllTestCasesToJson(String featurePath) {
+    private void saveAllTestCasesToJson(Directory dir) {
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
         for (int i = 0; i < model.getSize(); i++) {
             TestCase tc = model.getElementAt(i);
-            File file = new File(featurePath, tc.getId() + ".json");
+            File file = new File(dir.getFile(), tc.getId() + ".json");
 
             try {
                 mapper.writerWithDefaultPrettyPrinter().writeValue(file, tc);

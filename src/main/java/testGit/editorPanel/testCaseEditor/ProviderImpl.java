@@ -18,7 +18,7 @@ public class ProviderImpl implements FileEditorProvider, DumbAware {
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
         System.out.println("EditorProvider.createEditor()");
-        return new EditorPanel(((VirtualFileImpl) file).getTestCases(), ((VirtualFileImpl) file).getFeaturePath(), file);
+        return new EditorPanel(((VirtualFileImpl) file).getTestCases(), ((VirtualFileImpl) file).getDir(), file);
     }
 
     @Override
@@ -32,4 +32,5 @@ public class ProviderImpl implements FileEditorProvider, DumbAware {
         System.out.println("EditorProvider.getPolicy()");
         return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
     }
+
 }

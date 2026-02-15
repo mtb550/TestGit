@@ -5,30 +5,31 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import testGit.pojo.Config;
+import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
 import testGit.util.TestCaseSorter;
 
-import java.nio.file.Path;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TestCaseEditor {
 
-    public static void open(final Path featurePath) {
-        System.out.println("TestCaseEditor.open() , path: " + featurePath);
+    public static void open(final Directory dir) {
+        System.out.println("TestCaseEditor.open() , path: " + dir);
 
         FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 
         List<TestCase> testCases = new ArrayList<>();
-        java.io.File folder = featurePath.toFile();
+        File folder = dir.getFile();
 
         if (folder.exists() && folder.isDirectory()) {
-            java.io.File[] jsonFiles = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
+            File[] jsonFiles = folder.listFiles((dirType, name) -> name.toLowerCase().endsWith(".json"));
 
             if (jsonFiles != null) {
-                for (java.io.File file : jsonFiles) {
+                for (File file : jsonFiles) {
                     try {
                         TestCase tc = mapper.readValue(file, TestCase.class);
                         testCases.add(tc);
@@ -43,14 +44,14 @@ public class TestCaseEditor {
 
         // 1. Check if a tab for this path is already open
         for (VirtualFile openFile : editorManager.getOpenFiles()) {
-            if (openFile instanceof VirtualFileImpl existing && existing.getFeaturePath().equals(featurePath.toString())) {
-                System.out.println("open test set: " + existing.getFeaturePath());
+            if (openFile instanceof VirtualFileImpl existing && existing.getDir().equals(dir.toString())) {
+                System.out.println("open test set: " + existing.getDir());
                 editorManager.openFile(existing, true);
                 return;
             }
         }
 
-        VirtualFile virtualFile = new VirtualFileImpl(featurePath.toString(), testCases);
+        VirtualFile virtualFile = new VirtualFileImpl(dir, testCases);
         editorManager.openFile(virtualFile, true);
     }
 }

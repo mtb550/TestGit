@@ -2,38 +2,22 @@ package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.testFramework.LightVirtualFile;
 import lombok.Getter;
+import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 
 @Getter
 public class VirtualFileImpl extends LightVirtualFile {
-    private final String featurePath; // المسار الكامل للمجلد المعني
+    private final Directory dir;
     private final List<TestCase> testCases;
 
-    public VirtualFileImpl(String featurePath, List<TestCase> testCases) {
-        // نستخدم اسم المجلد فقط كعنوان للتبويب ليظهر بشكل جميل للمستخدم
-        super(extractFolderName(featurePath), FileType.INSTANCE, "");
-        this.featurePath = featurePath;
+    public VirtualFileImpl(Directory dir, List<TestCase> testCases) {
+        super(dir.getName(), FileType.INSTANCE, "");
+        this.dir = dir;
         this.testCases = testCases;
         System.out.println("TestCaseVirtualFile.TestCaseVirtualFile()");
-    }
-
-    /**
-     * دالة مساعدة لاستخراج اسم المجلد من المسار الكامل
-     * مثال: /home/user/Test/Login -> يعيد Login
-     */
-    private static String extractFolderName(String path) {
-        System.out.println("TestCaseVirtualFile.extractFolderName()");
-        try {
-            Path p = Paths.get(path);
-            return p.getFileName().toString();
-        } catch (Exception e) {
-            return "Test Cases";
-        }
     }
 
     @Override
@@ -43,13 +27,14 @@ public class VirtualFileImpl extends LightVirtualFile {
         if (this == o) return true;
         if (!(o instanceof VirtualFileImpl that)) return false;
         // المقارنة الآن تعتمد على المسار لضمان عدم تكرار فتح نفس المجلد
-        return Objects.equals(featurePath, that.featurePath);
+        return Objects.equals(dir, that.dir);
     }
 
     @Override
     public int hashCode() {
         // infinite sout
         //System.out.println("TestCaseVirtualFile.hashCode()");
-        return Objects.hash(featurePath);
+        return Objects.hash(dir);
     }
+
 }

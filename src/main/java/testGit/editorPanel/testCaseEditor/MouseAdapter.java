@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import testGit.actions.CreateTestCase;
+import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
 
 import java.awt.event.MouseEvent;
@@ -13,12 +14,12 @@ import java.awt.event.MouseEvent;
 public class MouseAdapter extends java.awt.event.MouseAdapter {
     private final JBList<TestCase> list;
     private final CollectionListModel<TestCase> model;
-    private final String featurePath;
+    private final Directory dir;
 
-    public MouseAdapter(JBList<TestCase> list, CollectionListModel<TestCase> model, String featurePath) {
+    public MouseAdapter(JBList<TestCase> list, CollectionListModel<TestCase> model, Directory dir) {
         this.list = list;
         this.model = model;
-        this.featurePath = featurePath;
+        this.dir = dir;
     }
 
     @Override
@@ -40,10 +41,10 @@ public class MouseAdapter extends java.awt.event.MouseAdapter {
         DefaultActionGroup group = new DefaultActionGroup();
         if (isItemClick) {
             if (!list.isSelectedIndex(idx)) list.setSelectedIndex(idx);
-            group.add(new ContextMenu(featurePath, list, model, model.getElementAt(idx)));
+            group.add(new ContextMenu(dir, list, model, model.getElementAt(idx)));
         } else {
             list.clearSelection();
-            group.add(new CreateTestCase(featurePath, list, model));
+            group.add(new CreateTestCase(dir, list, model));
         }
 
         ActionManager.getInstance()
