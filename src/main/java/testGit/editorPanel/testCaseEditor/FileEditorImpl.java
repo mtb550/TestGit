@@ -230,5 +230,6 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
 
     @Override
     public void dispose() {
+        /// when close editor reset details in view page
     }
 }

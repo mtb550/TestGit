@@ -11,14 +11,16 @@ public class ContextMenu extends DefaultActionGroup {
     public ContextMenu(Directory dir, JBList<TestCase> list, CollectionListModel<TestCase> model, TestCase tc) {
         super("Test Case Actions", false);
 
+        add(new CreateTestCase(dir, list, model));
+        add(new ViewDetails(tc));
+        addSeparator();
+        add(new UpdateTestCase(tc));
         add(new CopyTestCase(tc));
+        add(new DeleteTestCase(dir, list, model));
+        addSeparator();
         add(new GenerateTestCase(tc));
         add(new RunTestCase(tc));
-        add(new ViewDetails(tc));
 
-        addSeparator();
 
-        add(new DeleteTestCase(dir, list, model));
-        add(new CreateTestCase(dir, list, model));
     }
 }

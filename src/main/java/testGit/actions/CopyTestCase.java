@@ -1,5 +1,6 @@
 package testGit.actions;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +13,7 @@ public class CopyTestCase extends AnAction {
     TestCase tc;
 
     public CopyTestCase(TestCase tc) {
-        super("📋 Copy");
+        super("Copy", "Copy test case", AllIcons.Actions.Copy);
         this.tc = tc;
     }
 
