@@ -15,26 +15,16 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class DirectoryMapper {
+public class TestCasesDirectoryMapper {
     @Getter
     @Setter
-    private static DefaultTreeModel testCasesTreeModel;
-    @Getter
-    @Setter
-    private static DefaultTreeModel testRunsTreeModel;
+    private static DefaultTreeModel treeModel;
 
     /**
      * بناء شجرة الحالات الاختبارية (Test Cases)
      */
-    public static void buildTestCasesTree() {
-        testCasesTreeModel = new DefaultTreeModel(buildRoot(ProjectSelector.getSelectedProject().getName(), "testCases"));
-    }
-
-    /**
-     * بناء شجرة الخطط الاختبارية (Test Runs)
-     */
-    public static void buildTestRunsTree() {
-        testRunsTreeModel = new DefaultTreeModel(buildRoot(ProjectSelector.getSelectedProject().getName(), "testRuns"));
+    public static void buildTree() {
+        treeModel = new DefaultTreeModel(buildRoot(ProjectSelector.getSelectedProject().getName(), "testCases"));
     }
 
     /**
@@ -47,7 +37,7 @@ public class DirectoryMapper {
         if (projects != null) {
             Arrays.stream(projects)
                     .filter(file -> !file.getName().startsWith("."))
-                    .map(DirectoryMapper::map)
+                    .map(TestCasesDirectoryMapper::map)
                     .filter(Objects::nonNull)
                     .forEach(dir -> rootNode.add(buildNodeRecursive(dir, subFolderName)));
         }

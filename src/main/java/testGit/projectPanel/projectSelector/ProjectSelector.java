@@ -5,7 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.projectPanel.ProjectPanel;
-import testGit.util.DirectoryMapper;
+import testGit.util.TestCasesDirectoryMapper;
+import testGit.util.TestRunsDirectoryMapper;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -48,7 +49,7 @@ public class ProjectSelector {
         if (dirs != null) {
             Arrays.stream(dirs)
                     .filter(dir -> !dir.getName().equals(".git") && dir.getName().contains("_"))
-                    .map(DirectoryMapper::map)
+                    .map(TestCasesDirectoryMapper::map)
                     .filter(p -> p != null && p.getActive() == 1)
                     .forEach(comboBoxModel::addElement);
         }
@@ -80,24 +81,24 @@ public class ProjectSelector {
         System.out.println("Panel.filterByProject(): " + project.getName());
 
         if (project.getName().equals("All Projects")) {
-            DirectoryMapper.buildTestCasesTree();
-            DirectoryMapper.buildTestRunsTree();
+            TestCasesDirectoryMapper.buildTree();
+            TestCasesDirectoryMapper.buildTree();
 
-            projectPanel.getTestCaseTree().setModel(DirectoryMapper.getTestCasesTreeModel());
-            projectPanel.getTestRunTree().setModel(DirectoryMapper.getTestRunsTreeModel());
+            projectPanel.getTestCaseTree().setModel(TestCasesDirectoryMapper.getTreeModel());
+            projectPanel.getTestRunTree().setModel(TestRunsDirectoryMapper.getTreeModel());
 
             projectPanel.getTestCaseTree().setRootVisible(true);
             projectPanel.getTestRunTree().setRootVisible(true);
 
         } else {
-            DefaultMutableTreeNode casesRoot = DirectoryMapper.buildNodeRecursive(project, "testCases");
-            DefaultMutableTreeNode runsRoot = DirectoryMapper.buildNodeRecursive(project, "testRuns");
+            DefaultMutableTreeNode casesRoot = TestCasesDirectoryMapper.buildNodeRecursive(project, "testCases");
+            DefaultMutableTreeNode runsRoot = TestRunsDirectoryMapper.buildNodeRecursive(project, "testRuns");
 
-            DirectoryMapper.setTestCasesTreeModel(new DefaultTreeModel(casesRoot));
-            DirectoryMapper.setTestRunsTreeModel(new DefaultTreeModel(runsRoot));
+            TestCasesDirectoryMapper.setTreeModel(new DefaultTreeModel(casesRoot));
+            TestRunsDirectoryMapper.setTreeModel(new DefaultTreeModel(runsRoot));
 
-            projectPanel.getTestCaseTree().setModel(DirectoryMapper.getTestCasesTreeModel());
-            projectPanel.getTestRunTree().setModel(DirectoryMapper.getTestRunsTreeModel());
+            projectPanel.getTestCaseTree().setModel(TestCasesDirectoryMapper.getTreeModel());
+            projectPanel.getTestRunTree().setModel(TestRunsDirectoryMapper.getTreeModel());
 
             projectPanel.getTestCaseTree().setRootVisible(true);
             projectPanel.getTestRunTree().setRootVisible(true);
@@ -105,7 +106,9 @@ public class ProjectSelector {
 
         projectPanel.getTestCaseTree().revalidate();
         projectPanel.getTestRunTree().revalidate();
+
         projectPanel.getTestCaseTree().repaint();
+        projectPanel.getTestRunTree().repaint();
 
         //expandAllNodes(testCaseTree);
         //expandAllNodes(testRunTree);

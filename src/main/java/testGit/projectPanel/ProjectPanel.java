@@ -12,10 +12,13 @@ import testGit.actions.OpenTestSet;
 import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.projectPanel.projectSelector.ProjectSelector;
+import testGit.projectPanel.testCaseTab.TestCaseRenderer;
 import testGit.projectPanel.testRunTab.MouseAdapterImpl;
+import testGit.projectPanel.testRunTab.TestRunRenderer;
 import testGit.projectPanel.versionSelector.VersionSelector;
-import testGit.util.DirectoryMapper;
 import testGit.util.ShortcutRegistry;
+import testGit.util.TestCasesDirectoryMapper;
+import testGit.util.TestRunsDirectoryMapper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -92,11 +95,11 @@ public class ProjectPanel {
     public void setupTestCaseTree() {
         System.out.println("Panel.setupTestCaseTree()");
 
-        DirectoryMapper.buildTestCasesTree();
-        testCaseTree.setModel(DirectoryMapper.getTestCasesTreeModel());
+        TestCasesDirectoryMapper.buildTree();
+        testCaseTree.setModel(TestCasesDirectoryMapper.getTreeModel());
         testCaseTree.setRootVisible(true);
         testCaseTree.setShowsRootHandles(true);
-        testCaseTree.setCellRenderer(new Renderer());
+        testCaseTree.setCellRenderer(new TestCaseRenderer());
         testCaseTree.addMouseListener(new testGit.projectPanel.testCaseTab.MouseAdapterImpl(this));
         Shortcuts.register(testCaseTree, Config.getProject());
         OpenTestSet.register(testCaseTree);
@@ -109,12 +112,12 @@ public class ProjectPanel {
     private void setupTestRunTree() {
         System.out.println("Panel.setupTestRunTree()");
 
-        DirectoryMapper.buildTestRunsTree();
-        testRunTree.setModel(DirectoryMapper.getTestRunsTreeModel());
+        TestRunsDirectoryMapper.buildTree();
+        testRunTree.setModel(TestRunsDirectoryMapper.getTreeModel());
         testRunTree.setRootVisible(true);
         testRunTree.addMouseListener(new MouseAdapterImpl(this));
         testRunTree.setShowsRootHandles(true);
-        testRunTree.setCellRenderer(new Renderer());
+        testRunTree.setCellRenderer(new TestRunRenderer());
         testRunTree.addTreeSelectionListener(e -> {
         });
     }
