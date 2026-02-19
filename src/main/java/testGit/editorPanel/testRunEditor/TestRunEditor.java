@@ -7,6 +7,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
+import testGit.pojo.TestRun;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.TestCaseSorter;
 
@@ -21,7 +22,7 @@ import java.util.List;
 public class TestRunEditor {
     private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
-    public static void open(final Path runPath, ProjectPanel projectPanel, DefaultMutableTreeNode selectedNode) {
+    public static void open(final Path runPath, ProjectPanel projectPanel, DefaultMutableTreeNode selectedNode, TestRun metadata) {
         System.out.println("[DEBUG] TestRunEditor: Opening editor for path: " + runPath);
 
         FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
@@ -68,6 +69,8 @@ public class TestRunEditor {
                     (DefaultTreeModel) projectPanel.getTestCaseTree().getModel(),
                     sortedCases
             );
+
+            virtualFile.setMetadata(metadata);
             editorManager.openFile(virtualFile, true);
         }
     }

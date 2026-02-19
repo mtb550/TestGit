@@ -6,9 +6,11 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
+import testGit.editorPanel.testRunEditor.NewTestRunDialog;
 import testGit.editorPanel.testRunEditor.TestRunEditor;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
+import testGit.pojo.TestRun;
 import testGit.projectPanel.ProjectPanel;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -40,7 +42,12 @@ public class CreateTestRun extends AnAction {
             return;
         }
 
-        TestRunEditor.open(treeItem.getFilePath(), projectPanel, parentNode);
+        /*TestRunEditor.open(treeItem.getFilePath(), projectPanel, parentNode);*/
+        NewTestRunDialog dialog = new NewTestRunDialog();
+        if (dialog.showAndGet()) { // Shows popup; returns true if user clicks OK
+            TestRun metadata = dialog.getMetadata();
+            TestRunEditor.open(treeItem.getFilePath(), projectPanel, parentNode, metadata);
+        }
     }
 
     @Override

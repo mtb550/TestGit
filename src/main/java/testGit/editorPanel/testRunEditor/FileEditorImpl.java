@@ -17,8 +17,9 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
 
     public FileEditorImpl(VirtualFileImpl vf) {
         this.virtualFile = vf;
-        // FIX: Pass the test cases from the virtual file, NOT a new empty list
         this.ui = new TestRunUI(vf.getTestCases());
+        this.ui.setMetadata(vf.getMetadata());
+        this.ui.setCurrentFile(vf); // Now the UI knows exactly which tab it belongs to
         this.component = ui.createEditorPanel(vf.getTestCasesTreeModel(), vf.getRunPath());
     }
 
@@ -50,6 +51,7 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
     // Boilerplate
     @Override
     public boolean isModified() {
+        //return ui.isModified(); // The IDE now knows when to show the '*'
         return false;
     }
 

@@ -3,6 +3,9 @@ package testGit.editorPanel.testRunEditor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.CheckboxTree;
 import com.intellij.ui.CheckedTreeNode;
 import com.intellij.ui.SimpleTextAttributes;
@@ -10,8 +13,10 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.tree.TreeUtil;
 import lombok.Getter;
+import lombok.Setter;
 import testGit.pojo.*;
 import testGit.util.TestCaseSorter;
+import testGit.util.TestRunsDirectoryMapper;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -24,11 +29,14 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
+@Setter
 public class TestRunUI implements Disposable {
     private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private final List<TestCase> initialTestCases;
     private CheckboxTree checklistTree;
     private TestRun currentTestRun;
+    private TestRun metadata;
+    private VirtualFile currentFile;
 
     public TestRunUI(List<TestCase> initialTestCases) {
         this.initialTestCases = TestCaseSorter.sortTestCases(initialTestCases);
@@ -158,12 +166,22 @@ public class TestRunUI implements Disposable {
             testRunsDir.mkdirs();
         }
 
+        //TestRun run = new TestRun();
+        TestRun run = this.currentTestRun != null ? this.currentTestRun : new TestRun();
+
+        if (this.metadata != null) {
+            run.setBuildNumber(metadata.getBuildNumber());
+            run.setPlatform(metadata.getPlatform());
+            run.setLanguage(metadata.getLanguage());
+            run.setBrowser(metadata.getBrowser());
+            run.setDeviceType(metadata.getDeviceType());
+        }
+
         // 3. Define the actual filename (e.g., using the run name or a timestamp)
         // For now, we'll use a default name, but you should probably let the user name it
-        String fileName = "Run_" + System.currentTimeMillis() + ".json";
+        String fileName = "tr_" + metadata.getBuildNumber() + "_1.json";
         File finalOutputFile = new File(testRunsDir, fileName);
 
-        TestRun run = new TestRun();
         run.setRunName(fileName);
         run.setCreatedAt(LocalDateTime.now());
         run.setStatus(TestRunStatus.CREATED);
@@ -179,6 +197,18 @@ public class TestRunUI implements Disposable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // 2. Refresh the UI Tree
+        TestRunsDirectoryMapper.buildTree();
+
+        // 3. CLOSE DIRECTLY
+        if (currentFile != null) {
+            ApplicationManager.getApplication().invokeLater(() ->
+                    FileEditorManager.getInstance(Config.getProject())
+                            .closeFile(currentFile));
+        }
+
+
     }
 
     private void collectCheckedItems(CheckedTreeNode node, List<TestRun.TestRunItems> items) {

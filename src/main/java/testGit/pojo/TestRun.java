@@ -12,6 +12,11 @@ import java.util.UUID;
 @Setter
 public class TestRun {
     private String runName;
+    private String buildNumber;
+    private String platform;
+    private String language;
+    private String browser;
+    private String deviceType;
     private TestRunStatus status;
     private LocalDateTime createdAt;
     private List<TestRunItems> results;
