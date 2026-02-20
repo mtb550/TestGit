@@ -10,7 +10,6 @@ import com.intellij.ui.components.JBList;
 import testGit.pojo.Config;
 import testGit.pojo.TestCase;
 import testGit.util.ContentExtractor;
-import testGit.viewPanel.ViewPanel;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -46,7 +45,7 @@ public class SelectionListenerImpl implements ListSelectionListener {
         if (!e.getValueIsAdjusting()) {
             TestCase selected = list.getSelectedValue();
             if (selected != null) {
-                ViewPanel.show(selected);
+                //ViewPanel.show(selected);
                 ChangeListManager.getInstance(Config.getProject())
                         .getAllChanges()
                         .forEach(ContentExtractor::printJsonChanges);

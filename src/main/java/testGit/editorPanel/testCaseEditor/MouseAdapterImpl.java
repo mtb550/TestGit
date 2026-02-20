@@ -8,7 +8,9 @@ import com.intellij.ui.components.JBList;
 import testGit.actions.CreateTestCase;
 import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
+import testGit.viewPanel.ViewPanel;
 
+import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -25,12 +27,28 @@ public class MouseAdapterImpl extends MouseAdapter {
 
     @Override
     public void mousePressed(MouseEvent e) {
+        // 1. Handle Double Click (Left Button)
+        if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+            handleDoubleClick(e);
+        }
+
+        // 2. Handle Context Menu (Right Click)
         maybeShowPopup(e);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
         maybeShowPopup(e);
+    }
+
+    private void handleDoubleClick(MouseEvent e) {
+        int index = list.locationToIndex(e.getPoint());
+        if (index >= 0 && list.getCellBounds(index, index).contains(e.getPoint())) {
+            TestCase selected = model.getElementAt(index);
+            if (selected != null) {
+                ViewPanel.show(selected);
+            }
+        }
     }
 
     private void maybeShowPopup(MouseEvent e) {

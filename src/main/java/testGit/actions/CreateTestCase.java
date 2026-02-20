@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.CustomShortcutSet;
+import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
@@ -15,11 +16,12 @@ import testGit.pojo.TestCase;
 import testGit.ui.CreateNewTestCaseDialog;
 import testGit.util.Notifier;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
-public class CreateTestCase extends AnAction {
+public class CreateTestCase extends DumbAwareAction {
     private final JBList<TestCase> list;
     private final Directory dir;
     private final CollectionListModel<TestCase> model;
@@ -31,11 +33,17 @@ public class CreateTestCase extends AnAction {
         this.model = model;
     }
 
+    /**
+     * Registers the action with Ctrl + M shortcut
+     */
+    public static void register(Directory dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
+        CreateTestCase action = new CreateTestCase(dir, list, model);
+        action.registerCustomShortcutSet(new CustomShortcutSet(KeyStroke.getKeyStroke("control M")), list);
+    }
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        System.out.println("CreateTestCaseAction.actionPerformed(). dirPath: " + dir.getFilePath());
         CreateNewTestCaseDialog dialog = new CreateNewTestCaseDialog();
-
         if (dialog.showAndGet()) {
             saveNewTestCase(dialog);
         }
@@ -74,8 +82,6 @@ public class CreateTestCase extends AnAction {
 
         } catch (IOException ex) {
             Notifier.error("Error", "unable to add new test case. " + ex.getMessage());
-            System.err.println(ex.getMessage());
-            ex.printStackTrace(System.err);
         }
     }
 }

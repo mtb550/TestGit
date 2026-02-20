@@ -1,20 +1,31 @@
 package testGit.editorPanel.testCaseEditor;
 
-import com.intellij.openapi.actionSystem.CustomShortcutSet;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import testGit.actions.CreateTestCase;
 import testGit.actions.DeleteTestCase;
+import testGit.actions.OpenTestCaseDetails;
+import testGit.actions.ShowTestCaseContextMenu;
 import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
 
-import javax.swing.*;
-import java.awt.event.KeyEvent;
 
 public class ShortcutHandler {
     public static void register(Directory dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
-        new CreateTestCase(dir, list, model).registerCustomShortcutSet(new CustomShortcutSet(KeyStroke.getKeyStroke("control M")), list);
 
-        new DeleteTestCase(dir, list, model).registerCustomShortcutSet(new CustomShortcutSet(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0)), list);
+        // 1. Create (Ctrl + M)
+        CreateTestCase.register(dir, list, model);
+
+        // 2. Delete (Delete Key)
+        DeleteTestCase.register(dir, list, model);
+
+        // 3. Open View Details (Enter Key)
+        OpenTestCaseDetails.register(list);
+
+        // 4. Context Menu (Menu Key)
+        ShowTestCaseContextMenu.register(dir, list, model);
+
     }
+
+
 }
