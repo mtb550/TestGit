@@ -2,10 +2,7 @@ package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
-import testGit.actions.CreateTestCase;
-import testGit.actions.DeleteTestCase;
-import testGit.actions.OpenTestCaseDetails;
-import testGit.actions.ShowTestCaseContextMenu;
+import testGit.actions.*;
 import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
 
@@ -24,6 +21,9 @@ public class ShortcutHandler {
 
         // 4. Context Menu (Menu Key)
         ShowTestCaseContextMenu.register(dir, list, model);
+
+        // 5. Close View Panel on ESCAPE
+        CloseTestCaseDetails.register(list);
 
     }
 

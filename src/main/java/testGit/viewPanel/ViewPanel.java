@@ -11,25 +11,19 @@ import java.util.function.Consumer;
 
 public class ViewPanel {
 
-    public static void addTestCase(Consumer<TestCase> onSaveCallback) {
-        System.out.println("TestCaseToolWindow.addTestCase()");
-
+    // Helper to get the ToolWindow safely and avoid static state issues
+    private static ToolWindow getToolWindow() {
         Project project = Config.getProject();
-        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("Details"); // in plugin.xml <toolWindow id="TestCaseDetails"
+        if (project == null) return null;
+        return ToolWindowManager.getInstance(project).getToolWindow("Details");
+    }
 
-        if (toolWindow != null) {
-            if (!toolWindow.isVisible()) {
-                toolWindow.show();
-            }
+    public static void addTestCase(Consumer<TestCase> onSaveCallback) {
+        ToolWindow tw = getToolWindow();
+        if (tw != null) {
+            if (!tw.isVisible()) tw.show();
 
-            // Switch to "Create Test Case" tab
-            Content[] contents = toolWindow.getContentManager().getContents();
-            for (Content content : contents) {
-                if ("Create Test Case".equals(content.getDisplayName())) {
-                    toolWindow.getContentManager().setSelectedContent(content);
-                    break;
-                }
-            }
+            selectContent(tw, "Create Test Case");
 
             AddTestCasePanel add = ToolWindowFactory.getAddInstance();
             if (add != null) {
@@ -39,27 +33,33 @@ public class ViewPanel {
     }
 
     public static void show(TestCase testCase) {
-        //System.out.println("TestCaseToolWindow.show()");
+        ToolWindow tw = getToolWindow();
+        if (tw != null) {
+            if (!tw.isVisible()) tw.show();
 
-        ToolWindow toolWindow = ToolWindowManager.getInstance(Config.getProject()).getToolWindow("Details"); // in plugin.xml <toolWindow id="TestCaseDetails"
-
-        if (toolWindow != null) {
-            if (!toolWindow.isVisible()) {
-                toolWindow.show();
-            }
-
-            // Switch to "Details" tab
-            Content[] contents = toolWindow.getContentManager().getContents();
-            for (Content content : contents) {
-                if ("Details".equals(content.getDisplayName())) {
-                    toolWindow.getContentManager().setSelectedContent(content);
-                    break;
-                }
-            }
+            selectContent(tw, "Details");
 
             TestCaseDetailsPanel viewer = ToolWindowFactory.getDetailsInstance();
             if (viewer != null) {
                 viewer.update(testCase);
+            }
+        }
+    }
+
+    public static void hide() {
+        ToolWindow tw = getToolWindow();
+        if (tw != null && tw.isVisible()) {
+            tw.hide(null);
+        }
+    }
+
+    // Extracted logic to keep code DRY
+    private static void selectContent(ToolWindow tw, String displayName) {
+        Content[] contents = tw.getContentManager().getContents();
+        for (Content content : contents) {
+            if (displayName.equals(content.getDisplayName())) {
+                tw.getContentManager().setSelectedContent(content);
+                break;
             }
         }
     }
