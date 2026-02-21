@@ -2,9 +2,9 @@ package testGit.actions;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -19,7 +19,7 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class CreateTestCasePackage extends AnAction {
+public class CreateTestCasePackage extends DumbAwareAction {
     private final SimpleTree tree;
 
     public CreateTestCasePackage(final SimpleTree tree) {
@@ -29,9 +29,11 @@ public class CreateTestCasePackage extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
+        System.out.println("CreateTestCasePackage.actionPerformed()");
+
         TreePath path = tree.getSelectionPath();
         if (path == null) {
-            System.out.println("path is null!!");
+            System.out.println("path is null !!");
             return;
         }
 
@@ -40,7 +42,7 @@ public class CreateTestCasePackage extends AnAction {
 
         if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TS) return;
 
-        String name = Messages.showInputDialog("Enter package name:", "Add Package", null);
+        String name = Messages.showInputDialog("Enter package name:", "Create Package", AllIcons.Nodes.Package);
         if (name == null || name.isBlank()) return;
         name = name.replace("_", " ");
 

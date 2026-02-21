@@ -6,7 +6,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.treeStructure.SimpleTree;
 import testGit.actions.CreateTestRun;
 import testGit.actions.CreateTestRunPackage;
-import testGit.actions.Delete;
+import testGit.actions.DeletePackage;
 import testGit.actions.Rename;
 import testGit.projectPanel.ProjectPanel;
 
@@ -20,7 +20,7 @@ public class ContextMenu extends DefaultActionGroup {
         add(new createGroup(tree, projectPanel));
         addSeparator();
         add(new Rename(projectPanel, tree));
-        add(new Delete(projectPanel, tree));
+        add(new DeletePackage(projectPanel, tree));
 
     }
 

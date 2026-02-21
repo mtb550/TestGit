@@ -2,9 +2,9 @@ package testGit.actions;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -19,16 +19,18 @@ import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class CreateTestRunPackage extends AnAction {
+public class CreateTestRunPackage extends DumbAwareAction {
     private final SimpleTree tree;
 
     public CreateTestRunPackage(final SimpleTree tree) {
-        super("New Package", "Create a new package", AllIcons.Actions.ListFiles);
+        super("New Package", "Create a new package", AllIcons.Nodes.Package);
         this.tree = tree;
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
+        System.out.println("CreateTestRunPackage.actionPerformed()");
+
         TreePath path = tree.getSelectionPath();
         if (path == null) {
             System.out.println("path is null !!");
@@ -40,7 +42,7 @@ public class CreateTestRunPackage extends AnAction {
 
         if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TR) return;
 
-        String name = Messages.showInputDialog("Enter test run name:", "Add Test Run", AllIcons.RunConfigurations.TestState.Run);
+        String name = Messages.showInputDialog("Enter package name:", "Create Package", AllIcons.Nodes.Package);
         if (name == null || name.isBlank()) return;
         name = name.replace("_", " ");
 
@@ -48,15 +50,15 @@ public class CreateTestRunPackage extends AnAction {
                 ? treeItem.getFilePath().resolve("testRuns")
                 : treeItem.getFilePath();
 
-        Directory newTestRun = new Directory()
+        Directory newPackage = new Directory()
                 .setType(DirectoryType.PA)
                 .setName(name)
                 .setActive(1);
 
-        String folderName = String.format("%s_%s_%d", newTestRun.getType().name().toLowerCase(), newTestRun.getName(), newTestRun.getActive());
+        String folderName = String.format("%s_%s_%d", newPackage.getType().name().toLowerCase(), newPackage.getName(), newPackage.getActive());
         Path fullPath = parentPath.resolve(folderName);
 
-        newTestRun.setFileName(folderName)
+        newPackage.setFileName(folderName)
                 .setFilePath(fullPath)
                 .setFile(fullPath.toFile());
 
@@ -68,7 +70,7 @@ public class CreateTestRunPackage extends AnAction {
                     parentVf.createChildDirectory(this, folderName);
 
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newTestRun);
+                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newPackage);
 
                     model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
 

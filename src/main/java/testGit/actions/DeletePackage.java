@@ -1,0 +1,82 @@
+package testGit.actions;
+
+import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.CustomShortcutSet;
+import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.project.DumbAwareAction;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.treeStructure.SimpleTree;
+import org.jetbrains.annotations.NotNull;
+import testGit.pojo.Directory;
+import testGit.projectPanel.ProjectPanel;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
+
+public class DeletePackage extends DumbAwareAction {
+    private final ProjectPanel projectPanel;
+    private final SimpleTree tree;
+
+    public DeletePackage(final ProjectPanel projectPanel, final SimpleTree tree) {
+        super("Delete", "Delete selected node", AllIcons.Actions.GC);
+        this.projectPanel = projectPanel;
+        this.tree = tree;
+    }
+
+    public static void register(final ProjectPanel projectPanel, final SimpleTree tree) {
+        DeletePackage action = new DeletePackage(projectPanel, tree);
+        action.registerCustomShortcutSet(new CustomShortcutSet(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0)), tree);
+    }
+
+    @Override
+    public void actionPerformed(@NotNull AnActionEvent e) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        if (!(node.getUserObject() instanceof Directory treeItem)) return;
+
+        int confirm = Messages.showYesNoDialog(
+                "Are you sure you want to delete '" + treeItem.getName() + "'?",
+                "Confirm Delete",
+                Messages.getQuestionIcon()
+        );
+
+        if (confirm == Messages.YES)
+            performDeletion(node, treeItem);
+
+    }
+
+    private void performDeletion(DefaultMutableTreeNode node, Directory treeItem) {
+        WriteAction.run(() -> {
+            try {
+                // Use LocalFileSystem to safely delete the file/directory
+                VirtualFile vf = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(treeItem.getFile());
+                if (vf != null) {
+                    vf.delete(this);
+                }
+
+                // Update the tree model directly from the projectPanel
+                DefaultTreeModel model = (DefaultTreeModel) projectPanel.getTestCaseTree().getModel();
+                model.removeNodeFromParent(node);
+            } catch (IOException ex) {
+                Messages.showErrorDialog("Could not delete file: " + ex.getMessage(), "Error");
+            }
+        });
+    }
+
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        e.getPresentation().setEnabled(node != null && node.getUserObject() instanceof Directory);
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.EDT;
+    }
+}
