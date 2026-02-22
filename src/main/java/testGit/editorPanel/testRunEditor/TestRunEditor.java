@@ -66,7 +66,7 @@ public class TestRunEditor {
         } else {
             VirtualFileImpl virtualFile = new VirtualFileImpl(
                     targetPath,
-                    (DefaultTreeModel) projectPanel.getTestCaseTree().getModel(),
+                    (DefaultTreeModel) ProjectPanel.testCaseTree.getModel(),
                     sortedCases
             );
 

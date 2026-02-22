@@ -5,7 +5,6 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.TestCase;
-import testGit.util.ActionHistory;
 
 public class UndoDetails extends AnAction {
     TestCase tc;
@@ -17,6 +16,6 @@ public class UndoDetails extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        ActionHistory.undo();
+        ///  TO BE IMPLEMENTED
     }
 }

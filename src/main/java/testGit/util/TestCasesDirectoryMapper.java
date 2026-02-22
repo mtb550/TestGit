@@ -1,5 +1,9 @@
 package testGit.util;
 
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
+import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -21,10 +25,35 @@ public class TestCasesDirectoryMapper {
     private static DefaultTreeModel treeModel;
 
     /**
-     * بناء شجرة الحالات الاختبارية (Test Cases)
+     * The background-friendly way to load your tree.
      */
-    public static void buildTree() {
-        treeModel = new DefaultTreeModel(buildRoot(ProjectSelector.getSelectedProject().getName(), "testCases"));
+    public static void buildTreeAsync(@NotNull SimpleTree tree) {
+        ProgressManager.getInstance().run(new Task.Backgroundable(Config.getProject(), "Loading test cases", false) {
+            private DefaultTreeModel newModel;
+
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                // This runs on a BACKGROUND thread
+                indicator.setIndeterminate(true);
+                indicator.setText("Scanning directories for test cases...");
+
+                // Do the heavy IO work here
+                String rootName = ProjectSelector.getSelectedProject().getName();
+                DefaultMutableTreeNode root = buildRoot(rootName, "testCases");
+                newModel = new DefaultTreeModel(root);
+            }
+
+            @Override
+            public void onSuccess() {
+                // This runs on the UI thread (EDT)
+                treeModel = newModel;
+                tree.setModel(treeModel);
+
+                // Optional: Expand the first level
+                tree.expandRow(0);
+                System.out.println("Tree loaded successfully in background.");
+            }
+        });
     }
 
     /**

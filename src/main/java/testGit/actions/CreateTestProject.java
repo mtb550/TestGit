@@ -25,7 +25,7 @@ public class CreateTestProject extends AnAction {
     public CreateTestProject(ProjectPanel projectPanel) {
         super("New Test Project", "Create a new test project", AllIcons.General.Add);
         this.projectPanel = projectPanel;
-        this.testCaseTree = projectPanel.getTestCaseTree();
+        this.testCaseTree = ProjectPanel.testCaseTree;
     }
 
     @Override

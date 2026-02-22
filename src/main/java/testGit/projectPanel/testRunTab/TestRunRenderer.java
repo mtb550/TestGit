@@ -7,7 +7,6 @@ import com.intellij.ui.SimpleTextAttributes;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
 import testGit.pojo.TestRunStatus;
-import testGit.projectPanel.Shortcuts;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -43,9 +42,9 @@ public class TestRunRenderer extends SimpleColoredComponent implements TreeCellR
         setIcon(getIconForDirectory(dir));
         SimpleTextAttributes style = SimpleTextAttributes.REGULAR_ATTRIBUTES;
 
-        if (dir.getFilePath() != null && Shortcuts.isCutNode(dir.getFilePath())) {
-            style = SimpleTextAttributes.GRAYED_ATTRIBUTES;
-        }
+//        if (dir.getFilePath() != null && Shortcuts.isCutNode(dir.getFilePath())) {
+//            style = SimpleTextAttributes.GRAYED_ATTRIBUTES;
+//        }
 
         append(dir.getName() != null ? dir.getName() : "Unnamed", style);
 

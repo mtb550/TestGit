@@ -8,6 +8,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.CheckboxTree;
 import com.intellij.ui.CheckedTreeNode;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
@@ -16,7 +17,6 @@ import lombok.Getter;
 import lombok.Setter;
 import testGit.pojo.*;
 import testGit.util.TestCaseSorter;
-import testGit.util.TestRunsDirectoryMapper;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -72,15 +72,15 @@ public class TestRunUI implements Disposable {
                         if (result != null) {
                             switch (result.getStatus()) {
                                 case "PASSED" -> {
-                                    mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, new Color(36, 138, 61));
+                                    mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.BLUE);
                                     statusText = " [Passed]";
                                 }
                                 case "FAILED" -> {
-                                    mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, Color.RED);
+                                    mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.RED);
                                     statusText = " [Failed]";
                                 }
                                 case "BLOCKED" -> {
-                                    mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, Color.ORANGE);
+                                    mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.ORANGE);
                                     statusText = " [Blocked]";
                                 }
                             }
@@ -195,11 +195,11 @@ public class TestRunUI implements Disposable {
             mapper.writerWithDefaultPrettyPrinter().writeValue(finalOutputFile, run);
             System.out.println("Test Run saved successfully to: " + finalOutputFile.getAbsolutePath());
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
 
         // 2. Refresh the UI Tree
-        TestRunsDirectoryMapper.buildTree();
+        //TestRunsDirectoryMapper.buildTree();
 
         // 3. CLOSE DIRECTLY
         if (currentFile != null) {

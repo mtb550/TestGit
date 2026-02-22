@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import testGit.pojo.GroupType;
 import testGit.pojo.TestCase;
-import testGit.util.ActionHistory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -107,7 +107,7 @@ public class AddTestCasePanel {
         addRow("🧪 Groups:", groupsField, formPanel, gbc, row++);
 
         // Button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+        JBPanel<?> buttonPanel = new JBPanel<>(new FlowLayout(FlowLayout.RIGHT, 10, 5));
 
         saveButton = new JButton("Create Test Case");
         saveButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -181,7 +181,7 @@ public class AddTestCasePanel {
                             return null;
                         }
                     })
-                    .filter(gt -> gt != null)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             if (!groupTypes.isEmpty()) {
@@ -196,14 +196,14 @@ public class AddTestCasePanel {
         newTestCase.setUpdateAt(LocalDateTime.now());
 
         // Register undo/redo action
-        ActionHistory.register(
-                () -> {
-                    System.out.println("[UNDO] Test case creation reverted");
-                },
-                () -> {
-                    System.out.println("[REDO] Test case created again");
-                }
-        );
+//        ActionHistory.register(
+//                () -> {
+//                    System.out.println("[UNDO] Test case creation reverted");
+//                },
+//                () -> {
+//                    System.out.println("[REDO] Test case created again");
+//                }
+//        );
 
         // Call the callback if provided
         if (onSaveCallback != null) {
@@ -253,7 +253,7 @@ public class AddTestCasePanel {
         SwingUtilities.invokeLater(() -> titleField.requestFocusInWindow());
     }
 
-    private void addRow(String label, JComponent input, JPanel panel, GridBagConstraints gbc, int row) {
+    private void addRow(String label, JComponent input, JBPanel<?> panel, GridBagConstraints gbc, int row) {
         JBLabel keyLabel = new JBLabel(label);
         keyLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         keyLabel.setHorizontalAlignment(SwingConstants.LEFT);

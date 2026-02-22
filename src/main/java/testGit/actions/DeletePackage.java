@@ -12,7 +12,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Directory;
-import testGit.projectPanel.ProjectPanel;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -21,17 +20,15 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 
 public class DeletePackage extends DumbAwareAction {
-    private final ProjectPanel projectPanel;
     private final SimpleTree tree;
 
-    public DeletePackage(final ProjectPanel projectPanel, final SimpleTree tree) {
+    public DeletePackage(final SimpleTree tree) {
         super("Delete", "Delete selected node", AllIcons.Actions.GC);
-        this.projectPanel = projectPanel;
         this.tree = tree;
     }
 
-    public static void register(final ProjectPanel projectPanel, final SimpleTree tree) {
-        DeletePackage action = new DeletePackage(projectPanel, tree);
+    public static void register(final SimpleTree tree) {
+        DeletePackage action = new DeletePackage(tree);
         action.registerCustomShortcutSet(new CustomShortcutSet(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0)), tree);
     }
 
@@ -61,7 +58,7 @@ public class DeletePackage extends DumbAwareAction {
                 }
 
                 // Update the tree model directly from the projectPanel
-                DefaultTreeModel model = (DefaultTreeModel) projectPanel.getTestCaseTree().getModel();
+                DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
                 model.removeNodeFromParent(node);
             } catch (IOException ex) {
                 Messages.showErrorDialog("Could not delete file: " + ex.getMessage(), "Error");

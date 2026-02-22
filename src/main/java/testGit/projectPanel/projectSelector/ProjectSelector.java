@@ -81,14 +81,14 @@ public class ProjectSelector {
         System.out.println("Panel.filterByProject(): " + project.getName());
 
         if (project.getName().equals("All Projects")) {
-            TestCasesDirectoryMapper.buildTree();
-            TestRunsDirectoryMapper.buildTree();
+            TestCasesDirectoryMapper.buildTreeAsync(ProjectPanel.testCaseTree);
+            TestRunsDirectoryMapper.buildTreeAsync(ProjectPanel.testRunTree);
 
-            projectPanel.getTestCaseTree().setModel(TestCasesDirectoryMapper.getTreeModel());
-            projectPanel.getTestRunTree().setModel(TestRunsDirectoryMapper.getTreeModel());
+            ProjectPanel.testCaseTree.setModel(TestCasesDirectoryMapper.getTreeModel());
+            ProjectPanel.testRunTree.setModel(TestRunsDirectoryMapper.getTreeModel());
 
-            projectPanel.getTestCaseTree().setRootVisible(true);
-            projectPanel.getTestRunTree().setRootVisible(true);
+            ProjectPanel.testCaseTree.setRootVisible(true);
+            ProjectPanel.testRunTree.setRootVisible(true);
 
         } else {
             DefaultMutableTreeNode casesRoot = TestCasesDirectoryMapper.buildNodeRecursive(project, "testCases");
@@ -97,18 +97,18 @@ public class ProjectSelector {
             TestCasesDirectoryMapper.setTreeModel(new DefaultTreeModel(casesRoot));
             TestRunsDirectoryMapper.setTreeModel(new DefaultTreeModel(runsRoot));
 
-            projectPanel.getTestCaseTree().setModel(TestCasesDirectoryMapper.getTreeModel());
-            projectPanel.getTestRunTree().setModel(TestRunsDirectoryMapper.getTreeModel());
+            ProjectPanel.testCaseTree.setModel(TestCasesDirectoryMapper.getTreeModel());
+            ProjectPanel.testRunTree.setModel(TestRunsDirectoryMapper.getTreeModel());
 
-            projectPanel.getTestCaseTree().setRootVisible(true);
-            projectPanel.getTestRunTree().setRootVisible(true);
+            ProjectPanel.testCaseTree.setRootVisible(true);
+            ProjectPanel.testRunTree.setRootVisible(true);
         }
 
-        projectPanel.getTestCaseTree().revalidate();
-        projectPanel.getTestRunTree().revalidate();
+        ProjectPanel.testCaseTree.revalidate();
+        ProjectPanel.testRunTree.revalidate();
 
-        projectPanel.getTestCaseTree().repaint();
-        projectPanel.getTestRunTree().repaint();
+        ProjectPanel.testCaseTree.repaint();
+        ProjectPanel.testRunTree.repaint();
 
         //expandAllNodes(testCaseTree);
         //expandAllNodes(testRunTree);

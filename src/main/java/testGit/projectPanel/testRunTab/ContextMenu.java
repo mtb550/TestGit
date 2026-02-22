@@ -15,12 +15,12 @@ public class ContextMenu extends DefaultActionGroup {
 
     public ContextMenu(ProjectPanel projectPanel) {
         super("Test Run Context", true);
-        SimpleTree tree = projectPanel.getTestRunTree();
+        SimpleTree tree = ProjectPanel.testRunTree;
 
         add(new createGroup(tree, projectPanel));
         addSeparator();
         add(new Rename(projectPanel, tree));
-        add(new DeletePackage(projectPanel, tree));
+        add(new DeletePackage(tree));
 
     }
 

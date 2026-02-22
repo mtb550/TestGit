@@ -4,6 +4,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +34,7 @@ public class AppSettingsConfigurable implements Configurable {
 
         return FormBuilder.createFormBuilder()
                 .addLabeledComponent(new JBLabel("Root projects folder: "), rootPathField, 1, false)
-                .addComponentFillVertically(new JPanel(), 0)
+                .addComponentFillVertically(new JBPanel<>(), 0)
                 .getPanel();
     }
 

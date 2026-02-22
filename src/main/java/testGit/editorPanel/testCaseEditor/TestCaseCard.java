@@ -14,9 +14,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class TestCaseCard extends JPanel {
+public class TestCaseCard extends JBPanel<TestCaseCard> {
     private final JBLabel titleLabel = new JBLabel();
-    private final JPanel badgePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, JBUI.scale(10), 0));
+    private final JBPanel<?> badgePanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(10), 0));
     private final JBLabel expectedLabel = createDetailLabel();
     private final JBLabel stepsLabel = createDetailLabel();
     private final JBLabel automationRefLabel = createDetailLabel();
@@ -53,7 +53,7 @@ public class TestCaseCard extends JPanel {
         content.add(Box.createVerticalStrut(JBUI.scale(4)));
         content.add(automationRefLabel);
 
-        JPanel wrapper = new JPanel(new BorderLayout());
+        JBPanel<?> wrapper = new JBPanel<>(new BorderLayout());
         wrapper.setOpaque(false);
         wrapper.setBorder(JBUI.Borders.empty(12));
         wrapper.add(content, BorderLayout.CENTER);

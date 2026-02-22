@@ -1,5 +1,9 @@
 package testGit.util;
 
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
+import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -24,9 +28,36 @@ public class TestRunsDirectoryMapper {
      * Builds the Test Runs tree.
      * Matches the 'buildTree' naming in TestCasesDirectoryMapper.
      */
-    public static void buildTree() {
-        String projectName = ProjectSelector.getSelectedProject().getName();
-        treeModel = new DefaultTreeModel(buildRoot(projectName, "testRuns"));
+    /**
+     * The background-friendly way to load your tree.
+     */
+    public static void buildTreeAsync(@NotNull SimpleTree tree) {
+        ProgressManager.getInstance().run(new Task.Backgroundable(Config.getProject(), "Loading test runs", false) {
+            private DefaultTreeModel newModel;
+
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                // This runs on a BACKGROUND thread
+                indicator.setIndeterminate(true);
+                indicator.setText("Scanning directories for test runs...");
+
+                // Do the heavy IO work here
+                String rootName = ProjectSelector.getSelectedProject().getName();
+                DefaultMutableTreeNode root = buildRoot(rootName, "testRuns");
+                newModel = new DefaultTreeModel(root);
+            }
+
+            @Override
+            public void onSuccess() {
+                // This runs on the UI thread (EDT)
+                treeModel = newModel;
+                tree.setModel(treeModel);
+
+                // Optional: Expand the first level
+                tree.expandRow(0);
+                System.out.println("Tree loaded successfully in background.");
+            }
+        });
     }
 
     private static DefaultMutableTreeNode buildRoot(String rootName, String subFolderName) {

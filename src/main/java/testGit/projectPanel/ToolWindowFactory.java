@@ -28,8 +28,8 @@ public class ToolWindowFactory implements com.intellij.openapi.wm.ToolWindowFact
         DefaultActionGroup group = new DefaultActionGroup();
 
         group.add(new OpenSettings());
-        group.add(new ExpandAll(projectPanel.getTestCaseTree()));
-        group.add(new CollapseAll(projectPanel.getTestCaseTree()));
+        group.add(new ExpandAll(ProjectPanel.testCaseTree));
+        group.add(new CollapseAll(ProjectPanel.testCaseTree));
         group.add(new Refresh(projectPanel));
         group.add(new CreateTestProject(projectPanel));
 

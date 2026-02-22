@@ -21,7 +21,7 @@ public class MouseAdapterImpl extends MouseAdapter {
 
     public MouseAdapterImpl(final ProjectPanel projectPanel) {
         this.projectPanel = projectPanel;
-        this.tree = projectPanel.getTestRunTree();
+        this.tree = ProjectPanel.testRunTree;
     }
 
     @Override

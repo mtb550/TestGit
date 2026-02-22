@@ -3,16 +3,16 @@ package testGit.editorPanel.testRunEditor;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.ui.components.JBCheckBox;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.JBUI;
 import testGit.editorPanel.testCaseEditor.TestCaseCard;
 import testGit.pojo.TestCase;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class TestRunCard extends JPanel {
+public class TestRunCard extends JBPanel<TestRunCard> {
     private final JBCheckBox selectionBox = new JBCheckBox();
     private final TestCaseCard detailCard = new TestCaseCard();
 
@@ -23,7 +23,7 @@ public class TestRunCard extends JPanel {
         // CRITICAL FIX: Give the card a height so it doesn't collapse to 0px
         setPreferredSize(new Dimension(-1, JBUI.scale(140)));
 
-        JPanel checkWrapper = new JPanel(new GridBagLayout());
+        JBPanel<?> checkWrapper = new JBPanel<>(new GridBagLayout());
         checkWrapper.setOpaque(false);
         checkWrapper.setBorder(JBUI.Borders.empty(0, 10));
         checkWrapper.add(selectionBox);

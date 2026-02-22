@@ -5,7 +5,6 @@ import com.intellij.util.ui.JBUI;
 import testGit.pojo.DB;
 import testGit.pojo.TestCase;
 import testGit.pojo.TestCaseHistory;
-import testGit.util.ActionHistory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -68,7 +67,7 @@ public class TestCaseDetailsPanel {
         mainPanel.getActionMap().put("undo", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ActionHistory.undo();
+                //ActionHistory.undo();
                 System.out.println("[UNDO] Ctrl+Z triggered");
             }
         });
@@ -77,7 +76,7 @@ public class TestCaseDetailsPanel {
         mainPanel.getActionMap().put("redo", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ActionHistory.redo();
+                //ActionHistory.redo();
                 System.out.println("[REDO] Ctrl+Y triggered");
             }
         });
@@ -192,22 +191,22 @@ public class TestCaseDetailsPanel {
         currentTestCase.setSteps(newSteps);
         currentTestCase.setPriority(newPriority);
 
-        ActionHistory.register(
-                () -> {
-                    currentTestCase.setTitle(oldTitle);
-                    currentTestCase.setExpectedResult(oldExpected);
-                    currentTestCase.setSteps(oldSteps);
-                    currentTestCase.setPriority(oldPriority);
-                    update(currentTestCase);
-                },
-                () -> {
-                    currentTestCase.setTitle(newTitle);
-                    currentTestCase.setExpectedResult(newExpected);
-                    currentTestCase.setSteps(newSteps);
-                    currentTestCase.setPriority(newPriority);
-                    update(currentTestCase);
-                }
-        );
+//        ActionHistory.register(
+//                () -> {
+//                    currentTestCase.setTitle(oldTitle);
+//                    currentTestCase.setExpectedResult(oldExpected);
+//                    currentTestCase.setSteps(oldSteps);
+//                    currentTestCase.setPriority(oldPriority);
+//                    update(currentTestCase);
+//                },
+//                () -> {
+//                    currentTestCase.setTitle(newTitle);
+//                    currentTestCase.setExpectedResult(newExpected);
+//                    currentTestCase.setSteps(newSteps);
+//                    currentTestCase.setPriority(newPriority);
+//                    update(currentTestCase);
+//                }
+//        );
 
         toggleEditMode(false);
         JOptionPane.showMessageDialog(mainPanel, "✅ Test case saved successfully.", "Saved", JOptionPane.INFORMATION_MESSAGE);
@@ -234,7 +233,7 @@ public class TestCaseDetailsPanel {
         return label;
     }
 
-    private void addRow(String label, JComponent input, JPanel panel, GridBagConstraints gbc, int row) {
+    private void addRow(String label, JComponent input, JBPanel<?> panel, GridBagConstraints gbc, int row) {
         JBLabel keyLabel = new JBLabel(label);
         keyLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         keyLabel.setHorizontalAlignment(SwingConstants.LEFT);
@@ -251,19 +250,19 @@ public class TestCaseDetailsPanel {
         panel.add(input, gbc);
     }
 
-    public JPanel getPanel() {
+    public JBPanel<?> getPanel() {
         return mainPanel;
     }
 
-    public JPanel getDetailsPanel() {
+    public JBPanel<?> getDetailsPanel() {
         return detailTab;
     }
 
-    public JPanel getHistoryPanel() {
+    public JBPanel<?> getHistoryPanel() {
         return historyTab;
     }
 
-    public JPanel getBugPanel() {
+    public JBPanel<?> getBugPanel() {
         return bugTab;
     }
 }

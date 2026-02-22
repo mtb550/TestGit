@@ -57,6 +57,8 @@ public class Rename extends AnAction {
                 }
 
                 System.out.println("Success! Renamed to: " + newFileName);
+
+                ///  update vfs after rename. to fix the issue can not find directory
             } else {
                 Messages.showErrorDialog("Could not rename folder. Make sure it's not open in another program.", "Rename Failed");
             }

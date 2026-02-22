@@ -1,15 +1,15 @@
 package testGit.projectPanel;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.tabs.TabInfo;
 import com.intellij.ui.tabs.TabsListener;
 import com.intellij.ui.tabs.impl.JBTabsImpl;
 import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Getter;
-import testGit.actions.OpenTestSet;
-import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.projectPanel.projectSelector.ProjectSelector;
 import testGit.projectPanel.testCaseTab.ShortcutHandler;
@@ -22,24 +22,20 @@ import testGit.util.TestRunsDirectoryMapper;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.prefs.Preferences;
 
 
 @Getter
 public class ProjectPanel {
-    private final JPanel panel;
-    private final SimpleTree testCaseTree;
-    private final SimpleTree testRunTree;
+    public final static SimpleTree testCaseTree = new SimpleTree();
+    public final static SimpleTree testRunTree = new SimpleTree();
+    private final JBPanel<?> panel;
     private final ProjectSelector projectSelector;
     private final VersionSelector versionSelector;
     private final JBTabsImpl tabs;
 
     public ProjectPanel(final Project project) {
         System.out.println("Panel.Panel()");
-        panel = new JPanel(new BorderLayout());
-
-        testCaseTree = new SimpleTree();
-        testRunTree = new SimpleTree();
+        panel = new JBPanel<>(new BorderLayout());
 
         projectSelector = new ProjectSelector(this);
 
@@ -49,7 +45,7 @@ public class ProjectPanel {
         JBScrollPane testCaseScrollPane = new JBScrollPane(testCaseTree);
         JBScrollPane testRunScrollPane = new JBScrollPane(testRunTree);
 
-        JPanel topBar = new JPanel(new BorderLayout());
+        JBPanel<?> topBar = new JBPanel<>(new BorderLayout());
 
         topBar.add(projectSelector.selected(), BorderLayout.NORTH);
 
@@ -73,19 +69,27 @@ public class ProjectPanel {
         tabs.addTab(testCasesTab);
         tabs.addTab(testRunsTab);
 
-        Preferences prefs = Preferences.userRoot().node("TestGit");
-        String lastTab = prefs.get("activeTab", "Test Cases");
+        // 1. Get the instance of PropertiesComponent
+        PropertiesComponent preference = PropertiesComponent.getInstance();
+
+        // 2. Retrieve the value using a unique key (it's good practice to prefix with your plugin name)
+        String lastTab = preference.getValue("testGit.activeTab", "Test Cases");
+
+        // 3. Apply the selection to your tabs
         if ("Test Runs".equals(lastTab)) {
             tabs.select(testRunsTab, true);
         } else {
             tabs.select(testCasesTab, true);
         }
 
+// 4. Update the listener to save changes using PropertiesComponent
         tabs.addListener(new TabsListener() {
             @Override
             public void selectionChanged(TabInfo oldSelection, TabInfo newSelection) {
                 System.out.println("tabs.addListener.selectionChanged(): " + newSelection.getText());
-                prefs.put("activeTab", newSelection.getText());
+
+                // Use setValue to persist the selection
+                preference.setValue("testGit.activeTab", newSelection.getText());
             }
         });
 
@@ -95,27 +99,25 @@ public class ProjectPanel {
     public void setupTestCaseTree() {
         System.out.println("Panel.setupTestCaseTree()");
 
-        TestCasesDirectoryMapper.buildTree();
+        TestCasesDirectoryMapper.buildTreeAsync(testCaseTree);
         testCaseTree.setModel(TestCasesDirectoryMapper.getTreeModel());
         testCaseTree.setRootVisible(true);
         testCaseTree.setShowsRootHandles(true);
         testCaseTree.setCellRenderer(new TestCaseRenderer());
         testCaseTree.addMouseListener(new testGit.projectPanel.testCaseTab.MouseAdapterImpl(this));
-        Shortcuts.register(testCaseTree, Config.getProject());
-        ShortcutHandler.register(this);
-        OpenTestSet.register(testCaseTree);
+        ShortcutHandler.register(testCaseTree);
         testCaseTree.setDragEnabled(true);
         testCaseTree.setDropMode(DropMode.ON_OR_INSERT);
-        testCaseTree.setTransferHandler(new TransferHandler(testCaseTree));
+        //testCaseTree.setTransferHandler(new TransferHandlerImpl(testCaseTree));
     }
 
     private void setupTestRunTree() {
         System.out.println("Panel.setupTestRunTree()");
 
-        TestRunsDirectoryMapper.buildTree();
+        TestRunsDirectoryMapper.buildTreeAsync(testRunTree);
         testRunTree.setModel(TestRunsDirectoryMapper.getTreeModel());
         testRunTree.setRootVisible(true);
-        testGit.projectPanel.testRunTab.ShortcutHandler.register(this);
+        testGit.projectPanel.testRunTab.ShortcutHandler.register(testRunTree);
         testRunTree.addMouseListener(new MouseAdapterImpl(this));
         testRunTree.setShowsRootHandles(true);
         testRunTree.setCellRenderer(new TestRunRenderer());
