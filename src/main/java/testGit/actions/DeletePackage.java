@@ -25,11 +25,9 @@ public class DeletePackage extends DumbAwareAction {
     public DeletePackage(final SimpleTree tree) {
         super("Delete", "Delete selected node", AllIcons.Actions.GC);
         this.tree = tree;
-    }
 
-    public static void register(final SimpleTree tree) {
-        DeletePackage action = new DeletePackage(tree);
-        action.registerCustomShortcutSet(new CustomShortcutSet(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0)), tree);
+        this.registerCustomShortcutSet(new CustomShortcutSet(
+                KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0)), tree);
     }
 
     @Override

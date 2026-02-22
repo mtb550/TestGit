@@ -9,37 +9,41 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
+import java.util.Set;
 
 /**
  * Custom TreeCellRenderer for IntelliJ UI components.
  * Separates icon logic and text styling for better maintainability.
  */
 public class TestCaseRenderer extends SimpleColoredComponent implements TreeCellRenderer {
+    private final Set<DefaultMutableTreeNode> cutNodes;
+
+    public TestCaseRenderer(Set<DefaultMutableTreeNode> cutNodes) {
+        this.cutNodes = cutNodes;
+    }
 
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
         this.clear();
-
-        Object userObject = (value instanceof DefaultMutableTreeNode node) ? node.getUserObject() : null;
-
-        if (userObject instanceof Directory dir) {
-            renderDirectory(dir);
-
-        } else if (value != null) {
-            setIcon(AllIcons.Nodes.Unknown);
-            append(value.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
+        if (value instanceof DefaultMutableTreeNode node) {
+            Object userObject = node.getUserObject();
+            if (userObject instanceof Directory dir) {
+                renderDirectory(node, dir, selected);
+            } else {
+                setIcon(AllIcons.Nodes.Unknown);
+                append(value.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
+            }
         }
-
         return this;
     }
 
-    private void renderDirectory(Directory dir) {
+    private void renderDirectory(DefaultMutableTreeNode node, Directory dir, boolean selected) {
         setIcon(getIconForDirectory(dir));
-        SimpleTextAttributes style = SimpleTextAttributes.REGULAR_ATTRIBUTES;
 
-//        if (dir.getFilePath() != null && Shortcuts.isCutNode(dir.getFilePath())) {
-//            style = SimpleTextAttributes.GRAYED_ATTRIBUTES;
-//        }
+        // Check the shared set to see if this specific node instance is "cut"
+        SimpleTextAttributes style = cutNodes.contains(node)
+                ? SimpleTextAttributes.GRAYED_ATTRIBUTES
+                : SimpleTextAttributes.REGULAR_ATTRIBUTES;
 
         append(dir.getName() != null ? dir.getName() : "Unnamed", style);
     }

@@ -21,7 +21,10 @@ import testGit.util.TestCasesDirectoryMapper;
 import testGit.util.TestRunsDirectoryMapper;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Getter
@@ -103,12 +106,16 @@ public class ProjectPanel {
         testCaseTree.setModel(TestCasesDirectoryMapper.getTreeModel());
         testCaseTree.setRootVisible(true);
         testCaseTree.setShowsRootHandles(true);
-        testCaseTree.setCellRenderer(new TestCaseRenderer());
-        testCaseTree.addMouseListener(new testGit.projectPanel.testCaseTab.MouseAdapterImpl(this));
-        ShortcutHandler.register(testCaseTree);
         testCaseTree.setDragEnabled(true);
         testCaseTree.setDropMode(DropMode.ON_OR_INSERT);
-        //testCaseTree.setTransferHandler(new TransferHandlerImpl(testCaseTree));
+
+        Set<DefaultMutableTreeNode> sharedCutNodes = new HashSet<>();
+        TransferHandlerImpl transferHandler = new TransferHandlerImpl(testCaseTree, sharedCutNodes);
+        testCaseTree.setTransferHandler(transferHandler);
+        ShortcutHandler.register(this, testCaseTree, transferHandler);
+        testCaseTree.setCellRenderer(new TestCaseRenderer(sharedCutNodes));
+
+        testCaseTree.addMouseListener(new testGit.projectPanel.testCaseTab.MouseAdapterImpl(this));
     }
 
     private void setupTestRunTree() {

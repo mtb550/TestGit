@@ -1,9 +1,13 @@
 package testGit.projectPanel;
 
 import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Directory;
+import testGit.pojo.DirectoryType;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -12,8 +16,9 @@ import javax.swing.tree.TreePath;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class TransferHandlerImpl extends TransferHandler {
@@ -27,14 +32,15 @@ public class TransferHandlerImpl extends TransferHandler {
         }
     }
 
-    private final Set<DefaultMutableTreeNode> cutNodes = new HashSet<>();
     private final SimpleTree tree;
+    @Getter
+    private final Set<DefaultMutableTreeNode> cutNodes;
+    private Integer lastAction;
 
-    public TransferHandlerImpl(SimpleTree tree) {
+    public TransferHandlerImpl(SimpleTree tree, Set<DefaultMutableTreeNode> cutNodes) {
+        System.out.println("TransferHandlerImpl.TransferHandlerImpl()");
         this.tree = tree;
-        tree.setDropMode(DropMode.ON);
-        tree.setDragEnabled(true);
-        tree.setTransferHandler(this);
+        this.cutNodes = cutNodes;
     }
 
 
@@ -49,6 +55,8 @@ public class TransferHandlerImpl extends TransferHandler {
         System.out.println("TransferHandlerImpl.createTransferable. path: " + Arrays.toString(tree.getSelectionPaths()));
 
         TreePath[] paths = tree.getSelectionPaths();
+        Arrays.stream(Objects.requireNonNull(tree.getSelectionPaths())).forEach(treePath -> System.out.println(treePath.getLastPathComponent()));
+
         if (paths == null) return null;
 
         DefaultMutableTreeNode[] nodes = Arrays.stream(paths)
@@ -60,11 +68,17 @@ public class TransferHandlerImpl extends TransferHandler {
 
     @Override
     public boolean canImport(TransferSupport support) {
+        System.out.println("TransferHandlerImpl.canImport()");
         // Always check if we support the data flavor
-        if (!support.isDataFlavorSupported(NODE_FLAVOR)) return false;
+        if (!support.isDataFlavorSupported(NODE_FLAVOR)) {
+            System.out.println("TransferHandlerImpl.canImport(). not support");
+            return false;
+        }
 
         // Logic for Mouse Drop
         if (support.isDrop()) {
+            System.out.println("TransferHandlerImpl.canImport(). drop support");
+
             TreePath dropPath = ((SimpleTree.DropLocation) support.getDropLocation()).getPath();
             if (dropPath == null) return false;
             DefaultMutableTreeNode targetNode = (DefaultMutableTreeNode) dropPath.getLastPathComponent();
@@ -72,29 +86,30 @@ public class TransferHandlerImpl extends TransferHandler {
         }
 
         // Logic for Keyboard Paste (Ctrl+V)
-        // We check if something is selected in the tree to act as the target
         return tree.getSelectionPath() != null;
     }
 
     // Helper to encapsulate your business rules (DRY principle)
     private boolean isValidTarget(DefaultMutableTreeNode targetNode) {
-        if (!(targetNode.getUserObject() instanceof Directory targetDir)) return false;
+        System.out.println("TransferHandlerImpl.isValidTarget()");
+
+        return targetNode.getUserObject() instanceof Directory targetDir;
         // Add your existing constraints here (e.g., TS/PR types)
-        return true;
     }
 
     @Override
     public boolean importData(TransferSupport support) {
         System.out.println("TransferHandlerImpl.importData()");
-        if (!canImport(support)) {
-            System.out.println("can not import data");
-            return false;
-        }
+
+        if (!canImport(support)) return false;
 
         try {
+            // 1. Get the nodes safely
             DefaultMutableTreeNode[] nodes = (DefaultMutableTreeNode[]) support.getTransferable().getTransferData(NODE_FLAVOR);
 
+            // 2. Determine target node
             DefaultMutableTreeNode targetNode;
+
             if (support.isDrop()) {
                 targetNode = (DefaultMutableTreeNode) ((SimpleTree.DropLocation) support.getDropLocation()).getPath().getLastPathComponent();
             } else {
@@ -103,21 +118,34 @@ public class TransferHandlerImpl extends TransferHandler {
 
             if (targetNode == null) return false;
 
-            // SAFE ACTION DETECTION
-            // If it's a drop, get the actual drop action.
-            // If it's a keyboard paste, we default to COPY (or MOVE if you prefer).
-            int action = support.isDrop() ? support.getDropAction() : COPY;
+            if (targetNode.getUserObject() instanceof Directory targetDir) {
+                if (targetDir.getType() == DirectoryType.PR) {
+                    // Adjust the path to the 'testCases' folder
+                    Path newPath = targetDir.getFilePath().resolve("testCases");
+                    targetDir.setFilePath(newPath).setFile(newPath.toFile());
+
+                    // Update the model node to reflect the new directory object
+                    targetNode.setUserObject(targetDir);
+                }
+                System.out.println("import data, target: " + targetDir.getFilePath());
+
+            }
+
+            if (this.lastAction == null) return false;
+            int action = support.isDrop() ? support.getDropAction() : this.lastAction;
 
             WriteAction.run(() -> {
                 DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
                 for (DefaultMutableTreeNode node : nodes) {
                     if (action == MOVE) {
+                        System.out.println("action is move");
                         // 1. Move logic
                         model.removeNodeFromParent(node);
                         persistMove((Directory) node.getUserObject(), (Directory) targetNode.getUserObject());
                         // Insert the ORIGINAL node
                         model.insertNodeInto(node, targetNode, targetNode.getChildCount());
                     } else {
+                        System.out.println("action is copy");
                         // 2. Copy logic
                         // Use the CLONED node for insertion
                         DefaultMutableTreeNode clone = cloneNode(node);
@@ -150,41 +178,53 @@ public class TransferHandlerImpl extends TransferHandler {
 
     private void persistMove(Directory source, Directory target) {
         System.out.println("Persisting MOVE to disk: " + source.getFileName());
-        com.intellij.openapi.vfs.VirtualFile vFile = com.intellij.openapi.vfs.LocalFileSystem.getInstance().findFileByIoFile(source.getFile());
-        com.intellij.openapi.vfs.VirtualFile targetDir = com.intellij.openapi.vfs.LocalFileSystem.getInstance().findFileByIoFile(target.getFile());
+
+        VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(source.getFile());
+        VirtualFile targetDir = LocalFileSystem.getInstance().findFileByIoFile(target.getFile());
+
+        System.out.println("source:: " + source.getFilePath());
+        System.out.println("target:: " + target.getFilePath());
         try {
-            if (vFile != null && targetDir != null) vFile.move(this, targetDir);
+            if (vFile != null && targetDir != null)
+                vFile.move(this, targetDir);
         } catch (java.io.IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
 
     private void persistCopy(Directory source, Directory target) {
         System.out.println("Persisting COPY to disk: " + source.getFileName());
-        com.intellij.openapi.vfs.VirtualFile vFile = com.intellij.openapi.vfs.LocalFileSystem.getInstance().findFileByIoFile(source.getFile());
-        com.intellij.openapi.vfs.VirtualFile targetDir = com.intellij.openapi.vfs.LocalFileSystem.getInstance().findFileByIoFile(target.getFile());
+        VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(source.getFile());
+        VirtualFile targetDir = LocalFileSystem.getInstance().findFileByIoFile(target.getFile());
         try {
             if (vFile != null && targetDir != null) vFile.copy(this, targetDir, vFile.getName());
         } catch (java.io.IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
 
     @Override
     protected void exportDone(JComponent source, Transferable data, int action) {
         System.out.println("TransferHandlerImpl.exportDone()");
+        this.lastAction = action;
+
         if (action == MOVE) {
+            System.out.println("MMMMMMove action");
             try {
                 DefaultMutableTreeNode[] nodes = (DefaultMutableTreeNode[]) data.getTransferData(NODE_FLAVOR);
+                cutNodes.clear();
                 cutNodes.addAll(Arrays.asList(nodes));
+
                 tree.repaint(); // Triggers the renderer to update colors
             } catch (Exception e) {
                 e.printStackTrace(System.err);
             }
-            System.out.println("Nodes moved successfully, cleaning up source...");
-            // Here you would remove the nodes from the original parent
-            // IF they weren't already moved by importData.
+            System.out.println("Nodes cut successfully, cleaning up source...");
         }
+    }
+
+    public void resetLastAction() {
+        this.lastAction = null;
     }
 
     private record NodesTransferable(DefaultMutableTreeNode[] nodes) implements Transferable {

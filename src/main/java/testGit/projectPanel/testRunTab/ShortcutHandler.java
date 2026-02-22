@@ -10,7 +10,7 @@ public class ShortcutHandler {
     public static void register(final SimpleTree tree) {
 
         // Delete package (VK_DELETE)
-        DeletePackage.register(tree);
+        new DeletePackage(tree);
 
 
         // 2. Map standard keystrokes to TransferHandler actions
