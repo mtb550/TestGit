@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-public enum ShortcutSet {
+public enum KeyboardSet {
     DeletePackage(KeyEvent.VK_DELETE, 0),
     Rename(KeyEvent.VK_F6, InputEvent.SHIFT_DOWN_MASK),
     CreateTestCase(KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK),
@@ -20,11 +20,12 @@ public enum ShortcutSet {
     private final int keyCode;
     private final int modifiers;
 
-    ShortcutSet(int keyCode, int modifiers) {
+    KeyboardSet(int keyCode, int modifiers) {
         this.keyCode = keyCode;
         this.modifiers = modifiers;
     }
 
+    @SuppressWarnings("MagicConstant")
     public CustomShortcutSet get() {
         return new CustomShortcutSet(KeyStroke.getKeyStroke(this.keyCode, this.modifiers));
     }

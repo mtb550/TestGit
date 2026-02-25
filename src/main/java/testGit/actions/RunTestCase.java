@@ -8,9 +8,9 @@ import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
 import testGit.pojo.TestCase;
+import testGit.util.KeyboardSet;
 import testGit.util.Notifier;
 import testGit.util.Runner.TestNGRunnerByClassName;
-import testGit.util.ShortcutSet;
 import testGit.util.Tools;
 
 public class RunTestCase extends DumbAwareAction {
@@ -19,7 +19,7 @@ public class RunTestCase extends DumbAwareAction {
     public RunTestCase(TestCase tc, JBList<TestCase> list) {
         super("Run Test", "", AllIcons.Nodes.RunnableMark);
         this.tc = tc;
-        this.registerCustomShortcutSet(ShortcutSet.RunTestCase.get(), list);
+        this.registerCustomShortcutSet(KeyboardSet.RunTestCase.get(), list);
     }
 
     @Override

@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
 import testGit.ui.CreateNewTestCaseDialog;
+import testGit.util.KeyboardSet;
 import testGit.util.Notifier;
-import testGit.util.ShortcutSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class CreateTestCase extends DumbAwareAction {
         this.list = list;
         this.dir = dir;
         this.model = model;
-        this.registerCustomShortcutSet(ShortcutSet.CreateTestCase.get(), list);
+        this.registerCustomShortcutSet(KeyboardSet.CreateTestCase.get(), list);
 
     }
 

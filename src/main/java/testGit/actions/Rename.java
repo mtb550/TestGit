@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
 import testGit.projectPanel.ProjectPanel;
-import testGit.util.ShortcutSet;
+import testGit.util.KeyboardSet;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -25,7 +25,7 @@ public class Rename extends DumbAwareAction {
         super("Rename", "Rename selected node", AllIcons.Actions.Edit);
         this.projectPanel = projectPanel;
         this.tree = tree;
-        this.registerCustomShortcutSet(ShortcutSet.Rename.get(), tree);
+        this.registerCustomShortcutSet(KeyboardSet.Rename.get(), tree);
     }
 
     @Override

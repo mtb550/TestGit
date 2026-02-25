@@ -12,7 +12,7 @@ import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
 import testGit.ui.DeleteTestCaseDialog;
-import testGit.util.ShortcutSet;
+import testGit.util.KeyboardSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +31,7 @@ public class DeleteTestCase extends DumbAwareAction {
         this.dir = dir;
         this.list = list;
         this.model = model;
-        this.registerCustomShortcutSet(ShortcutSet.DeletePackage.get(), list);
+        this.registerCustomShortcutSet(KeyboardSet.DeletePackage.get(), list);
     }
 
     @Override

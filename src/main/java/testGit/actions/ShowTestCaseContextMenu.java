@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import testGit.editorPanel.testCaseEditor.ContextMenu;
 import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
-import testGit.util.ShortcutSet;
+import testGit.util.KeyboardSet;
 
 import java.awt.*;
 
@@ -21,12 +21,11 @@ public class ShowTestCaseContextMenu extends DumbAwareAction {
     private final CollectionListModel<TestCase> model;
 
     public ShowTestCaseContextMenu(Directory dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
-        // This sets the text for the action if it ever appears in a search or menu
         super("Show Context Menu");
         this.dir = dir;
         this.list = list;
         this.model = model;
-        this.registerCustomShortcutSet(ShortcutSet.ContextMenu.get(), list);
+        this.registerCustomShortcutSet(KeyboardSet.ContextMenu.get(), list);
 
     }
 

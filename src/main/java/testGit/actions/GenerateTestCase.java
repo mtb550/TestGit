@@ -6,7 +6,7 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.TestCase;
-import testGit.util.ShortcutSet;
+import testGit.util.KeyboardSet;
 
 public class GenerateTestCase extends DumbAwareAction {
     private final TestCase tc;
@@ -14,7 +14,7 @@ public class GenerateTestCase extends DumbAwareAction {
     public GenerateTestCase(TestCase tc, final JBList<TestCase> list) {
         super("Generate Test", "", AllIcons.RunConfigurations.TestState.Run);
         this.tc = tc;
-        this.registerCustomShortcutSet(ShortcutSet.GenerateTestCase.get(), list);
+        this.registerCustomShortcutSet(KeyboardSet.GenerateTestCase.get(), list);
     }
 
     @Override

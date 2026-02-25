@@ -6,7 +6,7 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import testGit.projectPanel.TransferHandlerImpl;
-import testGit.util.ShortcutSet;
+import testGit.util.KeyboardSet;
 
 public class Escape extends DumbAwareAction {
     private final SimpleTree tree;
@@ -16,7 +16,7 @@ public class Escape extends DumbAwareAction {
         super("Escape Action", "", AllIcons.Actions.InlayGear);
         this.tree = tree;
         this.transferHandler = transferHandler;
-        this.registerCustomShortcutSet(ShortcutSet.Escape.get(), tree);
+        this.registerCustomShortcutSet(KeyboardSet.Escape.get(), tree);
 
     }
 

@@ -16,7 +16,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.io.IOException;
 
-import static testGit.util.ShortcutSet.DeletePackage;
+import static testGit.util.KeyboardSet.DeletePackage;
 
 public class DeletePackage extends DumbAwareAction {
     private final SimpleTree tree;
