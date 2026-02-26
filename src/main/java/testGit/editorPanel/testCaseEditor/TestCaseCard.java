@@ -22,8 +22,7 @@ public class TestCaseCard extends JBPanel<TestCaseCard> {
     private final JBLabel automationRefLabel = createDetailLabel();
 
     public TestCaseCard() {
-        // إعداد الهيكل الأساسي
-        setLayout(new BorderLayout()); // استخدام BorderLayout للطبقة الخارجية
+        setLayout(new BorderLayout());
         setOpaque(true);
         setMaximumSize(new Dimension(Integer.MAX_VALUE, JBUI.scale(160)));
 
@@ -86,27 +85,12 @@ public class TestCaseCard extends JBPanel<TestCaseCard> {
             case "medium" -> JBColor.magenta;
             default -> JBColor.lightGray;
         };
-        //JBLabel badge = new JBLabel(tc.getPriority().toUpperCase());
-        //setupBadgeStyle(badge, bg);
-        //return badge;
         return new RoundedBadge(tc.getPriority(), bg, 20);
     }
 
     private JBLabel createGroupBadge(GroupType groupName) {
-        //JBLabel badge = new JBLabel(groupName.name());
-        //setupBadgeStyle(badge, JBColor.darkGray);
         return new RoundedBadge(groupName.name(), JBColor.darkGray, 20);
-        //return badge;
     }
-
-//    private void setupBadgeStyle(JBLabel badge, Color bg) {
-//        badge.setFont(UIUtil.getLabelFont(UIUtil.FontSize.SMALL).deriveFont(Font.BOLD));
-//        badge.setOpaque(true);
-//        badge.setForeground(JBColor.WHITE);
-//        badge.setBackground(bg);
-//        badge.setBorder(JBUI.Borders.empty(2, 8));
-//    }
-
 
     private JBLabel createDetailLabel() {
         JBLabel label = new JBLabel();
@@ -136,7 +120,6 @@ public class TestCaseCard extends JBPanel<TestCaseCard> {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(getBackground());
-            // رسم الخلفية المنحنية
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
             g2.dispose();
             super.paintComponent(g);

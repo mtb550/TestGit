@@ -36,7 +36,7 @@ public class TestRunOpeningUI implements Disposable {
             TestCase tc = initialTestCases.get(i);
 
             // 1. Create the card
-            TestRunCard2 card = new TestRunCard2(i, tc);
+            TestRunCard card = new TestRunCard(i, tc);
 
             // 2. YOU MUST CALL THIS LINE:
             card.updateData(i, tc);
