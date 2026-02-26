@@ -37,7 +37,7 @@ public class TestRunRenderer extends SimpleColoredComponent implements TreeCellR
     }
 
     private void renderDirectory(Directory dir) {
-        System.out.println("TestRunRenderer.renderDirectory()");
+        //System.out.println("TestRunRenderer.renderDirectory()");
 
         setIcon(getIconForDirectory(dir));
         SimpleTextAttributes style = SimpleTextAttributes.REGULAR_ATTRIBUTES;

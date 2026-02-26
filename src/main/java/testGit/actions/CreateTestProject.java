@@ -7,7 +7,6 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
 import testGit.pojo.Directory;
@@ -20,12 +19,10 @@ import java.io.IOException;
 
 public class CreateTestProject extends DumbAwareAction {
     public final ProjectPanel projectPanel;
-    public SimpleTree testCaseTree;
 
     public CreateTestProject(ProjectPanel projectPanel) {
         super("New Test Project", "Create a new test project", AllIcons.General.Add);
         this.projectPanel = projectPanel;
-        this.testCaseTree = ProjectPanel.testCaseTree;
     }
 
     @Override

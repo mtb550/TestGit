@@ -17,18 +17,18 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 public class CreateTestRun extends DumbAwareAction {
-    private final SimpleTree tree;
     private final ProjectPanel projectPanel;
+    private final SimpleTree testRunTree;
 
-    public CreateTestRun(final SimpleTree tree, final ProjectPanel projectPanel) {
+    public CreateTestRun(final ProjectPanel projectPanel) {
         super("New Test Run", "Create a new test run", AllIcons.Actions.GroupBy);
-        this.tree = tree;
         this.projectPanel = projectPanel;
+        this.testRunTree = ProjectPanel.testRunTree;
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        TreePath path = tree.getSelectionPath();
+        TreePath path = testRunTree.getSelectionPath();
         if (path == null) {
             System.out.println("path is null !!");
             return;
@@ -46,13 +46,13 @@ public class CreateTestRun extends DumbAwareAction {
         NewTestRunDialog dialog = new NewTestRunDialog();
         if (dialog.showAndGet()) { // Shows popup; returns true if user clicks OK
             TestRun metadata = dialog.getMetadata();
-            TestRunEditor.open(treeItem.getFilePath(), projectPanel, parentNode, metadata);
+            TestRunEditor.create(treeItem.getFilePath(), projectPanel, parentNode, metadata);
         }
     }
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        TreePath path = tree.getSelectionPath();
+        TreePath path = testRunTree.getSelectionPath();
 
         boolean isTestRun = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&

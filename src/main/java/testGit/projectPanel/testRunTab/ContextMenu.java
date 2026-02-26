@@ -32,7 +32,7 @@ public class ContextMenu extends DefaultActionGroup {
             super("Create", "Create test run items", AllIcons.General.Add);
             setPopup(true);
             add(new CreateTestRunPackage(tree));
-            add(new CreateTestRun(tree, projectPanel));
+            add(new CreateTestRun(projectPanel));
         }
 
 

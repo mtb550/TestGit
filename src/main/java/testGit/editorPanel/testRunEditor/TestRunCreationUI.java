@@ -1,7 +1,5 @@
 package testGit.editorPanel.testRunEditor;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -16,7 +14,9 @@ import com.intellij.util.ui.tree.TreeUtil;
 import lombok.Getter;
 import lombok.Setter;
 import testGit.pojo.*;
+import testGit.projectPanel.ProjectPanel;
 import testGit.util.TestCaseSorter;
+import testGit.util.TestRunsDirectoryMapper;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -30,15 +30,14 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class TestRunUI implements Disposable {
-    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+public class TestRunCreationUI implements Disposable {
     private final List<TestCase> initialTestCases;
     private CheckboxTree checklistTree;
     private TestRun currentTestRun;
     private TestRun metadata;
     private VirtualFile currentFile;
 
-    public TestRunUI(List<TestCase> initialTestCases) {
+    public TestRunCreationUI(List<TestCase> initialTestCases) {
         this.initialTestCases = TestCaseSorter.sortTestCases(initialTestCases);
     }
 
@@ -147,7 +146,7 @@ public class TestRunUI implements Disposable {
             if (files != null) {
                 for (File file : files) {
                     try {
-                        testCases.add(mapper.readValue(file, TestCase.class));
+                        testCases.add(Config.getMapper().readValue(file, TestCase.class));
                     } catch (Exception ignored) {
                     }
                 }
@@ -192,14 +191,14 @@ public class TestRunUI implements Disposable {
 
         try {
             // FIX: Write to the FILE object, not the DIRECTORY object
-            mapper.writerWithDefaultPrettyPrinter().writeValue(finalOutputFile, run);
+            Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(finalOutputFile, run);
             System.out.println("Test Run saved successfully to: " + finalOutputFile.getAbsolutePath());
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }
 
         // 2. Refresh the UI Tree
-        //TestRunsDirectoryMapper.buildTree();
+        TestRunsDirectoryMapper.buildTreeAsync(ProjectPanel.testRunTree);
 
         // 3. CLOSE DIRECTLY
         if (currentFile != null) {
@@ -217,6 +216,11 @@ public class TestRunUI implements Disposable {
             // Assuming tc.getId() returns a string that can be converted to UUID
             item.setTestCaseId(UUID.fromString(tc.getId()));
             item.setStatus("PENDING"); // Default status for new run
+
+            Object rootObject = ((DefaultMutableTreeNode) node.getRoot()).getUserObject();
+            if (rootObject instanceof Directory rootDir) {
+                item.setProject(rootDir.getFileName());
+            }
             items.add(item);
         }
 

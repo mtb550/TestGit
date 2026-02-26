@@ -73,7 +73,7 @@ public class CreateTestSet extends DumbAwareAction {
                     model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
 
                     tree.scrollPathToVisible(new TreePath(newNode.getPath()));
-                    TestCaseEditor.open(newTestSet);
+                    TestCaseEditor.open(newTestSet, newNode);
 
 //                    ApplicationManager.getApplication().invokeLater(() -> {
 //                        TestCaseEditor.open(newTestSet);

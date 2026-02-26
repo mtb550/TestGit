@@ -25,6 +25,7 @@ public class TestRun {
     @Setter
     public static class TestRunItems {
         private UUID testCaseId;   // Pointer to the TestCase file name
+        private String project;   // Pointer to the TestCase file name
         private String status;       // "PASSED", "FAILED", "BLOCKED", "PENDING"
         private Duration duration;     // Execution time
         private String executedBy;

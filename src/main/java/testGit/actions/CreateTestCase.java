@@ -1,8 +1,5 @@
 package testGit.actions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
@@ -10,14 +7,19 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
+import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
 import testGit.ui.CreateNewTestCaseDialog;
 import testGit.util.KeyboardSet;
 import testGit.util.Notifier;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class CreateTestCase extends DumbAwareAction {
@@ -49,10 +51,7 @@ public class CreateTestCase extends DumbAwareAction {
         newTestCase.setPriority(dialog.getPriority());
         newTestCase.setGroups(dialog.getSelectedGroups());
         newTestCase.setNext(null);
-
-        ObjectMapper mapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .enable(SerializationFeature.INDENT_OUTPUT);
+        //newTestCase.setPath(getTreePathNames());
 
         try {
             if (model.isEmpty()) {
@@ -63,11 +62,11 @@ public class CreateTestCase extends DumbAwareAction {
                 lastItem.setNext(UUID.fromString(newTestCase.getId()));
 
                 File lastItemFile = new File(dir.getFile(), lastItem.getId() + ".json");
-                mapper.writeValue(lastItemFile, lastItem);
+                Config.getMapper().writeValue(lastItemFile, lastItem);
             }
 
             File targetFile = new File(dir.getFile(), newTestCase.getId() + ".json");
-            mapper.writeValue(targetFile, newTestCase);
+            Config.getMapper().writeValue(targetFile, newTestCase);
 
             LocalFileSystem.getInstance().refreshAndFindFileByIoFile(targetFile);
             model.add(newTestCase);
@@ -77,4 +76,17 @@ public class CreateTestCase extends DumbAwareAction {
             Notifier.error("Error", "unable to add new test case. " + ex.getMessage());
         }
     }
+
+    // Helper to extract the list of names from the TreeNodes
+    private List<String> getTreePathNames(DefaultMutableTreeNode node) {
+        List<String> pathNames = new ArrayList<>();
+        TreeNode[] nodes = node.getPath(); // Gets nodes from root to this node
+        for (TreeNode n : nodes) {
+            if (n instanceof DefaultMutableTreeNode dmtn && dmtn.getUserObject() instanceof Directory dir) {
+                pathNames.add(dir.getName());
+            }
+        }
+        return pathNames;
+    }
+
 }

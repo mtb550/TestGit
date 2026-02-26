@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
-public class ProviderImpl implements FileEditorProvider {
+public class ProviderCreationImpl implements FileEditorProvider {
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
         return file instanceof VirtualFileImpl;
@@ -15,12 +15,12 @@ public class ProviderImpl implements FileEditorProvider {
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        return new FileEditorImpl((VirtualFileImpl) file);
+        return new FileEditorCreationImpl((VirtualFileImpl) file);
     }
 
     @Override
     public @NotNull String getEditorTypeId() {
-        return "TestRunChecklistEditor";
+        return "TestRunCreationEditor";
     }
 
     @Override

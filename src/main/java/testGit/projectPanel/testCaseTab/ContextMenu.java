@@ -16,15 +16,15 @@ public class ContextMenu extends DefaultActionGroup {
     public ContextMenu(ProjectPanel projectPanel) {
         super("Test Case Context", true);
 
-        SimpleTree tree = ProjectPanel.testCaseTree;
+        SimpleTree testCaseTree = ProjectPanel.testCaseTree;
 
-        add(new OpenTestSet2(tree));
-        add(new AddGroup(tree));
+        add(new OpenTestSet2(testCaseTree));
+        add(new AddGroup(testCaseTree));
         addSeparator();
-        add(new DeletePackage(tree));
-        add(new Rename(projectPanel, tree));
+        add(new DeletePackage(testCaseTree));
+        add(new Rename(projectPanel, testCaseTree));
         addSeparator();
-        add(new Run(tree));
+        add(new Run(testCaseTree));
         addSeparator();
         add(createSubGroup("Export", AllIcons.ToolbarDecorator.Export, new ExportCsv(), new ExportHtml(), new ExportExcel(), new ExportJson()));
         add(createSubGroup("Import", AllIcons.ToolbarDecorator.Import, new ImportCsv(), new ImportExcel(), new ImportJson()));

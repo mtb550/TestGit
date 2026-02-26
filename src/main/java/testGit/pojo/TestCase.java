@@ -18,6 +18,8 @@ public class TestCase {
 
     private int uid;
 
+    private List<String> path;
+
     private UUID next;
 
     private Boolean isHead;

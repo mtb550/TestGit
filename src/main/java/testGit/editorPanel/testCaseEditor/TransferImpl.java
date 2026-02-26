@@ -1,10 +1,9 @@
 package testGit.editorPanel.testCaseEditor;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
+import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
 
@@ -107,14 +106,13 @@ public class TransferImpl extends TransferHandler {
     }
 
     private void updateSequenceAndSave() {
-        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
         for (int i = 0; i < model.getSize(); i++) {
             TestCase current = model.getElementAt(i);
             current.setIsHead(i == 0);
             current.setNext(i < model.getSize() - 1 ? UUID.fromString(model.getElementAt(i + 1).getId()) : null);
 
             try {
-                mapper.writerWithDefaultPrettyPrinter().writeValue(new File(dir.getFile(), current.getId() + ".json"), current);
+                Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(new File(dir.getFile(), current.getId() + ".json"), current);
             } catch (IOException ignored) {
             }
         }

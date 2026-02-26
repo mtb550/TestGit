@@ -56,7 +56,7 @@ public class MouseAdapterImpl extends MouseAdapter {
 
         } else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e) && treeItem.getType() == DirectoryType.TR) {
             System.out.println("double left click test run");
-            TestRunEditor.open(treeItem.getFilePath(), projectPanel, parentNode, null);
+            TestRunEditor.open(treeItem.getFilePath());
         }
 
     }

@@ -10,14 +10,14 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
 
-public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
+public class FileEditorCreationImpl extends UserDataHolderBase implements FileEditor {
     private final JComponent component;
-    private final TestRunUI ui;
+    private final TestRunCreationUI ui;
     private final VirtualFileImpl virtualFile;
 
-    public FileEditorImpl(VirtualFileImpl vf) {
+    public FileEditorCreationImpl(VirtualFileImpl vf) {
         this.virtualFile = vf;
-        this.ui = new TestRunUI(vf.getTestCases());
+        this.ui = new TestRunCreationUI(vf.getTestCases());
         this.ui.setMetadata(vf.getMetadata());
         this.ui.setCurrentFile(vf); // Now the UI knows exactly which tab it belongs to
         this.component = ui.createEditorPanel(vf.getTestCasesTreeModel(), vf.getRunPath());
