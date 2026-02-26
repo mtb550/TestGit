@@ -125,16 +125,16 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         actionButtonPanel.setFont(UIUtil.getLabelFont(UIUtil.FontSize.NORMAL));
 
         actionButtonPanel.add(createModernStatusButton("PASSED",
-                new JBColor(new Color(39, 174, 96, 150), new Color(46, 125, 50, 150))));
+                new JBColor(new Color(39, 174, 96, 150), new Color(46, 125, 50, 150)), "PASSED"));
         actionButtonPanel.add(createModernStatusButton("FAILED",
-                new JBColor(new Color(192, 57, 43, 150), new Color(183, 28, 28, 150))));
+                new JBColor(new Color(192, 57, 43, 150), new Color(183, 28, 28, 150)), "FAILED"));
         actionButtonPanel.add(createModernStatusButton("BLOCKED",
-                new JBColor(new Color(243, 156, 18, 150), new Color(237, 108, 2, 150))));
+                new JBColor(new Color(243, 156, 18, 150), new Color(237, 108, 2, 150)), "BLOCKED"));
+
     }
 
-    private JButton createModernStatusButton(String text, Color bg) {
+    private JButton createModernStatusButton(String text, Color bg, String status) {
         JButton btn = new JButton(text);
-
         btn.putClientProperty("JButton.buttonType", "roundRect");
         btn.putClientProperty("JButton.backgroundColor", bg);
         btn.putClientProperty("JButton.selectedBackground", bg.darker());
@@ -145,6 +145,9 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.setFocusPainted(false);
         btn.setBorder(JBUI.Borders.empty(6, 16));
+
+        // ADD ACTION HERE
+        btn.addActionListener(e -> updateTestCaseStatus(status));
 
         btn.addMouseListener(new MouseAdapter() {
             @Override
@@ -161,6 +164,18 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         });
 
         return btn;
+    }
+
+    private void updateTestCaseStatus(String status) {
+        // 1. Update your POJO
+        //this.tc.setStatus(status); // Assuming your TestCase has a setStatus method
+
+        // 2. Refresh UI if needed
+        System.out.println("execution done.");
+        System.out.println("Test Case " + tc.getTitle() + " updated to: " + status);
+
+        // 3. Optional: Trigger a save or refresh event
+        // e.g., ProjectManager.getInstance().getService(MyService.class).notifyChange(tc);
     }
 
     private void setupClickListener() {
