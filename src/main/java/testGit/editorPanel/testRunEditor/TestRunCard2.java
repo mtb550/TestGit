@@ -22,19 +22,25 @@ import java.util.List;
 public class TestRunCard2 extends JBPanel<TestRunCard2> {
     private static final int CARD_HEIGHT = 160;
     private static final int BADGE_RADIUS = 12;
-    private static final int HOVER_OPACITY = 220;
-
+    private static final int SELECTED_OPACITY = 220;
+    private static final int BORDER_THICKNESS = 1; // Border thickness in pixels
+    // Static field to track the currently selected card
+    private static TestRunCard2 currentlySelectedCard = null;
     private final JBLabel titleLabel = new JBLabel();
     private final JBPanel<?> badgePanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(6), 0));
     private final JBLabel expectedLabel = createDetailLabel();
     private final JBLabel stepsLabel = createDetailLabel();
     private final JBLabel automationRefLabel = createDetailLabel();
-
     // Panel for the action buttons with modern styling
     private final JPanel actionButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, JBUI.scale(8), 8));
-
     private final Color defaultBackground;
-    private final Color hoverBackground;
+    private final Color selectedBackground;
+    // Predefined borders to prevent layout shifts
+    private final Border defaultBorder;
+    private final Border selectedBorder;
+    private final Border emptyBorderReservation;
+    // Track selection state
+    private boolean isSelected = false;
 
     public TestRunCard2(int index, TestCase tc) {
         super(new BorderLayout());
@@ -44,9 +50,25 @@ public class TestRunCard2 extends JBPanel<TestRunCard2> {
         // Initialize backgrounds
         updateBackgrounds(index);
         defaultBackground = getBackground();
-        hoverBackground = new JBColor(
-                new Color(defaultBackground.getRed(), defaultBackground.getGreen(), defaultBackground.getBlue(), HOVER_OPACITY),
-                new Color(defaultBackground.getRed(), defaultBackground.getGreen(), defaultBackground.getBlue(), HOVER_OPACITY)
+        selectedBackground = new JBColor(
+                new Color(defaultBackground.getRed(), defaultBackground.getGreen(), defaultBackground.getBlue(), SELECTED_OPACITY),
+                new Color(defaultBackground.getRed(), defaultBackground.getGreen(), defaultBackground.getBlue(), SELECTED_OPACITY)
+        );
+
+        // Create borders with consistent spacing
+        emptyBorderReservation = BorderFactory.createCompoundBorder(
+                JBUI.Borders.empty(BORDER_THICKNESS), // Reserve space for border
+                JBUI.Borders.customLine(JBColor.border(), 0, 0, 1, 0) // Bottom line only
+        );
+
+        defaultBorder = emptyBorderReservation;
+
+        selectedBorder = BorderFactory.createCompoundBorder(
+                JBUI.Borders.empty(0), // No extra space needed since we already reserved it
+                BorderFactory.createCompoundBorder(
+                        JBUI.Borders.customLine(new JBColor(new Color(0, 120, 215), new Color(75, 110, 175)), BORDER_THICKNESS),
+                        JBUI.Borders.customLine(JBColor.border(), 0, 0, 1, 0) // Keep bottom line
+                )
         );
 
         // Enhanced title styling with modern font
@@ -76,6 +98,7 @@ public class TestRunCard2 extends JBPanel<TestRunCard2> {
 
         // Modern button styling
         styleActionButtons();
+        actionButtonPanel.setVisible(false); // Initially hidden
 
         // Enhanced wrapper with card-like appearance
         BorderLayoutPanel wrapper = new BorderLayoutPanel();
@@ -86,8 +109,11 @@ public class TestRunCard2 extends JBPanel<TestRunCard2> {
 
         add(wrapper, BorderLayout.CENTER);
 
-        // Enhanced hover listener with smooth transitions
-        setupHoverListener();
+        // Set initial border
+        setBorder(defaultBorder);
+
+        // Click listener to toggle buttons
+        setupClickListener();
 
         // Initialize data
         updateData(index, tc);
@@ -138,38 +164,44 @@ public class TestRunCard2 extends JBPanel<TestRunCard2> {
         return btn;
     }
 
-    private void setupHoverListener() {
+    private void setupClickListener() {
         addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e) {
-                actionButtonPanel.setVisible(true);
-                setBackground(hoverBackground);
-                setBorder(createHoverBorder());
-                repaint();
-            }
+            public void mouseClicked(MouseEvent e) {
+                // If there's a previously selected card and it's not this one, deselect it
+                if (currentlySelectedCard != null && currentlySelectedCard != TestRunCard2.this) {
+                    currentlySelectedCard.deselect();
+                }
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                Point mousePosition = getMousePosition();
-                if (mousePosition == null || !contains(mousePosition)) {
-                    actionButtonPanel.setVisible(false);
-                    setBackground(defaultBackground);
-                    setBorder(createDefaultBorder());
-                    repaint();
+                // Toggle selection state for this card
+                isSelected = !isSelected;
+
+                if (isSelected) {
+                    // This card is now selected
+                    currentlySelectedCard = TestRunCard2.this;
+                    select();
+                } else {
+                    // This card was deselected
+                    currentlySelectedCard = null;
+                    deselect();
                 }
             }
         });
     }
 
-    private Border createDefaultBorder() {
-        return JBUI.Borders.customLine(JBColor.border(), 0, 0, 1, 0);
+    private void select() {
+        actionButtonPanel.setVisible(true);
+        setBackground(selectedBackground);
+        setBorder(selectedBorder);
+        repaint();
     }
 
-    private Border createHoverBorder() {
-        return BorderFactory.createCompoundBorder(
-                JBUI.Borders.customLine(JBColor.namedColor("Component.borderColor", JBColor.border()), 0, 0, 1, 0),
-                JBUI.Borders.empty()
-        );
+    private void deselect() {
+        isSelected = false;
+        actionButtonPanel.setVisible(false);
+        setBackground(defaultBackground);
+        setBorder(defaultBorder);
+        repaint();
     }
 
     private void updateBackgrounds(int index) {
@@ -186,7 +218,16 @@ public class TestRunCard2 extends JBPanel<TestRunCard2> {
         automationRefLabel.setText("Automation Reference: " + tc.getAutomationRef());
 
         updateBackgrounds(index);
-        setBorder(createDefaultBorder());
+
+        // Reset selection state when updating data
+        if (isSelected) {
+            deselect();
+            if (currentlySelectedCard == this) {
+                currentlySelectedCard = null;
+            }
+        } else {
+            setBorder(defaultBorder);
+        }
 
         // Update badges with modern styling
         badgePanel.removeAll();
