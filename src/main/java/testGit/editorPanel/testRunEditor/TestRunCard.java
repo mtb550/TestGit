@@ -112,8 +112,8 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         Dimension btn = actionButtonPanel.getPreferredSize();
 
         actionButtonPanel.setBounds(
-                w - btn.width - JBUI.scale(12),
-                JBUI.scale(8),
+                w - btn.width - JBUI.scale(8),
+                h - btn.height - JBUI.scale(8),
                 btn.width,
                 btn.height
         );
@@ -122,13 +122,14 @@ public class TestRunCard extends JBPanel<TestRunCard> {
     private void styleActionButtons() {
         actionButtonPanel.setOpaque(false);
         actionButtonPanel.setVisible(false);
+        actionButtonPanel.setFont(UIUtil.getLabelFont(UIUtil.FontSize.NORMAL));
 
         actionButtonPanel.add(createModernStatusButton("PASSED",
-                new JBColor(new Color(39, 174, 96, 80), new Color(46, 125, 50, 80))));
+                new JBColor(new Color(39, 174, 96, 150), new Color(46, 125, 50, 150))));
         actionButtonPanel.add(createModernStatusButton("FAILED",
-                new JBColor(new Color(192, 57, 43, 80), new Color(183, 28, 28, 80))));
+                new JBColor(new Color(192, 57, 43, 150), new Color(183, 28, 28, 150))));
         actionButtonPanel.add(createModernStatusButton("BLOCKED",
-                new JBColor(new Color(243, 156, 18, 80), new Color(237, 108, 2, 80))));
+                new JBColor(new Color(243, 156, 18, 150), new Color(237, 108, 2, 150))));
     }
 
     private JButton createModernStatusButton(String text, Color bg) {
@@ -140,7 +141,7 @@ public class TestRunCard extends JBPanel<TestRunCard> {
 
         btn.setBackground(bg);
         btn.setForeground(JBColor.WHITE);
-        btn.setFont(JBFont.small().asBold());
+        btn.setFont(JBFont.regular().asBold());
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.setFocusPainted(false);
         btn.setBorder(JBUI.Borders.empty(6, 16));
