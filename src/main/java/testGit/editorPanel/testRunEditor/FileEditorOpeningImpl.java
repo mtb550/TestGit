@@ -18,9 +18,9 @@ public class FileEditorOpeningImpl extends UserDataHolderBase implements FileEdi
     public FileEditorOpeningImpl(VirtualFileImpl vf) {
         this.virtualFile = vf;
         this.ui = new TestRunOpeningUI(vf.getTestCases());
-        this.ui.setMetadata(vf.getMetadata());
-        this.ui.setCurrentFile(vf); // Now the UI knows exactly which tab it belongs to
-        this.component = ui.createEditorPanel(vf.getTestCasesTreeModel(), vf.getRunPath());
+        //this.ui.setMetadata(vf.getMetadata());
+        //this.ui.setCurrentFile(vf); // Now the UI knows exactly which tab it belongs to
+        this.component = ui.createEditorPanel();
     }
 
     @Override
