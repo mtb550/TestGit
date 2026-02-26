@@ -4,27 +4,31 @@ import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.ui.components.panels.VerticalLayout;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
+import com.intellij.util.ui.components.BorderLayoutPanel;
 import testGit.pojo.GroupType;
 import testGit.pojo.TestCase;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
 public class TestCaseCard extends JBPanel<TestCaseCard> {
+    private static final int CARD_HEIGHT = 130;
+    private static final int BORDER_THICKNESS = 1;
     private final JBLabel titleLabel = new JBLabel();
     private final JBPanel<?> badgePanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(10), 0));
     private final JBLabel expectedLabel = createDetailLabel();
     private final JBLabel stepsLabel = createDetailLabel();
     private final JBLabel automationRefLabel = createDetailLabel();
+    private final BorderLayoutPanel wrapper = new BorderLayoutPanel();
 
     public TestCaseCard() {
         setLayout(new BorderLayout());
         setOpaque(true);
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, JBUI.scale(160)));
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, JBUI.scale(CARD_HEIGHT)));
 
         Font titleFont = JBFont.label().deriveFont(Font.BOLD, UIUtil.getLabelFont().getSize() + 10.0f);
         titleLabel.setFont(titleFont);
@@ -33,30 +37,21 @@ public class TestCaseCard extends JBPanel<TestCaseCard> {
 
         JBPanel<?> titleLine = new JBPanel<>(new BorderLayout());
         titleLine.setOpaque(false);
-
         titleLine.setAlignmentX(Component.LEFT_ALIGNMENT);
-
         titleLine.add(titleLabel, BorderLayout.WEST);
         titleLine.add(badgePanel, BorderLayout.CENTER);
 
-        JBPanel<?> content = new JBPanel<>();
+        JBPanel<?> content = new JBPanel<>(new VerticalLayout(JBUI.scale(4)));
         content.setOpaque(false);
-        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-
         content.setAlignmentX(Component.LEFT_ALIGNMENT);
-
         content.add(titleLine);
-        content.add(Box.createVerticalStrut(JBUI.scale(8)));
         content.add(expectedLabel);
         content.add(stepsLabel);
-        content.add(Box.createVerticalStrut(JBUI.scale(4)));
         content.add(automationRefLabel);
 
-        JBPanel<?> wrapper = new JBPanel<>(new BorderLayout());
         wrapper.setOpaque(false);
-        wrapper.setBorder(JBUI.Borders.empty(12));
-        wrapper.add(content, BorderLayout.CENTER);
-
+        wrapper.setBorder(JBUI.Borders.empty(12, 16));
+        wrapper.addToCenter(content);
         add(wrapper, BorderLayout.CENTER);
     }
 

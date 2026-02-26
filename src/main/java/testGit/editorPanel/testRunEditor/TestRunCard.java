@@ -18,10 +18,9 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.List;
 
 public class TestRunCard extends JBPanel<TestRunCard> {
-    private static final int CARD_HEIGHT = 160;
+    private static final int CARD_HEIGHT = 130;
     private static final int SELECTED_OPACITY = 220;
     private static final int BORDER_THICKNESS = 1;
     private static TestRunCard currentlySelectedCard = null;
@@ -32,6 +31,10 @@ public class TestRunCard extends JBPanel<TestRunCard> {
     private final JBLabel stepsLabel = createDetailLabel();
     private final JBLabel automationRefLabel = createDetailLabel();
     private final JPanel actionButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, JBUI.scale(8), 8));
+
+    private final JLayeredPane layeredPane = new JLayeredPane();
+    private final BorderLayoutPanel wrapper = new BorderLayoutPanel();
+
     private final Color defaultBackground;
     private final Color selectedBackground;
     private final Border defaultBorder;
@@ -43,6 +46,7 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         this.tc = tc;
         setOpaque(true);
         setMaximumSize(new Dimension(Integer.MAX_VALUE, JBUI.scale(CARD_HEIGHT)));
+        setPreferredSize(new Dimension(100, JBUI.scale(CARD_HEIGHT)));
 
         updateBackgrounds(index);
         defaultBackground = getBackground();
@@ -73,35 +77,58 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         JBPanel<?> content = new JBPanel<>(new VerticalLayout(JBUI.scale(4)));
         content.setOpaque(false);
         content.setAlignmentX(Component.LEFT_ALIGNMENT);
-
         content.add(titleLine);
         content.add(expectedLabel);
         content.add(stepsLabel);
         content.add(automationRefLabel);
 
         styleActionButtons();
-        actionButtonPanel.setVisible(false);
 
-        BorderLayoutPanel wrapper = new BorderLayoutPanel();
         wrapper.setOpaque(false);
         wrapper.setBorder(JBUI.Borders.empty(12, 16));
         wrapper.addToCenter(content);
-        wrapper.addToRight(actionButtonPanel);
-        add(wrapper, BorderLayout.CENTER);
+
+        layeredPane.setLayout(null);
+        layeredPane.add(wrapper, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(actionButtonPanel, JLayeredPane.PALETTE_LAYER);
+
+        add(layeredPane, BorderLayout.CENTER);
+
         setBorder(defaultBorder);
         setupClickListener();
         updateData(index, tc);
     }
 
+    @Override
+    public void doLayout() {
+        super.doLayout();
+
+        int w = getWidth();
+        int h = getHeight();
+
+        layeredPane.setBounds(0, 0, w, h);
+        wrapper.setBounds(0, 0, w, h);
+
+        Dimension btn = actionButtonPanel.getPreferredSize();
+
+        actionButtonPanel.setBounds(
+                w - btn.width - JBUI.scale(12),
+                JBUI.scale(8),
+                btn.width,
+                btn.height
+        );
+    }
+
     private void styleActionButtons() {
         actionButtonPanel.setOpaque(false);
+        actionButtonPanel.setVisible(false);
 
         actionButtonPanel.add(createModernStatusButton("PASSED",
-                new JBColor(new Color(39, 174, 96), new Color(46, 125, 50))));
+                new JBColor(new Color(39, 174, 96, 80), new Color(46, 125, 50, 80))));
         actionButtonPanel.add(createModernStatusButton("FAILED",
-                new JBColor(new Color(192, 57, 43), new Color(183, 28, 28))));
+                new JBColor(new Color(192, 57, 43, 80), new Color(183, 28, 28, 80))));
         actionButtonPanel.add(createModernStatusButton("BLOCKED",
-                new JBColor(new Color(243, 156, 18), new Color(237, 108, 2))));
+                new JBColor(new Color(243, 156, 18, 80), new Color(237, 108, 2, 80))));
     }
 
     private JButton createModernStatusButton(String text, Color bg) {
@@ -137,24 +164,24 @@ public class TestRunCard extends JBPanel<TestRunCard> {
 
     private void setupClickListener() {
         addMouseListener(new MouseAdapter() {
-            @Override
             public void mouseClicked(MouseEvent e) {
+
                 if (e.getClickCount() == 2) {
                     ViewPanel.show(TestRunCard.this.tc);
+                    return;
+                }
+
+                if (currentlySelectedCard != null && currentlySelectedCard != TestRunCard.this)
+                    currentlySelectedCard.deselect();
+
+                isSelected = !isSelected;
+
+                if (isSelected) {
+                    currentlySelectedCard = TestRunCard.this;
+                    select();
                 } else {
-                    if (currentlySelectedCard != null && currentlySelectedCard != TestRunCard.this) {
-                        currentlySelectedCard.deselect();
-                    }
-
-                    isSelected = !isSelected;
-
-                    if (isSelected) {
-                        currentlySelectedCard = TestRunCard.this;
-                        select();
-                    } else {
-                        currentlySelectedCard = null;
-                        deselect();
-                    }
+                    currentlySelectedCard = null;
+                    deselect();
                 }
             }
         });
@@ -188,27 +215,12 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         stepsLabel.setText("Steps: " + tc.getSteps());
         automationRefLabel.setText("Automation Reference: " + tc.getAutomationRef());
 
-        updateBackgrounds(index);
-
-        if (isSelected) {
-            deselect();
-            if (currentlySelectedCard == this) {
-                currentlySelectedCard = null;
-            }
-        } else {
-            setBorder(defaultBorder);
-        }
-
         badgePanel.removeAll();
         badgePanel.add(createPriorityBadge(tc));
 
-        List<GroupType> groups = tc.getGroups();
-
-        if (groups != null) {
-            for (GroupType groupName : groups) {
+        if (tc.getGroups() != null)
+            for (GroupType groupName : tc.getGroups())
                 badgePanel.add(createGroupBadge(groupName));
-            }
-        }
     }
 
     private JBLabel createPriorityBadge(TestCase tc) {
