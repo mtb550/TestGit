@@ -10,6 +10,7 @@ import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.SearchTextField;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
@@ -44,10 +45,13 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
     private final JButton groupButton; // Using a flat button style
     private final JButton detailsButton; // Using a flat button style
     private final ModelSyncListener<TestCase> syncListener;
+    private final SearchTextField searchField = new SearchTextField();
+    private final Footer footer;
     @Getter
     private boolean showGroups;
     @Getter
     private boolean showPriority;
+    private String currentSearchQuery = "";
 
     public FileEditorImpl(@NotNull List<TestCase> testCases, @NotNull Directory dir, @NotNull VirtualFile file) {
         this.allTestCases = new ArrayList<>(testCases);
@@ -63,9 +67,9 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
             selectedDetails.addAll(List.of(savedDetails.split(",")));
         }
 
-        JBPanel<?> toolbar = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(5), JBUI.scale(2)));
-        toolbar.setBorder(JBUI.Borders.customLine(JBColor.border(), 0, 0, 1, 0));
-        toolbar.setBackground(JBUI.CurrentTheme.EditorTabs.background());
+        JBPanel<?> header = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(5), JBUI.scale(2)));
+        header.setBorder(JBUI.Borders.customLine(JBColor.border(), 0, 0, 1, 0));
+        header.setBackground(JBUI.CurrentTheme.EditorTabs.background());
 
         groupButton = new JButton("Groups", AllIcons.Actions.GroupBy);
         groupButton.setFocusable(false);
@@ -88,7 +92,7 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
             }
         });
 
-        toolbar.add(groupButton);
+        header.add(groupButton);
 
         detailsButton = new JButton("Details", AllIcons.Actions.PreviewDetailsVertically);
         detailsButton.setFocusable(false);
@@ -111,8 +115,7 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
             }
         });
 
-        toolbar.add(detailsButton);
-
+        header.add(detailsButton);
 
         this.model = new CollectionListModel<>(new ArrayList<>(allTestCases));
         this.syncListener = new ModelSyncListener<>(allTestCases, model);
@@ -131,6 +134,28 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
         });
 
         this.model.addListDataListener(syncListener);
+
+        // 1. Set the size (otherwise it might be tiny)
+        searchField.getTextEditor().setColumns(30);
+
+        // 2. Add the listener to trigger filtering
+        searchField.addDocumentListener(new com.intellij.ui.DocumentAdapter() {
+            @Override
+            protected void textChanged(@org.jetbrains.annotations.NotNull javax.swing.event.DocumentEvent e) {
+                // This calls the filtering method in your FileEditorImpl
+                applyFilters(searchField.getText().trim());
+            }
+        });
+
+        // 3. Add it to the UI
+        header.add(searchField);
+
+        // 1. Initialize the footer
+        this.footer = new Footer();
+        // 2. Add it to your main panel at the bottom
+        this.panel.add(footer, BorderLayout.SOUTH);
+        // 3. Set the initial status
+        this.footer.updateStatus(allTestCases.size(), allTestCases.size());
 
         this.list = new JBList<>(model);
         list.getEmptyText().setText("No test cases found").appendLine("Press Ctrl+M to add");
@@ -159,7 +184,7 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
         list.setTransferHandler(new TransferImpl(dir, model, resetDetailsFilter));
         ShortcutHandler.register(dir, list, model);
 
-        panel.add(toolbar, BorderLayout.NORTH);
+        panel.add(header, BorderLayout.NORTH);
         panel.add(new JBScrollPane(list), BorderLayout.CENTER);
 
         // Create the checkbox
@@ -172,8 +197,8 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
             list.repaint();
         });
 
-        // Add it to the toolbar (before or after the groupButton)
-        toolbar.add(showGroupsCheck);
+        // Add it to the header (before or after the groupButton)
+        header.add(showGroupsCheck);
 
 
         // Priority Checkbox
@@ -184,7 +209,7 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
             list.repaint();
         });
 
-        toolbar.add(showPriorityCheck); // Added to toolbar
+        header.add(showPriorityCheck); // Added to header
 
         // Update the list renderer to accept the 'showGroups' state
         this.list.setCellRenderer(new RendererImpl(this));
@@ -322,6 +347,40 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
         props.setValue("testGit.showPriority", showPriority, true);
         // Convert Set to a comma-separated string to save it
         props.setValue("testGit.selectedDetails", String.join(",", selectedDetails));
+    }
+
+    public void applyFilters(String query) {
+        this.currentSearchQuery = query;
+
+        // We pause the syncListener so that updating the UI model
+        // doesn't accidentally try to "sync" back to the original file.
+        if (syncListener != null) syncListener.pause();
+
+        try {
+            List<TestCase> filtered = allTestCases.stream()
+                    .filter(tc -> {
+                        // Filter by Search Query
+                        boolean matchesSearch = query.isEmpty() ||
+                                (tc.getTitle() != null && tc.getTitle().toLowerCase().contains(query.toLowerCase()));
+
+                        // Filter by Selected Groups (Keep your existing logic here)
+                        boolean matchesGroup = selectedGroups.isEmpty() ||
+                                (tc.getGroups() != null && tc.getGroups().stream().anyMatch(selectedGroups::contains));
+
+                        return matchesSearch && matchesGroup;
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+
+            // Update the JBList model with the new filtered results
+            model.replaceAll(filtered);
+
+            // Update the footer counts
+            if (footer != null) {
+                footer.updateStatus(model.getSize(), allTestCases.size());
+            }
+        } finally {
+            if (syncListener != null) syncListener.resume();
+        }
     }
 
     @Override

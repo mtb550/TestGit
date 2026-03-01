@@ -3,20 +3,24 @@ package testGit.editorPanel.testCaseEditor;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
-public class ProviderImpl implements FileEditorProvider {
+public class ProviderImpl implements FileEditorProvider, DumbAware {
+
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
-        return file instanceof VirtualFileImpl;
+        return file.getClass().getSimpleName().equals("VirtualFileImpl");
     }
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        VirtualFileImpl vf = (VirtualFileImpl) file;
-        return new FileEditorImpl(vf.getTestCases(), vf.getDir(), file);
+        if (file instanceof VirtualFileImpl vf) {
+            return new FileEditorImpl(vf.getTestCases(), vf.getDir(), file);
+        }
+        throw new IllegalArgumentException("Expected VirtualFileImpl, got: " + file.getClass().getName());
     }
 
     @Override
