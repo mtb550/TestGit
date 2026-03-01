@@ -3,18 +3,14 @@ package testGit.actions;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Directory;
+import testGit.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import java.io.IOException;
 
 import static testGit.util.KeyboardSet.DeletePackage;
 
@@ -38,27 +34,11 @@ public class DeletePackage extends DumbAwareAction {
                 Messages.getQuestionIcon()
         );
 
-        if (confirm == Messages.YES)
-            performDeletion(node, treeItem);
+        if (confirm == Messages.YES) {
+            TreeUtilImpl.removeVf(this, treeItem.getFile());
+            TreeUtilImpl.removeNode(node, tree);
+        }
 
-    }
-
-    private void performDeletion(DefaultMutableTreeNode node, Directory treeItem) {
-        WriteAction.run(() -> {
-            try {
-                // Use LocalFileSystem to safely delete the file/directory
-                VirtualFile vf = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(treeItem.getFile());
-                if (vf != null) {
-                    vf.delete(this);
-                }
-
-                // Update the tree model directly from the projectPanel
-                DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                model.removeNodeFromParent(node);
-            } catch (IOException ex) {
-                Messages.showErrorDialog("Could not delete file: " + ex.getMessage(), "Error");
-            }
-        });
     }
 
     @Override

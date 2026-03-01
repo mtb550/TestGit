@@ -3,20 +3,16 @@ package testGit.actions;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
+import testGit.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import java.io.IOException;
 import java.nio.file.Path;
 
 public class CreateTestRunPackage extends DumbAwareAction {
@@ -62,25 +58,9 @@ public class CreateTestRunPackage extends DumbAwareAction {
                 .setFilePath(fullPath)
                 .setFile(fullPath.toFile());
 
-        WriteAction.run(() -> {
-            try {
-                VirtualFile parentVf = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(parentPath);
+        TreeUtilImpl.insertVf(this, parentPath, folderName);
+        TreeUtilImpl.insertNode(tree, parentNode, newPackage);
 
-                if (parentVf != null && parentVf.isDirectory()) {
-                    parentVf.createChildDirectory(this, folderName);
-
-                    DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newPackage);
-
-                    model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
-
-                    tree.makeVisible(new TreePath(newNode.getPath()));
-                    tree.setSelectionPath(new TreePath(newNode.getPath()));
-                }
-            } catch (IOException ex) {
-                Messages.showErrorDialog("Could not create directory: " + ex.getMessage(), "Error");
-            }
-        });
     }
 
     @Override

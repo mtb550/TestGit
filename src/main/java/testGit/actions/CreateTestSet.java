@@ -3,21 +3,17 @@ package testGit.actions;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import testGit.editorPanel.testCaseEditor.TestCaseEditor;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
+import testGit.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import java.io.IOException;
 
 
 public class CreateTestSet extends DumbAwareAction {
@@ -61,28 +57,10 @@ public class CreateTestSet extends DumbAwareAction {
         System.out.println("AddTestSet.actionPerformed(): newTestSet = " + newTestSet.getFilePath());
         newTestSet.setFile(newTestSet.getFilePath().toFile());
 
-        WriteAction.run(() -> {
-            try {
-                VirtualFile parentDir = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(treeItem.getType() == DirectoryType.PR ? treeItem.getFilePath().resolve("testCases") : treeItem.getFilePath());
+        TreeUtilImpl.insertVf(this, newTestSet.getFilePath(), newTestSet.getFileName());
 
-                if (parentDir != null) {
-                    parentDir.createChildDirectory(this, newTestSet.getFileName());
-
-                    DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newTestSet);
-                    model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
-
-                    tree.scrollPathToVisible(new TreePath(newNode.getPath()));
-                    TestCaseEditor.open(newTestSet, newNode);
-
-//                    ApplicationManager.getApplication().invokeLater(() -> {
-//                        TestCaseEditor.open(newTestSet);
-//                    });
-                }
-            } catch (IOException ex) {
-                System.err.println("unable to create test set: " + newTestSet);
-            }
-        });
+        DefaultMutableTreeNode newNode = TreeUtilImpl.insertNode(tree, parentNode, newTestSet);
+        TestCaseEditor.open(newTestSet, newNode);
     }
 
     @Override
