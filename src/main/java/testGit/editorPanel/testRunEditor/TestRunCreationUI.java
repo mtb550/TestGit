@@ -174,7 +174,7 @@ public class TestRunCreationUI implements Disposable {
             e.printStackTrace(System.err);
         }
 
-        TestRunsDirectoryMapper.buildTreeAsync(projectPanel.getProjectSelector().getSelectedProject(),projectPanel.getTestRunTabController().getTree());
+        TestRunsDirectoryMapper.buildTreeAsync(projectPanel.getTestProjectSelector().getSelectedTestProject().getItem(), projectPanel.getTestRunTabController().getTree());
         FileEditorManager.getInstance(Config.getProject()).closeFile(currentFile);
     }
 

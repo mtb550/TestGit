@@ -7,7 +7,8 @@ import testGit.util.TestRunsDirectoryMapper;
 
 public class TestRunTabController {
     private final ProjectPanel projectPanel;
-    @Getter private final SimpleTree tree;
+    @Getter
+    private final SimpleTree tree;
 
 
     public TestRunTabController(ProjectPanel projectPanel) {
@@ -15,13 +16,13 @@ public class TestRunTabController {
         this.tree = new SimpleTree();
     }
 
-    public void setup() {
+    public void init() {
         tree.setCellRenderer(new TestRunRenderer());
         tree.setRootVisible(true);
         tree.setShowsRootHandles(true);
         tree.addMouseListener(new MouseAdapterImpl(projectPanel));
         ShortcutHandler.register(tree);
 
-        TestRunsDirectoryMapper.buildTreeAsync(projectPanel.getProjectSelector().getSelectedProject(),tree);
+        TestRunsDirectoryMapper.buildTreeAsync(projectPanel.getTestProjectSelector().getSelectedTestProject().getItem(), tree);
     }
 }

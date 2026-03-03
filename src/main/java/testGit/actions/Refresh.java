@@ -17,7 +17,7 @@ public class Refresh extends DumbAwareAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         System.out.println("RefreshAction.actionPerformed()");
-        projectPanel.getProjectSelector().loadProjectList();
+        projectPanel.getTestProjectSelector().loadTestProjectList();
     }
 
 }

@@ -32,15 +32,15 @@ public class CreateTestProject extends DumbAwareAction {
 
         if (name == null) return;
 
-        Directory newProject = new Directory()
+        Directory newTestProject = new Directory()
                 .setType(DirectoryType.PR)
                 .setName(name)
                 .setActive(1);
 
-        String folderName = String.format("%s_%s_%d", newProject.getType().name().toLowerCase(), newProject.getName(), newProject.getActive());
+        String folderName = String.format("%s_%s_%d", newTestProject.getType().name().toLowerCase(), newTestProject.getName(), newTestProject.getActive());
         Path projectPath = Config.getTestGitPath().resolve(folderName);
 
-        newProject.setFileName(folderName)
+        newTestProject.setFileName(folderName)
                 .setFilePath(projectPath)
                 .setFile(projectPath.toFile());
 
@@ -54,9 +54,9 @@ public class CreateTestProject extends DumbAwareAction {
                     projectDir.createChildDirectory(this, "testCases");
                     projectDir.createChildDirectory(this, "testRuns");
 
-                    projectPanel.getProjectSelector().addProject(newProject);
-                    projectPanel.getProjectSelector().selectProject(newProject);
-                    projectPanel.getProjectSelector().filterByTestProject(newProject, projectPanel);
+                    projectPanel.getTestProjectSelector().addTestProject(newTestProject);
+                    projectPanel.getTestProjectSelector().getSelectedTestProject().setSelectedItem(newTestProject);
+                    projectPanel.getTestProjectSelector().filterByTestProject(newTestProject, projectPanel);
 
                     Notifier.information("New Test Project", String.format("Test Project %s has been added", name));
 

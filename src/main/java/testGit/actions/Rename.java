@@ -54,8 +54,8 @@ public class Rename extends DumbAwareAction {
 
                 ((DefaultTreeModel) tree.getModel()).nodeChanged(node);
 
-                if (treeItem.getType() == DirectoryType.PR && projectPanel.getProjectSelector() != null) {
-                    projectPanel.getProjectSelector().loadProjectList();
+                if (treeItem.getType() == DirectoryType.PR && projectPanel.getTestProjectSelector() != null) {
+                    projectPanel.getTestProjectSelector().loadTestProjectList();
                 }
 
                 System.out.println("Success! Renamed to: " + newFileName);

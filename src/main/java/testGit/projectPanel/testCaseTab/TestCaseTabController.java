@@ -4,11 +4,9 @@ import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Getter;
 import testGit.projectPanel.ProjectPanel;
 import testGit.projectPanel.TransferHandlerImpl;
-import testGit.util.TestCasesDirectoryMapper;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,7 +22,7 @@ public class TestCaseTabController {
         this.tree = new SimpleTree();
     }
 
-    public void setup() {
+    public void init() {
         tree.setRootVisible(true);
         tree.setShowsRootHandles(true);
         tree.setDragEnabled(true);
@@ -38,6 +36,6 @@ public class TestCaseTabController {
         ShortcutHandler.register(projectPanel, tree, transferHandler);
         tree.addMouseListener(new MouseAdapterImpl(projectPanel));
 
-        buildTreeAsync(projectPanel.getProjectSelector().getSelectedProject(),tree);
+        buildTreeAsync(projectPanel.getTestProjectSelector().getSelectedTestProject().getItem(), tree);
     }
 }

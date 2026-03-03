@@ -4,7 +4,7 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBPanel;
 import lombok.Getter;
-import testGit.projectPanel.projectSelector.ProjectSelector;
+import testGit.projectPanel.projectSelector.TestProjectSelector;
 import testGit.projectPanel.testCaseTab.TestCaseTabController;
 import testGit.projectPanel.testRunTab.TestRunTabController;
 import testGit.projectPanel.versionSelector.VersionSelector;
@@ -14,7 +14,7 @@ import java.awt.*;
 @Getter
 public class ProjectPanel implements Disposable {
     private final JBPanel<?> panel;
-    private final ProjectSelector projectSelector;
+    private final TestProjectSelector testProjectSelector;
     private final VersionSelector versionSelector;
     private final Tabs tabs;
     private final TestCaseTabController testCaseTabController;
@@ -23,15 +23,15 @@ public class ProjectPanel implements Disposable {
     public ProjectPanel(Project project) {
         panel = new JBPanel<>(new BorderLayout());
 
-        projectSelector = new ProjectSelector(this);
+        testProjectSelector = new TestProjectSelector(this);
 
         testCaseTabController = new TestCaseTabController(this);
         testRunTabController = new TestRunTabController(this);
 
         JBPanel<?> topBar = new JBPanel<>(new BorderLayout());
-        topBar.add(projectSelector.selected(), BorderLayout.NORTH);
+        topBar.add(testProjectSelector.getSelectedTestProject(), BorderLayout.NORTH);
 
-        versionSelector = new VersionSelector(projectSelector.getSelectedProject());
+        versionSelector = new VersionSelector(testProjectSelector.getSelectedTestProject().getItem());
         topBar.add(versionSelector.getComponent(), BorderLayout.SOUTH);
 
         panel.add(topBar, BorderLayout.NORTH);
@@ -41,9 +41,10 @@ public class ProjectPanel implements Disposable {
     }
 
     public void init() {
-        testCaseTabController.setup();
-        testRunTabController.setup();
-        projectSelector.loadProjectList();
+        //testProjectSelector.loadTestProjectList();
+        testProjectSelector.init();
+        testCaseTabController.init();
+        testRunTabController.init();
     }
 
     @Override
