@@ -1,7 +1,6 @@
 package testGit.projectPanel.testRunTab;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.treeStructure.SimpleTree;
 import testGit.actions.CreateTestRun;
@@ -15,7 +14,7 @@ public class ContextMenu extends DefaultActionGroup {
 
     public ContextMenu(ProjectPanel projectPanel) {
         super("Test Run Context", true);
-        SimpleTree tree = projectPanel.getTestRunTree();
+        SimpleTree tree = projectPanel.getTestRunTabController().getTree();
 
         add(new createGroup(tree, projectPanel));
         addSeparator();
@@ -30,16 +29,6 @@ public class ContextMenu extends DefaultActionGroup {
             setPopup(true);
             add(new CreateTestRunPackage(tree));
             add(new CreateTestRun(projectPanel));
-        }
-
-
-        private DefaultActionGroup createSubGroup(String title, javax.swing.Icon icon, AnAction... actions) {
-            DefaultActionGroup group = new DefaultActionGroup(title, true);
-            group.getTemplatePresentation().setIcon(icon);
-            for (AnAction action : actions) {
-                group.add(action);
-            }
-            return group;
         }
 
     }

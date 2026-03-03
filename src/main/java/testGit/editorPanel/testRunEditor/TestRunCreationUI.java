@@ -175,7 +175,7 @@ public class TestRunCreationUI implements Disposable {
             e.printStackTrace(System.err);
         }
 
-        TestRunsDirectoryMapper.buildTreeAsync(projectPanel.getTestRunTree());
+        TestRunsDirectoryMapper.buildTreeAsync(projectPanel.getTestRunTabController().getTree());
 
         if (currentFile != null) {
             ApplicationManager.getApplication().invokeLater(() ->

@@ -1,6 +1,5 @@
 package testGit.projectPanel.projectSelector;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
@@ -15,7 +14,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.io.File;
 import java.util.Arrays;
-import java.util.List;
 
 public class ProjectSelector {
     public static ComboBox<Directory> comboBox;
@@ -92,48 +90,26 @@ public class ProjectSelector {
         System.out.println("Panel.filterByProject(): " + project.getName());
 
         if (project.getName().equals("All Projects")) {
-            TestCasesDirectoryMapper.buildTreeAsync(projectPanel.getTestCaseTree());
-            TestRunsDirectoryMapper.buildTreeAsync(projectPanel.getTestRunTree());
+            TestCasesDirectoryMapper.buildTreeAsync(projectPanel.getTestCaseTabController().getTree());
+            TestRunsDirectoryMapper.buildTreeAsync(projectPanel.getTestRunTabController().getTree());
         } else {
             DefaultMutableTreeNode casesRoot = TestCasesDirectoryMapper.buildNodeRecursive(project, "testCases");
             DefaultMutableTreeNode runsRoot = TestRunsDirectoryMapper.buildNodeRecursive(project, "testRuns");
 
-            projectPanel.getTestCaseTree().setModel(new DefaultTreeModel(casesRoot));
-            projectPanel.getTestRunTree().setModel(new DefaultTreeModel(runsRoot));
+            projectPanel.getTestCaseTabController().getTree().setModel(new DefaultTreeModel(casesRoot));
+            projectPanel.getTestRunTabController().getTree().setModel(new DefaultTreeModel(runsRoot));
         }
 
-        if (projectPanel.getTestCaseTree().getCellRenderer() == null ||
-                !(projectPanel.getTestCaseTree().getCellRenderer() instanceof TestCaseRenderer)) {
-            projectPanel.setupTestCaseTree(Config.getProject());
+        if (projectPanel.getTestCaseTabController().getTree().getCellRenderer() == null ||
+                !(projectPanel.getTestCaseTabController().getTree().getCellRenderer() instanceof TestCaseRenderer)) {
+            projectPanel.getTestCaseTabController().setup(Config.getProject());
         }
 
-        projectPanel.getTestCaseTree().setRootVisible(true);
-        projectPanel.getTestRunTree().setRootVisible(true);
+        projectPanel.getTestCaseTabController().getTree().setRootVisible(true);
+        projectPanel.getTestRunTabController().getTree().setRootVisible(true);
 
-        projectPanel.getTestCaseTree().repaint();
-        projectPanel.getTestRunTree().repaint();
-    }
-
-    public void onProjectListLoaded(List<Directory> projects) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            comboBoxModel.removeAllElements();
-
-            Directory allProjects = new Directory().setName("All Projects");
-            comboBoxModel.addElement(allProjects);
-
-            for (Directory p : projects) {
-                comboBoxModel.addElement(p);
-            }
-
-            if (comboBoxModel.getSize() > 0) {
-                comboBox.setSelectedIndex(0);
-            }
-
-            if (projectPanel != null && Config.getProject() != null) {
-                projectPanel.setupTestCaseTree(Config.getProject());
-                projectPanel.setupTestRunTree(Config.getProject());
-            }
-        });
+        projectPanel.getTestCaseTabController().getTree().repaint();
+        projectPanel.getTestRunTabController().getTree().repaint();
     }
 
 }

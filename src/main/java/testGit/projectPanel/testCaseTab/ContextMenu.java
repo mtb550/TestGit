@@ -16,7 +16,7 @@ public class ContextMenu extends DefaultActionGroup {
     public ContextMenu(ProjectPanel projectPanel) {
         super("Test Case Context", true);
 
-        SimpleTree testCaseTree = projectPanel.getTestCaseTree();
+        SimpleTree testCaseTree = projectPanel.getTestCaseTabController().getTree();
 
         add(new OpenTestSet2(testCaseTree));
         add(new AddGroup(testCaseTree));

@@ -27,7 +27,6 @@ public class TestCaseCard extends JBPanel<TestCaseCard> {
     private final JBLabel businessRefLabel = createDetailLabel();
     private final JBLabel moduleLabel = createDetailLabel();
     private final JBLabel idLabel = createDetailLabel();
-    private final BorderLayoutPanel wrapper = new BorderLayoutPanel();
 
     public TestCaseCard() {
         setLayout(new BorderLayout());
@@ -56,6 +55,7 @@ public class TestCaseCard extends JBPanel<TestCaseCard> {
         content.add(moduleLabel);
         content.add(idLabel);
 
+        BorderLayoutPanel wrapper = new BorderLayoutPanel();
         wrapper.setOpaque(false);
         wrapper.setBorder(JBUI.Borders.empty(12, 16));
         wrapper.addToCenter(content);

@@ -60,7 +60,7 @@ public class CreateTestSet extends DumbAwareAction {
         TreeUtilImpl.insertVf(this, newTestSet.getFilePath(), newTestSet.getFileName());
 
         DefaultMutableTreeNode newNode = TreeUtilImpl.insertNode(tree, parentNode, newTestSet);
-        TestCaseEditor.open(newTestSet, newNode);
+        TestCaseEditor.open(newTestSet);
     }
 
     @Override

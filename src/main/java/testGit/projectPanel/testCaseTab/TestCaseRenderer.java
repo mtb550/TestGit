@@ -17,7 +17,7 @@ public class TestCaseRenderer extends SimpleColoredComponent implements TreeCell
 
     public TestCaseRenderer(Set<DefaultMutableTreeNode> cutNodes) {
         this.cutNodes = cutNodes;
-        setOpaque(true); // Required for background colors to show
+        setOpaque(true);
     }
 
     @Override
@@ -34,7 +34,6 @@ public class TestCaseRenderer extends SimpleColoredComponent implements TreeCell
             append(value.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
         }
 
-        // Fix selection colors
         if (selected) {
             setBackground(UIUtil.getTreeSelectionBackground(true));
             setForeground(UIUtil.getTreeSelectionForeground(true));

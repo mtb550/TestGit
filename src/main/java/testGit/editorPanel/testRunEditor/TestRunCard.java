@@ -303,7 +303,6 @@ public class TestRunCard extends JBPanel<TestRunCard> {
 
         @Override
         protected void paintComponent(Graphics g) {
-
             super.paintComponent(g);
         }
     }
