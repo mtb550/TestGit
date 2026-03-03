@@ -14,8 +14,6 @@
 
     <extensions defaultExtensionNs="com.intellij">
 
-        <postStartupActivity implementation="testGit.settings.PluginPostStartupActivity"/>
-
         <toolWindow
                 id="TestGit"
                 factoryClass="testGit.projectPanel.Main"
@@ -68,8 +66,4 @@
         </group>
     </actions>
 
-    <!--    <projectListeners>-->
-    <!--        <listener class="testGit.settings.MyVfsListener"-->
-    <!--                  topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>-->
-    <!--    </projectListeners>-->
 </idea-plugin>

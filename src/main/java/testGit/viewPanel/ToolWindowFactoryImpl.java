@@ -1,6 +1,5 @@
 package testGit.viewPanel;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -24,27 +23,23 @@ public class ToolWindowFactoryImpl implements ToolWindowFactory, DumbAware {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            if (project.isDisposed()) return;
 
-            detailsInstance = new TestCaseDetailsPanel();
-            addInstance = new AddTestCasePanel();
+        detailsInstance = new TestCaseDetailsPanel();
+        addInstance = new AddTestCasePanel();
 
-            ContentFactory contentFactory = ContentFactory.getInstance();
+        ContentFactory contentFactory = ContentFactory.getInstance();
 
-            Content detailsTab = contentFactory.createContent(detailsInstance.getDetailsPanel(), "Details", false);
-            Content historyTab = contentFactory.createContent(detailsInstance.getHistoryPanel(), "History", false);
-            Content bugsTab = contentFactory.createContent(detailsInstance.getBugPanel(), "Open Bugs", false);
-            Content addTestCaseTab = contentFactory.createContent(addInstance.getMainPanel(), "Create Test Case", false);
+        Content detailsTab = contentFactory.createContent(detailsInstance.getDetailsPanel(), "Details", false);
+        Content historyTab = contentFactory.createContent(detailsInstance.getHistoryPanel(), "History", false);
+        Content bugsTab = contentFactory.createContent(detailsInstance.getBugPanel(), "Open Bugs", false);
+        Content addTestCaseTab = contentFactory.createContent(addInstance.getMainPanel(), "Create Test Case", false);
 
-            toolWindow.getContentManager().addContent(detailsTab);
-            toolWindow.getContentManager().addContent(historyTab);
-            toolWindow.getContentManager().addContent(bugsTab);
-            toolWindow.getContentManager().addContent(addTestCaseTab);
+        toolWindow.getContentManager().addContent(detailsTab);
+        toolWindow.getContentManager().addContent(historyTab);
+        toolWindow.getContentManager().addContent(bugsTab);
+        toolWindow.getContentManager().addContent(addTestCaseTab);
 
-            setupKeyHandlers(detailsInstance);
-
-        }, project.getDisposed());
+        setupKeyHandlers(detailsInstance);
     }
 
     private void setupKeyHandlers(TestCaseDetailsPanel details) {

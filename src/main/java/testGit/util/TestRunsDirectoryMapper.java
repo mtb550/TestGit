@@ -1,15 +1,11 @@
 package testGit.util;
 
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.treeStructure.SimpleTree;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
-import testGit.projectPanel.projectSelector.ProjectSelector;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -20,35 +16,11 @@ import java.util.Optional;
 
 public class TestRunsDirectoryMapper {
 
-    public static void buildTreeAsync(SimpleTree tree) {
-
-        ProgressManager.getInstance().run(new Task.Backgroundable(Config.getProject(), "Loading test runs", false) {
-            private DefaultTreeModel newModel;
-
-            @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                Directory selectedProject = ProjectSelector.getSelectedProject();
-
-                if (selectedProject == null) {
-                    return;
-                }
-
-                indicator.setIndeterminate(true);
-                indicator.setText("Scanning directories for test runs...");
-
-                String rootName = selectedProject.getName();
-                DefaultMutableTreeNode root = buildRoot(rootName);
-                newModel = new DefaultTreeModel(root);
-            }
-
-            @Override
-            public void onSuccess() {
-                tree.setModel(newModel);
-                newModel.nodeStructureChanged((DefaultMutableTreeNode) newModel.getRoot());
-                //tree.updateUI();
-                tree.expandRow(0);
-                System.out.println("TR Tree loaded successfully in background.");
-            }
+    public static void buildTreeAsync(Directory selectedProject, SimpleTree tree) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            DefaultMutableTreeNode root = buildRoot(selectedProject.getName());
+            DefaultTreeModel newModel = new DefaultTreeModel(root);
+            tree.setModel(newModel);
         });
     }
 
@@ -56,16 +28,15 @@ public class TestRunsDirectoryMapper {
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(rootName);
         File[] testProjects = Config.getTestGitPath().toFile().listFiles();
 
-        if (testProjects != null) {
-            Arrays.stream(testProjects)
-                    .filter(item -> !item.getName().startsWith("."))
-                    .map(TestRunsDirectoryMapper::map)
-                    .filter(Objects::nonNull)
-                    .forEach(item -> {
-                        System.out.println("TestRunsDirectoryMapper.buildRoot: " + item.getName());
-                        rootNode.add(buildNodeRecursive(item, "testRuns"));
-                    });
-        }
+        Optional.ofNullable(testProjects)
+                .stream()
+                .flatMap(Arrays::stream)
+                .filter(item -> !item.getName().startsWith("."))
+                .parallel()
+                .map(TestRunsDirectoryMapper::map)
+                .filter(Objects::nonNull)
+                .forEach(item -> rootNode.add(buildNodeRecursive(item, "testRuns")));
+
         return rootNode;
     }
 
@@ -76,18 +47,13 @@ public class TestRunsDirectoryMapper {
                 ? dir.getFilePath().resolve(subFolder).toFile()
                 : dir.getFile();
 
-        System.out.println("TestRunsDirectoryMapper.buildNodeRecursive. folderToScan: " + folderToScan);
-
         Optional.ofNullable(folderToScan.listFiles())
                 .stream()
                 .flatMap(Arrays::stream)
-                .map(TestRunsDirectoryMapper::map)
                 .parallel()
+                .map(TestRunsDirectoryMapper::map)
                 .filter(Objects::nonNull)
-                .forEachOrdered(runDir -> {
-                    System.out.println("TestRunsDirectoryMapper.buildNodeRecursive: " + runDir.getFileName());
-                    node.add(buildNodeRecursive(runDir, null));
-                });
+                .forEachOrdered(runDir -> node.add(buildNodeRecursive(runDir, null)));
 
         return node;
     }
@@ -96,10 +62,7 @@ public class TestRunsDirectoryMapper {
     public static Directory map(final File file) {
         try {
             String fileName = file.getName();
-            System.out.println("TestRunsDirectoryMapper.map(). fileName: " + fileName);
-
             String rawName = fileName.contains(".") ? fileName.substring(0, fileName.lastIndexOf(".")) : fileName;
-            System.out.println("TestRunsDirectoryMapper.map(). rawName: " + rawName);
 
             String[] parts = rawName.split("_", 3);
             if (parts.length < 3)

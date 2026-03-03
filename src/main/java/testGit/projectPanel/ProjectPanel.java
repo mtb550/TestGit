@@ -1,8 +1,6 @@
 package testGit.projectPanel;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBPanel;
 import lombok.Getter;
@@ -33,7 +31,7 @@ public class ProjectPanel implements Disposable {
         JBPanel<?> topBar = new JBPanel<>(new BorderLayout());
         topBar.add(projectSelector.selected(), BorderLayout.NORTH);
 
-        versionSelector = new VersionSelector(ProjectSelector.getSelectedProject());
+        versionSelector = new VersionSelector(projectSelector.getSelectedProject());
         topBar.add(versionSelector.getComponent(), BorderLayout.SOUTH);
 
         panel.add(topBar, BorderLayout.NORTH);
@@ -42,17 +40,10 @@ public class ProjectPanel implements Disposable {
         panel.add(tabs.getComponent(), BorderLayout.CENTER);
     }
 
-    public void init(Project project) {
-        DumbService.getInstance(project).runWhenSmart(() ->
-                ApplicationManager.getApplication().executeOnPooledThread(() -> {
-                    if (project.isDisposed()) return;
-
-                    ApplicationManager.getApplication().invokeLater(() -> {
-                        testCaseTabController.setup();
-                        testRunTabController.setup();
-                        projectSelector.loadProjectList();
-                    });
-                }));
+    public void init() {
+        testCaseTabController.setup();
+        testRunTabController.setup();
+        projectSelector.loadProjectList();
     }
 
     @Override

@@ -1,22 +1,16 @@
 package testGit.settings;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.startup.ProjectActivity;
-import kotlin.Unit;
-import kotlin.coroutines.Continuation;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Config;
 
 import java.nio.file.Path;
 import java.util.Optional;
 
-public class PluginPostStartupActivity implements ProjectActivity {
+public class StartupActivity {
 
-    @Nullable
-    @Override
-    public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
-        System.out.println("PluginPostStartupActivity.execute()");
+    public static void execute(@NotNull Project project) {
+        System.out.println("StartupActivity.execute()");
 
         Path testGitPath = Optional.ofNullable(project.getBasePath())
                 .map(Path::of)
@@ -27,7 +21,5 @@ public class PluginPostStartupActivity implements ProjectActivity {
 
         Config.setTestGitPath(testGitPath);
         Config.setProject(project);
-
-        return Unit.INSTANCE;
     }
 }

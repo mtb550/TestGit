@@ -56,7 +56,7 @@ public class CreateTestProject extends DumbAwareAction {
 
                     projectPanel.getProjectSelector().addProject(newProject);
                     projectPanel.getProjectSelector().selectProject(newProject);
-                    projectPanel.getProjectSelector().filterByProject(newProject, projectPanel);
+                    projectPanel.getProjectSelector().filterByTestProject(newProject, projectPanel);
 
                     Notifier.information("New Test Project", String.format("Test Project %s has been added", name));
 

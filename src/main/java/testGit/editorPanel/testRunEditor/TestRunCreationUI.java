@@ -1,7 +1,6 @@
 package testGit.editorPanel.testRunEditor;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.*;
@@ -175,15 +174,8 @@ public class TestRunCreationUI implements Disposable {
             e.printStackTrace(System.err);
         }
 
-        TestRunsDirectoryMapper.buildTreeAsync(projectPanel.getTestRunTabController().getTree());
-
-        if (currentFile != null) {
-            ApplicationManager.getApplication().invokeLater(() ->
-                    FileEditorManager.getInstance(Config.getProject())
-                            .closeFile(currentFile));
-        }
-
-
+        TestRunsDirectoryMapper.buildTreeAsync(projectPanel.getProjectSelector().getSelectedProject(),projectPanel.getTestRunTabController().getTree());
+        FileEditorManager.getInstance(Config.getProject()).closeFile(currentFile);
     }
 
     private void collectCheckedItems(CheckedTreeNode node, List<TestRun.TestRunItems> items) {

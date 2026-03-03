@@ -23,7 +23,7 @@ public class TestCaseSorter {
         }
 
         if (head == null) {
-            System.err.println("Warning: No Head found in test cases.");
+            Notifier.warning("Warning: ", "No Head found in test cases.");
             return unsortedList;
         }
 

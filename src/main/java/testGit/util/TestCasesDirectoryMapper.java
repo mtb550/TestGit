@@ -1,15 +1,12 @@
 package testGit.util;
 
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
-import testGit.projectPanel.projectSelector.ProjectSelector;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -20,36 +17,11 @@ import java.util.Optional;
 
 public class TestCasesDirectoryMapper {
 
-    public static void buildTreeAsync(@NotNull SimpleTree tree) {
-
-        ProgressManager.getInstance().run(new Task.Backgroundable(Config.getProject(), "Loading test cases", false) {
-            private DefaultTreeModel newModel;
-
-            @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                Directory selectedProject = ProjectSelector.getSelectedProject();
-
-                if (selectedProject == null) {
-                    return;
-                }
-
-                indicator.setIndeterminate(true);
-                indicator.setText("Scanning directories for test cases...");
-
-                String rootName = selectedProject.getName();
-                DefaultMutableTreeNode root = buildRoot(rootName);
-                newModel = new DefaultTreeModel(root);
-            }
-
-            @Override
-            public void onSuccess() {
-                tree.setModel(newModel);
-
-                newModel.nodeStructureChanged((DefaultMutableTreeNode) newModel.getRoot());
-                //tree.updateUI();
-                tree.expandRow(0);
-                System.out.println("TC Tree loaded successfully in background.");
-            }
+    public static void buildTreeAsync(Directory selectedProject, SimpleTree tree) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            DefaultMutableTreeNode root = buildRoot(selectedProject.getName());
+            DefaultTreeModel newModel = new DefaultTreeModel(root);
+            tree.setModel(newModel);
         });
     }
 
@@ -57,16 +29,15 @@ public class TestCasesDirectoryMapper {
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(rootName);
         File[] testProjects = Config.getTestGitPath().toFile().listFiles(File::isDirectory);
 
-        if (testProjects != null) {
-            Arrays.stream(testProjects)
-                    .filter(file -> !file.getName().startsWith("."))
-                    .map(TestCasesDirectoryMapper::map)
-                    .filter(Objects::nonNull)
-                    .forEach(item -> {
-                        System.out.println("TestCasesDirectoryMapper.buildRoot(). " + item.getFileName());
-                        rootNode.add(buildNodeRecursive(item, "testCases"));
-                    });
-        }
+        Optional.ofNullable(testProjects)
+                .stream()
+                .flatMap(Arrays::stream)
+                .filter(item -> !item.getName().startsWith("."))
+                .parallel()
+                .map(TestCasesDirectoryMapper::map)
+                .filter(Objects::nonNull)
+                .forEach(item -> rootNode.add(buildNodeRecursive(item, "testCases")));
+
         return rootNode;
     }
 
@@ -80,13 +51,10 @@ public class TestCasesDirectoryMapper {
         Optional.ofNullable(folderToScan.listFiles(File::isDirectory)) // Handles the null check safely
                 .stream()
                 .flatMap(Arrays::stream)
-                .map(TestCasesDirectoryMapper::map)
                 .parallel()
+                .map(TestCasesDirectoryMapper::map)
                 .filter(Objects::nonNull)
-                .forEachOrdered(caseDir -> {
-                    System.out.println("TestCasesDirectoryMapper.buildNodeRecursive: " + caseDir.getName());
-                    node.add(buildNodeRecursive(caseDir, null));
-                });
+                .forEachOrdered(caseDir -> node.add(buildNodeRecursive(caseDir, null)));
 
         return node;
     }
@@ -104,7 +72,7 @@ public class TestCasesDirectoryMapper {
                     .setName(parts[1])
                     .setActive(Integer.parseInt(parts[2]));
         } catch (Exception e) {
-            System.err.println("Skipping invalid directory format: " + file.getName());
+            Notifier.error("Read Test Case Failed", "Skipping invalid directory format: " + file.getName());
             return null;
         }
     }
