@@ -53,10 +53,9 @@ public class CreateTestProject extends DumbAwareAction {
 
                     projectDir.createChildDirectory(this, "testCases");
                     projectDir.createChildDirectory(this, "testRuns");
+                    projectDir.refresh(false, true);
 
                     projectPanel.getTestProjectSelector().addTestProject(newTestProject);
-                    projectPanel.getTestProjectSelector().getSelectedTestProject().setSelectedItem(newTestProject);
-                    projectPanel.getTestProjectSelector().filterByTestProject(newTestProject, projectPanel);
 
                     Notifier.information("New Test Project", String.format("Test Project %s has been added", name));
 

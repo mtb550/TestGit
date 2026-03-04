@@ -14,6 +14,7 @@ import testGit.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
+import java.nio.file.Path;
 
 
 public class CreateTestSet extends DumbAwareAction {
@@ -48,18 +49,22 @@ public class CreateTestSet extends DumbAwareAction {
 
         newTestSet.setFileName(String.format("%s_%s_%d", newTestSet.getType().toString().toLowerCase(), newTestSet.getName(), newTestSet.getActive()));
 
-        if (treeItem.getType() == DirectoryType.PR)
+        Path parentPath;
+        if (treeItem.getType() == DirectoryType.PR) {
+            parentPath = treeItem.getFilePath().resolve("testCases");
             newTestSet.setFilePath(treeItem.getFilePath().resolve("testCases").resolve(newTestSet.getFileName()));
-        else
-            newTestSet.setFilePath(treeItem.getFilePath().resolve(newTestSet.getFileName()));
 
+        } else {
+            parentPath = treeItem.getFilePath();
+            newTestSet.setFilePath(treeItem.getFilePath().resolve(newTestSet.getFileName()));
+        }
 
         System.out.println("AddTestSet.actionPerformed(): newTestSet = " + newTestSet.getFilePath());
         newTestSet.setFile(newTestSet.getFilePath().toFile());
 
-        TreeUtilImpl.insertVf(this, newTestSet.getFilePath(), newTestSet.getFileName());
+        TreeUtilImpl.insertVf(this, parentPath, newTestSet.getFileName());
 
-        DefaultMutableTreeNode newNode = TreeUtilImpl.insertNode(tree, parentNode, newTestSet);
+        TreeUtilImpl.insertNode(tree, parentNode, newTestSet);
         TestCaseEditor.open(newTestSet);
     }
 

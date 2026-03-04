@@ -25,14 +25,14 @@ public class TestRunRenderer extends SimpleColoredComponent implements TreeCellR
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
         this.clear();
         Object userObject = (value instanceof DefaultMutableTreeNode node) ? node.getUserObject() : value;
-        System.out.println("getTreeCellRendererComponent. " + userObject.getClass());
+        //System.out.println("getTreeCellRendererComponent. " + userObject.getClass());
 
         if (userObject instanceof Directory dir) {
-            System.out.println("Rendering TR: " + dir.getName());
+            //System.out.println("Rendering TR: " + dir.getName());
             renderDirectory(dir);
 
         } else if (value != null) {
-            System.out.println("TestRunRenderer.getTreeCellRendererComponent. else if: " + value.getClass());
+            //System.out.println("TestRunRenderer.getTreeCellRendererComponent. else if: " + value.getClass());
             setIcon(AllIcons.Nodes.Unknown);
             append(value.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
         }

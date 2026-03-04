@@ -20,7 +20,7 @@ public class Listener implements ActionListener {
             Directory selected = (Directory) comboBox.getSelectedItem();
             if (selected != null && projectPanel.getTestProjectSelector() != null) {
                 System.out.println("Selection changed to: " + selected.getName());
-                projectPanel.getTestProjectSelector().filterByTestProject(selected, projectPanel);
+                projectPanel.getTestProjectSelector().filterByTestProject(selected);
             }
         }
     }

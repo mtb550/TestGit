@@ -33,6 +33,10 @@ public class TreeUtilImpl {
         model.removeNodeFromParent(node);
     }
 
+    public static void removeProjectNode(DefaultTreeModel model) {
+        model.setRoot(null);
+    }
+
     public static void insertVf(final Object requester, final Path parentPath, final String folderName) {
         WriteAction.run(() -> {
             try {

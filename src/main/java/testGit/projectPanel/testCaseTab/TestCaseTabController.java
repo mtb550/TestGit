@@ -1,34 +1,56 @@
 package testGit.projectPanel.testCaseTab;
 
-import com.intellij.ui.SimpleTextAttributes;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.treeStructure.SimpleTree;
-import com.intellij.util.ui.StatusText;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import testGit.pojo.Directory;
+import testGit.pojo.DirectoryType;
 import testGit.projectPanel.ProjectPanel;
 import testGit.projectPanel.TransferHandlerImpl;
-import testGit.projectPanel.projectSelector.TestProjectSelector;
+import testGit.util.Notifier;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import java.util.HashSet;
-import java.util.Set;
+import java.io.File;
+import java.util.*;
 
-import static testGit.util.TestCasesDirectoryMapper.buildTreeAsync;
 
 public class TestCaseTabController {
-    private final ProjectPanel projectPanel;
     @Getter
-    private final SimpleTree tree;
+    public final SimpleTree tree;
+    private final ProjectPanel projectPanel;
 
     public TestCaseTabController(ProjectPanel projectPanel) {
         this.projectPanel = projectPanel;
         this.tree = new SimpleTree();
     }
 
+    @Nullable
+    public static Directory map(@NotNull final File file) {
+        try {
+            String[] parts = file.getName().split("_", 3);
+
+            return new Directory()
+                    .setFile(file)
+                    .setFilePath(file.toPath())
+                    .setFileName(file.getName())
+                    .setType(DirectoryType.valueOf(parts[0].toUpperCase()))
+                    .setName(parts[1])
+                    .setActive(Integer.parseInt(parts[2]));
+        } catch (Exception e) {
+            Notifier.error("Read Test Case Failed", "Skipping invalid directory format: " + file.getName());
+            return null;
+        }
+    }
+
     public void init() {
-        tree.setRootVisible(true);
-        tree.setShowsRootHandles(true);
+        System.out.println("TestCaseTabController.init()");
+
+        tree.setRootVisible(false);
+        tree.setShowsRootHandles(false);
         tree.setDragEnabled(true);
         tree.setDropMode(DropMode.ON_OR_INSERT);
 
@@ -40,26 +62,44 @@ public class TestCaseTabController {
         ShortcutHandler.register(projectPanel, tree, transferHandler);
         tree.addMouseListener(new MouseAdapterImpl(projectPanel));
 
-        TestProjectSelector projectSelector = projectPanel.getTestProjectSelector();
-        if (projectSelector.getTestProjectList().getSize() > 0)
-            buildTreeAsync(projectPanel.getTestProjectSelector().getSelectedTestProject().getItem(), tree);
-        else {
-            System.out.println("no test cases and project");
-            showEmptyState();
-        }
+        System.out.println("once init tc: " + projectPanel.getTestProjectSelector().getSelectedTestProject().getItem());
+        buildTreeAsync(projectPanel.getTestProjectSelector().getSelectedTestProject().getItem());
     }
 
-    public void showEmptyState() {
-        tree.setModel(new DefaultTreeModel(null));
+    public void buildTreeAsync(Directory selectedProject) {
+        System.out.println("TestCaseTabController.buildTreeAsync()");
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
 
-        StatusText emptyText = tree.getEmptyText();
-        emptyText.setText("No test projects found.");
-        emptyText.appendLine("Press ");
-        emptyText.appendText("+ button", SimpleTextAttributes.REGULAR_BOLD_ATTRIBUTES);
-        emptyText.appendText(" At the top panel");
-        emptyText.appendLine("To create new test project ");
+            DefaultMutableTreeNode root = buildNodeRecursive(selectedProject, "testCases");
+            DefaultTreeModel newModel = new DefaultTreeModel(root);
 
-        tree.setRootVisible(false);
+            ApplicationManager.getApplication().invokeLater(() -> {
+                this.tree.setModel(newModel);
+                this.tree.setRootVisible(true);
+                this.tree.revalidate();
+                this.tree.repaint();
+            });
+        });
+    }
+
+    private DefaultMutableTreeNode buildNodeRecursive(@NotNull Directory dir, @Nullable String subFolder) {
+        System.out.println("TC buildNodeRecursive");
+
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(dir);
+
+        File folderToScan = (subFolder != null)
+                ? dir.getFilePath().resolve(subFolder).toFile()
+                : dir.getFile();
+
+        Optional.ofNullable(folderToScan.listFiles(File::isDirectory))
+                .stream()
+                .flatMap(Arrays::stream)
+                //.parallel()
+                .map(TestCaseTabController::map)
+                .filter(Objects::nonNull)
+                .forEachOrdered(caseDir -> node.add(buildNodeRecursive(caseDir, null)));
+
+        return node;
     }
 
 

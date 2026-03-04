@@ -14,7 +14,6 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="testGit.projectPanel.ProjectPanel"/>
-        <postStartupActivity implementation="testGit.settings.ProjectLoadActivity"/>
         <fileEditorProvider implementation="testGit.editorPanel.testCaseEditor.ProviderImpl"/>
         <fileEditorProvider implementation="testGit.editorPanel.testRunEditor.FileEditorProviderImpl"/>
         <applicationService serviceImplementation="testGit.settings.AppSettingsState"/>

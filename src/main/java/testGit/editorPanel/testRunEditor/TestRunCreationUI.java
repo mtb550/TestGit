@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import testGit.pojo.*;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.TestCaseSorter;
-import testGit.util.TestRunsDirectoryMapper;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -174,7 +173,7 @@ public class TestRunCreationUI implements Disposable {
             e.printStackTrace(System.err);
         }
 
-        TestRunsDirectoryMapper.buildTreeAsync(projectPanel.getTestProjectSelector().getSelectedTestProject().getItem(), projectPanel.getTestRunTabController().getTree());
+        projectPanel.getTestRunTabController().buildTreeAsync(projectPanel.getTestProjectSelector().getSelectedTestProject().getItem());
         FileEditorManager.getInstance(Config.getProject()).closeFile(currentFile);
     }
 

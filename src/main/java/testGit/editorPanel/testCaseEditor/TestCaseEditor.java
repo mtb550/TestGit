@@ -30,7 +30,7 @@ public class TestCaseEditor {
                 .map(f -> f.listFiles((d, name) -> name.toLowerCase().endsWith(".json")))
                 .stream()
                 .flatMap(Arrays::stream)
-                .parallel()
+                //.parallel()
                 .map(TestCaseEditor::addTestCase)
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparing(TestCase::getTitle))

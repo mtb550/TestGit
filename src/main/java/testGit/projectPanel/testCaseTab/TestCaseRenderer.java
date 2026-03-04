@@ -28,7 +28,7 @@ public class TestCaseRenderer extends SimpleColoredComponent implements TreeCell
         Object userObject = (value instanceof DefaultMutableTreeNode node) ? node.getUserObject() : value;
 
         if (userObject instanceof Directory dir) {
-            System.out.println("Rendering TC: " + dir.getName());
+            //System.out.println("Rendering TC: " + dir.getName());
             renderDirectory((value instanceof DefaultMutableTreeNode n) ? n : null, dir);
 
         } else if (value != null) {

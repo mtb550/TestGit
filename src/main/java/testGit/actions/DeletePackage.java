@@ -8,6 +8,8 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Directory;
+import testGit.pojo.DirectoryType;
+import testGit.projectPanel.ProjectPanel;
 import testGit.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -16,9 +18,11 @@ import static testGit.util.KeyboardSet.DeletePackage;
 
 public class DeletePackage extends DumbAwareAction {
     private final SimpleTree tree;
+    private final ProjectPanel projectPanel;
 
-    public DeletePackage(final SimpleTree tree) {
+    public DeletePackage(ProjectPanel projectPanel, SimpleTree tree) {
         super("Delete", "Delete selected node", AllIcons.Actions.GC);
+        this.projectPanel = projectPanel;
         this.tree = tree;
         this.registerCustomShortcutSet(DeletePackage.get(), tree);
     }
@@ -36,7 +40,14 @@ public class DeletePackage extends DumbAwareAction {
 
         if (confirm == Messages.YES) {
             TreeUtilImpl.removeVf(this, treeItem.getFile());
-            TreeUtilImpl.removeNode(node, tree);
+
+            if (treeItem.getType() == DirectoryType.PR) {
+                System.out.println("delete package");
+                projectPanel.getTestProjectSelector().removeTestProject(tree, treeItem);
+            } else {
+                System.out.println(node.getParent() == null);
+                TreeUtilImpl.removeNode(node, tree);
+            }
         }
 
     }

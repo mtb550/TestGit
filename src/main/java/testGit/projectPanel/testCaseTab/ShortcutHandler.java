@@ -14,7 +14,7 @@ import java.awt.event.KeyEvent;
 public class ShortcutHandler {
     public static void register(final ProjectPanel projectPanel, final SimpleTree tree, TransferHandlerImpl transferHandler) {
 
-        new DeletePackage(tree);
+        new DeletePackage(projectPanel, tree);
         new OpenTestSet(tree);
         new Rename(projectPanel, tree);
         new Escape(tree, transferHandler);
