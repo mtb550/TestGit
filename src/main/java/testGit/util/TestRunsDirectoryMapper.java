@@ -18,7 +18,10 @@ public class TestRunsDirectoryMapper {
 
     public static void buildTreeAsync(Directory selectedProject, SimpleTree tree) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            DefaultMutableTreeNode root = buildRoot(selectedProject.getName());
+            // to be removed after fix
+            String rootName = (selectedProject != null) ? selectedProject.getName() : "All Projects";
+
+            DefaultMutableTreeNode root = buildRoot(rootName);
             DefaultTreeModel newModel = new DefaultTreeModel(root);
             tree.setModel(newModel);
         });

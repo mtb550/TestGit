@@ -20,12 +20,16 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class TestProjectSelector {
-    private final DefaultComboBoxModel<Directory> testProjectList;
+    private final ProjectPanel projectPanel;
+    @Getter
+    @Setter
+    private DefaultComboBoxModel<Directory> testProjectList;
     @Getter
     @Setter
     private ComboBox<Directory> selectedTestProject;
 
     public TestProjectSelector(ProjectPanel projectPanel) {
+        this.projectPanel = projectPanel;
         testProjectList = new DefaultComboBoxModel<>();
         selectedTestProject = new ComboBox<>(testProjectList);
 
@@ -34,21 +38,37 @@ public class TestProjectSelector {
         selectedTestProject.addActionListener(new Listener(projectPanel));
     }
 
-    public void init(){}
+    public void init() {
+        loadTestProjectList();
+        Directory allProjects = testProjectList.getElementAt(0);
+
+        TestCasesDirectoryMapper.buildTreeAsync(allProjects, projectPanel.getTestCaseTabController().getTree());
+        TestRunsDirectoryMapper.buildTreeAsync(allProjects, projectPanel.getTestRunTabController().getTree());
+
+        if (projectPanel.getTestCaseTabController().getTree().getCellRenderer() == null ||
+                !(projectPanel.getTestCaseTabController().getTree().getCellRenderer() instanceof TestCaseRenderer)) {
+            projectPanel.getTestCaseTabController().init();
+        }
+
+        if (projectPanel.getTestRunTabController().getTree().getCellRenderer() == null ||
+                !(projectPanel.getTestRunTabController().getTree().getCellRenderer() instanceof TestRunRenderer)) {
+            projectPanel.getTestRunTabController().init();
+        }
+
+        projectPanel.getTestCaseTabController().getTree().setRootVisible(true);
+        projectPanel.getTestRunTabController().getTree().setRootVisible(true);
+
+        projectPanel.getTestCaseTabController().getTree().repaint();
+        projectPanel.getTestRunTabController().getTree().repaint();
+    }
 
     public void loadTestProjectList() {
         testProjectList.removeAllElements();
-        Directory allProjects = new Directory().setName("All Projects");
-        testProjectList.addElement(allProjects);
 
         File root = Config.getTestGitPath().toFile();
-        if (!root.exists()) {
-            selectedTestProject.setSelectedIndex(0);
-            selectedTestProject.setEnabled(true);
-            return;
-        }
 
         File[] dirs = root.listFiles(File::isDirectory);
+
         Optional.ofNullable(dirs)
                 .stream()
                 .flatMap(Arrays::stream)
@@ -59,8 +79,22 @@ public class TestProjectSelector {
                 .filter(p -> p.getActive() == 1)
                 .forEach(testProjectList::addElement);
 
-        selectedTestProject.setEnabled(testProjectList.getSize() > 0);
-        selectedTestProject.setSelectedIndex(0);
+        if (!root.exists() || testProjectList.getSize() == 0) {
+            // show no test projects
+            // make project disabled
+            //selectedTestProject.setSelectedIndex(0);
+            //selectedTestProject.setEnabled(false);
+            //return;
+            selectedTestProject.setEnabled(false);
+            projectPanel.getTestCaseTabController().getTree().getEmptyText().setText("No projects found");
+            return;
+        }
+
+        Directory allProjects = new Directory().setName("All Projects");
+        testProjectList.insertElementAt(allProjects, 0);
+
+        selectedTestProject.setSelectedItem(allProjects);
+        selectedTestProject.setEnabled(true);
     }
 
     public void addTestProject(Directory testProject) {
