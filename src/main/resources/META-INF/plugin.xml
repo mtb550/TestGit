@@ -13,13 +13,18 @@
     <depends>TestNG-J</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="testGit.projectPanel.ProjectPanel"/>
+        <postStartupActivity implementation="testGit.settings.ProjectLoadActivity"/>
+        <fileEditorProvider implementation="testGit.editorPanel.testCaseEditor.ProviderImpl"/>
+        <fileEditorProvider implementation="testGit.editorPanel.testRunEditor.FileEditorProviderImpl"/>
+        <applicationService serviceImplementation="testGit.settings.AppSettingsState"/>
 
         <toolWindow
                 id="TestGit"
                 factoryClass="testGit.projectPanel.Main"
                 anchor="left"
-                icon="AllIcons.General.Information"
-                secondary="false"
+                icon="AllIcons.Debugger.Db_array"
+                secondary="true"
                 doNotActivateOnStart="true"
         />
 
@@ -27,19 +32,14 @@
                 id="Details"
                 factoryClass="testGit.viewPanel.ToolWindowFactoryImpl"
                 anchor="bottom"
-                icon="AllIcons.General.Information"
+                icon="AllIcons.Debugger.Db_array"
                 secondary="false"
                 doNotActivateOnStart="true"
         />
 
-        <fileEditorProvider implementation="testGit.editorPanel.testCaseEditor.ProviderImpl"/>
-        <fileEditorProvider implementation="testGit.editorPanel.testRunEditor.FileEditorProviderImpl"/>
-
         <notificationGroup id="TestGit Notifications"
                            displayType="BALLOON"
                            isLogByDefault="true"/>
-
-        <applicationService serviceImplementation="testGit.settings.AppSettingsState"/>
 
         <applicationConfigurable
                 instance="testGit.settings.AppSettingsConfigurable"
