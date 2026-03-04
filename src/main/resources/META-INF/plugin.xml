@@ -1,32 +1,28 @@
 <idea-plugin>
     <id>testGit.demo</id>
-    <name>Test Case Manager</name>
+    <resource-bundle>messages.bundle</resource-bundle>
+    <name>Test Git</name>
     <vendor email="mtb550@gmail.com" url="https://mtb.com">initial</vendor>
-
     <description><![CDATA[
         Plugin to browse test projects, view features, and manage test cases with details and bug tracking.
     ]]></description>
-
     <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.java</depends>
+    <depends>com.intellij.modules.java</depends>
     <depends>Git4Idea</depends>
     <depends>TestNG-J</depends>
-
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="testGit.projectPanel.ProjectPanel"/>
         <fileEditorProvider implementation="testGit.editorPanel.testCaseEditor.ProviderImpl"/>
         <fileEditorProvider implementation="testGit.editorPanel.testRunEditor.FileEditorProviderImpl"/>
         <applicationService serviceImplementation="testGit.settings.AppSettingsState"/>
-
         <toolWindow
                 id="TestGit"
                 factoryClass="testGit.projectPanel.Main"
                 anchor="left"
                 icon="AllIcons.Debugger.Db_array"
-                secondary="true"
+                secondary="false"
                 doNotActivateOnStart="true"
         />
-
         <toolWindow
                 id="Details"
                 factoryClass="testGit.viewPanel.ToolWindowFactoryImpl"
@@ -35,34 +31,29 @@
                 secondary="false"
                 doNotActivateOnStart="true"
         />
-
         <notificationGroup id="TestGit Notifications"
                            displayType="BALLOON"
-                           isLogByDefault="true"/>
-
+                           isLogByDefault="true"
+                           key="notification.group.testgit"
+        />
         <applicationConfigurable
                 instance="testGit.settings.AppSettingsConfigurable"
                 id="testGit.settings.AppSettingsConfigurable"
-                displayName="TestGit"
-                groupId="tools"/>
-
+                key="settings.display.name.testgit"
+                bundle="messages.bundle"
+                groupId="tools"
+        />
     </extensions>
-
     <actions>
-        <action
-                id="testGit.demo.OpenTestTreeAction"
+        <action id="testGit.demo.OpenTestTreeAction"
                 class="testGit.pojo.ShowTestTreeAction"
-                text="Open Test Run Tree"
-                description="Show test case explorer"
                 icon="AllIcons.Actions.ListFiles">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
-
         <group id="TestTreeContextMenuGroup"
                class="testGit.projectPanel.testCaseTab.ContextMenu"
-               text="Test Tree Context Menu"
                popup="true">
+            <reference ref="testGit.demo.OpenTestTreeAction"/>
         </group>
     </actions>
-
 </idea-plugin>

@@ -1,6 +1,8 @@
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+
 plugins {
     id("java")
-    id("org.jetbrains.intellij.platform") version "2.11.0"
+    id("org.jetbrains.intellij.platform")
 }
 
 group = "testGit"
@@ -10,7 +12,6 @@ repositories {
     mavenCentral()
     intellijPlatform {
         defaultRepositories()
-        snapshots()
     }
 }
 
@@ -22,13 +23,20 @@ java {
 
 dependencies {
     intellijPlatform {
-        intellijIdea("253.28294.334") {
-            useInstaller = false
-        }
-        bundledPlugins(listOf("com.intellij.java", "TestNG-J", "Git4Idea"))
+        intellijIdea("2025.3.3")
+
+        bundledPlugins(
+            listOf(
+                "com.intellij.java",
+                "TestNG-J",
+                "Git4Idea"
+            )
+        )
+
         jetbrainsRuntime()
         pluginVerifier()
         zipSigner()
+        testFramework(TestFrameworkType.Platform)
     }
 
     compileOnly("org.projectlombok:lombok:1.18.30")
@@ -43,17 +51,27 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         id.set("testGit.demo")
-        name.set("Test Case Manager")
+        name.set("Test Git")
+        version.set(project.version.toString())
+
+        vendor {
+            name.set("Muteb Almughyiri")
+            email.set("mtb550@gmail.com")
+            url.set("https://mtb.com")
+        }
+
         ideaVersion {
             sinceBuild.set("253")
             untilBuild.set("253.*")
         }
     }
+
     signing {
         certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
         privateKey.set(System.getenv("PRIVATE_KEY"))
         password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
     }
+
     publishing {
         token.set(System.getenv("PUBLISH_TOKEN"))
     }
@@ -64,8 +82,11 @@ tasks {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
-}
+    withType<Test> {
+        useTestNG()
 
-//tasks.withType<JavaCompile> {
-//    options.compilerArgs.add("-Xlint:deprecation")
-//}
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
+    }
+}
