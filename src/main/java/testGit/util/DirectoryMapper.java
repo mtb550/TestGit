@@ -1,6 +1,5 @@
 package testGit.util;
 
-import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryStatus;
 import testGit.pojo.DirectoryType;
@@ -8,9 +7,9 @@ import testGit.pojo.DirectoryType;
 import java.io.File;
 
 public class DirectoryMapper {
-    public static Directory map(@NotNull final File file) {
+    public static Directory map(File file) {
         try {
-            String[] parts = file.getName().split("_", 3);
+            String[] parts = file.getName().replaceFirst("\\.json$", "").split("_", 3);
 
             return new Directory()
                     .setFile(file)

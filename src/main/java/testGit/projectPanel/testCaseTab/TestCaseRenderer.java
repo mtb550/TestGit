@@ -32,8 +32,8 @@ public class TestCaseRenderer extends SimpleColoredComponent implements TreeCell
             renderDirectory((value instanceof DefaultMutableTreeNode n) ? n : null, dir);
 
         } else if (value != null) {
-            setIcon(AllIcons.Nodes.Unknown);
-            append(value.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
+            setIcon(AllIcons.CodeWithMe.CwmAccessOn);
+            append(value.toString(), SimpleTextAttributes.REGULAR_BOLD_ATTRIBUTES);
         }
 
         if (selected) {
@@ -60,7 +60,7 @@ public class TestCaseRenderer extends SimpleColoredComponent implements TreeCell
             case PR -> AllIcons.Nodes.Project;
             case PA -> AllIcons.Nodes.WebFolder;
             case TS -> AllIcons.Nodes.Class;
-            default -> AllIcons.Nodes.Unknown;
+            default -> AllIcons.Providers.DuckDB;
         };
     }
 }

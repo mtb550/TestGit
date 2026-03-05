@@ -7,13 +7,13 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryStatus;
 import testGit.pojo.DirectoryType;
 import testGit.projectPanel.ProjectPanel;
-import testGit.ui.AddNewTestProjectDialog;
+import testGit.ui.CreateNewTestProjectDialog;
 import testGit.util.Notifier;
 
 import java.io.IOException;
@@ -28,8 +28,8 @@ public class CreateTestProject extends DumbAwareAction {
     }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
-        String name = AddNewTestProjectDialog.show();
+    public void actionPerformed(@Nullable AnActionEvent e) {
+        String name = CreateNewTestProjectDialog.show();
 
         if (name == null) return;
 

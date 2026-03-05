@@ -7,7 +7,7 @@ import testGit.pojo.TestCase;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DeleteTestCaseDialog {
+public class RemoveTestCaseDialog {
 
     public static boolean confirmDeleteAction(List<TestCase> selected) {
         if (selected == null || selected.isEmpty()) return false;

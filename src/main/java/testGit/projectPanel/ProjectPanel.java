@@ -1,5 +1,6 @@
 package testGit.projectPanel;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.SimpleTextAttributes;
@@ -7,6 +8,7 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBPanelWithEmptyText;
 import com.intellij.util.ui.StatusText;
 import lombok.Getter;
+import testGit.actions.CreateTestProject;
 import testGit.pojo.Config;
 import testGit.projectPanel.projectSelector.TestProjectSelector;
 import testGit.projectPanel.testCaseTab.TestCaseTabController;
@@ -104,12 +106,16 @@ public class ProjectPanel implements Disposable {
         StatusText emptyText = panel.getEmptyText();
 
         emptyText.clear();
-        emptyText.setText("No test projects found.");
-        emptyText.appendLine("Press ");
-        emptyText.appendText("+ button", SimpleTextAttributes.REGULAR_BOLD_ATTRIBUTES);
-        emptyText.appendText(" At the top panel");
-        emptyText.appendLine("To create a new test project");
-
+        emptyText.setText("Welcome to QC plugin", SimpleTextAttributes.REGULAR_BOLD_ATTRIBUTES);
+        emptyText.appendLine("");
+        emptyText.appendLine("By", SimpleTextAttributes.GRAYED_ATTRIBUTES, null);
+        emptyText.appendLine("Muteb Almughyiri", SimpleTextAttributes.GRAYED_ATTRIBUTES, null);
+        emptyText.appendLine("");
+        emptyText.appendLine("");
+        emptyText.appendLine(AllIcons.General.Add, "", SimpleTextAttributes.LINK_ATTRIBUTES, null);
+        emptyText.appendLine("Create your first new test project", SimpleTextAttributes.LINK_ATTRIBUTES, e -> {
+            new CreateTestProject(this).actionPerformed(null);
+        });
         panel.revalidate();
         panel.repaint();
     }

@@ -33,8 +33,8 @@ public class TestRunRenderer extends SimpleColoredComponent implements TreeCellR
 
         } else if (value != null) {
             //System.out.println("TestRunRenderer.getTreeCellRendererComponent. else if: " + value.getClass());
-            setIcon(AllIcons.Nodes.Unknown);
-            append(value.toString(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
+            setIcon(AllIcons.CodeWithMe.CwmAccessOn);
+            append(value.toString(), SimpleTextAttributes.REGULAR_BOLD_ATTRIBUTES);
         }
 
         if (selected) {
@@ -64,7 +64,7 @@ public class TestRunRenderer extends SimpleColoredComponent implements TreeCellR
             case PR -> AllIcons.Nodes.Project;
             case PA -> AllIcons.Nodes.WebFolder;
             case TR -> AllIcons.Nodes.Services;
-            default -> AllIcons.Nodes.Folder;
+            default -> AllIcons.Providers.TensorFlow;
         };
     }
 }

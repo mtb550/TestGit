@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import testGit.editorPanel.testRunEditor.NewTestRunDialog;
 import testGit.editorPanel.testRunEditor.TestRunEditor;
 import testGit.pojo.Directory;
@@ -27,7 +28,7 @@ public class CreateTestRun extends DumbAwareAction {
     }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public void actionPerformed(@Nullable AnActionEvent e) {
         TreePath path = testRunTree.getSelectionPath();
         if (path == null) {
             System.out.println("path is null !!");

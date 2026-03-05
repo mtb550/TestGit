@@ -24,39 +24,37 @@ public class TestCaseTabController {
     public final SimpleTree tree;
     private final ProjectPanel projectPanel;
     @Getter
-    DefaultMutableTreeNode rootNode;
+    private DefaultMutableTreeNode rootNode;
 
     public TestCaseTabController(ProjectPanel projectPanel) {
         this.projectPanel = projectPanel;
         this.tree = new SimpleTree();
     }
 
-
     public void init() {
         System.out.println("TestCaseTabController.init()");
 
         Set<DefaultMutableTreeNode> sharedCutNodes = new HashSet<>();
-        tree.setCellRenderer(new TestCaseRenderer(sharedCutNodes));
+        tree.setRootVisible(false);
 
+        tree.setCellRenderer(new TestCaseRenderer(sharedCutNodes));
         TransferHandlerImpl transferHandler = new TransferHandlerImpl(tree, sharedCutNodes);
         tree.setTransferHandler(transferHandler);
         ShortcutHandler.register(projectPanel, tree, transferHandler);
         tree.addMouseListener(new MouseAdapterImpl(projectPanel));
 
-        // ENHANCEMENT: Configure the empty state message
-        tree.getEmptyText().clear();
-        tree.getEmptyText().appendLine("No test cases found.");
-        tree.getEmptyText().appendLine("Add new package", SimpleTextAttributes.LINK_ATTRIBUTES, e -> {
-            // Trigger the Create Package action manually
-            new CreateTestCasePackage(projectPanel, tree).actionPerformed(null);
-        });
-        tree.getEmptyText().appendLine("Add new test set", SimpleTextAttributes.LINK_ATTRIBUTES, e -> {
-            // Trigger the Create Test Set action manually
-            new CreateTestSet(tree);
-        });
-
+        showEmptyState();
         System.out.println("once init tc: " + projectPanel.getTestProjectSelector().getSelectedTestProject().getItem());
+    }
 
+    private void showEmptyState() {
+        tree.getEmptyText().clear();
+
+        tree.getEmptyText().appendLine("Create new package", SimpleTextAttributes.LINK_ATTRIBUTES,
+                e -> new CreateTestCasePackage(projectPanel, tree).actionPerformed(null));
+
+        tree.getEmptyText().appendLine("Create new test set", SimpleTextAttributes.LINK_ATTRIBUTES,
+                e -> new CreateTestSet(null).actionPerformed(null));
     }
 
     public void buildTreeAsync(Directory selectedProject) {
@@ -77,16 +75,13 @@ public class TestCaseTabController {
 
             ApplicationManager.getApplication().invokeLater(() -> {
                 DefaultTreeModel newModel = new DefaultTreeModel(rootNode);
-                if (rootNode.getChildCount() == 0) {
-                    System.out.println("No packages found under TEST CASES.");
-                    tree.setRootVisible(false);
-                } else
+
+                if (rootNode.getChildCount() > 0)
                     tree.setRootVisible(true);
 
-                tree.setShowsRootHandles(false);
+                tree.setShowsRootHandles(true);
                 tree.setDragEnabled(true);
                 tree.setDropMode(DropMode.ON_OR_INSERT);
-                tree.setEnabled(true);
                 tree.setModel(newModel);
                 TreeUtil.expandAll(tree);
                 tree.revalidate();

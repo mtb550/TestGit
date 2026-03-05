@@ -11,7 +11,8 @@ import testGit.pojo.Directory;
 import testGit.pojo.DirectoryStatus;
 import testGit.pojo.DirectoryType;
 import testGit.projectPanel.ProjectPanel;
-import testGit.ui.AddNewTestPackageDialog;
+import testGit.ui.CreateTestPackageDialog;
+import testGit.ui.InputDialog;
 import testGit.util.Notifier;
 import testGit.util.TreeUtilImpl;
 
@@ -38,25 +39,14 @@ public class CreateTestCasePackage extends DumbAwareAction {
             System.out.println("path is null !!, first case package");
             Directory selectedTestProject = projectPanel.getTestProjectSelector().getSelectedTestProject().getItem();
 
-            String name = AddNewTestPackageDialog.show();
+            InputDialog.show("Test Project Name", AllIcons.Nodes.Package, (enteredName) -> {
+                System.out.println("Processing: " + enteredName);
+                if (enteredName != null) {
+                    add_new(selectedTestProject, enteredName);
+                }
+            });
 
-            Path parentPath = selectedTestProject.getFilePath().resolve("testCases");
 
-            Directory newPackage = new Directory()
-                    .setType(DirectoryType.PA)
-                    .setName(name)
-                    .setStatus(DirectoryStatus.AC);
-
-            String folderName = String.format("%s_%s_%s", newPackage.getType().name(), newPackage.getName(), newPackage.getStatus());
-            Path fullPath = parentPath.resolve(folderName);
-
-            newPackage.setFileName(folderName)
-                    .setFilePath(fullPath)
-                    .setFile(fullPath.toFile());
-
-            TreeUtilImpl.insertVf(this, parentPath, folderName);
-            TreeUtilImpl.insertNode(tree, projectPanel.getTestCaseTabController().getRootNode(), newPackage);
-            Notifier.info("Test Package Created", "Create new test package under: " + parentPath);
             return;
         }
 
@@ -65,7 +55,10 @@ public class CreateTestCasePackage extends DumbAwareAction {
 
         if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TS) return;
 
-        String name = AddNewTestPackageDialog.show();
+        String name = CreateTestPackageDialog.show();
+
+        if (name == null)
+            return;
 
         Path parentPath = (treeItem.getType() == DirectoryType.PR)
                 ? treeItem.getFilePath().resolve("testCases")
@@ -85,6 +78,27 @@ public class CreateTestCasePackage extends DumbAwareAction {
 
         TreeUtilImpl.insertVf(this, parentPath, folderName);
         TreeUtilImpl.insertNode(tree, parentNode, newPackage);
+
+    }
+
+    private void add_new(Directory selectedTestProject, String name) {
+        Path parentPath = selectedTestProject.getFilePath().resolve("testCases");
+
+        Directory newPackage = new Directory()
+                .setType(DirectoryType.PA)
+                .setName(name)
+                .setStatus(DirectoryStatus.AC);
+
+        String folderName = String.format("%s_%s_%s", newPackage.getType().name(), newPackage.getName(), newPackage.getStatus());
+        Path fullPath = parentPath.resolve(folderName);
+
+        newPackage.setFileName(folderName)
+                .setFilePath(fullPath)
+                .setFile(fullPath.toFile());
+
+        TreeUtilImpl.insertVf(this, parentPath, folderName);
+        TreeUtilImpl.insertNode(tree, projectPanel.getTestCaseTabController().getRootNode(), newPackage);
+        Notifier.info("Test Package Created", "Create new test package under: " + parentPath);
 
     }
 

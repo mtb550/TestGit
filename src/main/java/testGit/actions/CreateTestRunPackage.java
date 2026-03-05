@@ -7,6 +7,7 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryStatus;
 import testGit.pojo.DirectoryType;
@@ -25,7 +26,7 @@ public class CreateTestRunPackage extends DumbAwareAction {
     }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public void actionPerformed(@Nullable AnActionEvent e) {
         System.out.println("CreateTestRunPackage.actionPerformed()");
 
         TreePath path = tree.getSelectionPath();

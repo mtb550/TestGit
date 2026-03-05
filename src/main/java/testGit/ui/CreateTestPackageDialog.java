@@ -3,14 +3,13 @@ package testGit.ui;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.ui.Messages;
 
-public class AddNewTestProjectDialog {
+public class CreateTestPackageDialog {
 
     public static String show() {
-        String name = Messages.showInputDialog("Set the name:", "New Test Project", AllIcons.General.Add);
+        String name = Messages.showInputDialog("Enter package name:", "New Test Package", AllIcons.Nodes.Package);
 
-        if (name == null || name.isBlank()) {
+        if (name == null || name.isBlank())
             return null;
-        }
 
         return name.replace("_", " ");
     }

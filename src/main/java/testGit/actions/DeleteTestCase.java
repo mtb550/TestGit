@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
 import testGit.pojo.Directory;
 import testGit.pojo.TestCase;
-import testGit.ui.DeleteTestCaseDialog;
+import testGit.ui.RemoveTestCaseDialog;
 import testGit.util.KeyboardSet;
 
 import java.io.File;
@@ -39,7 +39,7 @@ public class DeleteTestCase extends DumbAwareAction {
         List<TestCase> selectedItems = list.getSelectedValuesList();
         if (selectedItems.isEmpty()) return;
 
-        if (!DeleteTestCaseDialog.confirmDeleteAction(selectedItems)) return;
+        if (!RemoveTestCaseDialog.confirmDeleteAction(selectedItems)) return;
 
         ApplicationManager.getApplication().runWriteAction(() -> {
             try {
