@@ -29,13 +29,13 @@ public class TestCaseTabController {
     public TestCaseTabController(ProjectPanel projectPanel) {
         this.projectPanel = projectPanel;
         this.tree = new SimpleTree();
+        tree.setRootVisible(false);
     }
 
     public void init() {
         System.out.println("TestCaseTabController.init()");
 
         Set<DefaultMutableTreeNode> sharedCutNodes = new HashSet<>();
-        tree.setRootVisible(false);
 
         tree.setCellRenderer(new TestCaseRenderer(sharedCutNodes));
         TransferHandlerImpl transferHandler = new TransferHandlerImpl(tree, sharedCutNodes);
@@ -76,9 +76,7 @@ public class TestCaseTabController {
             ApplicationManager.getApplication().invokeLater(() -> {
                 DefaultTreeModel newModel = new DefaultTreeModel(rootNode);
 
-                if (rootNode.getChildCount() > 0)
-                    tree.setRootVisible(true);
-
+                tree.setRootVisible(rootNode.getChildCount() > 0);
                 tree.setShowsRootHandles(true);
                 tree.setDragEnabled(true);
                 tree.setDropMode(DropMode.ON_OR_INSERT);

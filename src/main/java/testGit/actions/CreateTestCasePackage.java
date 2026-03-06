@@ -12,7 +12,7 @@ import testGit.pojo.DirectoryStatus;
 import testGit.pojo.DirectoryType;
 import testGit.projectPanel.ProjectPanel;
 import testGit.ui.CreateTestPackageDialog;
-import testGit.ui.InputDialog;
+import testGit.ui.InputDialogList;
 import testGit.util.Notifier;
 import testGit.util.TreeUtilImpl;
 
@@ -39,9 +39,16 @@ public class CreateTestCasePackage extends DumbAwareAction {
             System.out.println("path is null !!, first case package");
             Directory selectedTestProject = projectPanel.getTestProjectSelector().getSelectedTestProject().getItem();
 
-            InputDialog.show("Test Project Name", AllIcons.Nodes.Package, (enteredName) -> {
-                System.out.println("Processing: " + enteredName);
-                if (enteredName != null) {
+//            InputDialog.show("Test Project Name", AllIcons.Nodes.Package, (enteredName) -> {
+//                System.out.println("Processing: " + enteredName);
+//                if (enteredName != null) {
+//                    add_new(selectedTestProject, enteredName);
+//                }
+//            });
+
+            InputDialogList.show("Test Project Name", (enteredName, selectedItem) -> {
+                System.out.println("Processing: " + enteredName + " | Selected Type: " + selectedItem.name());
+                if (enteredName != null && !enteredName.isEmpty()) {
                     add_new(selectedTestProject, enteredName);
                 }
             });
