@@ -45,6 +45,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2")
     implementation("com.jayway.jsonpath:json-path:3.0.0")
     implementation("commons-io:commons-io:2.21.0")
+    implementation("com.codoid.products:fillo:1.24")
     testImplementation("org.testng:testng:7.12.0")
 }
 

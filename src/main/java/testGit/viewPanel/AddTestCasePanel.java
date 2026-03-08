@@ -154,11 +154,11 @@ public class AddTestCasePanel {
 
         TestCase newTestCase = new TestCase();
         newTestCase.setTitle(title);
-        newTestCase.setExpectedResult(expected);
+        newTestCase.setExpected(expected);
         newTestCase.setSteps(steps);
         newTestCase.setPriority(Priority.valueOf(priorityField.getText().trim()));
-        newTestCase.setAutomationRef(autoRefField.getText().trim());
-        newTestCase.setBusinessRef(busiRefField.getText().trim());
+        newTestCase.setAutoRef(autoRefField.getText().trim());
+        newTestCase.setBusiRef(busiRefField.getText().trim());
         newTestCase.setModule(moduleField.getText().trim());
 
         String groupsText = groupsField.getText().trim();

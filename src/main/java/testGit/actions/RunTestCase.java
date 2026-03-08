@@ -24,7 +24,7 @@ public class RunTestCase extends DumbAwareAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        String ref = tc.getAutomationRef();
+        String ref = tc.getAutoRef();
         Project project = Config.getProject();
         if (ref != null && !ref.isBlank()) {
             Tools.printTestSourceRoots(project);

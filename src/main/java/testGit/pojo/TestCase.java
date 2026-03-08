@@ -28,15 +28,15 @@ public class TestCase {
 
     private String title;
 
-    private String expectedResult;
+    private String expected;
 
     private String steps;
 
     private Priority priority;
 
-    private String automationRef;
+    private String autoRef;
 
-    private String businessRef;
+    private String busiRef;
 
     private List<GroupType> groups;
 

@@ -103,11 +103,11 @@ public class TestCaseDetailsPanel {
 
         if (editable) {
             titleField = new JBTextField(currentTestCase.getTitle());
-            expectedArea = new JBTextField(currentTestCase.getExpectedResult());
+            expectedArea = new JBTextField(currentTestCase.getExpected());
             stepsArea = new JBTextField(currentTestCase.getSteps());
             priorityField = new JBTextField(currentTestCase.getPriority().getDescription());
-            autoRefField = new JBTextField(currentTestCase.getAutomationRef());
-            busiRefField = new JBTextField(currentTestCase.getBusinessRef());
+            autoRefField = new JBTextField(currentTestCase.getAutoRef());
+            busiRefField = new JBTextField(currentTestCase.getBusiRef());
             groupsField = new JBTextField(currentTestCase.getGroups() != null ? currentTestCase.getGroups().toString() : "");
 
             addRow("Title:", titleField, detailTab, gbc, row++);
@@ -120,11 +120,11 @@ public class TestCaseDetailsPanel {
         } else {
             idLabel = createValueLabel(currentTestCase.getId());
             titleLabel = createValueLabel(currentTestCase.getTitle());
-            expectedLabel = createValueLabel(currentTestCase.getExpectedResult());
+            expectedLabel = createValueLabel(currentTestCase.getExpected());
             stepsLabel = createValueLabel(currentTestCase.getSteps());
             priorityLabel = createValueLabel(currentTestCase.getPriority().getDescription());
-            autoRefLabel = createValueLabel(currentTestCase.getAutomationRef());
-            busiRefLabel = createValueLabel(currentTestCase.getBusinessRef());
+            autoRefLabel = createValueLabel(currentTestCase.getAutoRef());
+            busiRefLabel = createValueLabel(currentTestCase.getBusiRef());
             groupsLabel = createValueLabel(currentTestCase.getGroups() != null ? currentTestCase.getGroups().toString() : "");
 
             addRow("ID:", idLabel, detailTab, gbc, row++);
@@ -178,7 +178,7 @@ public class TestCaseDetailsPanel {
 
     private void onSave() {
         String oldTitle = currentTestCase.getTitle();
-        String oldExpected = currentTestCase.getExpectedResult();
+        String oldExpected = currentTestCase.getExpected();
         String oldSteps = currentTestCase.getSteps();
         Priority oldPriority = currentTestCase.getPriority();
 
@@ -188,7 +188,7 @@ public class TestCaseDetailsPanel {
         String newPriority = priorityField.getText().trim();
 
         currentTestCase.setTitle(newTitle);
-        currentTestCase.setExpectedResult(newExpected);
+        currentTestCase.setExpected(newExpected);
         currentTestCase.setSteps(newSteps);
         currentTestCase.setPriority(Priority.valueOf(newPriority));
 

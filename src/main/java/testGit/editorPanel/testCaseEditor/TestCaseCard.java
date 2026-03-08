@@ -64,10 +64,10 @@ public class TestCaseCard extends JBPanel<TestCaseCard> {
 
     public void updateData(int index, TestCase tc, boolean showGroups, boolean showPriority, Set<String> activeDetails) {
         titleLabel.setText((index + 1) + ". " + tc.getTitle());
-        expectedLabel.setText("Expected Result: " + tc.getExpectedResult());
+        expectedLabel.setText("Expected Result: " + tc.getExpected());
         stepsLabel.setText("Steps: " + tc.getSteps());
-        automationRefLabel.setText("Automation Reference: " + tc.getAutomationRef());
-        businessRefLabel.setText("Business Reference: " + tc.getBusinessRef());
+        automationRefLabel.setText("Automation Reference: " + tc.getAutoRef());
+        businessRefLabel.setText("Business Reference: " + tc.getBusiRef());
         moduleLabel.setText("Module: " + tc.getModule());
         idLabel.setText("ID: " + tc.getId());
 

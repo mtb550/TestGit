@@ -258,9 +258,9 @@ public class TestRunCard extends JBPanel<TestRunCard> {
     public void updateData(int index, TestCase tc) {
         titleLabel.setText(String.format("%d. %s", index + 1, tc.getTitle()));
 
-        expectedLabel.setText("Expected Result: " + tc.getExpectedResult());
+        expectedLabel.setText("Expected Result: " + tc.getExpected());
         stepsLabel.setText("Steps: " + tc.getSteps());
-        automationRefLabel.setText("Automation Reference: " + tc.getAutomationRef());
+        automationRefLabel.setText("Automation Reference: " + tc.getAutoRef());
 
         badgePanel.removeAll();
         badgePanel.add(createPriorityBadge(tc));
