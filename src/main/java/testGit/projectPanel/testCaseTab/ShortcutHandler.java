@@ -1,7 +1,7 @@
 package testGit.projectPanel.testCaseTab;
 
 import com.intellij.ui.treeStructure.SimpleTree;
-import testGit.actions.DeletePackage;
+import testGit.actions.RemovePackage;
 import testGit.actions.Escape;
 import testGit.actions.OpenTestSet;
 import testGit.actions.Rename;
@@ -14,7 +14,7 @@ import java.awt.event.KeyEvent;
 public class ShortcutHandler {
     public static void register(final ProjectPanel projectPanel, final SimpleTree tree, TransferHandlerImpl transferHandler) {
 
-        new DeletePackage(projectPanel, tree);
+        new RemovePackage(projectPanel, tree);
         new OpenTestSet(tree);
         new Rename(projectPanel, tree);
         new Escape(tree, transferHandler);

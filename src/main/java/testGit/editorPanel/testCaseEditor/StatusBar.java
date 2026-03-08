@@ -20,12 +20,12 @@ public class StatusBar extends JBPanel<StatusBar> {
     @Getter
     private final JButton firstButton = new JButton("<<");
     @Getter
-    private final JButton prevButton = new JButton("< Prev");
-    private final JBLabel currentPageLabel = new JBLabel("Page 1 of 1");
+    private final JButton prevButton = new JButton("<");
+    private final JBLabel currentPageLabel = new JBLabel("1:1");
     @Getter
     private final JBTextField pageSizeField = new JBTextField("10", 3);
     @Getter
-    private final JButton nextButton = new JButton("Next >");
+    private final JButton nextButton = new JButton(">");
     @Getter
     private final JButton lastButton = new JButton(">>");
 

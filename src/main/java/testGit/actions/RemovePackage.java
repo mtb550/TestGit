@@ -16,11 +16,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import static testGit.util.KeyboardSet.DeletePackage;
 
-public class DeletePackage extends DumbAwareAction {
+public class RemovePackage extends DumbAwareAction {
     private final SimpleTree tree;
     private final ProjectPanel projectPanel;
 
-    public DeletePackage(ProjectPanel projectPanel, SimpleTree tree) {
+    public RemovePackage(ProjectPanel projectPanel, SimpleTree tree) {
         super("Delete", "Delete selected node", AllIcons.Actions.GC);
         this.projectPanel = projectPanel;
         this.tree = tree;

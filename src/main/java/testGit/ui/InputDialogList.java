@@ -26,7 +26,7 @@ public class InputDialogList {
 
     public static void show(String title, BiConsumer<String, TemplateItem> onSelected) {
         TemplateItem[] items = {
-                new TemplateItem("Class", AllIcons.Nodes.Class, true),
+                new TemplateItem("Class", AllIcons.Nodes.Class, false),
                 new TemplateItem("Interface", AllIcons.Nodes.Interface, true),
                 new TemplateItem("Record", AllIcons.Nodes.Record, true),
                 new TemplateItem("Enum", AllIcons.Nodes.Enum, true),

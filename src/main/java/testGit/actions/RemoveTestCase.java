@@ -21,12 +21,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class DeleteTestCase extends DumbAwareAction {
+public class RemoveTestCase extends DumbAwareAction {
     private final Directory dir;
     private final JBList<TestCase> list;
     private final CollectionListModel<TestCase> model;
 
-    public DeleteTestCase(Directory dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
+    public RemoveTestCase(Directory dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
         super("Delete", "Delete test case", AllIcons.Actions.DeleteTag);
         this.dir = dir;
         this.list = list;

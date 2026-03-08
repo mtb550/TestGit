@@ -16,7 +16,7 @@ public class ContextMenu extends DefaultActionGroup {
         addSeparator();
         add(new UpdateTestCase(tc, list));
         add(new CopyTestCase(tc));
-        add(new DeleteTestCase(dir, list, model));
+        add(new RemoveTestCase(dir, list, model));
         addSeparator();
         add(new GenerateTestCase(tc, list));
         add(new RunTestCase(tc, list));

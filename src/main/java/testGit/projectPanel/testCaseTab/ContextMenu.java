@@ -23,7 +23,7 @@ public class ContextMenu extends DefaultActionGroup {
         add(new OpenTestSet2(testCaseTree));
         add(new AddGroup(projectPanel, testCaseTree));
         addSeparator();
-        add(new DeletePackage(projectPanel, testCaseTree));
+        add(new RemovePackage(projectPanel, testCaseTree));
         add(new Rename(projectPanel, testCaseTree));
         addSeparator();
         add(new Run(testCaseTree));
