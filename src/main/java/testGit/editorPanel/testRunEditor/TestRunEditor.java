@@ -1,10 +1,9 @@
 package testGit.editorPanel.testRunEditor;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.vfs.VirtualFile;
 import testGit.pojo.*;
 import testGit.projectPanel.ProjectPanel;
-import testGit.util.TestCaseSorter;
+import testGit.util.DirectoryMapper;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -15,152 +14,132 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class TestRunEditor {
 
     private static DefaultTreeModel createFilteredModel(List<TestCase> cases) {
         System.out.println("TestRunEditor.createFilteredModel()");
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Selected Test Cases");
-        for (TestCase tc : cases) {
-            root.add(new DefaultMutableTreeNode(tc));
-        }
+        cases.forEach(tc -> root.add(new DefaultMutableTreeNode(tc)));
         return new DefaultTreeModel(root);
     }
 
     public static void open(Path runFilePath, ProjectPanel projectPanel) {
         System.out.println("TestRunEditor.open()");
-        FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
-        String targetPath = runFilePath.toAbsolutePath().toString();
 
-        TestRun metadata;
         try {
-            metadata = Config.getMapper().readValue(runFilePath.toFile(), TestRun.class);
-        } catch (IOException e) {
-            return;
-        }
+            // 1. Read the Test Run JSON file
+            TestRun metadata = Config.getMapper().readValue(runFilePath.toFile(), TestRun.class);
+            List<TestCase> loadedCases = new ArrayList<>();
 
-        List<TestCase> testCases = new ArrayList<>();
-        if (metadata.getResults() != null) {
-            for (TestRun.TestRunItems item : metadata.getResults()) {
-                if (item.getProject() != null && item.getTestCaseId() != null) {
-                    TestCase tc = findTestCaseRecursively(item.getProject(), item.getTestCaseId().toString());
-                    if (tc != null) {
-                        testCases.add(tc);
+            if (metadata.getResults() != null) {
+                // 2. Extract the target UUIDs we need to find
+                Set<String> targetIds = metadata.getResults().stream()
+                        .map(item -> item.getTestCaseId().toString())
+                        .collect(Collectors.toSet());
+
+                // 3. Locate the testCases folder for the current project
+                String projectName = projectPanel.getTestProjectSelector().getSelectedTestProject().getItem().getFileName();
+                Path testCasesRoot = Config.getTestGitPath().resolve(projectName).resolve("testCases");
+
+                // 4. Scan the folder and load the matching TestCase JSON files
+                if (Files.exists(testCasesRoot)) {
+                    try (java.util.stream.Stream<Path> paths = java.nio.file.Files.walk(testCasesRoot)) {
+                        paths.filter(java.nio.file.Files::isRegularFile)
+                                .filter(p -> p.toString().endsWith(".json"))
+                                .forEach(p -> {
+                                    try {
+                                        TestCase tc = Config.getMapper().readValue(p.toFile(), TestCase.class);
+                                        // If this test case is in our Test Run, add it to the list
+                                        if (tc.getId() != null && targetIds.contains(tc.getId())) {
+                                            loadedCases.add(tc);
+                                        }
+                                    } catch (Exception ignored) {
+                                    }
+                                });
                     }
                 }
             }
-        }
 
-        List<TestCase> sortedCases = TestCaseSorter.sortTestCases(testCases);
-        openEditor(editorManager, targetPath, metadata, sortedCases, EditorType.TEST_RUN_OPENING, projectPanel);
-    }
+            // 5. Sort them and hand them to the Editor
+            List<TestCase> sortedCases = testGit.util.TestCaseSorter.sortTestCases(loadedCases);
+            System.out.println("[TRACE] Opened run. Loaded " + sortedCases.size() + " test cases.");
 
-    public static void create(Path runPath, ProjectPanel projectPanel, DefaultMutableTreeNode selectedNode, TestRun metadata) {
-        System.out.println("[DEBUG] TestRunEditor: creating editor for path: " + runPath);
-
-        FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
-        // Normalize path to absolute string
-        String targetPath = runPath.toAbsolutePath().toString();
-
-        Directory testSet = (Directory) selectedNode.getUserObject();
-        List<TestCase> testCases = new ArrayList<>();
-        File folder = testSet.getFile();
-
-        System.out.println("[DEBUG] TestRunEditor: Scanning folder: " + folder.getAbsolutePath());
-
-        if (folder != null && folder.exists() && folder.isDirectory()) {
-            File[] files = folder.listFiles((d, name) -> name.toLowerCase().endsWith(".json"));
-            if (files != null) {
-                System.out.println("[DEBUG] TestRunEditor: Found " + files.length + " JSON files.");
-                for (File file : files) {
-                    try {
-                        TestCase tc = Config.getMapper().readValue(file, TestCase.class);
-                        testCases.add(tc);
-                        System.out.println("[DEBUG] TestRunEditor: Successfully parsed test case: " + tc.getTitle());
-                    } catch (Exception e) {
-                        System.err.println("[DEBUG] TestRunEditor: Failed to parse " + file.getName() + " - " + e.getMessage());
-                    }
-                }
-            } else {
-                System.out.println("[DEBUG] TestRunEditor: No files found in directory.");
-            }
-        }
-
-        List<TestCase> sortedCases = TestCaseSorter.sortTestCases(testCases);
-        System.out.println("[DEBUG] TestRunEditor: Total test cases ready: " + sortedCases.size());
-
-        VirtualFile existingFile = Arrays.stream(editorManager.getOpenFiles())
-                .filter(f -> f instanceof VirtualFileImpl && ((VirtualFileImpl) f).getRunPath().equals(targetPath))
-                .findFirst()
-                .orElse(null);
-
-        if (existingFile != null) {
-            editorManager.openFile(existingFile, true);
-        } else {
             VirtualFileImpl virtualFile = new VirtualFileImpl(
-                    targetPath,
-                    (DefaultTreeModel) projectPanel.getTestCaseTabController().getTree().getModel(),
-                    sortedCases,
-                    EditorType.TEST_RUN_CREATION,
-                    projectPanel
-            );
-
-            virtualFile.setMetadata(metadata);
-            editorManager.openFile(virtualFile, true);
-        }
-    }
-
-    private static void openEditor(FileEditorManager editorManager, String targetPath, TestRun metadata,
-                                   List<TestCase> sortedCases, EditorType type, ProjectPanel projectPanel) {
-        System.out.println("TestRunEditor.openEditor()");
-        VirtualFile existingFile = Arrays.stream(editorManager.getOpenFiles())
-                .filter(f -> f instanceof VirtualFileImpl && ((VirtualFileImpl) f).getRunPath().equals(targetPath))
-                .findFirst()
-                .orElse(null);
-
-        if (existingFile != null) {
-            editorManager.openFile(existingFile, true);
-        } else {
-            VirtualFileImpl virtualFile = new VirtualFileImpl(
-                    targetPath,
+                    runFilePath.toAbsolutePath().toString(),
                     createFilteredModel(sortedCases),
                     sortedCases,
-                    type,
+                    EditorType.TEST_RUN_OPENING,
                     projectPanel
             );
             virtualFile.setMetadata(metadata);
-            editorManager.openFile(virtualFile, true);
+
+            FileEditorManager.getInstance(Config.getProject()).openFile(virtualFile, true);
+        } catch (IOException e) {
+            System.err.println("Failed to open Test Run: " + e.getMessage());
         }
     }
 
-    public static TestCase findTestCaseRecursively(String projectName, String testCaseId) {
-        if (projectName == null || testCaseId == null || Config.getTestGitPath() == null) {
-            System.out.println("findTestCaseRecursively. projectName == null || testCaseId == null || Config.getTestGitPath() == null");
-            return null;
-        }
+    public static void create(Path runFilePath, ProjectPanel projectPanel, Directory projectName, TestRun metadata) {
+        System.out.println("[TRACE] TestRunEditor.create() for project: " + projectName);
 
-        Path searchRoot = Config.getTestGitPath()
-                .resolve(projectName)
-                .resolve("testCases");
+        Path testCasesPath = Config.getTestGitPath().resolve(projectName.getFileName()).resolve("testCases");
+        File rootFolder = testCasesPath.toFile();
 
-        System.out.println("searchRoot: " + searchRoot);
-        if (!Files.exists(searchRoot)) {
-            return null;
-        }
+        DefaultMutableTreeNode rootNode = buildDirectoryTree(rootFolder, true);
+        DefaultTreeModel fullTestCasesModel = new DefaultTreeModel(rootNode);
 
-        try (Stream<Path> paths = Files.walk(searchRoot)) {
-            Optional<Path> foundFile = paths
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().equals(testCaseId + ".json"))
-                    .findFirst();
+        List<TestCase> initialTestCases = new ArrayList<>();
 
-            if (foundFile.isPresent()) {
-                return Config.getMapper().readValue(foundFile.get().toFile(), TestCase.class);
+        VirtualFileImpl virtualFile = new VirtualFileImpl(
+                runFilePath.toAbsolutePath().toString(),
+                fullTestCasesModel,
+                initialTestCases,
+                EditorType.TEST_RUN_CREATION,
+                projectPanel
+        );
+        virtualFile.setMetadata(metadata);
+
+        FileEditorManager.getInstance(Config.getProject()).openFile(virtualFile, true);
+    }
+
+    private static DefaultMutableTreeNode buildDirectoryTree(File folder, boolean isRoot) {
+        Object userObject;
+        if (isRoot) {
+            userObject = "Test Cases (" + folder.getParentFile().getName() + ")";
+        } else {
+            userObject = DirectoryMapper.map(folder);
+            if (userObject == null) {
+                userObject = folder.getName();
             }
-        } catch (IOException ignored) {
         }
-        return null;
+
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(userObject);
+
+        File[] children = folder.listFiles();
+        if (children != null) {
+            Arrays.sort(children, (a, b) -> {
+                if (a.isDirectory() && !b.isDirectory()) return -1;
+                if (!a.isDirectory() && b.isDirectory()) return 1;
+                return a.getName().compareToIgnoreCase(b.getName());
+            });
+
+            for (File child : children) {
+                if (child.isDirectory()) {
+                    node.add(buildDirectoryTree(child, false));
+                } else if (child.isFile() && child.getName().endsWith(".json")) {
+                    try {
+                        TestCase tc = Config.getMapper().readValue(child, TestCase.class);
+                        node.add(new DefaultMutableTreeNode(tc));
+                    } catch (Exception e) {
+                        System.err.println("[TRACE-ERROR] Failed to parse JSON: " + child.getName());
+                    }
+                }
+            }
+        }
+
+        return node;
     }
 }

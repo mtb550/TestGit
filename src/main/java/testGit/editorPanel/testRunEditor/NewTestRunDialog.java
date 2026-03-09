@@ -40,7 +40,7 @@ public class NewTestRunDialog extends DialogWrapper {
 
     public TestRun getMetadata() {
         TestRun metadata = new TestRun();
-        metadata.setBuildNumber(buildNumberField.getText());
+        metadata.setBuildNumber(buildNumberField.getText().trim());
         metadata.setPlatform((String) platformCombo.getSelectedItem());
         metadata.setLanguage((String) languageCombo.getSelectedItem());
         metadata.setBrowser((String) browserCombo.getSelectedItem());

@@ -29,6 +29,11 @@ public class FileEditorOpeningImpl extends UserDataHolderBase implements FileEdi
     }
 
     @Override
+    public @Nullable JComponent getPreferredFocusedComponent() {
+        return component;
+    }
+
+    @Override
     public @NotNull String getName() {
         return "Test Run Editor";
     }
@@ -44,15 +49,16 @@ public class FileEditorOpeningImpl extends UserDataHolderBase implements FileEdi
     }
 
     @Override
-    public void dispose() {
-        Disposer.dispose(ui);
-    }
-
-    @Override
     public boolean isModified() {
         return true;
     }
 
+    @Override
+    public void dispose() {
+        Disposer.dispose(ui);
+    }
+
+    // Unused boilerplate
     @Override
     public void addPropertyChangeListener(@NotNull PropertyChangeListener l) {
     }
@@ -63,11 +69,5 @@ public class FileEditorOpeningImpl extends UserDataHolderBase implements FileEdi
 
     @Override
     public void setState(@NotNull FileEditorState state) {
-    }
-
-    @Nullable
-    @Override
-    public JComponent getPreferredFocusedComponent() {
-        return component;
     }
 }

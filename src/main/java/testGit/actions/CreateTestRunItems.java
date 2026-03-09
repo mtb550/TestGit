@@ -100,9 +100,7 @@ public class CreateTestRunItems extends DumbAwareAction {
             TreeUtilImpl.insertVf(this, parentPath, folderName);
             TreeUtilImpl.insertNode(tree, projectPanel.getTestCaseTabController().getRootNode(), newPackage);
             Notifier.info("Test Package Created", "Create new test package under: " + parentPath);
-        }
-
-        else if (selectedItem.type() == DirectoryType.TR) {
+        } else if (selectedItem.type() == DirectoryType.TR) {
             Directory newTestRun = new Directory()
                     .setType(DirectoryType.TR)
                     .setName(enteredName)

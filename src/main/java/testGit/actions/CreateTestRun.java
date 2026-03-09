@@ -47,7 +47,7 @@ public class CreateTestRun extends DumbAwareAction {
         NewTestRunDialog dialog = new NewTestRunDialog();
         if (dialog.showAndGet()) {
             TestRun metadata = dialog.getMetadata();
-            TestRunEditor.create(treeItem.getFilePath(), projectPanel, parentNode, metadata);
+            TestRunEditor.create(treeItem.getFilePath(), projectPanel, projectPanel.getTestProjectSelector().getSelectedTestProject().getItem(), metadata);
         }
     }
 

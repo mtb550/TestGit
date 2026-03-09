@@ -25,16 +25,15 @@ public class VirtualFileImpl extends LightVirtualFile {
 
     public VirtualFileImpl(@NotNull String runPath, @NotNull DefaultTreeModel treeModel, List<TestCase> testCases, EditorType editorType, ProjectPanel projectPanel) {
         super(String.format("Run: %s", Paths.get(runPath).getFileName()));
-        this.projectPanel = projectPanel;
         this.runPath = runPath;
         this.testCasesTreeModel = treeModel;
         this.testCases = testCases;
         this.editorType = editorType;
+        this.projectPanel = projectPanel;
     }
 
     @Override
     public boolean isValid() {
         return true;
     }
-
 }

@@ -20,133 +20,128 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
 public class TestRunCreationUI implements Disposable {
     private final List<TestCase> initialTestCases;
+    private final Set<Integer> initialTestCaseUids;
     private CheckboxTree checklistTree;
     private TestRun currentTestRun;
     private TestRun metadata;
     private VirtualFile currentFile;
+    private Map<UUID, TestRun.TestRunItems> resultsMap;
 
     public TestRunCreationUI(List<TestCase> initialTestCases) {
-        System.out.println("TestRunCreationUI.TestRunCreationUI()");
+        System.out.println("[TRACE] TestRunCreationUI constructor started.");
         this.initialTestCases = TestCaseSorter.sortTestCases(initialTestCases);
+        this.initialTestCaseUids = this.initialTestCases.stream()
+                .map(TestCase::getUid)
+                .collect(Collectors.toSet());
     }
 
     public JComponent createEditorPanel(DefaultTreeModel testCaseModel, String savePathString, ProjectPanel projectPanel) {
+        System.out.println("[TRACE] createEditorPanel() started.");
+
+        System.out.println("[TRACE] Converting DefaultTreeModel to CheckedTreeNodes...");
+        CheckedTreeNode root = convertToCheckedNodes((DefaultMutableTreeNode) testCaseModel.getRoot());
+        System.out.println("[TRACE] Tree conversion complete.");
+
         JBPanel<?> mainPanel = new JBPanel<>(new BorderLayout());
 
-        CheckedTreeNode root = convertToCheckedNodes((DefaultMutableTreeNode) testCaseModel.getRoot());
-
-        checklistTree = new CheckboxTree(
-                new CheckboxTree.CheckboxTreeCellRenderer() {
-                    @Override
-                    public void customizeRenderer(@NotNull JTree tree, @NotNull Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-                        if (value instanceof CheckedTreeNode node) {
-                            Object userObj = node.getUserObject();
-                            if (userObj instanceof Directory dir) {
-                                getTextRenderer().append(dir.getName(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
-                            } else if (userObj instanceof TestCase tc) {
-                                TestRun.TestRunItems result = findResultFor(tc.getId());
-
-                                SimpleTextAttributes mainStyle = SimpleTextAttributes.REGULAR_ATTRIBUTES;
-                                String statusText = " [Pending]";
-
-                                if (result != null) {
-                                    switch (result.getStatus()) {
-                                        case "PASSED" -> {
-                                            mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.BLUE);
-                                            statusText = " [Passed]";
-                                        }
-                                        case "FAILED" -> {
-                                            mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.RED);
-                                            statusText = " [Failed]";
-                                        }
-                                        case "BLOCKED" -> {
-                                            mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.ORANGE);
-                                            statusText = " [Blocked]";
-                                        }
-                                    }
-                                }
-
-                                getTextRenderer().append(tc.getTitle(), mainStyle);
-                                getTextRenderer().append(statusText, SimpleTextAttributes.GRAYED_ATTRIBUTES);
-                            }
-                        }
-                    }
-                },
-                root,
-                new CheckboxTreeBase.CheckPolicy(true, true, true, true)
-        );
-
+        System.out.println("[TRACE] Initializing CheckboxTree...");
+        checklistTree = new CheckboxTree(createRenderer(), root, new CheckboxTreeBase.CheckPolicy(true, true, true, true));
         TreeUtil.expandAll(checklistTree);
 
         mainPanel.add(new JBScrollPane(checklistTree), BorderLayout.CENTER);
+        mainPanel.add(createSaveButton(root, savePathString, projectPanel), BorderLayout.SOUTH);
 
-        JButton saveButton = new JButton("Save Test Run");
-        saveButton.addActionListener(e -> saveSelectedToJSON(root, savePathString, projectPanel));
-        mainPanel.add(saveButton, BorderLayout.SOUTH);
-
+        System.out.println("[TRACE] createEditorPanel() finished.");
         return mainPanel;
     }
 
+    private CheckboxTree.CheckboxTreeCellRenderer createRenderer() {
+        return new CheckboxTree.CheckboxTreeCellRenderer() {
+            @Override
+            public void customizeRenderer(@NotNull JTree tree, @NotNull Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+                if (value instanceof CheckedTreeNode node) {
+                    Object userObj = node.getUserObject();
+
+                    if (userObj instanceof Directory dir) {
+                        getTextRenderer().append(dir.getName(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
+                    } else if (userObj instanceof TestCase tc) {
+                        // Render TestCase name and status
+                        TestRun.TestRunItems result = findResultFor(tc.getId());
+                        SimpleTextAttributes mainStyle = SimpleTextAttributes.REGULAR_ATTRIBUTES;
+                        String statusText = " [Pending]";
+
+                        if (result != null) {
+                            switch (result.getStatus()) {
+                                case "PASSED" -> {
+                                    mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.BLUE);
+                                    statusText = " [Passed]";
+                                }
+                                case "FAILED" -> {
+                                    mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.RED);
+                                    statusText = " [Failed]";
+                                }
+                                case "BLOCKED" -> {
+                                    mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.ORANGE);
+                                    statusText = " [Blocked]";
+                                }
+                            }
+                        }
+
+                        getTextRenderer().append(tc.getTitle(), mainStyle);
+                        getTextRenderer().append(statusText, SimpleTextAttributes.GRAYED_ATTRIBUTES);
+                    } else if (userObj instanceof String str) {
+                        // Fallback for the root node string
+                        getTextRenderer().append(str, SimpleTextAttributes.REGULAR_BOLD_ATTRIBUTES);
+                    }
+                }
+            }
+        };
+    }
+
+    private JButton createSaveButton(CheckedTreeNode root, String savePathString, ProjectPanel projectPanel) {
+        JButton saveButton = new JButton("Save Test Run");
+        saveButton.addActionListener(e -> {
+            System.out.println("[TRACE] Save button clicked!");
+            saveSelectedToJSON(root, savePathString, projectPanel);
+        });
+        return saveButton;
+    }
+
     private CheckedTreeNode convertToCheckedNodes(DefaultMutableTreeNode node) {
-        System.out.println("TestRunCreationUI.convertToCheckedNodes()");
         Object userObj = node.getUserObject();
         CheckedTreeNode newNode = new CheckedTreeNode(userObj);
 
-        for (int i = 0; i < node.getChildCount(); i++) {
-            newNode.add(convertToCheckedNodes((DefaultMutableTreeNode) node.getChildAt(i)));
+        // If this node is a TestCase, check if it should be selected initially
+        if (userObj instanceof TestCase tc && isAlreadyInRun(tc)) {
+            newNode.setChecked(true);
+            System.out.println("[TRACE] Auto-checking TestCase: " + tc.getTitle());
         }
 
-        if (userObj instanceof Directory dir && dir.getType() == DirectoryType.TS) {
-            List<TestCase> cases = loadTestCasesFromDir(dir);
-            for (TestCase tc : cases) {
-                CheckedTreeNode tcNode = new CheckedTreeNode(tc);
-
-                if (initialTestCases != null && isAlreadyInRun(tc)) {
-                    tcNode.setChecked(true);
-                }
-
-                newNode.add(tcNode);
-            }
+        // Recursively convert all children
+        for (int i = 0; i < node.getChildCount(); i++) {
+            newNode.add(convertToCheckedNodes((DefaultMutableTreeNode) node.getChildAt(i)));
         }
 
         return newNode;
     }
 
     private boolean isAlreadyInRun(TestCase tc) {
-        return initialTestCases.stream()
-                .anyMatch(existing -> existing.getUid() == tc.getUid());
-    }
-
-    private List<TestCase> loadTestCasesFromDir(Directory dir) {
-        System.out.println("looking for the test cases for directory " + dir.getName());
-        List<TestCase> testCases = new ArrayList<>();
-        File folder = dir.getFile();
-        if (folder != null && folder.exists() && folder.isDirectory()) {
-            File[] files = folder.listFiles((d, name) -> name.endsWith(".json"));
-            if (files != null) {
-                for (File file : files) {
-                    try {
-                        testCases.add(Config.getMapper().readValue(file, TestCase.class));
-                    } catch (Exception ignored) {
-                    }
-                }
-            }
-        }
-
-        testCases.forEach(System.out::println);
-        return TestCaseSorter.sortTestCases(testCases);
+        return initialTestCaseUids != null && initialTestCaseUids.contains(tc.getUid());
     }
 
     private void saveSelectedToJSON(CheckedTreeNode root, String baseProjectPath, ProjectPanel projectPanel) {
-        File testRunsDir = new File(baseProjectPath, "testRuns");
+        System.out.println("[TRACE] saveSelectedToJSON() started.");
+
+        // Use the baseProjectPath directly to avoid duplicate "testRuns" folders
+        File testRunsDir = new File(baseProjectPath);
 
         TestRun run = this.currentTestRun != null ? this.currentTestRun : new TestRun();
 
@@ -159,7 +154,7 @@ public class TestRunCreationUI implements Disposable {
         }
 
         assert metadata != null;
-        String fileName = "tr_" + metadata.getBuildNumber() + "_1.json";
+        String fileName = DirectoryType.TR.name() + "_" + metadata.getBuildNumber() + "_" + DirectoryStatus.AC.name() + ".json";
         File finalOutputFile = new File(testRunsDir, fileName);
 
         run.setRunName(fileName);
@@ -172,8 +167,9 @@ public class TestRunCreationUI implements Disposable {
 
         try {
             Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(finalOutputFile, run);
-            System.out.println("Test Run saved successfully to: " + finalOutputFile.getAbsolutePath());
+            System.out.println("[TRACE] Test Run saved successfully to: " + finalOutputFile.getAbsolutePath());
         } catch (Exception e) {
+            System.err.println("[TRACE-ERROR] Failed to save JSON.");
             e.printStackTrace(System.err);
         }
 
@@ -187,9 +183,12 @@ public class TestRunCreationUI implements Disposable {
             item.setTestCaseId(UUID.fromString(tc.getId()));
             item.setStatus("PENDING");
 
+            // Navigate up the tree to find the parent Directory (Project/Test Set)
             Object rootObject = ((DefaultMutableTreeNode) node.getRoot()).getUserObject();
             if (rootObject instanceof Directory rootDir) {
                 item.setProject(rootDir.getFileName());
+            } else if (rootObject instanceof String str) {
+                item.setProject(str); // Fallback if root is a String
             }
             items.add(item);
         }
@@ -200,16 +199,9 @@ public class TestRunCreationUI implements Disposable {
     }
 
     private TestRun.TestRunItems findResultFor(String testCaseId) {
-        if (currentTestRun == null || currentTestRun.getResults() == null) {
-            return null;
-        }
-
+        if (resultsMap == null) return null;
         try {
-            UUID targetUuid = UUID.fromString(testCaseId);
-            return currentTestRun.getResults().stream()
-                    .filter(item -> item.getTestCaseId().equals(targetUuid))
-                    .findFirst()
-                    .orElse(null);
+            return resultsMap.get(UUID.fromString(testCaseId));
         } catch (IllegalArgumentException e) {
             return null;
         }
