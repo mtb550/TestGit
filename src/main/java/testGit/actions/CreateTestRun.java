@@ -7,11 +7,11 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import testGit.editorPanel.testRunEditor.NewTestRunDialog;
 import testGit.editorPanel.testRunEditor.TestRunEditor;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
 import testGit.pojo.TestRun;
+import testGit.pojo.TestRunStatus;
 import testGit.projectPanel.ProjectPanel;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -44,11 +44,20 @@ public class CreateTestRun extends DumbAwareAction {
         }
 
         /*TestRunEditor.open(treeItem.getFilePath(), projectPanel, parentNode);*/
-        NewTestRunDialog dialog = new NewTestRunDialog();
-        if (dialog.showAndGet()) {
-            TestRun metadata = dialog.getMetadata();
-            TestRunEditor.create(treeItem.getFilePath(), projectPanel, projectPanel.getTestProjectSelector().getSelectedTestProject().getItem(), metadata);
-        }
+        //NewTestRunDialog dialog = new NewTestRunDialog();
+        //if (dialog.showAndGet()) {
+        //TestRun metadata = dialog.getMetadata();
+
+        TestRun metadata = new TestRun();
+        metadata.setStatus(TestRunStatus.CREATED);
+
+        TestRunEditor.create(
+                treeItem.getFilePath(),
+                projectPanel,
+                projectPanel.getTestProjectSelector().getSelectedTestProject().getItem(),
+                metadata
+        );
+        //}
     }
 
     @Override

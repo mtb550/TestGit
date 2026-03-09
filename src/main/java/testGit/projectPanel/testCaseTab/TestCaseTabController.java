@@ -13,7 +13,6 @@ import testGit.projectPanel.ProjectPanel;
 import testGit.projectPanel.TransferHandlerImpl;
 import testGit.util.DirectoryMapper;
 
-import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.io.File;
@@ -87,6 +86,7 @@ public class TestCaseTabController {
             });
         });
     }
+
     private DefaultMutableTreeNode buildNodeRecursive(@NotNull Directory dir) {
         System.out.println("TC buildNodeRecursive");
 

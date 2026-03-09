@@ -29,11 +29,13 @@ import java.util.stream.Collectors;
 public class TestRunCreationUI implements Disposable {
     private final List<TestCase> initialTestCases;
     private final Set<Integer> initialTestCaseUids;
+    JBPanel<?> mainPanel = new JBPanel<>(new BorderLayout());
     private CheckboxTree checklistTree;
     private TestRun currentTestRun;
     private TestRun metadata;
     private VirtualFile currentFile;
     private Map<UUID, TestRun.TestRunItems> resultsMap;
+    private TestRunMetadataHeader metadataHeader;
 
     public TestRunCreationUI(List<TestCase> initialTestCases) {
         System.out.println("[TRACE] TestRunCreationUI constructor started.");
@@ -50,7 +52,12 @@ public class TestRunCreationUI implements Disposable {
         CheckedTreeNode root = convertToCheckedNodes((DefaultMutableTreeNode) testCaseModel.getRoot());
         System.out.println("[TRACE] Tree conversion complete.");
 
-        JBPanel<?> mainPanel = new JBPanel<>(new BorderLayout());
+        mainPanel = new JBPanel<>(new BorderLayout());
+
+        // NEW: Add the metadata panel at the top (NORTH)
+        // Initialize and add the clean header class
+        metadataHeader = new TestRunMetadataHeader();
+        mainPanel.add(metadataHeader.getPanel(), BorderLayout.NORTH);
 
         System.out.println("[TRACE] Initializing CheckboxTree...");
         checklistTree = new CheckboxTree(createRenderer(), root, new CheckboxTreeBase.CheckPolicy(true, true, true, true));
@@ -110,6 +117,11 @@ public class TestRunCreationUI implements Disposable {
         JButton saveButton = new JButton("Save Test Run");
         saveButton.addActionListener(e -> {
             System.out.println("[TRACE] Save button clicked!");
+            if (!metadataHeader.validate()) {
+                JOptionPane.showMessageDialog(mainPanel, "Build number is required.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            metadataHeader.applyToMetadata(this.metadata);
             saveSelectedToJSON(root, savePathString, projectPanel);
         });
         return saveButton;

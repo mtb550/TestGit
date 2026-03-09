@@ -30,21 +30,17 @@ public class TestRunEditor {
         System.out.println("TestRunEditor.open()");
 
         try {
-            // 1. Read the Test Run JSON file
             TestRun metadata = Config.getMapper().readValue(runFilePath.toFile(), TestRun.class);
             List<TestCase> loadedCases = new ArrayList<>();
 
             if (metadata.getResults() != null) {
-                // 2. Extract the target UUIDs we need to find
                 Set<String> targetIds = metadata.getResults().stream()
                         .map(item -> item.getTestCaseId().toString())
                         .collect(Collectors.toSet());
 
-                // 3. Locate the testCases folder for the current project
                 String projectName = projectPanel.getTestProjectSelector().getSelectedTestProject().getItem().getFileName();
                 Path testCasesRoot = Config.getTestGitPath().resolve(projectName).resolve("testCases");
 
-                // 4. Scan the folder and load the matching TestCase JSON files
                 if (Files.exists(testCasesRoot)) {
                     try (java.util.stream.Stream<Path> paths = java.nio.file.Files.walk(testCasesRoot)) {
                         paths.filter(java.nio.file.Files::isRegularFile)
@@ -52,7 +48,6 @@ public class TestRunEditor {
                                 .forEach(p -> {
                                     try {
                                         TestCase tc = Config.getMapper().readValue(p.toFile(), TestCase.class);
-                                        // If this test case is in our Test Run, add it to the list
                                         if (tc.getId() != null && targetIds.contains(tc.getId())) {
                                             loadedCases.add(tc);
                                         }
@@ -63,7 +58,6 @@ public class TestRunEditor {
                 }
             }
 
-            // 5. Sort them and hand them to the Editor
             List<TestCase> sortedCases = testGit.util.TestCaseSorter.sortTestCases(loadedCases);
             System.out.println("[TRACE] Opened run. Loaded " + sortedCases.size() + " test cases.");
 
@@ -100,8 +94,8 @@ public class TestRunEditor {
                 EditorType.TEST_RUN_CREATION,
                 projectPanel
         );
-        virtualFile.setMetadata(metadata);
 
+        virtualFile.setMetadata(metadata);
         FileEditorManager.getInstance(Config.getProject()).openFile(virtualFile, true);
     }
 
