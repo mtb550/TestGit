@@ -60,34 +60,33 @@ public class TestCaseTabController {
     public void buildTreeAsync(Directory selectedProject) {
         System.out.println("TestCaseTabController.buildTreeAsync()");
 
-        rootNode = new DefaultMutableTreeNode("TEST CASES");
+        // FIX 1: Create a LOCAL root so background threads don't share state
+        DefaultMutableTreeNode localRoot = new DefaultMutableTreeNode("TEST CASES");
         File testCasesFolder = selectedProject.getFilePath().resolve("testCases").toFile();
 
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             if (testCasesFolder.exists() && testCasesFolder.isDirectory()) {
-                Optional.ofNullable(testCasesFolder.listFiles(File::isDirectory))
-                        .stream()
-                        .flatMap(Arrays::stream)
-                        .map(DirectoryMapper::map)
-                        .filter(Objects::nonNull)
-                        .forEachOrdered(caseDir -> rootNode.add(buildNodeRecursive(caseDir)));
+                File[] files = testCasesFolder.listFiles(File::isDirectory);
+                if (files != null) {
+                    Arrays.stream(files)
+                            .map(DirectoryMapper::map)
+                            .filter(Objects::nonNull)
+                            .forEachOrdered(caseDir -> localRoot.add(buildNodeRecursive(caseDir)));
+                }
             }
 
             ApplicationManager.getApplication().invokeLater(() -> {
-                DefaultTreeModel newModel = new DefaultTreeModel(rootNode);
+                this.rootNode = localRoot;
 
-                tree.setRootVisible(rootNode.getChildCount() > 0);
-                tree.setShowsRootHandles(true);
-                tree.setDragEnabled(true);
-                tree.setDropMode(DropMode.ON_OR_INSERT);
+                DefaultTreeModel newModel = new DefaultTreeModel(localRoot);
                 tree.setModel(newModel);
-                TreeUtil.expandAll(tree);
-                tree.revalidate();
-                tree.repaint();
+
+                tree.setRootVisible(localRoot.getChildCount() > 0);
+                tree.setShowsRootHandles(true);
+                TreeUtil.promiseExpandAll(tree);
             });
         });
     }
-
     private DefaultMutableTreeNode buildNodeRecursive(@NotNull Directory dir) {
         System.out.println("TC buildNodeRecursive");
 

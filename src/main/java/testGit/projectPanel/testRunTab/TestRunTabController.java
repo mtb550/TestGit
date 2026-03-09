@@ -57,32 +57,35 @@ public class TestRunTabController {
     public void buildTreeAsync(Directory selectedProject) {
         System.out.println("TestRunTabController.buildTreeAsync()");
 
-        rootNode = new DefaultMutableTreeNode("TEST RUNS");
+        DefaultMutableTreeNode localRoot = new DefaultMutableTreeNode("TEST RUNS");
         File testRunsFolder = selectedProject.getFilePath().resolve("testRuns").toFile();
 
 
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             if (testRunsFolder.exists() && testRunsFolder.isDirectory()) {
-                Optional.ofNullable(testRunsFolder.listFiles())
-                        .stream()
-                        .flatMap(Arrays::stream)
-                        .map(DirectoryMapper::map)
-                        .filter(Objects::nonNull)
-                        .forEachOrdered(runDir -> rootNode.add(buildNodeRecursive(runDir)));
+                File[] files = testRunsFolder.listFiles();
+                if (files != null) {
+                    Arrays.stream(files)
+                            .map(DirectoryMapper::map)
+                            .filter(Objects::nonNull)
+                            .forEachOrdered(runDir -> localRoot.add(buildNodeRecursive(runDir)));
+                }
             }
 
             ApplicationManager.getApplication().invokeLater(() -> {
-                DefaultTreeModel newModel = new DefaultTreeModel(rootNode);
+                this.rootNode = localRoot;
 
-                tree.setRootVisible(rootNode.getChildCount() > 0);
+                DefaultTreeModel newModel = new DefaultTreeModel(localRoot);
+                tree.setModel(newModel);
+
+                tree.setRootVisible(localRoot.getChildCount() > 0);
                 tree.setShowsRootHandles(true);
                 tree.setDragEnabled(true);
                 tree.setDropMode(DropMode.ON_OR_INSERT);
-                tree.setEnabled(true);
-                tree.setModel(newModel);
-                TreeUtil.expandAll(tree);
-                tree.revalidate();
-                tree.repaint();
+                //tree.setEnabled(true);
+                TreeUtil.promiseExpandAll(tree);
+                //tree.revalidate();
+                //tree.repaint();
             });
         });
     }
