@@ -2,7 +2,6 @@ package testGit.editorPanel.testRunEditor;
 
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPlaces;
-import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
@@ -26,6 +25,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Set;
 
 public class TestRunCard extends JBPanel<TestRunCard> {
 
@@ -60,7 +60,6 @@ public class TestRunCard extends JBPanel<TestRunCard> {
                 new Color(defaultBackground.getRed(), defaultBackground.getGreen(), defaultBackground.getBlue(), 220),
                 new Color(defaultBackground.getRed(), defaultBackground.getGreen(), defaultBackground.getBlue(), 220)
         );
-
         defaultBorder = JBUI.Borders.empty(BORDER_THICKNESS);
         selectedBorder = BorderFactory.createCompoundBorder(
                 JBUI.Borders.customLine(new JBColor(new Color(0, 120, 215), new Color(75, 110, 175)), BORDER_THICKNESS),
@@ -101,7 +100,6 @@ public class TestRunCard extends JBPanel<TestRunCard> {
 
         setupClickListener();
         addMouseListener(createContextMenuListener());
-        updateData(index, tc);
     }
 
     public void deselect() {
@@ -112,17 +110,37 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         repaint();
     }
 
-    public void updateData(int index, TestCase tc) {
+    /**
+     * Updates the card's displayed content, driven by the current EditorHeader state.
+     *
+     * @param index         absolute index across all pages (used for the numbered title)
+     * @param tc            the test case to render
+     * @param showGroups    whether group badges should be visible
+     * @param showPriority  whether the priority badge should be visible
+     * @param activeDetails which detail rows are visible ("Expected Result", "Steps", "Automation Ref")
+     */
+    public void updateData(int index, TestCase tc,
+                           boolean showGroups, boolean showPriority,
+                           Set<String> activeDetails) {
         titleLabel.setText(String.format("%d. %s", index + 1, tc.getTitle()));
+
         expectedLabel.setText("Expected Result: " + tc.getExpected());
         stepsLabel.setText("Steps: " + tc.getSteps());
         automationRefLabel.setText("Automation Reference: " + tc.getAutoRef());
 
+        expectedLabel.setVisible(activeDetails.contains("Expected Result"));
+        stepsLabel.setVisible(activeDetails.contains("Steps"));
+        automationRefLabel.setVisible(activeDetails.contains("Automation Ref"));
+
         badgePanel.removeAll();
-        badgePanel.add(createPriorityBadge(tc));
-        if (tc.getGroups() != null)
+        if (showPriority) badgePanel.add(createPriorityBadge(tc));
+        if (showGroups && tc.getGroups() != null)
             for (GroupType group : tc.getGroups())
                 badgePanel.add(createGroupBadge(group));
+        badgePanel.revalidate();
+        badgePanel.repaint();
+
+        updateBackgrounds(index);
     }
 
     @Override
@@ -155,7 +173,9 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         });
     }
 
-    // --- Private helpers ---
+    // -------------------------------------------------------------------------
+    // Private helpers
+    // -------------------------------------------------------------------------
 
     private MouseListener createContextMenuListener() {
         return new MouseAdapter() {
@@ -174,10 +194,9 @@ public class TestRunCard extends JBPanel<TestRunCard> {
                 group.add(new ViewDetails(tc));
                 group.addSeparator();
                 group.add(new RunTestCase(tc, null));
-
-                ActionPopupMenu popupMenu = ActionManager.getInstance()
-                        .createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, group);
-                popupMenu.getComponent().show(e.getComponent(), e.getX(), e.getY());
+                ActionManager.getInstance()
+                        .createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, group)
+                        .getComponent().show(e.getComponent(), e.getX(), e.getY());
             }
         };
     }
@@ -211,9 +230,7 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.setFocusPainted(false);
         btn.setBorder(JBUI.Borders.empty(6, 16));
-        btn.addActionListener(e -> {
-            System.out.println("Test Case [" + tc.getTitle() + "] updated to: " + status);
-        });
+        btn.addActionListener(e -> System.out.println("Test Case [" + tc.getTitle() + "] updated to: " + status));
         btn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {

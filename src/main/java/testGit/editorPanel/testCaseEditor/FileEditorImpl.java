@@ -1,56 +1,41 @@
 package testGit.editorPanel.testCaseEditor;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorState;
-import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.CollectionListModel;
-import com.intellij.ui.JBColor;
-import com.intellij.ui.SearchTextField;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.util.ui.JBUI;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.editorPanel.StatusBar;
+import testGit.editorPanel.ToolBar;
 import testGit.pojo.Directory;
-import testGit.pojo.GroupType;
 import testGit.pojo.TestCase;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
+public class FileEditorImpl extends UserDataHolderBase implements FileEditor, ToolBar.Callbacks {
+
     private final JBPanel<?> panel;
     private final VirtualFile file;
     private final JBList<TestCase> list;
     private final CollectionListModel<TestCase> model;
-    private final Set<GroupType> selectedGroups = new HashSet<>();
-    @Getter
-    private final Set<String> selectedDetails = new HashSet<>();
-    private final JButton groupButton;
-    private final JButton detailsButton;
     private final ModelSyncListener<TestCase> syncListener;
-    private final SearchTextField searchField = new SearchTextField();
+    private final ToolBar toolBar;
     private final StatusBar statusBar;
+
     private List<TestCase> allTestCases;
-    @Getter
-    private boolean showGroups;
-    @Getter
-    private boolean showPriority;
 
     @Getter
     private int currentPage = 1;
@@ -62,168 +47,149 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
         this.panel = new JBPanel<>(new BorderLayout());
         this.file = file;
 
-        PropertiesComponent props = PropertiesComponent.getInstance();
-        this.showGroups = props.getBoolean("testGit.showGroups", true);
-        this.showPriority = props.getBoolean("testGit.showPriority", true);
-        String savedDetails = props.getValue("testGit.selectedDetails", "ID,Module,Expected Result,Steps,Automation Ref,Business Ref");
-        if (!savedDetails.isEmpty()) {
-            selectedDetails.addAll(List.of(savedDetails.split(",")));
-        }
+        pageSize = PropertiesComponent.getInstance().getInt("testGit.pageSize", 10);
 
-        JBPanel<?> header = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(5), JBUI.scale(2)));
-        header.setBorder(JBUI.Borders.customLine(JBColor.border(), 0, 0, 1, 0));
-        header.setBackground(JBUI.CurrentTheme.EditorTabs.background());
+        // Header — 'this' implements Callbacks so the header can notify us of changes
+        this.toolBar = new ToolBar(this);
+        panel.add(toolBar, BorderLayout.NORTH);
 
-        groupButton = new JButton("Groups", AllIcons.Actions.GroupBy);
-        groupButton.setFocusable(false);
-        groupButton.setBorderPainted(false);
-        groupButton.setContentAreaFilled(false);
-        groupButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        groupButton.setFont(JBUI.Fonts.label(12f));
-        groupButton.addActionListener(e -> showGroupPopup(groupButton));
-
-        groupButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                groupButton.setContentAreaFilled(true);
-                groupButton.setBackground(JBUI.CurrentTheme.ActionButton.hoverBackground());
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                groupButton.setContentAreaFilled(false);
-            }
-        });
-
-        header.add(groupButton);
-
-        detailsButton = new JButton("Details", AllIcons.Actions.PreviewDetailsVertically);
-        detailsButton.setFocusable(false);
-        detailsButton.setBorderPainted(false);
-        detailsButton.setContentAreaFilled(false);
-        detailsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        detailsButton.setFont(JBUI.Fonts.label(12f));
-        detailsButton.addActionListener(e -> showDetailsPopup(detailsButton));
-
-        detailsButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                detailsButton.setContentAreaFilled(true);
-                detailsButton.setBackground(JBUI.CurrentTheme.ActionButton.hoverBackground());
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                detailsButton.setContentAreaFilled(false);
-            }
-        });
-
-        header.add(detailsButton);
-
+        // Model + sync listener
         this.model = new CollectionListModel<>(new ArrayList<>());
         this.syncListener = new ModelSyncListener<>(allTestCases, model);
-
         this.syncListener.setOnUpdate(() -> {
-
-            if (!selectedGroups.isEmpty()) {
-                selectedGroups.clear();
-            }
-
-            if (!selectedDetails.isEmpty()) {
-                selectedDetails.clear();
-            }
-            updateDetailsButtonState();
+            toolBar.resetFilters();
             refreshView();
         });
-
         this.model.addListDataListener(syncListener);
 
-        searchField.getTextEditor().setColumns(30);
-
-        searchField.addDocumentListener(new com.intellij.ui.DocumentAdapter() {
-            @Override
-            protected void textChanged(@org.jetbrains.annotations.NotNull javax.swing.event.DocumentEvent e) {
-                applyFilters();
-            }
-        });
-
-        header.add(searchField);
-
-        this.statusBar = new StatusBar();
-        this.panel.add(statusBar, BorderLayout.SOUTH);
-        attachListeners();
-
+        // List
         this.list = new JBList<>(model);
         list.getEmptyText().setText("No test cases found").appendLine("Press Ctrl+M to add");
         list.setOpaque(true);
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         list.setDragEnabled(true);
         list.setDropMode(DropMode.INSERT);
-
         list.addListSelectionListener(new SelectionListenerImpl(list));
         list.addMouseListener(new MouseAdapterImpl(list, model, dir));
-
-        Runnable resetGroupFilter = this::applyGroupFilters;
-        Runnable resetDetailsFilter = () -> {
-            selectedDetails.clear();
-            updateDetailsButtonState();
-        };
-
-        list.setTransferHandler(new TransferImpl(dir, model, resetGroupFilter));
-        list.setTransferHandler(new TransferImpl(dir, model, resetDetailsFilter));
+        list.setTransferHandler(new TransferImpl(dir, model, this::applyFilters));
+        list.setCellRenderer(new RendererImpl(this));
         ShortcutHandler.register(dir, list, model);
-
-        panel.add(header, BorderLayout.NORTH);
         panel.add(new JBScrollPane(list), BorderLayout.CENTER);
 
-        JCheckBox showGroupsCheck = new JCheckBox("Show Groups", showGroups);
-        showGroupsCheck.setOpaque(false);
-        showGroupsCheck.setFocusable(false);
-        showGroupsCheck.addActionListener(e -> {
-            showGroups = showGroupsCheck.isSelected();
-            list.repaint();
-        });
+        // Status bar
+        this.statusBar = new StatusBar();
+        panel.add(statusBar, BorderLayout.SOUTH);
+        attachPaginationListeners();
 
-        header.add(showGroupsCheck);
-
-        JCheckBox showPriorityCheck = new JCheckBox("Show Priority", showPriority);
-        showPriorityCheck.setOpaque(false);
-        showPriorityCheck.addActionListener(e -> {
-            showPriority = showPriorityCheck.isSelected();
-            list.repaint();
-        });
-
-        header.add(showPriorityCheck);
-
-        this.list.setCellRenderer(new RendererImpl(this));
         refreshView();
     }
 
-    private void attachListeners() {
-        statusBar.getNextButton().addActionListener(e -> {
-            if (currentPage < getTotalPages(getFilteredList())) {
-                currentPage++;
-                refreshView();
-            }
-        });
+    // -------------------------------------------------------------------------
+    // EditorHeader.Callbacks implementation
+    // -------------------------------------------------------------------------
 
+    @Override
+    public void onFilterChanged() {
+        applyFilters();
+    }
+
+    @Override
+    public void onDetailsChanged() {
+        // Force the cell renderer to re-measure row heights and repaint
+        list.setFixedCellHeight(-1);
+        list.setCellRenderer(new RendererImpl(this));
+        list.revalidate();
+        list.repaint();
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters delegated to header — used by RendererImpl
+    // -------------------------------------------------------------------------
+
+    public boolean isShowGroups() {
+        return toolBar.isShowGroups();
+    }
+
+    public boolean isShowPriority() {
+        return toolBar.isShowPriority();
+    }
+
+    public Set<String> getSelectedDetails() {
+        return toolBar.getSelectedDetails();
+    }
+
+    // -------------------------------------------------------------------------
+    // Filtering and pagination
+    // -------------------------------------------------------------------------
+
+    public void applyFilters() {
+        currentPage = 1;
+        refreshView();
+    }
+
+    public void refreshView() {
+        List<TestCase> filtered = getFilteredList();
+        int totalItems = filtered.size();
+        int totalPages = getTotalPages(filtered);
+        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+
+        int startIndex = (currentPage - 1) * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, totalItems);
+        List<TestCase> pageItems = startIndex < totalItems
+                ? new ArrayList<>(filtered.subList(startIndex, endIndex))
+                : new ArrayList<>();
+
+        syncListener.pause();
+        model.replaceAll(pageItems);
+        syncListener.resume();
+
+        statusBar.updatePaginationState(currentPage, totalPages, pageItems.size(), totalItems);
+    }
+
+    public void loadData(List<TestCase> loadedData) {
+        this.allTestCases = loadedData;
+        this.currentPage = 1;
+        refreshView();
+    }
+
+    private List<TestCase> getFilteredList() {
+        String query = toolBar.getSearchQuery();
+        return allTestCases.stream()
+                .filter(tc -> {
+                    boolean matchesSearch = query.isEmpty() ||
+                            (tc.getTitle() != null && tc.getTitle().toLowerCase().contains(query));
+                    boolean matchesGroup = toolBar.getSelectedGroups().isEmpty() ||
+                            (tc.getGroups() != null && tc.getGroups().stream().anyMatch(toolBar.getSelectedGroups()::contains));
+                    return matchesSearch && matchesGroup;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private int getTotalPages(List<TestCase> filtered) {
+        return filtered.isEmpty() ? 1 : (int) Math.ceil((double) filtered.size() / pageSize);
+    }
+
+    private void attachPaginationListeners() {
+        statusBar.getFirstButton().addActionListener(e -> {
+            currentPage = 1;
+            refreshView();
+        });
         statusBar.getPrevButton().addActionListener(e -> {
             if (currentPage > 1) {
                 currentPage--;
                 refreshView();
             }
         });
-
-        statusBar.getFirstButton().addActionListener(e -> {
-            currentPage = 1;
-            refreshView();
+        statusBar.getNextButton().addActionListener(e -> {
+            if (currentPage < getTotalPages(getFilteredList())) {
+                currentPage++;
+                refreshView();
+            }
         });
-
         statusBar.getLastButton().addActionListener(e -> {
             currentPage = getTotalPages(getFilteredList());
             refreshView();
         });
-
         statusBar.getPageSizeField().addActionListener(e -> {
             try {
                 int newSize = Integer.parseInt(statusBar.getPageSizeField().getText().trim());
@@ -238,165 +204,9 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
         });
     }
 
-    private int getTotalPages(List<TestCase> filtered) {
-        if (filtered.isEmpty()) return 1;
-        return (int) Math.ceil((double) filtered.size() / pageSize);
-    }
-
-    private List<TestCase> getFilteredList() {
-        String query = searchField.getText().trim().toLowerCase();
-        return allTestCases.stream()
-                .filter(tc -> {
-                    boolean matchesSearch = query.isEmpty() ||
-                            (tc.getTitle() != null && tc.getTitle().toLowerCase().contains(query));
-                    boolean matchesGroup = selectedGroups.isEmpty() ||
-                            (tc.getGroups() != null && tc.getGroups().stream().anyMatch(selectedGroups::contains));
-                    return matchesSearch && matchesGroup;
-                })
-                .collect(Collectors.toList());
-    }
-
-    public void refreshView() {
-        List<TestCase> filtered = getFilteredList();
-        int totalItems = filtered.size();
-        int totalPages = getTotalPages(filtered);
-
-        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
-
-        int startIndex = (currentPage - 1) * pageSize;
-        int endIndex = Math.min(startIndex + pageSize, totalItems);
-
-        List<TestCase> pageItems = new ArrayList<>();
-        if (startIndex < totalItems) {
-            pageItems = new ArrayList<>(filtered.subList(startIndex, endIndex));
-        }
-
-        if (syncListener != null) syncListener.pause();
-        model.replaceAll(pageItems);
-        if (syncListener != null) syncListener.resume();
-
-        if (statusBar != null) {
-            statusBar.updatePaginationState(currentPage, totalPages, pageItems.size(), totalItems);
-        }
-    }
-
-    public void applyFilters() {
-        currentPage = 1;
-        refreshView();
-    }
-
-    private void applyGroupFilters() {
-        currentPage = 1;
-        refreshView();
-        if (selectedGroups.isEmpty()) {
-            groupButton.setText("Groups");
-            groupButton.setForeground(JBColor.foreground());
-        } else {
-            groupButton.setText("Groups (" + selectedGroups.size() + ")");
-            groupButton.setForeground(JBUI.CurrentTheme.Link.Foreground.ENABLED);
-        }
-    }
-
-    public void loadData(List<TestCase> loadedData) {
-        this.allTestCases = loadedData;
-        this.currentPage = 1;
-        refreshView();
-    }
-
-    private void showGroupPopup(JButton anchor) {
-        JBList<GroupType> groupList = new JBList<>(GroupType.values());
-
-        groupList.setBackground(JBColor.namedColor("Popup.background", new JBColor(0xffffff, 0x3c3f41)));
-
-        groupList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
-            JCheckBox checkBox = new JCheckBox(value.name(), selectedGroups.contains(value));
-            checkBox.setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
-            checkBox.setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
-            checkBox.setBorder(JBUI.Borders.empty(2, 8));
-            checkBox.setOpaque(true);
-            return checkBox;
-        });
-
-        groupList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int index = groupList.locationToIndex(e.getPoint());
-                if (index >= 0) {
-                    GroupType group = groupList.getModel().getElementAt(index);
-                    if (selectedGroups.contains(group)) selectedGroups.remove(group);
-                    else selectedGroups.add(group);
-                    groupList.repaint();
-                    applyGroupFilters();
-                }
-            }
-        });
-
-        JBPopupFactory.getInstance()
-                .createComponentPopupBuilder(new JBScrollPane(groupList), null)
-                .setRequestFocus(true)
-                .setCancelOnClickOutside(true)
-                .createPopup()
-                .showUnderneathOf(anchor);
-    }
-
-    private void showDetailsPopup(JButton anchor) {
-        JBList<String> detailsList = new JBList<>(List.of("ID", "Module", "Expected Result", "Steps", "Automation Ref", "Business Ref"));
-
-        detailsList.setBackground(JBColor.namedColor("Popup.background", new JBColor(0xffffff, 0x3c3f41)));
-
-        detailsList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
-            JCheckBox checkBox = new JCheckBox(value, selectedDetails.contains(value));
-            checkBox.setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
-            checkBox.setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
-            checkBox.setBorder(JBUI.Borders.empty(2, 8));
-            checkBox.setOpaque(true);
-            return checkBox;
-        });
-
-        detailsList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int index = detailsList.locationToIndex(e.getPoint());
-                if (index >= 0) {
-                    String detailName = detailsList.getModel().getElementAt(index);
-                    if (selectedDetails.contains(detailName)) selectedDetails.remove(detailName);
-                    else selectedDetails.add(detailName);
-                    list.setFixedCellHeight(-1);
-                    list.setCellRenderer(new RendererImpl(FileEditorImpl.this));
-                    detailsList.repaint();
-                    list.revalidate();
-                    list.repaint();
-                    saveSettings();
-                    updateDetailsButtonState();
-                }
-            }
-        });
-
-        JBPopupFactory.getInstance()
-                .createComponentPopupBuilder(new JBScrollPane(detailsList), null)
-                .setRequestFocus(true)
-                .setCancelOnClickOutside(true)
-                .createPopup()
-                .showUnderneathOf(anchor);
-    }
-
-    private void updateDetailsButtonState() {
-        if (selectedDetails.isEmpty()) {
-            detailsButton.setText("Details");
-            detailsButton.setForeground(JBColor.foreground());
-        } else {
-            detailsButton.setText("Details (" + selectedDetails.size() + ")");
-            detailsButton.setForeground(JBUI.CurrentTheme.Link.Foreground.ENABLED);
-        }
-        list.repaint();
-    }
-
-    private void saveSettings() {
-        PropertiesComponent props = PropertiesComponent.getInstance();
-        props.setValue("testGit.showGroups", showGroups, true);
-        props.setValue("testGit.showPriority", showPriority, true);
-        props.setValue("testGit.selectedDetails", String.join(",", selectedDetails));
-    }
+    // -------------------------------------------------------------------------
+    // FileEditor boilerplate
+    // -------------------------------------------------------------------------
 
     @Override
     public @NotNull VirtualFile getFile() {
@@ -424,12 +234,12 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
     }
 
     @Override
-    public void setState(@NotNull FileEditorState state) {
+    public boolean isModified() {
+        return false;
     }
 
     @Override
-    public boolean isModified() {
-        return false;
+    public void setState(@NotNull FileEditorState s) {
     }
 
     @Override
@@ -442,6 +252,5 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
 
     @Override
     public void dispose() {
-        /// when close editor reset details in view page
     }
 }
