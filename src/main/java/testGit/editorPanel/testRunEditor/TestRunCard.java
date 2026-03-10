@@ -3,6 +3,7 @@ package testGit.editorPanel.testRunEditor;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionPopupMenu;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
@@ -12,6 +13,9 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.components.BorderLayoutPanel;
+import lombok.Setter;
+import testGit.actions.RunTestCase;
+import testGit.actions.ViewDetails;
 import testGit.pojo.GroupType;
 import testGit.pojo.TestCase;
 import testGit.viewPanel.ViewPanel;
@@ -24,10 +28,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 public class TestRunCard extends JBPanel<TestRunCard> {
+
     private static final int CARD_HEIGHT = 130;
-    private static final int SELECTED_OPACITY = 220;
     private static final int BORDER_THICKNESS = 1;
-    private static TestRunCard currentlySelectedCard = null;
     final TestCase tc;
     private final JBLabel titleLabel = new JBLabel();
     private final JBPanel<?> badgePanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(6), 0));
@@ -35,17 +38,17 @@ public class TestRunCard extends JBPanel<TestRunCard> {
     private final JBLabel stepsLabel = createDetailLabel();
     private final JBLabel automationRefLabel = createDetailLabel();
     private final JPanel actionButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, JBUI.scale(8), 8));
-
     private final Color defaultBackground;
     private final Color selectedBackground;
     private final Border defaultBorder;
     private final Border selectedBorder;
     private boolean isSelected = false;
-
+    @Setter
+    private SelectionListener selectionListener;
     public TestRunCard(int index, TestCase tc) {
         super(new BorderLayout());
-        System.out.println("TestRunCard.TestRunCard()");
         this.tc = tc;
+
         setOpaque(true);
         setMaximumSize(new Dimension(Integer.MAX_VALUE, JBUI.scale(CARD_HEIGHT)));
         setPreferredSize(new Dimension(100, JBUI.scale(CARD_HEIGHT)));
@@ -53,22 +56,18 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         updateBackgrounds(index);
         defaultBackground = getBackground();
         selectedBackground = new JBColor(
-                new Color(defaultBackground.getRed(), defaultBackground.getGreen(), defaultBackground.getBlue(), SELECTED_OPACITY),
-                new Color(defaultBackground.getRed(), defaultBackground.getGreen(), defaultBackground.getBlue(), SELECTED_OPACITY)
+                new Color(defaultBackground.getRed(), defaultBackground.getGreen(), defaultBackground.getBlue(), 220),
+                new Color(defaultBackground.getRed(), defaultBackground.getGreen(), defaultBackground.getBlue(), 220)
         );
 
         defaultBorder = JBUI.Borders.empty(BORDER_THICKNESS);
-
         selectedBorder = BorderFactory.createCompoundBorder(
                 JBUI.Borders.customLine(new JBColor(new Color(0, 120, 215), new Color(75, 110, 175)), BORDER_THICKNESS),
                 JBUI.Borders.empty()
         );
 
-        Font titleFont = JBFont.label().deriveFont(Font.BOLD, UIUtil.getLabelFont().getSize() + 10.0f);
-        titleLabel.setFont(titleFont);
-        titleLabel.setText(tc.getTitle());
+        titleLabel.setFont(JBFont.label().deriveFont(Font.BOLD, UIUtil.getLabelFont().getSize() + 10.0f));
         titleLabel.setForeground(JBColor.namedColor("Label.foreground", UIUtil.getLabelForeground()));
-
         badgePanel.setOpaque(false);
 
         BorderLayoutPanel titleLine = new BorderLayoutPanel();
@@ -97,95 +96,126 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         layeredPane.add(actionButtonPanel);
 
         add(layeredPane, BorderLayout.CENTER);
-
         setBorder(defaultBorder);
+
         setupClickListener();
+        addMouseListener(createContextMenuListener());
         updateData(index, tc);
-        addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
+    }
 
-            }
+    /**
+     * Called externally by the parent to deselect this card when another is selected.
+     */
+    public void deselect() {
+        isSelected = false;
+        actionButtonPanel.setVisible(false);
+        setBackground(defaultBackground);
+        setBorder(defaultBorder);
+        repaint();
+    }
 
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    showContextMenu(e);
-                }
-            }
+    public void updateData(int index, TestCase tc) {
+        titleLabel.setText(String.format("%d. %s", index + 1, tc.getTitle()));
+        expectedLabel.setText("Expected Result: " + tc.getExpected());
+        stepsLabel.setText("Steps: " + tc.getSteps());
+        automationRefLabel.setText("Automation Reference: " + tc.getAutoRef());
 
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    showContextMenu(e);
-                }
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-
-            }
-
-            private void showContextMenu(MouseEvent e) {
-                ContextMenu group = new ContextMenu(null, null, null, TestRunCard.this.tc);
-
-                ActionManager actionManager = ActionManager.getInstance();
-                ActionPopupMenu popupMenu = actionManager.createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, group);
-
-                popupMenu.getComponent().show(e.getComponent(), e.getX(), e.getY());
-            }
-        });
+        badgePanel.removeAll();
+        badgePanel.add(createPriorityBadge(tc));
+        if (tc.getGroups() != null)
+            for (GroupType group : tc.getGroups())
+                badgePanel.add(createGroupBadge(group));
     }
 
     @Override
     public void doLayout() {
         super.doLayout();
-
-        int w = getWidth();
-        int h = getHeight();
         Dimension btn = actionButtonPanel.getPreferredSize();
         actionButtonPanel.setBounds(
-                w - btn.width - JBUI.scale(8),
-                h - btn.height - JBUI.scale(8),
-                btn.width,
-                btn.height
+                getWidth() - btn.width - JBUI.scale(8),
+                getHeight() - btn.height - JBUI.scale(8),
+                btn.width, btn.height
         );
+    }
+
+    private void setupClickListener() {
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    ViewPanel.show(tc);
+                    return;
+                }
+                isSelected = !isSelected;
+                if (isSelected) {
+                    select();
+                    if (selectionListener != null) selectionListener.onSelected(TestRunCard.this);
+                } else {
+                    deselect();
+                }
+            }
+        });
+    }
+
+    // --- Private helpers ---
+
+    private MouseListener createContextMenuListener() {
+        return new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger()) showContextMenu(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) showContextMenu(e);
+            }
+
+            private void showContextMenu(MouseEvent e) {
+                DefaultActionGroup group = new DefaultActionGroup("Test Run Actions", false);
+                group.add(new ViewDetails(tc));
+                group.addSeparator();
+                group.add(new RunTestCase(tc, null));
+
+                ActionPopupMenu popupMenu = ActionManager.getInstance()
+                        .createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, group);
+                popupMenu.getComponent().show(e.getComponent(), e.getX(), e.getY());
+            }
+        };
+    }
+
+    private void select() {
+        actionButtonPanel.setVisible(true);
+        setBackground(selectedBackground);
+        setBorder(selectedBorder);
+        repaint();
     }
 
     private void styleActionButtons() {
         actionButtonPanel.setOpaque(false);
         actionButtonPanel.setVisible(false);
         actionButtonPanel.setFont(UIUtil.getLabelFont(UIUtil.FontSize.NORMAL));
-
-        actionButtonPanel.add(createModernStatusButton("PASSED",
-                new JBColor(new Color(39, 174, 96, 150), new Color(46, 125, 50, 150)), "PASSED"));
-        actionButtonPanel.add(createModernStatusButton("FAILED",
-                new JBColor(new Color(192, 57, 43, 150), new Color(183, 28, 28, 150)), "FAILED"));
-        actionButtonPanel.add(createModernStatusButton("BLOCKED",
-                new JBColor(new Color(243, 156, 18, 150), new Color(237, 108, 2, 150)), "BLOCKED"));
-
+        actionButtonPanel.add(createStatusButton("PASSED",
+                new JBColor(new Color(39, 174, 96, 150), new Color(46, 125, 50, 150))));
+        actionButtonPanel.add(createStatusButton("FAILED",
+                new JBColor(new Color(192, 57, 43, 150), new Color(183, 28, 28, 150))));
+        actionButtonPanel.add(createStatusButton("BLOCKED",
+                new JBColor(new Color(243, 156, 18, 150), new Color(237, 108, 2, 150))));
     }
 
-    private JButton createModernStatusButton(String text, Color bg, String status) {
-        JButton btn = new JButton(text);
+    private JButton createStatusButton(String status, Color bg) {
+        JButton btn = new JButton(status);
         btn.putClientProperty("JButton.buttonType", "roundRect");
         btn.putClientProperty("JButton.backgroundColor", bg);
-        btn.putClientProperty("JButton.selectedBackground", bg.darker());
-
         btn.setBackground(bg);
         btn.setForeground(JBColor.WHITE);
         btn.setFont(JBFont.regular().asBold());
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.setFocusPainted(false);
         btn.setBorder(JBUI.Borders.empty(6, 16));
-
-        btn.addActionListener(e -> updateTestCaseStatus(status));
-
+        btn.addActionListener(e -> {
+            System.out.println("Test Case [" + tc.getTitle() + "] updated to: " + status);
+        });
         btn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -199,76 +229,11 @@ public class TestRunCard extends JBPanel<TestRunCard> {
                 btn.repaint();
             }
         });
-
         return btn;
     }
 
-    private void updateTestCaseStatus(String status) {
-
-        System.out.println("execution done.");
-        System.out.println("Test Case " + tc.getTitle() + " updated to: " + status);
-
-    }
-
-    private void setupClickListener() {
-        addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-
-                if (e.getClickCount() == 2) {
-                    ViewPanel.show(TestRunCard.this.tc);
-                    return;
-                }
-
-                if (currentlySelectedCard != null && currentlySelectedCard != TestRunCard.this)
-                    currentlySelectedCard.deselect();
-
-                isSelected = !isSelected;
-
-                if (isSelected) {
-                    currentlySelectedCard = TestRunCard.this;
-                    select();
-                } else {
-                    currentlySelectedCard = null;
-                    deselect();
-                }
-            }
-        });
-    }
-
-    private void select() {
-        actionButtonPanel.setVisible(true);
-        setBackground(selectedBackground);
-        setBorder(selectedBorder);
-        repaint();
-    }
-
-    private void deselect() {
-        isSelected = false;
-        actionButtonPanel.setVisible(false);
-        setBackground(defaultBackground);
-        setBorder(defaultBorder);
-        repaint();
-    }
-
     private void updateBackgrounds(int index) {
-        JBColor evenBg = new JBColor(Gray._245, Gray._60);
-        JBColor oddBg = new JBColor(Gray._230, Gray._45);
-        setBackground(index % 2 == 0 ? evenBg : oddBg);
-    }
-
-    public void updateData(int index, TestCase tc) {
-        titleLabel.setText(String.format("%d. %s", index + 1, tc.getTitle()));
-
-        expectedLabel.setText("Expected Result: " + tc.getExpected());
-        stepsLabel.setText("Steps: " + tc.getSteps());
-        automationRefLabel.setText("Automation Reference: " + tc.getAutoRef());
-
-        badgePanel.removeAll();
-        badgePanel.add(createPriorityBadge(tc));
-
-        if (tc.getGroups() != null)
-            for (GroupType groupName : tc.getGroups())
-                badgePanel.add(createGroupBadge(groupName));
+        setBackground(index % 2 == 0 ? new JBColor(Gray._245, Gray._60) : new JBColor(Gray._230, Gray._45));
     }
 
     private JBLabel createPriorityBadge(TestCase tc) {
@@ -292,19 +257,20 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         return label;
     }
 
-    private static class RoundedBadge extends JBLabel {
+    /**
+     * Callback interface so the parent (TestRunOpeningUI) manages selection state, not a static field.
+     */
+    public interface SelectionListener {
+        void onSelected(TestRunCard card);
+    }
 
+    private static class RoundedBadge extends JBLabel {
         RoundedBadge(String text, Color bg) {
             super(text);
             setBackground(bg);
             setForeground(JBColor.WHITE);
             setFont(UIUtil.getLabelFont(UIUtil.FontSize.SMALL).deriveFont(Font.BOLD));
             setBorder(JBUI.Borders.empty(2, 10));
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
         }
     }
 }

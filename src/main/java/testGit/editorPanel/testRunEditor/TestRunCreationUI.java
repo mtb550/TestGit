@@ -27,102 +27,96 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class TestRunCreationUI implements Disposable {
+
     private final List<TestCase> initialTestCases;
     private final Set<Integer> initialTestCaseUids;
-    JBPanel<?> mainPanel = new JBPanel<>(new BorderLayout());
+
     private CheckboxTree checklistTree;
-    private TestRun currentTestRun;
     private TestRun metadata;
     private VirtualFile currentFile;
     private Map<UUID, TestRun.TestRunItems> resultsMap;
     private TestRunMetadataHeader metadataHeader;
 
+    private JBPanel<?> mainPanel = new JBPanel<>(new BorderLayout());
+
     public TestRunCreationUI(List<TestCase> initialTestCases) {
-        System.out.println("[TRACE] TestRunCreationUI constructor started.");
         this.initialTestCases = TestCaseSorter.sortTestCases(initialTestCases);
         this.initialTestCaseUids = this.initialTestCases.stream()
                 .map(TestCase::getUid)
                 .collect(Collectors.toSet());
     }
 
-    public JComponent createEditorPanel(DefaultTreeModel testCaseModel, String savePathString, ProjectPanel projectPanel) {
-        System.out.println("[TRACE] createEditorPanel() started.");
-
-        System.out.println("[TRACE] Converting DefaultTreeModel to CheckedTreeNodes...");
+    public JComponent createEditorPanel(DefaultTreeModel testCaseModel, String savePath, ProjectPanel projectPanel) {
         CheckedTreeNode root = convertToCheckedNodes((DefaultMutableTreeNode) testCaseModel.getRoot());
-        System.out.println("[TRACE] Tree conversion complete.");
 
         mainPanel = new JBPanel<>(new BorderLayout());
 
-        // NEW: Add the metadata panel at the top (NORTH)
-        // Initialize and add the clean header class
         metadataHeader = new TestRunMetadataHeader();
         mainPanel.add(metadataHeader.getPanel(), BorderLayout.NORTH);
 
-        System.out.println("[TRACE] Initializing CheckboxTree...");
-        checklistTree = new CheckboxTree(createRenderer(), root, new CheckboxTreeBase.CheckPolicy(true, true, true, true));
+        checklistTree = new CheckboxTree(createRenderer(), root,
+                new CheckboxTreeBase.CheckPolicy(true, true, true, true));
         TreeUtil.expandAll(checklistTree);
 
         mainPanel.add(new JBScrollPane(checklistTree), BorderLayout.CENTER);
-        mainPanel.add(createSaveButton(root, savePathString, projectPanel), BorderLayout.SOUTH);
+        mainPanel.add(createSaveButton(root, savePath, projectPanel), BorderLayout.SOUTH);
 
-        System.out.println("[TRACE] createEditorPanel() finished.");
         return mainPanel;
     }
 
     private CheckboxTree.CheckboxTreeCellRenderer createRenderer() {
         return new CheckboxTree.CheckboxTreeCellRenderer() {
             @Override
-            public void customizeRenderer(@NotNull JTree tree, @NotNull Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-                if (value instanceof CheckedTreeNode node) {
-                    Object userObj = node.getUserObject();
+            public void customizeRenderer(@NotNull JTree tree, @NotNull Object value, boolean selected,
+                                          boolean expanded, boolean leaf, int row, boolean hasFocus) {
+                if (!(value instanceof CheckedTreeNode node)) return;
+                Object userObj = node.getUserObject();
 
-                    if (userObj instanceof Directory dir) {
-                        getTextRenderer().append(dir.getName(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
-                    } else if (userObj instanceof TestCase tc) {
-                        // Render TestCase name and status
-                        TestRun.TestRunItems result = findResultFor(tc.getId());
-                        SimpleTextAttributes mainStyle = SimpleTextAttributes.REGULAR_ATTRIBUTES;
-                        String statusText = " [Pending]";
+                if (userObj instanceof Directory dir) {
+                    getTextRenderer().append(dir.getName(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
+                } else if (userObj instanceof TestCase tc) {
+                    renderTestCase(tc);
+                } else if (userObj instanceof String str) {
+                    getTextRenderer().append(str, SimpleTextAttributes.REGULAR_BOLD_ATTRIBUTES);
+                }
+            }
 
-                        if (result != null) {
-                            switch (result.getStatus()) {
-                                case "PASSED" -> {
-                                    mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.BLUE);
-                                    statusText = " [Passed]";
-                                }
-                                case "FAILED" -> {
-                                    mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.RED);
-                                    statusText = " [Failed]";
-                                }
-                                case "BLOCKED" -> {
-                                    mainStyle = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.ORANGE);
-                                    statusText = " [Blocked]";
-                                }
-                            }
+            private void renderTestCase(TestCase tc) {
+                TestRun.TestRunItems result = findResultFor(tc.getId());
+                SimpleTextAttributes style = SimpleTextAttributes.REGULAR_ATTRIBUTES;
+                String statusText = " [Pending]";
+
+                if (result != null) {
+                    switch (result.getStatus()) {
+                        case "PASSED" -> {
+                            style = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.BLUE);
+                            statusText = " [Passed]";
                         }
-
-                        getTextRenderer().append(tc.getTitle(), mainStyle);
-                        getTextRenderer().append(statusText, SimpleTextAttributes.GRAYED_ATTRIBUTES);
-                    } else if (userObj instanceof String str) {
-                        // Fallback for the root node string
-                        getTextRenderer().append(str, SimpleTextAttributes.REGULAR_BOLD_ATTRIBUTES);
+                        case "FAILED" -> {
+                            style = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.RED);
+                            statusText = " [Failed]";
+                        }
+                        case "BLOCKED" -> {
+                            style = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.ORANGE);
+                            statusText = " [Blocked]";
+                        }
                     }
                 }
+                getTextRenderer().append(tc.getTitle(), style);
+                getTextRenderer().append(statusText, SimpleTextAttributes.GRAYED_ATTRIBUTES);
             }
         };
     }
 
-    private JButton createSaveButton(CheckedTreeNode root, String savePathString, ProjectPanel projectPanel) {
+    private JButton createSaveButton(CheckedTreeNode root, String savePath, ProjectPanel projectPanel) {
         JButton saveButton = new JButton("Save Test Run");
         saveButton.addActionListener(e -> {
-            System.out.println("[TRACE] Save button clicked!");
             if (!metadataHeader.validate()) {
                 JOptionPane.showMessageDialog(mainPanel, "Build number is required.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             metadataHeader.applyToMetadata(this.metadata);
-            saveSelectedToJSON(root, savePathString, projectPanel);
+            saveSelectedToJSON(root, savePath, projectPanel);
         });
         return saveButton;
     }
@@ -131,17 +125,13 @@ public class TestRunCreationUI implements Disposable {
         Object userObj = node.getUserObject();
         CheckedTreeNode newNode = new CheckedTreeNode(userObj);
 
-        // If this node is a TestCase, check if it should be selected initially
         if (userObj instanceof TestCase tc && isAlreadyInRun(tc)) {
             newNode.setChecked(true);
-            System.out.println("[TRACE] Auto-checking TestCase: " + tc.getTitle());
         }
 
-        // Recursively convert all children
         for (int i = 0; i < node.getChildCount(); i++) {
             newNode.add(convertToCheckedNodes((DefaultMutableTreeNode) node.getChildAt(i)));
         }
-
         return newNode;
     }
 
@@ -149,25 +139,19 @@ public class TestRunCreationUI implements Disposable {
         return initialTestCaseUids != null && initialTestCaseUids.contains(tc.getUid());
     }
 
-    private void saveSelectedToJSON(CheckedTreeNode root, String baseProjectPath, ProjectPanel projectPanel) {
-        System.out.println("[TRACE] saveSelectedToJSON() started.");
+    private void saveSelectedToJSON(CheckedTreeNode root, String savePath, ProjectPanel projectPanel) {
+        TestRun run = Optional.ofNullable(this.metadata).map(m -> {
+            TestRun r = new TestRun();
+            r.setBuildNumber(m.getBuildNumber());
+            r.setPlatform(m.getPlatform());
+            r.setLanguage(m.getLanguage());
+            r.setBrowser(m.getBrowser());
+            r.setDeviceType(m.getDeviceType());
+            return r;
+        }).orElseGet(TestRun::new);
 
-        // Use the baseProjectPath directly to avoid duplicate "testRuns" folders
-        File testRunsDir = new File(baseProjectPath);
-
-        TestRun run = this.currentTestRun != null ? this.currentTestRun : new TestRun();
-
-        if (this.metadata != null) {
-            run.setBuildNumber(metadata.getBuildNumber());
-            run.setPlatform(metadata.getPlatform());
-            run.setLanguage(metadata.getLanguage());
-            run.setBrowser(metadata.getBrowser());
-            run.setDeviceType(metadata.getDeviceType());
-        }
-
-        assert metadata != null;
         String fileName = DirectoryType.TR.name() + "_" + metadata.getBuildNumber() + "_" + DirectoryStatus.AC.name() + ".json";
-        File finalOutputFile = new File(testRunsDir, fileName);
+        File outputFile = new File(savePath, fileName);
 
         run.setRunName(fileName);
         run.setCreatedAt(LocalDateTime.now());
@@ -178,14 +162,14 @@ public class TestRunCreationUI implements Disposable {
         run.setResults(items);
 
         try {
-            Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(finalOutputFile, run);
-            System.out.println("[TRACE] Test Run saved successfully to: " + finalOutputFile.getAbsolutePath());
+            Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(outputFile, run);
         } catch (Exception e) {
-            System.err.println("[TRACE-ERROR] Failed to save JSON.");
+            System.err.println("Failed to save Test Run: " + e.getMessage());
             e.printStackTrace(System.err);
         }
 
-        projectPanel.getTestRunTabController().buildTreeAsync(projectPanel.getTestProjectSelector().getSelectedTestProject().getItem());
+        projectPanel.getTestRunTabController().buildTreeAsync(
+                projectPanel.getTestProjectSelector().getSelectedTestProject().getItem());
         FileEditorManager.getInstance(Config.getProject()).closeFile(currentFile);
     }
 
@@ -195,13 +179,8 @@ public class TestRunCreationUI implements Disposable {
             item.setTestCaseId(UUID.fromString(tc.getId()));
             item.setStatus("PENDING");
 
-            // Navigate up the tree to find the parent Directory (Project/Test Set)
-            Object rootObject = ((DefaultMutableTreeNode) node.getRoot()).getUserObject();
-            if (rootObject instanceof Directory rootDir) {
-                item.setProject(rootDir.getFileName());
-            } else if (rootObject instanceof String str) {
-                item.setProject(str); // Fallback if root is a String
-            }
+            Object rootObj = ((DefaultMutableTreeNode) node.getRoot()).getUserObject();
+            item.setProject(rootObj instanceof Directory d ? d.getFileName() : String.valueOf(rootObj));
             items.add(item);
         }
 

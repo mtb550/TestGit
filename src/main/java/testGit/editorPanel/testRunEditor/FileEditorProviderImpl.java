@@ -17,14 +17,7 @@ public class FileEditorProviderImpl implements FileEditorProvider, DumbAware {
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        System.out.println("FileEditorProviderImpl.createEditor()");
-        VirtualFileImpl vf = (VirtualFileImpl) file;
-
-        return switch (vf.getEditorType()) {
-            case TEST_RUN_CREATION -> new FileEditorCreationImpl(vf);
-            case TEST_RUN_OPENING -> new FileEditorOpeningImpl(vf);
-            case TEST_SET_OPEN -> throw new IllegalArgumentException("Unsupported editor type: TEST_SET_OPEN");
-        };
+        return new FileEditorImpl((VirtualFileImpl) file);
     }
 
     @Override

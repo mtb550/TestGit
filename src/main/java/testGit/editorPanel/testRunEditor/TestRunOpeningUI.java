@@ -5,36 +5,31 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
-import lombok.Getter;
 import testGit.pojo.TestCase;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.util.List;
 
-@Getter
 public class TestRunOpeningUI implements Disposable {
-    private final List<TestCase> initialTestCases;
-    private final DefaultTreeModel testCasesTreeModel;
+
+    private final List<TestCase> testCases;
+    private TestRunCard selectedCard = null;
 
     public TestRunOpeningUI(VirtualFileImpl vf) {
-        this.initialTestCases = vf.getTestCases();
-        this.testCasesTreeModel = vf.getTestCasesTreeModel();
+        this.testCases = vf.getTestCases();
     }
 
     public JComponent createEditorPanel() {
-        JBPanel<?> mainPanel = new JBPanel<>(new BorderLayout());
-
         JPanel cardList = new JPanel();
         cardList.setLayout(new BoxLayout(cardList, BoxLayout.Y_AXIS));
         cardList.setBackground(UIUtil.getTreeBackground());
         cardList.setOpaque(true);
 
-        for (int i = 0; i < initialTestCases.size(); i++) {
-            TestCase tc = initialTestCases.get(i);
+        for (int i = 0; i < testCases.size(); i++) {
+            TestCase tc = testCases.get(i);
             TestRunCard card = new TestRunCard(i, tc);
-            card.updateData(i, tc);
+            card.setSelectionListener(this::handleCardSelected);
             cardList.add(card);
         }
 
@@ -42,12 +37,19 @@ public class TestRunOpeningUI implements Disposable {
 
         JBScrollPane scrollPane = new JBScrollPane(cardList);
         scrollPane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
-
         scrollPane.setBorder(JBUI.Borders.empty());
-        scrollPane.getVerticalScrollBar().setUnitIncrement(25); // Faster increment = fewer paint calls
+        scrollPane.getVerticalScrollBar().setUnitIncrement(25);
 
+        JBPanel<?> mainPanel = new JBPanel<>(new BorderLayout());
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         return mainPanel;
+    }
+
+    private void handleCardSelected(TestRunCard newlySelected) {
+        if (selectedCard != null && selectedCard != newlySelected) {
+            selectedCard.deselect();
+        }
+        selectedCard = newlySelected;
     }
 
     @Override

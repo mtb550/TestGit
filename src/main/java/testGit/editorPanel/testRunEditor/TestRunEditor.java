@@ -4,6 +4,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import testGit.pojo.*;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.DirectoryMapper;
+import testGit.util.TestCaseSorter;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -11,60 +12,24 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TestRunEditor {
 
-    private static DefaultTreeModel createFilteredModel(List<TestCase> cases) {
-        System.out.println("TestRunEditor.createFilteredModel()");
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Selected Test Cases");
-        cases.forEach(tc -> root.add(new DefaultMutableTreeNode(tc)));
-        return new DefaultTreeModel(root);
+    private TestRunEditor() {
     }
 
     public static void open(Path runFilePath, ProjectPanel projectPanel) {
-        System.out.println("TestRunEditor.open()");
-
         try {
             TestRun metadata = Config.getMapper().readValue(runFilePath.toFile(), TestRun.class);
-            List<TestCase> loadedCases = new ArrayList<>();
-
-            if (metadata.getResults() != null) {
-                Set<String> targetIds = metadata.getResults().stream()
-                        .map(item -> item.getTestCaseId().toString())
-                        .collect(Collectors.toSet());
-
-                String projectName = projectPanel.getTestProjectSelector().getSelectedTestProject().getItem().getFileName();
-                Path testCasesRoot = Config.getTestGitPath().resolve(projectName).resolve("testCases");
-
-                if (Files.exists(testCasesRoot)) {
-                    try (java.util.stream.Stream<Path> paths = java.nio.file.Files.walk(testCasesRoot)) {
-                        paths.filter(java.nio.file.Files::isRegularFile)
-                                .filter(p -> p.toString().endsWith(".json"))
-                                .forEach(p -> {
-                                    try {
-                                        TestCase tc = Config.getMapper().readValue(p.toFile(), TestCase.class);
-                                        if (tc.getId() != null && targetIds.contains(tc.getId())) {
-                                            loadedCases.add(tc);
-                                        }
-                                    } catch (Exception ignored) {
-                                    }
-                                });
-                    }
-                }
-            }
-
-            List<TestCase> sortedCases = testGit.util.TestCaseSorter.sortTestCases(loadedCases);
-            System.out.println("[TRACE] Opened run. Loaded " + sortedCases.size() + " test cases.");
+            List<TestCase> testCases = loadTestCasesForRun(metadata, projectPanel);
+            List<TestCase> sorted = TestCaseSorter.sortTestCases(testCases);
 
             VirtualFileImpl virtualFile = new VirtualFileImpl(
                     runFilePath.toAbsolutePath().toString(),
-                    createFilteredModel(sortedCases),
-                    sortedCases,
+                    buildFilteredModel(sorted),
+                    sorted,
                     EditorType.TEST_RUN_OPENING,
                     projectPanel
             );
@@ -77,63 +42,84 @@ public class TestRunEditor {
     }
 
     public static void create(Path runFilePath, ProjectPanel projectPanel, Directory projectName, TestRun metadata) {
-        System.out.println("[TRACE] TestRunEditor.create() for project: " + projectName);
-
         Path testCasesPath = Config.getTestGitPath().resolve(projectName.getFileName()).resolve("testCases");
-        File rootFolder = testCasesPath.toFile();
-
-        DefaultMutableTreeNode rootNode = buildDirectoryTree(rootFolder, true);
-        DefaultTreeModel fullTestCasesModel = new DefaultTreeModel(rootNode);
-
-        List<TestCase> initialTestCases = new ArrayList<>();
+        DefaultTreeModel fullModel = new DefaultTreeModel(buildDirectoryTree(testCasesPath.toFile(), true));
 
         VirtualFileImpl virtualFile = new VirtualFileImpl(
                 runFilePath.toAbsolutePath().toString(),
-                fullTestCasesModel,
-                initialTestCases,
+                fullModel,
+                new ArrayList<>(),
                 EditorType.TEST_RUN_CREATION,
                 projectPanel
         );
-
         virtualFile.setMetadata(metadata);
+
         FileEditorManager.getInstance(Config.getProject()).openFile(virtualFile, true);
     }
 
-    private static DefaultMutableTreeNode buildDirectoryTree(File folder, boolean isRoot) {
-        Object userObject;
-        if (isRoot) {
-            userObject = "Test Cases (" + folder.getParentFile().getName() + ")";
-        } else {
-            userObject = DirectoryMapper.map(folder);
-            if (userObject == null) {
-                userObject = folder.getName();
-            }
-        }
+    // --- Private helpers ---
 
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode(userObject);
+    private static List<TestCase> loadTestCasesForRun(TestRun metadata, ProjectPanel projectPanel) throws IOException {
+        if (metadata.getResults() == null) return Collections.emptyList();
+
+        Set<String> targetIds = metadata.getResults().stream()
+                .map(item -> item.getTestCaseId().toString())
+                .collect(Collectors.toSet());
+
+        String projectName = projectPanel.getTestProjectSelector().getSelectedTestProject().getItem().getFileName();
+        Path testCasesRoot = Config.getTestGitPath().resolve(projectName).resolve("testCases");
+
+        if (!Files.exists(testCasesRoot)) return Collections.emptyList();
+
+        List<TestCase> cases = new ArrayList<>();
+        try (var paths = Files.walk(testCasesRoot)) {
+            paths.filter(Files::isRegularFile)
+                    .filter(p -> p.toString().endsWith(".json"))
+                    .forEach(p -> {
+                        try {
+                            TestCase tc = Config.getMapper().readValue(p.toFile(), TestCase.class);
+                            if (tc.getId() != null && targetIds.contains(tc.getId())) {
+                                cases.add(tc);
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    });
+        }
+        return cases;
+    }
+
+    private static DefaultTreeModel buildFilteredModel(List<TestCase> cases) {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Selected Test Cases");
+        cases.forEach(tc -> root.add(new DefaultMutableTreeNode(tc)));
+        return new DefaultTreeModel(root);
+    }
+
+    private static DefaultMutableTreeNode buildDirectoryTree(File folder, boolean isRoot) {
+        Object label = isRoot
+                ? "Test Cases (" + folder.getParentFile().getName() + ")"
+                : Optional.ofNullable((Object) DirectoryMapper.map(folder)).orElse(folder.getName());
+
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(label);
 
         File[] children = folder.listFiles();
-        if (children != null) {
-            Arrays.sort(children, (a, b) -> {
-                if (a.isDirectory() && !b.isDirectory()) return -1;
-                if (!a.isDirectory() && b.isDirectory()) return 1;
-                return a.getName().compareToIgnoreCase(b.getName());
-            });
+        if (children == null) return node;
 
-            for (File child : children) {
-                if (child.isDirectory()) {
-                    node.add(buildDirectoryTree(child, false));
-                } else if (child.isFile() && child.getName().endsWith(".json")) {
-                    try {
-                        TestCase tc = Config.getMapper().readValue(child, TestCase.class);
-                        node.add(new DefaultMutableTreeNode(tc));
-                    } catch (Exception e) {
-                        System.err.println("[TRACE-ERROR] Failed to parse JSON: " + child.getName());
-                    }
+        Arrays.sort(children, Comparator
+                .comparing((File f) -> !f.isDirectory())
+                .thenComparing(f -> f.getName().toLowerCase()));
+
+        for (File child : children) {
+            if (child.isDirectory()) {
+                node.add(buildDirectoryTree(child, false));
+            } else if (child.isFile() && child.getName().endsWith(".json")) {
+                try {
+                    TestCase tc = Config.getMapper().readValue(child, TestCase.class);
+                    node.add(new DefaultMutableTreeNode(tc));
+                } catch (Exception e) {
+                    System.err.println("Failed to parse test case: " + child.getName());
                 }
             }
         }
-
         return node;
     }
 }
