@@ -1,61 +1,101 @@
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.17.4"
+    id("org.jetbrains.intellij.platform")
 }
 
-group = "com.example"
+group = "testGit"
 version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
-}
-
-intellij {
-    version.set("2024.1.7")
-    type.set("IC") // Target IDE Platform
-    plugins.set(listOf("java", "TestNG-J"))
-}
-
-sourceSets {
-    main {
-        java.srcDirs("src/main/java")
-        resources.srcDirs("src/main/resources")
+    intellijPlatform {
+        defaultRepositories()
     }
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
 
 dependencies {
-    compileOnly("org.projectlombok:lombok:1.18.30")
-    annotationProcessor("org.projectlombok:lombok:1.18.30")
-    testCompileOnly("org.projectlombok:lombok:1.18.30")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
-    testImplementation("org.testng:testng:7.11.0")
-    testImplementation("org.xerial:sqlite-jdbc:3.49.1.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.3")
-}
+    intellijPlatform {
+        intellijIdea("2025.3.3")
 
-tasks {
-    patchPluginXml {
-        sinceBuild.set("241")
-        untilBuild.set("243.*")
+        bundledPlugins(
+            listOf(
+                "com.intellij.java",
+                "TestNG-J",
+                "Git4Idea"
+            )
+        )
+
+        jetbrainsRuntime()
+        pluginVerifier()
+        zipSigner()
+        testFramework(TestFrameworkType.Platform)
     }
 
-    signPlugin {
+    compileOnly("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2")
+    implementation("com.jayway.jsonpath:json-path:3.0.0")
+    implementation("commons-io:commons-io:2.21.0")
+    implementation("com.codoid.products:fillo:1.24")
+    testImplementation("org.testng:testng:7.12.0")
+}
+
+intellijPlatform {
+    pluginConfiguration {
+        id.set("testGit.demo")
+        name.set("Test Git")
+        version.set(project.version.toString())
+
+        vendor {
+            name.set("Muteb Almughyiri")
+            email.set("mtb550@gmail.com")
+            url.set("https://mtb.com")
+        }
+
+        ideaVersion {
+            sinceBuild.set("253")
+            untilBuild.set("253.*")
+        }
+    }
+
+    signing {
         certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
         privateKey.set(System.getenv("PRIVATE_KEY"))
         password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
     }
 
-    publishPlugin {
+    publishing {
         token.set(System.getenv("PUBLISH_TOKEN"))
     }
 
+    sandboxContainer.set(layout.projectDirectory.dir(".sandbox"))
+}
+
+tasks {
     processResources {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
+    withType<Test> {
+        useTestNG()
+
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
+    }
+}
+
+intellijPlatformTesting {
+    runIde {
+        parallelStream()
     }
 }

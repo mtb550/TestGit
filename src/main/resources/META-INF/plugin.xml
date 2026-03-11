@@ -1,60 +1,59 @@
 <idea-plugin>
-    <id>com.example.demo</id>
-    <name>Test Case Manager</name>
+    <id>testGit</id>
+    <resource-bundle>messages.bundle</resource-bundle>
+    <name>Test Git</name>
     <vendor email="mtb550@gmail.com" url="https://mtb.com">initial</vendor>
-
     <description><![CDATA[
         Plugin to browse test projects, view features, and manage test cases with details and bug tracking.
     ]]></description>
-
-    <!-- Required to access core IntelliJ APIs -->
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
+    <depends>Git4Idea</depends>
     <depends>TestNG-J</depends>
-    <depends>com.intellij.modules.lang</depends>
-
     <extensions defaultExtensionNs="com.intellij">
-
-        <!-- 🧭 Left-side tool window: Test Case Explorer -->
+        <fileEditorProvider implementation="testGit.editorPanel.testCaseEditor.ProviderImpl"/>
+        <fileEditorProvider implementation="testGit.editorPanel.testRunEditor.FileEditorProviderImpl"/>
+        <applicationService serviceImplementation="testGit.settings.AppSettingsState"/>
         <toolWindow
-                id="Test Bind"
-                factoryClass="com.example.explorer.ExplorerToolWindowFactory"
+                id="TestGit"
+                factoryClass="testGit.projectPanel.Main"
                 anchor="left"
-                icon="/icons/ant_dark.svg"
-                secondary="false"/>
-
-        <!-- 🔍 Right-side tool window: Test Case Details -->
+                icon="META-INF/pluginIcon.svg"
+                secondary="false"
+                doNotActivateOnStart="true"
+        />
         <toolWindow
-                id="TestCaseDetails"
-                factoryClass="com.example.viewer.TestCaseDetailsToolWindowFactory"
+                id="Details"
+                factoryClass="testGit.viewPanel.ToolWindowFactoryImpl"
                 anchor="bottom"
-                icon="/icons/ant_dark.svg"
-                secondary="false"/>
-
-        <!-- 📝 File editor providers -->
-        <fileEditorProvider implementation="com.example.editor.EditorProvider"/>
-        <fileEditorProvider implementation="com.example.explorer.testPlan.TestRunFileEditorProvider"/>
-
-        <!-- 🔔 Notification group -->
-        <notificationGroup id="Test Case Notifications"
+                icon="META-INF/pluginIcon.svg"
+                secondary="false"
+                doNotActivateOnStart="true"
+                canCloseContents="true"
+        />
+        <notificationGroup id="TestGit Notifications"
                            displayType="BALLOON"
-                           isLogByDefault="true"/>
+                           isLogByDefault="true"
+                           key="notification.group.testgit"
+        />
+        <applicationConfigurable
+                instance="testGit.settings.AppSettingsConfigurable"
+                id="testGit.settings.AppSettingsConfigurable"
+                key="settings.display.name.testgit"
+                bundle="messages.bundle"
+                groupId="tools"
+        />
     </extensions>
-
     <actions>
-        <!-- 📂 Menu action to show tree view manually -->
-        <action
-                id="com.example.demo.OpenTestTreeAction"
-                class="com.example.pojo.ShowTestTreeAction"
-                text="Open Test Plan Tree"
-                description="Show Test Case Explorer"
-                icon="/icons/t1.png">
+        <action id="testGit.demo.OpenTestTreeAction"
+                class="testGit.pojo.ShowTestTreeAction"
+                icon="META-INF/pluginIcon.svg">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
-
-        <action id="TestTreeContextMenuGroup"
-                class="com.example.explorer.ExplorerContext"
-                text="Test Tree Context Menu"
-                popup="true"/>
+        <group id="TestTreeContextMenuGroup"
+               class="testGit.projectPanel.testCaseTab.ContextMenu"
+               popup="true">
+            <reference ref="testGit.demo.OpenTestTreeAction"/>
+        </group>
     </actions>
 </idea-plugin>
