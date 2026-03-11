@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>testGit.demo</id>
+    <id>testGit</id>
     <resource-bundle>messages.bundle</resource-bundle>
     <name>Test Git</name>
     <vendor email="mtb550@gmail.com" url="https://mtb.com">initial</vendor>
@@ -18,7 +18,7 @@
                 id="TestGit"
                 factoryClass="testGit.projectPanel.Main"
                 anchor="left"
-                icon="AllIcons.Debugger.Db_array"
+                icon="META-INF/pluginIcon.svg"
                 secondary="false"
                 doNotActivateOnStart="true"
         />
@@ -26,9 +26,10 @@
                 id="Details"
                 factoryClass="testGit.viewPanel.ToolWindowFactoryImpl"
                 anchor="bottom"
-                icon="AllIcons.Debugger.Db_array"
+                icon="META-INF/pluginIcon.svg"
                 secondary="false"
                 doNotActivateOnStart="true"
+                canCloseContents="true"
         />
         <notificationGroup id="TestGit Notifications"
                            displayType="BALLOON"
@@ -46,7 +47,7 @@
     <actions>
         <action id="testGit.demo.OpenTestTreeAction"
                 class="testGit.pojo.ShowTestTreeAction"
-                icon="AllIcons.Actions.ListFiles">
+                icon="META-INF/pluginIcon.svg">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
         <group id="TestTreeContextMenuGroup"

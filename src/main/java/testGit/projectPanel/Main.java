@@ -22,7 +22,6 @@ public class Main implements ToolWindowFactory, DumbAware {
 
         ProjectPanel projectPanel = new ProjectPanel(project);
 
-        toolWindow.setIcon(AllIcons.Debugger.Db_array);
         toolWindow.setTitleActions(TitleActions.create(projectPanel));
 
         ProjectPanelService.getInstance(project).setPanel(projectPanel);
