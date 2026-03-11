@@ -9,7 +9,6 @@ import com.intellij.ui.components.JBPanelWithEmptyText;
 import com.intellij.util.ui.StatusText;
 import lombok.Getter;
 import testGit.actions.CreateTestProject;
-import testGit.pojo.Config;
 import testGit.projectPanel.projectSelector.TestProjectSelector;
 import testGit.projectPanel.testCaseTab.TestCaseTabController;
 import testGit.projectPanel.testRunTab.TestRunTabController;
@@ -47,7 +46,7 @@ public class ProjectPanel implements Disposable {
 
             panel.add(topBar, BorderLayout.NORTH);
 
-            tabs = new Tabs(project, this);
+            tabs = new Tabs(this);
             panel.add(tabs.getComponent(), BorderLayout.CENTER);
 
             testCaseTabController.init();
@@ -78,7 +77,7 @@ public class ProjectPanel implements Disposable {
 
             panel.add(topBar, BorderLayout.NORTH);
 
-            tabs = new Tabs(Config.getProject(), this);
+            tabs = new Tabs(this);
             panel.add(tabs.getComponent(), BorderLayout.CENTER);
 
             testCaseTabController.init();
