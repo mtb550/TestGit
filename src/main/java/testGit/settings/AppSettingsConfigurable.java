@@ -9,6 +9,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +30,8 @@ import java.util.Objects;
 
 public class AppSettingsConfigurable implements Configurable {
 
-    private final TextFieldWithBrowseButton rootPathField = new TextFieldWithBrowseButton();
+    private final TextFieldWithBrowseButton rootTestGitPathField = new TextFieldWithBrowseButton();
+    private final JBTextField rootAutomationPathField = new JBTextField();
 
     // Store projects as Directory objects in a Model
     private final DefaultComboBoxModel<Directory> testProjectList = new DefaultComboBoxModel<>();
@@ -51,13 +53,17 @@ public class AppSettingsConfigurable implements Configurable {
     @Override
     public JComponent createComponent() {
         // 1. Setup Browse Listener
-        rootPathField.addBrowseFolderListener(
+        rootTestGitPathField.addBrowseFolderListener(
                 null,
                 FileChooserDescriptorFactory.createSingleFolderDescriptor()
                         .withTitle("Select Root Folder")
                         .withDescription("Choose the directory where your test projects are stored"),
                 TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT
         );
+
+        // (Optional) Add a placeholder/tooltip to guide the user
+        rootAutomationPathField.getEmptyText().setText("E.g. src.test");
+        rootAutomationPathField.setToolTipText("Base package path for your automation framework");
 
         // 2. Setup Renderer
         projectComboBox.setRenderer(new RendererImpl());
@@ -79,7 +85,8 @@ public class AppSettingsConfigurable implements Configurable {
         buttonPanel.add(archivBtn);
 
         return FormBuilder.createFormBuilder()
-                .addLabeledComponent(new JBLabel("Root projects folder: "), rootPathField, 1, false)
+                .addLabeledComponent(new JBLabel("Root TestGit folder: "), rootTestGitPathField, 1, false)
+                .addLabeledComponent(new JBLabel("Root Automation folder: "), rootAutomationPathField, 1, false)
                 .addVerticalGap(10)
                 .addComponent(new TitledSeparator("Project Management"))
                 .addLabeledComponent("Select test project: ", projectComboBox)
@@ -127,7 +134,7 @@ public class AppSettingsConfigurable implements Configurable {
 
     private void refreshProjectList() {
         testProjectList.removeAllElements();
-        File root = new File(rootPathField.getText());
+        File root = new File(rootTestGitPathField.getText());
 
         if (root.exists() && root.isDirectory()) {
             File[] projects = root.listFiles(f -> f.isDirectory() && f.getName().startsWith("PR_"));
@@ -143,7 +150,8 @@ public class AppSettingsConfigurable implements Configurable {
     @Override
     public boolean isModified() {
         AppSettingsState settings = AppSettingsState.getInstance();
-        boolean modified = !rootPathField.getText().equals(settings.rootFolderPath);
+        boolean modified = !rootTestGitPathField.getText().equals(settings.rootTestGitPath);
+        modified |= !rootAutomationPathField.getText().equals(settings.rootAutomationPath);
         modified |= readModeCheckBox.isSelected() != settings.readMode;
         return modified;
     }
@@ -151,14 +159,17 @@ public class AppSettingsConfigurable implements Configurable {
     @Override
     public void apply() {
         AppSettingsState settings = AppSettingsState.getInstance();
-        settings.rootFolderPath = rootPathField.getText();
+        settings.rootTestGitPath = rootTestGitPathField.getText();
+        settings.rootAutomationPath = rootAutomationPathField.getText();
+
         settings.readMode = readModeCheckBox.isSelected();
     }
 
     @Override
     public void reset() {
         AppSettingsState settings = AppSettingsState.getInstance();
-        rootPathField.setText(settings.rootFolderPath != null ? settings.rootFolderPath : "");
+        rootTestGitPathField.setText(settings.rootTestGitPath != null ? settings.rootTestGitPath : "");
+        rootAutomationPathField.setText(settings.rootAutomationPath != null ? settings.rootAutomationPath : "");
         readModeCheckBox.setSelected(settings.readMode);
         refreshProjectList();
     }

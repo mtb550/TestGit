@@ -10,6 +10,8 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
+import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
@@ -19,13 +21,23 @@ import com.theoryinpractice.testng.configuration.TestNGConfigurationType;
 import com.theoryinpractice.testng.model.TestType;
 import testGit.pojo.Config;
 
-public class TestNGRunnerByClassName {
+public class TestNGRunnerByClass {
 
     public static void runTestClass(String fqcn) {
         final Project project = Config.getProject();
 
+        // 1. SAFETY CHECK: Abort and notify if IntelliJ is currently indexing
+        if (DumbService.isDumb(project)) {
+            // This displays the standard IntelliJ balloon: "Action not available while indexing"
+            DumbService.getInstance(project).showDumbModeNotification(
+                    "Cannot run tests while IntelliJ is indexing. Please wait a moment."
+            );
+            return;
+        }
+
         // 1. Offload heavy PSI lookup to a background thread (Zero UI freezing!)
-        ApplicationManager.getApplication().executeOnPooledThread(() ->
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try {
                 ApplicationManager.getApplication().runReadAction(() -> {
 
                     // 2. Resolve the class to find its Module for the classpath
@@ -40,42 +52,39 @@ public class TestNGRunnerByClassName {
                     final Module finalModule = module;
 
                     // 3. Jump to the UI thread to safely manipulate the RunManager
+// 3. Jump to the UI thread to safely manipulate the RunManager
                     ApplicationManager.getApplication().invokeLater(() -> {
 
                         RunManager runManager = RunManager.getInstance(project);
                         TestNGConfigurationType configType = TestNGConfigurationType.getInstance();
 
-                        // Create a clean name for the dropdown, e.g., "LoginTest"
                         String simpleClassName = fqcn.substring(fqcn.lastIndexOf('.') + 1);
 
-                        // 4. Check if we already created this configuration to prevent duplicates
+                        // Check if it exists
                         RunnerAndConfigurationSettings settings = runManager.findConfigurationByName(simpleClassName);
 
                         if (settings == null) {
+                            // Create it if it doesn't exist
                             settings = runManager.createConfiguration(simpleClassName, configType.getConfigurationFactories()[0]);
-                            TestNGConfiguration configuration = (TestNGConfiguration) settings.getConfiguration();
-
-                            // Tell TestNG to run the entire CLASS
-                            configuration.getPersistantData().TEST_OBJECT = TestType.CLASS.getType();
-                            configuration.getPersistantData().MAIN_CLASS_NAME = fqcn;
-                            configuration.getPersistantData().getPatterns().clear();
-
-                            // Attach module so TestNG can find your dependencies (Selenium, etc.)
-                            if (finalModule != null) {
-                                configuration.setModule(finalModule);
-                            }
-
                             runManager.addConfiguration(settings);
-
-                            // Make it temporary so IntelliJ auto-cleans it later
                             runManager.setTemporaryConfiguration(settings);
+                        }
+
+                        // 4. ALWAYS UPDATE THE SETTINGS, even if we reused an old configuration!
+                        TestNGConfiguration configuration = (TestNGConfiguration) settings.getConfiguration();
+                        configuration.getPersistantData().TEST_OBJECT = TestType.CLASS.getType();
+                        configuration.getPersistantData().MAIN_CLASS_NAME = fqcn; // Forces the updated path!
+                        configuration.getPersistantData().getPatterns().clear();
+
+                        if (finalModule != null) {
+                            configuration.setModule(finalModule);
                         }
 
                         runManager.setSelectedConfiguration(settings);
 
                         // 5. Add the Notifier
                         Notification notification = new Notification(
-                                "Print", // This is your Notification Group ID
+                                "Print",
                                 "Starting test class",
                                 "Running: " + simpleClassName,
                                 NotificationType.INFORMATION
@@ -85,6 +94,13 @@ public class TestNGRunnerByClassName {
                         // 6. Execute!
                         ProgramRunnerUtil.executeConfiguration(settings, DefaultRunExecutor.getRunExecutorInstance());
                     });
-                }));
+                });
+            } catch (IndexNotReadyException e) {
+                // Failsafe catch in case dumb mode starts milliseconds after our check
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    DumbService.getInstance(project).showDumbModeNotification("Indexing interrupted the test run. Please try again.");
+                });
+            }
+        });
     }
 }

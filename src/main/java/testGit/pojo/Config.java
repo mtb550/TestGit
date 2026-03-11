@@ -15,6 +15,11 @@ public class Config {
     @Setter
     @Getter
     private static Path testGitPath;
+
+    @Setter
+    @Getter
+    private static Path automationPath;
+
     @Setter
     @Getter
     private static Project project;

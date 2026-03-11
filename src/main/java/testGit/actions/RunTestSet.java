@@ -8,6 +8,9 @@ import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
+import testGit.util.Notifier;
+import testGit.util.Runner.TestNGRunnerByClass;
+import testGit.util.Tools;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -40,7 +43,27 @@ public class RunTestSet extends DumbAwareAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        /// TODO: Run the feature test automation
+        // Double-check the path is still selected
+        TreePath path = tree.getSelectionPath();
+        if (path == null) return;
+
+        // Extract the selected Directory object
+        Object userObject = ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
+
+        if (userObject instanceof Directory treeItem && treeItem.getType() == DirectoryType.TS) {
+            // 1. Convert the physical File path into a Java FQCN
+            System.out.println(this.getClass() + "directory file: " + treeItem.getFile());
+            String fqcn = Tools.fileToFqcn(treeItem.getFile());
+            System.out.println(this.getClass() + "fqcn path: " + fqcn);
+
+            // 2. Trigger the high-performance background runner!
+            if (fqcn != null && !fqcn.trim().isEmpty()) {
+                System.out.println("fqcn: " + fqcn);
+                TestNGRunnerByClass.runTestClass(fqcn);
+            } else {
+                Notifier.error("Run Failed", "Could not parse class name from file path: " + treeItem.getFile().getName());
+            }
+        }
     }
 
     @Override

@@ -13,8 +13,8 @@ import org.jetbrains.annotations.Nullable;
         storages = @Storage("TestGitSettings.xml")
 )
 public class AppSettingsState implements PersistentStateComponent<AppSettingsState> {
-
-    public String rootFolderPath = "";
+    public String rootTestGitPath = "";
+    public String rootAutomationPath = "";
     public boolean readMode = false;
 
     public static AppSettingsState getInstance() {
