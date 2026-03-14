@@ -7,8 +7,8 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
-import testGit.pojo.Directory;
-import testGit.pojo.DirectoryType;
+import testGit.pojo.Package;
+import testGit.pojo.Project;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.TreeUtilImpl;
 
@@ -16,11 +16,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import static testGit.util.KeyboardSet.DeletePackage;
 
-public class RemovePackage extends DumbAwareAction {
+public class Remove extends DumbAwareAction {
     private final SimpleTree tree;
     private final ProjectPanel projectPanel;
 
-    public RemovePackage(ProjectPanel projectPanel, SimpleTree tree) {
+    public Remove(ProjectPanel projectPanel, SimpleTree tree) {
         super("Delete", "Delete selected node", AllIcons.Actions.GC);
         this.projectPanel = projectPanel;
         this.tree = tree;
@@ -30,24 +30,30 @@ public class RemovePackage extends DumbAwareAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-        if (!(node.getUserObject() instanceof Directory treeItem)) return;
+        if (node.getUserObject() instanceof Project pr) {
 
-        int confirm = Messages.showYesNoDialog(
-                "Are you sure you want to delete '" + treeItem.getName() + "'?",
-                "Confirm Delete",
-                Messages.getQuestionIcon()
-        );
+            int confirm = Messages.showYesNoDialog(
+                    "Are you sure you want to remove '" + pr.getName() + "'?",
+                    "Confirm",
+                    Messages.getQuestionIcon()
+            );
 
-        if (confirm == Messages.YES) {
-            TreeUtilImpl.removeVf(this, treeItem.getFile());
+            if (confirm == Messages.YES) {
+                TreeUtilImpl.removeVf(this, pr.getFile());
 
-            if (treeItem.getType() == DirectoryType.PR) {
-                System.out.println("delete package");
-                projectPanel.getTestProjectSelector().removeTestProject(tree, treeItem);
+                System.out.println("remove project");
+                projectPanel.getTestProjectSelector().removeTestProject(tree, pr);
             } else {
                 System.out.println(node.getParent() == null);
                 TreeUtilImpl.removeNode(node, tree);
+
             }
+
+            return;
+        }
+
+        if (node.getUserObject() instanceof Package pkg) {
+
         }
 
     }
@@ -55,7 +61,7 @@ public class RemovePackage extends DumbAwareAction {
     @Override
     public void update(@NotNull AnActionEvent e) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-        e.getPresentation().setEnabled(node != null && node.getUserObject() instanceof Directory);
+        e.getPresentation().setEnabled(node != null && node.getUserObject() instanceof Package);
     }
 
     @Override

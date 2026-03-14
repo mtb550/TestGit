@@ -9,9 +9,8 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Config;
-import testGit.pojo.Directory;
-import testGit.pojo.DirectoryStatus;
-import testGit.pojo.DirectoryType;
+import testGit.pojo.Project;
+import testGit.pojo.ProjectStatus;
 import testGit.projectPanel.ProjectPanel;
 import testGit.ui.CreateNewTestProjectDialog;
 import testGit.util.Notifier;
@@ -33,12 +32,12 @@ public class CreateTestProject extends DumbAwareAction {
 
         if (name == null) return;
 
-        Directory newTestProject = new Directory()
-                .setType(DirectoryType.PR)
-                .setName(name)
-                .setStatus(DirectoryStatus.AC);
+        Project newTestProject = new Project()
+                .setProjectStatus(ProjectStatus.AC)
 
-        String folderName = String.format("%s_%s_%s", newTestProject.getType().name(), newTestProject.getName(), newTestProject.getStatus());
+                .setName(name);
+
+        String folderName = String.format("%s_%s", newTestProject.getName(), newTestProject.getProjectStatus());
         Path projectPath = Config.getTestGitPath().resolve(folderName);
 
         newTestProject.setFileName(folderName)

@@ -9,7 +9,7 @@ import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
-import testGit.pojo.Directory;
+import testGit.pojo.Package;
 import testGit.pojo.TestCase;
 import testGit.ui.RemoveTestCaseDialog;
 import testGit.util.KeyboardSet;
@@ -22,11 +22,11 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class RemoveTestCase extends DumbAwareAction {
-    private final Directory dir;
+    private final Package dir;
     private final JBList<TestCase> list;
     private final CollectionListModel<TestCase> model;
 
-    public RemoveTestCase(Directory dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
+    public RemoveTestCase(Package dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
         super("Delete", "Delete test case", AllIcons.Actions.DeleteTag);
         this.dir = dir;
         this.list = list;

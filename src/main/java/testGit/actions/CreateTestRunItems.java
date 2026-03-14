@@ -8,9 +8,9 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import testGit.pojo.Directory;
-import testGit.pojo.DirectoryStatus;
 import testGit.pojo.DirectoryType;
+import testGit.pojo.Package;
+import testGit.pojo.Project;
 import testGit.projectPanel.ProjectPanel;
 import testGit.ui.InputDialogList_TestRun;
 import testGit.util.Notifier;
@@ -38,7 +38,7 @@ public class CreateTestRunItems extends DumbAwareAction {
         if (path == null) {
             System.out.println("path is null !!");
 
-            Directory selectedTestProject = projectPanel.getTestProjectSelector().getSelectedTestProject().getItem();
+            Project selectedTestProject = projectPanel.getTestProjectSelector().getSelectedTestProject().getItem();
 
 
             InputDialogList_TestRun.show("Test Project Name", (enteredName, selectedItem) -> {
@@ -54,22 +54,21 @@ public class CreateTestRunItems extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TR) return;
+        if (!(userObject instanceof Package treeItem) || treeItem.getDirectoryType() == DirectoryType.TR) return;
 
         String name = Messages.showInputDialog("Enter package name:", "Create Package", AllIcons.Nodes.Package);
         if (name == null || name.isBlank()) return;
         name = name.replace("_", " ");
 
-        Path parentPath = (treeItem.getType() == DirectoryType.PR)
+        Path parentPath = (treeItem.getDirectoryType() == DirectoryType.PR)
                 ? treeItem.getFilePath().resolve("testRuns")
                 : treeItem.getFilePath();
 
-        Directory newPackage = new Directory()
-                .setType(DirectoryType.PA)
-                .setName(name)
-                .setStatus(DirectoryStatus.AC);
+        Package newPackage = new Package()
+                .setDirectoryType(DirectoryType.PA)
+                .setName(name);
 
-        String folderName = String.format("%s_%s_%s", newPackage.getType().name(), newPackage.getName(), newPackage.getStatus());
+        String folderName = String.format("%s_%s_%s", newPackage.getDirectoryType().name(), newPackage.getName());
         Path fullPath = parentPath.resolve(folderName);
 
         newPackage.setFileName(folderName)
@@ -81,16 +80,15 @@ public class CreateTestRunItems extends DumbAwareAction {
 
     }
 
-    private void add_new(Directory selectedTestProject, String enteredName, InputDialogList_TestRun.TemplateItem selectedItem) {
+    private void add_new(Project selectedTestProject, String enteredName, InputDialogList_TestRun.TemplateItem selectedItem) {
         Path parentPath = selectedTestProject.getFilePath().resolve("testRuns");
 
-        if (selectedItem.type() == DirectoryType.PA) {
-            Directory newPackage = new Directory()
-                    .setType(DirectoryType.PA)
-                    .setName(enteredName)
-                    .setStatus(DirectoryStatus.AC);
+        if (selectedItem.directoryType() == DirectoryType.PA) {
+            Package newPackage = new Package()
+                    .setDirectoryType(DirectoryType.PA)
+                    .setName(enteredName);
 
-            String folderName = String.format("%s_%s_%s", newPackage.getType().name(), newPackage.getName(), newPackage.getStatus());
+            String folderName = String.format("%s_%s_%s", newPackage.getDirectoryType().name(), newPackage.getName());
             Path fullPath = parentPath.resolve(folderName);
 
             newPackage.setFileName(folderName)
@@ -100,13 +98,12 @@ public class CreateTestRunItems extends DumbAwareAction {
             TreeUtilImpl.insertVf(this, parentPath, folderName);
             TreeUtilImpl.insertNode(tree, projectPanel.getTestCaseTabController().getRootNode(), newPackage);
             Notifier.info("Test Package Created", "Create new test package under: " + parentPath);
-        } else if (selectedItem.type() == DirectoryType.TR) {
-            Directory newTestRun = new Directory()
-                    .setType(DirectoryType.TR)
-                    .setName(enteredName)
-                    .setStatus(DirectoryStatus.AC);
+        } else if (selectedItem.directoryType() == DirectoryType.TR) {
+            Package newTestRun = new Package()
+                    .setDirectoryType(DirectoryType.TR)
+                    .setName(enteredName);
 
-            String folderName = String.format("%s_%s_%s", newTestRun.getType().name(), newTestRun.getName(), newTestRun.getStatus());
+            String folderName = String.format("%s_%s_%s", newTestRun.getDirectoryType().name(), newTestRun.getName());
             Path fullPath = parentPath.resolve(folderName);
 
             newTestRun.setFileName(folderName)
@@ -125,8 +122,8 @@ public class CreateTestRunItems extends DumbAwareAction {
 
         boolean isTestRun = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
-                node.getUserObject() instanceof Directory item &&
-                (item.getType() == DirectoryType.PA || item.getType() == DirectoryType.TR));
+                node.getUserObject() instanceof Package item &&
+                (item.getDirectoryType() == DirectoryType.PA || item.getDirectoryType() == DirectoryType.TR));
 
         e.getPresentation().setVisible(true);
         e.getPresentation().setEnabled(!isTestRun);

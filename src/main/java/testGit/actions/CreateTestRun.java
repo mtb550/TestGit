@@ -8,8 +8,8 @@ import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.editorPanel.testRunEditor.TestRunEditor;
-import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
+import testGit.pojo.Package;
 import testGit.pojo.TestRun;
 import testGit.pojo.TestRunStatus;
 import testGit.projectPanel.ProjectPanel;
@@ -38,7 +38,7 @@ public class CreateTestRun extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TR) {
+        if (!(userObject instanceof Package treeItem) || treeItem.getDirectoryType() == DirectoryType.TR) {
             System.out.println("!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TR");
             return;
         }
@@ -66,8 +66,8 @@ public class CreateTestRun extends DumbAwareAction {
 
         boolean isTestRun = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
-                node.getUserObject() instanceof Directory item &&
-                item.getType() == DirectoryType.TR);
+                node.getUserObject() instanceof Package item &&
+                item.getDirectoryType() == DirectoryType.TR);
 
         e.getPresentation().setVisible(true);
         e.getPresentation().setEnabled(!isTestRun);

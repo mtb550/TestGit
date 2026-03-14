@@ -7,9 +7,9 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import testGit.pojo.Directory;
-import testGit.pojo.DirectoryStatus;
 import testGit.pojo.DirectoryType;
+import testGit.pojo.Package;
+import testGit.pojo.Project;
 import testGit.projectPanel.ProjectPanel;
 import testGit.ui.CreateTestPackageDialog;
 import testGit.ui.InputDialogList;
@@ -37,7 +37,7 @@ public class CreateTestCasePackage extends DumbAwareAction {
         TreePath path = tree.getSelectionPath();
         if (path == null) {
             System.out.println("path is null !!, first case package");
-            Directory selectedTestProject = projectPanel.getTestProjectSelector().getSelectedTestProject().getItem();
+            Project selectedTestProject = projectPanel.getTestProjectSelector().getSelectedTestProject().getItem();
 
 //            InputDialog.show("Test Project Name", AllIcons.Nodes.Package, (enteredName) -> {
 //                System.out.println("Processing: " + enteredName);
@@ -60,23 +60,22 @@ public class CreateTestCasePackage extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TS) return;
+        if (!(userObject instanceof Package treeItem) || treeItem.getDirectoryType() == DirectoryType.TS) return;
 
         String name = CreateTestPackageDialog.show();
 
         if (name == null)
             return;
 
-        Path parentPath = (treeItem.getType() == DirectoryType.PR)
+        Path parentPath = (treeItem.getDirectoryType() == DirectoryType.PR)
                 ? treeItem.getFilePath().resolve("testCases")
                 : treeItem.getFilePath();
 
-        Directory newPackage = new Directory()
-                .setType(DirectoryType.PA)
-                .setName(name)
-                .setStatus(DirectoryStatus.AC);
+        Package newPackage = new Package()
+                .setDirectoryType(DirectoryType.PA)
+                .setName(name);
 
-        String folderName = String.format("%s_%s_%s", newPackage.getType().name(), newPackage.getName(), newPackage.getStatus());
+        String folderName = String.format("%s_%s", newPackage.getDirectoryType().name(), newPackage.getName());
         Path fullPath = parentPath.resolve(folderName);
 
         newPackage.setFileName(folderName)
@@ -88,15 +87,14 @@ public class CreateTestCasePackage extends DumbAwareAction {
 
     }
 
-    private void add_new(Directory selectedTestProject, String name) {
+    private void add_new(Project selectedTestProject, String name) {
         Path parentPath = selectedTestProject.getFilePath().resolve("testCases");
 
-        Directory newPackage = new Directory()
-                .setType(DirectoryType.PA)
-                .setName(name)
-                .setStatus(DirectoryStatus.AC);
+        Package newPackage = new Package()
+                .setDirectoryType(DirectoryType.PA)
+                .setName(name);
 
-        String folderName = String.format("%s_%s_%s", newPackage.getType().name(), newPackage.getName(), newPackage.getStatus());
+        String folderName = String.format("%s_%s", newPackage.getDirectoryType().name(), newPackage.getName());
         Path fullPath = parentPath.resolve(folderName);
 
         newPackage.setFileName(folderName)
@@ -115,8 +113,8 @@ public class CreateTestCasePackage extends DumbAwareAction {
 
         boolean isFeature = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
-                node.getUserObject() instanceof Directory item &&
-                item.getType() == DirectoryType.TS);
+                node.getUserObject() instanceof Package item &&
+                item.getDirectoryType() == DirectoryType.TS);
 
         e.getPresentation().setVisible(true);
         e.getPresentation().setEnabled(!isFeature);

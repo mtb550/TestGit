@@ -6,8 +6,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
+import testGit.pojo.Package;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -88,7 +88,7 @@ public class TransferHandlerImpl extends TransferHandler {
 
     private boolean isValidTarget(DefaultMutableTreeNode targetNode) {
         System.out.println("TransferHandlerImpl.isValidTarget()");
-        return targetNode.getUserObject() instanceof Directory targetDir;
+        return targetNode.getUserObject() instanceof Package targetDir;
     }
 
     @Override
@@ -109,8 +109,8 @@ public class TransferHandlerImpl extends TransferHandler {
 
             if (targetNode == null) return false;
 
-            if (targetNode.getUserObject() instanceof Directory targetDir) {
-                if (targetDir.getType() == DirectoryType.PR) {
+            if (targetNode.getUserObject() instanceof Package targetDir) {
+                if (targetDir.getDirectoryType() == DirectoryType.PR) {
                     Path newPath = targetDir.getFilePath().resolve("testCases");
                     targetDir.setFilePath(newPath).setFile(newPath.toFile());
 
@@ -129,12 +129,12 @@ public class TransferHandlerImpl extends TransferHandler {
                     if (action == MOVE) {
                         System.out.println("action is move");
                         model.removeNodeFromParent(node);
-                        persistMove((Directory) node.getUserObject(), (Directory) targetNode.getUserObject());
+                        persistMove((Package) node.getUserObject(), (Package) targetNode.getUserObject());
                         model.insertNodeInto(node, targetNode, targetNode.getChildCount());
                     } else {
                         System.out.println("action is copy");
                         DefaultMutableTreeNode clone = cloneNode(node);
-                        persistCopy((Directory) node.getUserObject(), (Directory) targetNode.getUserObject());
+                        persistCopy((Package) node.getUserObject(), (Package) targetNode.getUserObject());
                         model.insertNodeInto(clone, targetNode, targetNode.getChildCount());
                     }
                 }
@@ -151,15 +151,16 @@ public class TransferHandlerImpl extends TransferHandler {
     }
 
     private DefaultMutableTreeNode cloneNode(DefaultMutableTreeNode node) {
-        Directory dir = (Directory) node.getUserObject();
-        Directory newDir = new Directory()
-                .setFile(dir.getFile())
+        Package dir = (Package) node.getUserObject();
+        Package newDir = new Package()
+                .setDirectoryType(dir.getDirectoryType())
                 .setName(dir.getName())
-                .setType(dir.getType());
+                .setFile(dir.getFile());
+
         return new DefaultMutableTreeNode(newDir);
     }
 
-    private void persistMove(Directory source, Directory target) {
+    private void persistMove(Package source, Package target) {
         System.out.println("Persisting MOVE to disk: " + source.getFileName());
 
         VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(source.getFile());
@@ -175,7 +176,7 @@ public class TransferHandlerImpl extends TransferHandler {
         }
     }
 
-    private void persistCopy(Directory source, Directory target) {
+    private void persistCopy(Package source, Package target) {
         System.out.println("Persisting COPY to disk: " + source.getFileName());
         VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(source.getFile());
         VirtualFile targetDir = LocalFileSystem.getInstance().findFileByIoFile(target.getFile());

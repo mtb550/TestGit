@@ -1,6 +1,6 @@
 package testGit.projectPanel.projectSelector;
 
-import testGit.pojo.Directory;
+import testGit.pojo.Project;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,8 +10,8 @@ public class RendererImpl extends DefaultListCellRenderer {
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
-        if (value instanceof Directory dir) {
-            setText(dir.getName());
+        if (value instanceof Project pr) {
+            setText(pr.getName());
         }
 
         return this;

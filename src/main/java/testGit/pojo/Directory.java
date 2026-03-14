@@ -12,38 +12,31 @@ import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
-@Setter
 @Getter
+@Setter
 @NoArgsConstructor
 @Accessors(chain = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Directory {
-    private String name;
+public abstract class Directory {
+    public String name;
 
-    private DirectoryStatus status;
+    public Path filePath;
 
-    private Path filePath;
+    public File file;
 
-    private File file;
-
-    private String fileName;
-
-    private DirectoryType type;
-
-    private Integer link;
+    public String fileName;
 
     @JsonAlias("created_at")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createdAt;
+    public LocalDateTime createdAt;
 
     @JsonAlias("created_by")
-    private String createdBy;
+    public String createdBy;
 
     @JsonAlias("modified_at")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime modifiedAt;
+    public LocalDateTime modifiedAt;
 
     @JsonAlias("modified_by")
-    private String modifiedBy;
-
+    public String modifiedBy;
 }

@@ -7,7 +7,8 @@ import com.intellij.util.ui.tree.TreeUtil;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import testGit.actions.CreateTestRunItems;
-import testGit.pojo.Directory;
+import testGit.pojo.Package;
+import testGit.pojo.Project;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.DirectoryMapper;
 
@@ -54,7 +55,7 @@ public class TestRunTabController {
 //                e -> new CreateTestRun(projectPanel).actionPerformed(null));
     }
 
-    public void buildTreeAsync(Directory selectedProject) {
+    public void buildTreeAsync(Project selectedProject) {
         System.out.println("TestRunTabController.buildTreeAsync()");
 
         DefaultMutableTreeNode localRoot = new DefaultMutableTreeNode("TEST RUNS");
@@ -90,7 +91,7 @@ public class TestRunTabController {
         });
     }
 
-    private DefaultMutableTreeNode buildNodeRecursive(@NotNull Directory dir) {
+    private DefaultMutableTreeNode buildNodeRecursive(@NotNull Package dir) {
         System.out.println("TR buildNodeRecursive");
 
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(dir);

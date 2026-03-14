@@ -1,0 +1,44 @@
+package testGit.pojo;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
+import java.io.File;
+import java.nio.file.Path;
+
+@Setter
+@Getter
+@NoArgsConstructor
+@Accessors(chain = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class Package extends Directory {
+    private DirectoryType directoryType;
+
+    @Override
+    public Package setFilePath(Path filePath) {
+        super.setFilePath(filePath);
+        return this;
+    }
+
+    @Override
+    public Package setFile(File file) {
+        super.setFile(file);
+        return this;
+    }
+
+    @Override
+    public Package setFileName(String fileName) {
+        super.setFileName(fileName);
+        return this;
+    }
+
+    @Override
+    public Package setName(String name) {
+        super.setName(name);
+        return this;
+    }
+
+}

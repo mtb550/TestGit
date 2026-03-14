@@ -3,7 +3,7 @@ package testGit.editorPanel.testCaseEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import testGit.pojo.Config;
-import testGit.pojo.Directory;
+import testGit.pojo.Package;
 import testGit.pojo.TestCase;
 import testGit.util.Notifier;
 
@@ -12,7 +12,7 @@ import java.util.*;
 
 public class TestCaseEditor {
 
-    public static void open(final Directory testSet) {
+    public static void open(final Package testSet) {
         FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
 
         editorManager.openFile(
@@ -24,7 +24,7 @@ public class TestCaseEditor {
         );
     }
 
-    private static VirtualFile createVirtualFile(Directory testSet) {
+    private static VirtualFile createVirtualFile(Package testSet) {
         List<TestCase> testCases = Optional.ofNullable(testSet.getFile())
                 .filter(f -> f.exists() && f.isDirectory())
                 .map(f -> f.listFiles((d, name) -> name.endsWith(".json")))

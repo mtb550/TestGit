@@ -9,18 +9,18 @@ import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
 import testGit.editorPanel.testCaseEditor.ContextMenu;
-import testGit.pojo.Directory;
+import testGit.pojo.Package;
 import testGit.pojo.TestCase;
 import testGit.util.KeyboardSet;
 
 import java.awt.*;
 
 public class ShowTestCaseContextMenu extends DumbAwareAction {
-    private final Directory dir;
+    private final Package dir;
     private final JBList<TestCase> list;
     private final CollectionListModel<TestCase> model;
 
-    public ShowTestCaseContextMenu(Directory dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
+    public ShowTestCaseContextMenu(Package dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
         super("Show Context Menu");
         this.dir = dir;
         this.list = list;

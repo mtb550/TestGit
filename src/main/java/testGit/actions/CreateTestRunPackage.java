@@ -8,9 +8,8 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import testGit.pojo.Directory;
-import testGit.pojo.DirectoryStatus;
 import testGit.pojo.DirectoryType;
+import testGit.pojo.Package;
 import testGit.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -38,22 +37,21 @@ public class CreateTestRunPackage extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TR) return;
+        if (!(userObject instanceof Package treeItem) || treeItem.getDirectoryType() == DirectoryType.TR) return;
 
         String name = Messages.showInputDialog("Enter package name:", "Create Package", AllIcons.Nodes.Package);
         if (name == null || name.isBlank()) return;
         name = name.replace("_", " ");
 
-        Path parentPath = (treeItem.getType() == DirectoryType.PR)
+        Path parentPath = (treeItem.getDirectoryType() == DirectoryType.PR)
                 ? treeItem.getFilePath().resolve("testRuns")
                 : treeItem.getFilePath();
 
-        Directory newPackage = new Directory()
-                .setType(DirectoryType.PA)
-                .setName(name)
-                .setStatus(DirectoryStatus.AC);
+        Package newPackage = new Package()
+                .setDirectoryType(DirectoryType.PA)
+                .setName(name);
 
-        String folderName = String.format("%s_%s_%s", newPackage.getType().name(), newPackage.getName(), newPackage.getStatus());
+        String folderName = String.format("%s_%s", newPackage.getDirectoryType().name(), newPackage.getName());
         Path fullPath = parentPath.resolve(folderName);
 
         newPackage.setFileName(folderName)
@@ -71,8 +69,8 @@ public class CreateTestRunPackage extends DumbAwareAction {
 
         boolean isTestRun = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
-                node.getUserObject() instanceof Directory item &&
-                (item.getType() == DirectoryType.PA || item.getType() == DirectoryType.TR));
+                node.getUserObject() instanceof Package item &&
+                (item.getDirectoryType() == DirectoryType.PA || item.getDirectoryType() == DirectoryType.TR));
 
         e.getPresentation().setVisible(true);
         e.getPresentation().setEnabled(!isTestRun);

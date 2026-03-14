@@ -8,7 +8,8 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import testGit.actions.CreateTestCasePackage;
 import testGit.actions.CreateTestSet;
-import testGit.pojo.Directory;
+import testGit.pojo.Package;
+import testGit.pojo.Project;
 import testGit.projectPanel.ProjectPanel;
 import testGit.projectPanel.TransferHandlerImpl;
 import testGit.util.DirectoryMapper;
@@ -56,7 +57,7 @@ public class TestCaseTabController {
                 e -> new CreateTestSet(null).actionPerformed(null));
     }
 
-    public void buildTreeAsync(Directory selectedProject) {
+    public void buildTreeAsync(Project selectedProject) {
         System.out.println("TestCaseTabController.buildTreeAsync()");
 
         // FIX 1: Create a LOCAL root so background threads don't share state
@@ -87,7 +88,7 @@ public class TestCaseTabController {
         });
     }
 
-    private DefaultMutableTreeNode buildNodeRecursive(@NotNull Directory dir) {
+    private DefaultMutableTreeNode buildNodeRecursive(@NotNull Package dir) {
         System.out.println("TC buildNodeRecursive");
 
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(dir);

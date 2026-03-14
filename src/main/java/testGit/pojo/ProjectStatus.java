@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum DirectoryStatus {
+public enum ProjectStatus {
     AC("Active"),
     IN("Inactive"),
     AR("Archived");

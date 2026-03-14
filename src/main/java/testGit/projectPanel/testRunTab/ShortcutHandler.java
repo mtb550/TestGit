@@ -1,7 +1,7 @@
 package testGit.projectPanel.testRunTab;
 
 import com.intellij.ui.treeStructure.SimpleTree;
-import testGit.actions.RemovePackage;
+import testGit.actions.Remove;
 import testGit.projectPanel.ProjectPanel;
 
 import javax.swing.*;
@@ -10,7 +10,7 @@ import java.awt.event.KeyEvent;
 public class ShortcutHandler {
     public static void register(ProjectPanel projectPanel, SimpleTree tree) {
 
-        new RemovePackage(projectPanel, tree);
+        new Remove(projectPanel, tree);
 
 
         InputMap inputMap = tree.getInputMap(JComponent.WHEN_FOCUSED);

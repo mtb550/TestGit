@@ -6,8 +6,7 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
-import testGit.pojo.Directory;
-import testGit.pojo.DirectoryType;
+import testGit.pojo.Project;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.KeyboardSet;
 
@@ -36,14 +35,14 @@ public class Rename extends DumbAwareAction {
         if (path == null) return;
 
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-        if (!(node.getUserObject() instanceof Directory treeItem)) return;
+        if (!(node.getUserObject() instanceof Project treeItem)) return;
 
         String newName = Messages.showInputDialog("Enter new name:", "Rename", null, treeItem.getName(), null);
         if (newName == null || newName.isBlank() || newName.equals(treeItem.getName())) return;
 
         try {
             File oldFile = treeItem.getFilePath().toFile();
-            String newFileName = treeItem.getType() + "_" + newName + "_" + treeItem.getStatus();
+            String newFileName = newName + "_" + treeItem.getProjectStatus();
             Path newFilePath = treeItem.getFilePath().getParent().resolve(newFileName);
             File newFile = newFilePath.toFile();
 
@@ -54,7 +53,7 @@ public class Rename extends DumbAwareAction {
 
                 ((DefaultTreeModel) tree.getModel()).nodeChanged(node);
 
-                if (treeItem.getType() == DirectoryType.PR && projectPanel.getTestProjectSelector() != null) {
+                if (projectPanel.getTestProjectSelector() != null) {
                     projectPanel.getTestProjectSelector().loadTestProjectList();
                 }
 

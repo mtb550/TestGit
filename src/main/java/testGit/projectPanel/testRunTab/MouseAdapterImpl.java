@@ -5,8 +5,8 @@ import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.ui.treeStructure.SimpleTree;
 import testGit.editorPanel.testRunEditor.TestRunEditor;
-import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
+import testGit.pojo.Package;
 import testGit.projectPanel.ProjectPanel;
 
 import javax.swing.*;
@@ -37,7 +37,7 @@ public class MouseAdapterImpl extends MouseAdapter {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selPath.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof Directory treeItem)) {
+        if (!(userObject instanceof Package treeItem)) {
             System.out.println("userObject not instanceof Directory");
             return;
         }
@@ -54,7 +54,7 @@ public class MouseAdapterImpl extends MouseAdapter {
 
             popupMenu.getComponent().show(e.getComponent(), e.getX(), e.getY());
 
-        } else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e) && treeItem.getType() == DirectoryType.TR) {
+        } else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e) && treeItem.getDirectoryType() == DirectoryType.TR) {
             System.out.println("double left click test run");
             TestRunEditor.open(treeItem.getFilePath(), projectPanel);
         }

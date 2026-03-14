@@ -9,9 +9,8 @@ import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.editorPanel.testCaseEditor.TestCaseEditor;
-import testGit.pojo.Directory;
-import testGit.pojo.DirectoryStatus;
 import testGit.pojo.DirectoryType;
+import testGit.pojo.Package;
 import testGit.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -38,21 +37,20 @@ public class CreateTestSet extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TS) return;
+        if (!(userObject instanceof Package treeItem) || treeItem.getDirectoryType() == DirectoryType.TS) return;
 
         String name = Messages.showInputDialog("Enter feature name:", "Add Feature", null);
         if (name == null || name.isBlank()) return;
         name = name.replace("_", " ");
 
-        Directory newTestSet = new Directory()
-                .setType(DirectoryType.TS)
-                .setName(name)
-                .setStatus(DirectoryStatus.AC);
+        Package newTestSet = new Package()
+                .setDirectoryType(DirectoryType.TS)
+                .setName(name);
 
-        newTestSet.setFileName(String.format("%s_%s_%s", newTestSet.getType().toString(), newTestSet.getName(), newTestSet.getStatus()));
+        newTestSet.setFileName(String.format("%s_%s", newTestSet.getDirectoryType().toString(), newTestSet.getName()));
 
         Path parentPath;
-        if (treeItem.getType() == DirectoryType.PR) {
+        if (treeItem.getDirectoryType() == DirectoryType.PR) {
             parentPath = treeItem.getFilePath().resolve("testCases");
             newTestSet.setFilePath(treeItem.getFilePath().resolve("testCases").resolve(newTestSet.getFileName()));
 
@@ -76,8 +74,8 @@ public class CreateTestSet extends DumbAwareAction {
 
         boolean isFeature = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
-                node.getUserObject() instanceof Directory item &&
-                item.getType() == DirectoryType.TS);
+                node.getUserObject() instanceof Package item &&
+                item.getDirectoryType() == DirectoryType.TS);
 
         e.getPresentation().setVisible(true);
         e.getPresentation().setEnabled(!isFeature);

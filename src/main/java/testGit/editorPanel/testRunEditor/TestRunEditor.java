@@ -38,7 +38,7 @@ public class TestRunEditor {
         }
     }
 
-    public static void create(Path runFilePath, ProjectPanel projectPanel, Directory projectName, TestRun metadata) {
+    public static void create(Path runFilePath, ProjectPanel projectPanel, Project projectName, TestRun metadata) {
         Path testCasesPath = Config.getTestGitPath().resolve(projectName.getFileName()).resolve("testCases");
         DefaultTreeModel fullModel = new DefaultTreeModel(buildDirectoryTree(testCasesPath.toFile(), true));
 

@@ -15,8 +15,8 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 import testGit.actions.Refresh;
 import testGit.pojo.Config;
-import testGit.pojo.Directory;
-import testGit.pojo.DirectoryStatus;
+import testGit.pojo.Package;
+import testGit.pojo.ProjectStatus;
 import testGit.projectPanel.ProjectPanel;
 import testGit.projectPanel.projectSelector.RendererImpl;
 import testGit.settings.service.ProjectPanelService;
@@ -34,8 +34,8 @@ public class AppSettingsConfigurable implements Configurable {
     private final JBTextField rootAutomationPathField = new JBTextField();
 
     // Store projects as Directory objects in a Model
-    private final DefaultComboBoxModel<Directory> testProjectList = new DefaultComboBoxModel<>();
-    private final ComboBox<Directory> projectComboBox = new ComboBox<>(testProjectList);
+    private final DefaultComboBoxModel<Package> testProjectList = new DefaultComboBoxModel<>();
+    private final ComboBox<Package> projectComboBox = new ComboBox<>(testProjectList);
 
     private final JBCheckBox readModeCheckBox = new JBCheckBox("Enable read mode (view only)");
 
@@ -69,9 +69,9 @@ public class AppSettingsConfigurable implements Configurable {
         projectComboBox.setRenderer(new RendererImpl());
 
         // 3. Setup Management Button Listeners
-        activateBtn.addActionListener(e -> updateProjectStatus(DirectoryStatus.AC));
-        deactivateBtn.addActionListener(e -> updateProjectStatus(DirectoryStatus.IN));
-        archivBtn.addActionListener(e -> updateProjectStatus(DirectoryStatus.AR));
+        activateBtn.addActionListener(e -> updateProjectStatus(ProjectStatus.AC));
+        deactivateBtn.addActionListener(e -> updateProjectStatus(ProjectStatus.IN));
+        archivBtn.addActionListener(e -> updateProjectStatus(ProjectStatus.AR));
 
         // 4. Initialize Data
         refreshProjectList();
@@ -97,8 +97,8 @@ public class AppSettingsConfigurable implements Configurable {
                 .getPanel();
     }
 
-    private void updateProjectStatus(DirectoryStatus newStatus) {
-        Directory selected = (Directory) projectComboBox.getSelectedItem();
+    private void updateProjectStatus(ProjectStatus newProjectStatus) {
+        Package selected = (Package) projectComboBox.getSelectedItem();
         if (selected == null) return;
 
         File oldDir = selected.getFile();
@@ -107,7 +107,7 @@ public class AppSettingsConfigurable implements Configurable {
         if (oldDir.exists() && currentFileName.contains("_")) {
             // Extract the base (PR_Name) and append the new Status (AC/IN/AR)
             String baseName = currentFileName.substring(0, currentFileName.lastIndexOf("_"));
-            String newName = baseName + "_" + newStatus.name();
+            String newName = baseName + "_" + newProjectStatus.name();
 
             File newDir = new File(oldDir.getParent(), newName);
             if (oldDir.renameTo(newDir)) {

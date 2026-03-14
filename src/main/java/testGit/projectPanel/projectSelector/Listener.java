@@ -1,6 +1,6 @@
 package testGit.projectPanel.projectSelector;
 
-import testGit.pojo.Directory;
+import testGit.pojo.Project;
 import testGit.projectPanel.ProjectPanel;
 
 import javax.swing.*;
@@ -17,7 +17,7 @@ public class Listener implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() instanceof JComboBox<?> comboBox) {
-            Directory selected = (Directory) comboBox.getSelectedItem();
+            Project selected = (Project) comboBox.getSelectedItem();
             if (selected != null && projectPanel.getTestProjectSelector() != null) {
                 System.out.println("Selection changed to: " + selected.getName());
                 projectPanel.getTestProjectSelector().filterByTestProject(selected);

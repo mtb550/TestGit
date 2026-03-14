@@ -5,8 +5,8 @@ import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.ui.treeStructure.SimpleTree;
 import testGit.editorPanel.testCaseEditor.TestCaseEditor;
-import testGit.pojo.Directory;
 import testGit.pojo.DirectoryType;
+import testGit.pojo.Package;
 import testGit.projectPanel.ProjectPanel;
 
 import javax.swing.*;
@@ -34,14 +34,14 @@ public class MouseAdapterImpl extends MouseAdapter {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
         Object userObject = node.getUserObject();
 
-        if (!(userObject instanceof Directory treeItem)) return;
+        if (!(userObject instanceof Package treeItem)) return;
 
         if (SwingUtilities.isRightMouseButton(e)) {
             ContextMenu contextMenu = new ContextMenu(projectPanel);
             ActionPopupMenu popupMenu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, contextMenu);
             popupMenu.getComponent().show(e.getComponent(), e.getX(), e.getY());
 
-        } else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e) && treeItem.getType() == DirectoryType.TS)
+        } else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e) && treeItem.getDirectoryType() == DirectoryType.TS)
             TestCaseEditor.open(treeItem);
     }
 }

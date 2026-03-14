@@ -18,7 +18,7 @@ import testGit.editorPanel.EditorFocusSyncListener;
 import testGit.editorPanel.StatusBar;
 import testGit.editorPanel.ToolBar;
 import testGit.pojo.Config;
-import testGit.pojo.Directory;
+import testGit.pojo.Package;
 import testGit.pojo.TestCase;
 import testGit.viewPanel.ViewPanel;
 
@@ -47,7 +47,7 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor, To
     @Getter
     private int pageSize = 10;
 
-    public FileEditorImpl(@NotNull List<TestCase> testCases, @NotNull Directory dir, @NotNull VirtualFile file) {
+    public FileEditorImpl(@NotNull List<TestCase> testCases, @NotNull Package dir, @NotNull VirtualFile file) {
         this.allTestCases = new ArrayList<>(testCases);
         this.panel = new JBPanel<>(new BorderLayout());
         this.file = file;
