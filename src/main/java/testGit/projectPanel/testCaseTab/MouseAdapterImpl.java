@@ -6,7 +6,7 @@ import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.ui.treeStructure.SimpleTree;
 import testGit.editorPanel.testCaseEditor.TestCaseEditor;
 import testGit.pojo.DirectoryType;
-import testGit.pojo.Package;
+import testGit.pojo.TestPackage;
 import testGit.projectPanel.ProjectPanel;
 
 import javax.swing.*;
@@ -34,7 +34,7 @@ public class MouseAdapterImpl extends MouseAdapter {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
         Object userObject = node.getUserObject();
 
-        if (!(userObject instanceof Package treeItem)) return;
+        if (!(userObject instanceof TestPackage treeItem)) return;
 
         if (SwingUtilities.isRightMouseButton(e)) {
             ContextMenu contextMenu = new ContextMenu(projectPanel);

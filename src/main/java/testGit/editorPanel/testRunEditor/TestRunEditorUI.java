@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import testGit.editorPanel.StatusBar;
 import testGit.editorPanel.ToolBar;
 import testGit.pojo.*;
-import testGit.pojo.Package;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.TestCaseSorter;
 
@@ -244,7 +243,7 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
                 if (!(value instanceof CheckedTreeNode node)) return;
                 Object userObj = node.getUserObject();
 
-                if (userObj instanceof Package dir) {
+                if (userObj instanceof TestPackage dir) {
                     getTextRenderer().append(dir.getName(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
                 } else if (userObj instanceof TestCase tc) {
                     renderTestCaseNode(tc);
@@ -343,7 +342,7 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
             item.setTestCaseId(UUID.fromString(tc.getId()));
             item.setStatus("PENDING");
             Object rootObj = ((DefaultMutableTreeNode) node.getRoot()).getUserObject();
-            item.setProject(rootObj instanceof Package d ? d.getFileName() : String.valueOf(rootObj));
+            item.setProject(rootObj instanceof TestPackage d ? d.getFileName() : String.valueOf(rootObj));
             items.add(item);
         }
         for (int i = 0; i < node.getChildCount(); i++) {

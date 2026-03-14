@@ -6,7 +6,7 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
-import testGit.pojo.Project;
+import testGit.pojo.TestProject;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.KeyboardSet;
 
@@ -35,7 +35,7 @@ public class Rename extends DumbAwareAction {
         if (path == null) return;
 
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-        if (!(node.getUserObject() instanceof Project treeItem)) return;
+        if (!(node.getUserObject() instanceof TestProject treeItem)) return;
 
         String newName = Messages.showInputDialog("Enter new name:", "Rename", null, treeItem.getName(), null);
         if (newName == null || newName.isBlank() || newName.equals(treeItem.getName())) return;

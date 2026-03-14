@@ -8,9 +8,9 @@ import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
-import testGit.pojo.Package;
 import testGit.pojo.Priority;
 import testGit.pojo.TestCase;
+import testGit.pojo.TestPackage;
 import testGit.ui.CreateNewTestCaseDialog;
 import testGit.util.KeyboardSet;
 import testGit.util.Notifier;
@@ -25,10 +25,10 @@ import java.util.UUID;
 
 public class CreateTestCase extends DumbAwareAction {
     private final JBList<TestCase> list;
-    private final Package dir;
+    private final TestPackage dir;
     private final CollectionListModel<TestCase> model;
 
-    public CreateTestCase(Package dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
+    public CreateTestCase(TestPackage dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
         super("Create Test Case", "Create new test case", AllIcons.Actions.AddToDictionary);
         this.list = list;
         this.dir = dir;
@@ -81,7 +81,7 @@ public class CreateTestCase extends DumbAwareAction {
         List<String> pathNames = new ArrayList<>();
         TreeNode[] nodes = node.getPath();
         for (TreeNode n : nodes) {
-            if (n instanceof DefaultMutableTreeNode dmtn && dmtn.getUserObject() instanceof Package dir) {
+            if (n instanceof DefaultMutableTreeNode dmtn && dmtn.getUserObject() instanceof TestPackage dir) {
                 pathNames.add(dir.getName());
             }
         }

@@ -1,6 +1,6 @@
 package testGit.projectPanel.projectSelector;
 
-import testGit.pojo.Project;
+import testGit.pojo.TestProject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +10,7 @@ public class RendererImpl extends DefaultListCellRenderer {
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
-        if (value instanceof Project pr) {
+        if (value instanceof TestProject pr) {
             setText(pr.getName());
         }
 

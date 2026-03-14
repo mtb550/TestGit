@@ -5,11 +5,11 @@ import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import testGit.actions.RunTestCase;
 import testGit.actions.ViewDetails;
-import testGit.pojo.Package;
 import testGit.pojo.TestCase;
+import testGit.pojo.TestPackage;
 
 public class ContextMenu extends DefaultActionGroup {
-    public ContextMenu(Package dir, JBList<TestCase> list, CollectionListModel<TestCase> model, TestCase tc) {
+    public ContextMenu(TestPackage dir, JBList<TestCase> list, CollectionListModel<TestCase> model, TestCase tc) {
         super("Test Run Actions", false);
         System.out.println("testGit.editorPanel.testRunEditor.ContextMenu()");
 

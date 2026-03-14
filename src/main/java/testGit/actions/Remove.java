@@ -7,8 +7,8 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
-import testGit.pojo.Package;
-import testGit.pojo.Project;
+import testGit.pojo.TestPackage;
+import testGit.pojo.TestProject;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.TreeUtilImpl;
 
@@ -30,7 +30,7 @@ public class Remove extends DumbAwareAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-        if (node.getUserObject() instanceof Project pr) {
+        if (node.getUserObject() instanceof TestProject pr) {
 
             int confirm = Messages.showYesNoDialog(
                     "Are you sure you want to remove '" + pr.getName() + "'?",
@@ -52,7 +52,7 @@ public class Remove extends DumbAwareAction {
             return;
         }
 
-        if (node.getUserObject() instanceof Package pkg) {
+        if (node.getUserObject() instanceof TestPackage pkg) {
 
         }
 
@@ -61,7 +61,7 @@ public class Remove extends DumbAwareAction {
     @Override
     public void update(@NotNull AnActionEvent e) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-        e.getPresentation().setEnabled(node != null && node.getUserObject() instanceof Package);
+        e.getPresentation().setEnabled(node != null && node.getUserObject() instanceof TestPackage);
     }
 
     @Override

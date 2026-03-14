@@ -9,8 +9,8 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Config;
-import testGit.pojo.Project;
 import testGit.pojo.ProjectStatus;
+import testGit.pojo.TestProject;
 import testGit.projectPanel.ProjectPanel;
 import testGit.ui.CreateNewTestProjectDialog;
 import testGit.util.Notifier;
@@ -32,15 +32,15 @@ public class CreateTestProject extends DumbAwareAction {
 
         if (name == null) return;
 
-        Project newTestProject = new Project()
+        TestProject newTestTestProject = new TestProject()
                 .setProjectStatus(ProjectStatus.AC)
 
                 .setName(name);
 
-        String folderName = String.format("%s_%s", newTestProject.getName(), newTestProject.getProjectStatus());
+        String folderName = String.format("%s_%s", newTestTestProject.getName(), newTestTestProject.getProjectStatus());
         Path projectPath = Config.getTestGitPath().resolve(folderName);
 
-        newTestProject.setFileName(folderName)
+        newTestTestProject.setFileName(folderName)
                 .setFilePath(projectPath)
                 .setFile(projectPath.toFile());
 
@@ -55,7 +55,7 @@ public class CreateTestProject extends DumbAwareAction {
                     projectDir.createChildDirectory(this, "testRuns");
                     projectDir.refresh(false, true);
 
-                    projectPanel.getTestProjectSelector().addTestProject(newTestProject);
+                    projectPanel.getTestProjectSelector().addTestProject(newTestTestProject);
 
                     Notifier.info("New Test Project", String.format("Test Project %s has been added", name));
 

@@ -5,8 +5,8 @@ import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Getter;
 import lombok.Setter;
 import testGit.pojo.Config;
-import testGit.pojo.Project;
 import testGit.pojo.ProjectStatus;
+import testGit.pojo.TestProject;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.DirectoryMapper;
 
@@ -21,10 +21,10 @@ public class TestProjectSelector {
     private final ProjectPanel projectPanel;
     @Getter
     @Setter
-    private DefaultComboBoxModel<Project> testProjectList;
+    private DefaultComboBoxModel<TestProject> testProjectList;
     @Getter
     @Setter
-    private ComboBox<Project> selectedTestProject;
+    private ComboBox<TestProject> selectedTestProject;
 
     public TestProjectSelector(ProjectPanel projectPanel) {
         this.projectPanel = projectPanel;
@@ -71,30 +71,30 @@ public class TestProjectSelector {
         }
 
         selectedTestProject.setEnabled(true);
-        Project firstTestProject = testProjectList.getElementAt(0);
-        selectedTestProject.setSelectedItem(firstTestProject);
+        TestProject firstTestTestProject = testProjectList.getElementAt(0);
+        selectedTestProject.setSelectedItem(firstTestTestProject);
         //filterByTestProject(firstTestProject);
         return true;
     }
 
-    public void addTestProject(Project newTestProject) {
+    public void addTestProject(TestProject newTestTestProject) {
         System.out.println("TestProjectSelector.addTestProject()");
         if (!selectedTestProject.isEnabled()) {
             projectPanel.showEmptyState();
         }
 
-        testProjectList.addElement(newTestProject);
-        selectedTestProject.setSelectedItem(newTestProject);
+        testProjectList.addElement(newTestTestProject);
+        selectedTestProject.setSelectedItem(newTestTestProject);
         if (testProjectList.getSize() == 1) {
             selectedTestProject.setEnabled(true);
             projectPanel.setupMainLayout();
         }
     }
 
-    public void removeTestProject(SimpleTree tree, Project project) {
+    public void removeTestProject(SimpleTree tree, TestProject testProject) {
         int indexToRemove = -1;
         for (int i = 0; i < testProjectList.getSize(); i++) {
-            if (testProjectList.getElementAt(i).getName().equals(project.getName())) {
+            if (testProjectList.getElementAt(i).getName().equals(testProject.getName())) {
                 indexToRemove = i;
                 break;
             }
@@ -123,7 +123,7 @@ public class TestProjectSelector {
         tree.repaint();
     }
 
-    public void filterByTestProject(Project testProject) {
+    public void filterByTestProject(TestProject testProject) {
         System.out.println("Panel.filterByProject(): " + testProject.getName());
 
         projectPanel.getTestCaseTabController().buildTreeAsync(selectedTestProject.getItem());

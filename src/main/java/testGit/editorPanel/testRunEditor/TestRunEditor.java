@@ -38,8 +38,8 @@ public class TestRunEditor {
         }
     }
 
-    public static void create(Path runFilePath, ProjectPanel projectPanel, Project projectName, TestRun metadata) {
-        Path testCasesPath = Config.getTestGitPath().resolve(projectName.getFileName()).resolve("testCases");
+    public static void create(Path runFilePath, ProjectPanel projectPanel, TestProject testProjectName, TestRun metadata) {
+        Path testCasesPath = Config.getTestGitPath().resolve(testProjectName.getFileName()).resolve("testCases");
         DefaultTreeModel fullModel = new DefaultTreeModel(buildDirectoryTree(testCasesPath.toFile(), true));
 
         VirtualFileImpl virtualFile = new VirtualFileImpl(

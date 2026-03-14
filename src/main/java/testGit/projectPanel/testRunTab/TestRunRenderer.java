@@ -6,7 +6,7 @@ import com.intellij.ui.SimpleColoredComponent;
 import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.util.ui.UIUtil;
 import testGit.pojo.DirectoryType;
-import testGit.pojo.Package;
+import testGit.pojo.TestPackage;
 import testGit.pojo.TestRunStatus;
 
 import javax.swing.*;
@@ -27,7 +27,7 @@ public class TestRunRenderer extends SimpleColoredComponent implements TreeCellR
         Object userObject = (value instanceof DefaultMutableTreeNode node) ? node.getUserObject() : value;
         //System.out.println("getTreeCellRendererComponent. " + userObject.getClass());
 
-        if (userObject instanceof Package dir) {
+        if (userObject instanceof TestPackage dir) {
             //System.out.println("Rendering TR: " + dir.getName());
             renderDirectory(dir);
 
@@ -49,7 +49,7 @@ public class TestRunRenderer extends SimpleColoredComponent implements TreeCellR
         return this;
     }
 
-    private void renderDirectory(Package dir) {
+    private void renderDirectory(TestPackage dir) {
         setIcon(getIconForDirectory(dir));
         append(dir.getName(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
 
@@ -59,7 +59,7 @@ public class TestRunRenderer extends SimpleColoredComponent implements TreeCellR
         }
     }
 
-    private Icon getIconForDirectory(Package dir) {
+    private Icon getIconForDirectory(TestPackage dir) {
         return switch (dir.getDirectoryType()) {
             case PR -> AllIcons.Nodes.Project;
             case PA -> AllIcons.Nodes.WebFolder;

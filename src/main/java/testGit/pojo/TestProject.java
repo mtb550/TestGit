@@ -14,31 +14,34 @@ import java.nio.file.Path;
 @NoArgsConstructor
 @Accessors(chain = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Package extends Directory {
-    private DirectoryType directoryType;
+public class TestProject extends Directory {
+    private ProjectStatus projectStatus;
+
+    private File testCasePath;
+
+    private File testRunPath;
 
     @Override
-    public Package setFilePath(Path filePath) {
+    public TestProject setName(String name) {
+        super.name = name;
+        return this;
+    }
+
+    @Override
+    public TestProject setFilePath(Path filePath) {
         super.setFilePath(filePath);
         return this;
     }
 
     @Override
-    public Package setFile(File file) {
+    public TestProject setFile(File file) {
         super.setFile(file);
         return this;
     }
 
     @Override
-    public Package setFileName(String fileName) {
+    public TestProject setFileName(String fileName) {
         super.setFileName(fileName);
         return this;
     }
-
-    @Override
-    public Package setName(String name) {
-        super.setName(name);
-        return this;
-    }
-
 }

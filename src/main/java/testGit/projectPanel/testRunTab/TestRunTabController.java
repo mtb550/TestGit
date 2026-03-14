@@ -7,8 +7,8 @@ import com.intellij.util.ui.tree.TreeUtil;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import testGit.actions.CreateTestRunItems;
-import testGit.pojo.Package;
-import testGit.pojo.Project;
+import testGit.pojo.TestPackage;
+import testGit.pojo.TestProject;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.DirectoryMapper;
 
@@ -55,11 +55,11 @@ public class TestRunTabController {
 //                e -> new CreateTestRun(projectPanel).actionPerformed(null));
     }
 
-    public void buildTreeAsync(Project selectedProject) {
+    public void buildTreeAsync(TestProject selectedTestProject) {
         System.out.println("TestRunTabController.buildTreeAsync()");
 
         DefaultMutableTreeNode localRoot = new DefaultMutableTreeNode("TEST RUNS");
-        File testRunsFolder = selectedProject.getFilePath().resolve("testRuns").toFile();
+        File testRunsFolder = selectedTestProject.getFilePath().resolve("testRuns").toFile();
 
 
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
@@ -91,7 +91,7 @@ public class TestRunTabController {
         });
     }
 
-    private DefaultMutableTreeNode buildNodeRecursive(@NotNull Package dir) {
+    private DefaultMutableTreeNode buildNodeRecursive(@NotNull TestPackage dir) {
         System.out.println("TR buildNodeRecursive");
 
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(dir);

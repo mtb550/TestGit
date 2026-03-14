@@ -1,18 +1,18 @@
 package testGit.util;
 
 import testGit.pojo.DirectoryType;
-import testGit.pojo.Package;
-import testGit.pojo.Project;
 import testGit.pojo.ProjectStatus;
+import testGit.pojo.TestPackage;
+import testGit.pojo.TestProject;
 
 import java.io.File;
 
 public class DirectoryMapper {
-    public static Package map(File file) {
+    public static TestPackage map(File file) {
         try {
             String[] parts = file.getName().replaceFirst("\\.json$", "").split("_", 3);
 
-            return new Package()
+            return new TestPackage()
                     .setDirectoryType(DirectoryType.valueOf(parts[0]))
                     .setName(parts[1])
                     .setFile(file)
@@ -26,11 +26,11 @@ public class DirectoryMapper {
         }
     }
 
-    public static Project mapProject(File file) {
+    public static TestProject mapProject(File file) {
         try {
             String[] parts = file.getName().split("_", 2);
 
-            return new Project()
+            return new TestProject()
                     .setProjectStatus(ProjectStatus.valueOf(parts[1]))
                     .setName(parts[0])
                     .setFile(file)

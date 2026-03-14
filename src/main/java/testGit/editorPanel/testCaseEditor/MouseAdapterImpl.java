@@ -6,8 +6,8 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import testGit.actions.CreateTestCase;
-import testGit.pojo.Package;
 import testGit.pojo.TestCase;
+import testGit.pojo.TestPackage;
 import testGit.viewPanel.ViewPanel;
 
 import javax.swing.*;
@@ -17,9 +17,9 @@ import java.awt.event.MouseEvent;
 public class MouseAdapterImpl extends MouseAdapter {
     private final JBList<TestCase> list;
     private final CollectionListModel<TestCase> model;
-    private final Package dir;
+    private final TestPackage dir;
 
-    public MouseAdapterImpl(JBList<TestCase> list, CollectionListModel<TestCase> model, Package dir) {
+    public MouseAdapterImpl(JBList<TestCase> list, CollectionListModel<TestCase> model, TestPackage dir) {
         this.list = list;
         this.model = model;
         this.dir = dir;

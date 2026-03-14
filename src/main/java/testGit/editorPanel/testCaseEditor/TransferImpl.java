@@ -3,8 +3,8 @@ package testGit.editorPanel.testCaseEditor;
 import com.intellij.ui.CollectionListModel;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
-import testGit.pojo.Package;
 import testGit.pojo.TestCase;
+import testGit.pojo.TestPackage;
 
 import javax.swing.*;
 import java.awt.datatransfer.DataFlavor;
@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
 public class TransferImpl extends TransferHandler {
     private static final DataFlavor FLAVOR = new DataFlavor(List.class, "List of TestCase");
     private final CollectionListModel<TestCase> model;
-    private final Package dir;
+    private final TestPackage dir;
     private final Runnable onDragStart;
     private int[] draggedIndices;
 
-    public TransferImpl(Package dir, CollectionListModel<TestCase> model, Runnable onDragStart) {
+    public TransferImpl(TestPackage dir, CollectionListModel<TestCase> model, Runnable onDragStart) {
         this.model = model;
         this.dir = dir;
         this.onDragStart = onDragStart;

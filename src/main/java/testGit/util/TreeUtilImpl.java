@@ -6,7 +6,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
 import com.intellij.util.ui.tree.TreeUtil;
-import testGit.pojo.Package;
+import testGit.pojo.TestPackage;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -16,10 +16,10 @@ import java.nio.file.Path;
 
 public class TreeUtilImpl {
 
-    public static DefaultMutableTreeNode insertNode(final SimpleTree tree, final DefaultMutableTreeNode parentNode, final Package newPackage) {
+    public static DefaultMutableTreeNode insertNode(final SimpleTree tree, final DefaultMutableTreeNode parentNode, final TestPackage newTestPackage) {
 
         DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-        DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newPackage);
+        DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newTestPackage);
 
         model.insertNodeInto(newNode, parentNode, parentNode.getChildCount());
 

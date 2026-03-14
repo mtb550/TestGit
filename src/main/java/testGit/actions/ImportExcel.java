@@ -19,7 +19,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.*;
-import testGit.pojo.Package;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.Notifier;
 
@@ -53,7 +52,7 @@ public class ImportExcel extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof Package treeItem) || treeItem.getDirectoryType() != DirectoryType.TS) {
+        if (!(userObject instanceof TestPackage treeItem) || treeItem.getDirectoryType() != DirectoryType.TS) {
             Notifier.error("Import Error", "Please select a valid TS Directory.");
             return;
         }

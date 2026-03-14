@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.editorPanel.testCaseEditor.TestCaseEditor;
 import testGit.pojo.DirectoryType;
-import testGit.pojo.Package;
+import testGit.pojo.TestPackage;
 import testGit.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -37,13 +37,13 @@ public class CreateTestSet extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof Package treeItem) || treeItem.getDirectoryType() == DirectoryType.TS) return;
+        if (!(userObject instanceof TestPackage treeItem) || treeItem.getDirectoryType() == DirectoryType.TS) return;
 
         String name = Messages.showInputDialog("Enter feature name:", "Add Feature", null);
         if (name == null || name.isBlank()) return;
         name = name.replace("_", " ");
 
-        Package newTestSet = new Package()
+        TestPackage newTestSet = new TestPackage()
                 .setDirectoryType(DirectoryType.TS)
                 .setName(name);
 
@@ -74,7 +74,7 @@ public class CreateTestSet extends DumbAwareAction {
 
         boolean isFeature = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
-                node.getUserObject() instanceof Package item &&
+                node.getUserObject() instanceof TestPackage item &&
                 item.getDirectoryType() == DirectoryType.TS);
 
         e.getPresentation().setVisible(true);

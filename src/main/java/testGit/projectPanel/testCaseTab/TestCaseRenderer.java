@@ -4,7 +4,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.ui.SimpleColoredComponent;
 import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.util.ui.UIUtil;
-import testGit.pojo.Package;
+import testGit.pojo.TestPackage;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -27,7 +27,7 @@ public class TestCaseRenderer extends SimpleColoredComponent implements TreeCell
         this.clear();
         Object userObject = (value instanceof DefaultMutableTreeNode node) ? node.getUserObject() : value;
 
-        if (userObject instanceof Package dir) {
+        if (userObject instanceof TestPackage dir) {
             //System.out.println("Rendering TC: " + dir.getName());
             renderDirectory((value instanceof DefaultMutableTreeNode n) ? n : null, dir);
 
@@ -48,14 +48,14 @@ public class TestCaseRenderer extends SimpleColoredComponent implements TreeCell
         return this;
     }
 
-    private void renderDirectory(DefaultMutableTreeNode node, Package dir) {
+    private void renderDirectory(DefaultMutableTreeNode node, TestPackage dir) {
         setIcon(getIconForDirectory(dir));
 
 
         append(dir.getName(), (cutNodes.contains(node)) ? SimpleTextAttributes.GRAYED_ATTRIBUTES : SimpleTextAttributes.REGULAR_ATTRIBUTES);
     }
 
-    private Icon getIconForDirectory(Package dir) {
+    private Icon getIconForDirectory(TestPackage dir) {
         return switch (dir.getDirectoryType()) {
             case PR -> AllIcons.Nodes.Project;
             case PA -> AllIcons.Nodes.WebFolder;

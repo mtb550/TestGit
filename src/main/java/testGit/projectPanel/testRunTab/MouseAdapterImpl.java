@@ -6,7 +6,7 @@ import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.ui.treeStructure.SimpleTree;
 import testGit.editorPanel.testRunEditor.TestRunEditor;
 import testGit.pojo.DirectoryType;
-import testGit.pojo.Package;
+import testGit.pojo.TestPackage;
 import testGit.projectPanel.ProjectPanel;
 
 import javax.swing.*;
@@ -37,7 +37,7 @@ public class MouseAdapterImpl extends MouseAdapter {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selPath.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof Package treeItem)) {
+        if (!(userObject instanceof TestPackage treeItem)) {
             System.out.println("userObject not instanceof Directory");
             return;
         }
