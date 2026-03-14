@@ -10,8 +10,8 @@ public class TitleActions {
     public static List<AnAction> create(ProjectPanel projectPanel) {
         return List.of(
                 new OpenSettings(),
-                new ExpandAll(projectPanel.getTestCaseTabController().getTree()),
-                new CollapseAll(projectPanel.getTestRunTabController().getTree()),
+                new ExpandAll(projectPanel.getProjectTree().getMainTree()),
+                new CollapseAll(projectPanel.getProjectTree().getMainTree()),
                 new Refresh(projectPanel),
                 new CreateTestProject(projectPanel)
         );

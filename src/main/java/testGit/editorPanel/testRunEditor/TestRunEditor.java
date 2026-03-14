@@ -94,7 +94,7 @@ public class TestRunEditor {
     private static DefaultMutableTreeNode buildDirectoryTree(File folder, boolean isRoot) {
         Object label = isRoot
                 ? "Test Cases (" + folder.getParentFile().getName() + ")"
-                : Optional.ofNullable((Object) DirectoryMapper.map(folder)).orElse(folder.getName());
+                : Optional.ofNullable((Object) DirectoryMapper.mapPackage(folder)).orElse(folder.getName());
 
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(label);
 

@@ -7,7 +7,7 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import testGit.pojo.DirectoryType;
+import testGit.pojo.PackageType;
 import testGit.pojo.TestPackage;
 import testGit.pojo.TestProject;
 import testGit.projectPanel.ProjectPanel;
@@ -60,22 +60,22 @@ public class CreateTestCasePackage extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof TestPackage treeItem) || treeItem.getDirectoryType() == DirectoryType.TS) return;
+        if (!(userObject instanceof TestPackage treeItem) || treeItem.getPackageType() == PackageType.TS) return;
 
         String name = CreateTestPackageDialog.show();
 
         if (name == null)
             return;
 
-        Path parentPath = (treeItem.getDirectoryType() == DirectoryType.PR)
+        Path parentPath = (treeItem.getPackageType() == PackageType.PR)
                 ? treeItem.getFilePath().resolve("testCases")
                 : treeItem.getFilePath();
 
         TestPackage newTestPackage = new TestPackage()
-                .setDirectoryType(DirectoryType.PA)
+                .setPackageType(PackageType.PA)
                 .setName(name);
 
-        String folderName = String.format("%s_%s", newTestPackage.getDirectoryType().name(), newTestPackage.getName());
+        String folderName = String.format("%s_%s", newTestPackage.getPackageType().name(), newTestPackage.getName());
         Path fullPath = parentPath.resolve(folderName);
 
         newTestPackage.setFileName(folderName)
@@ -91,10 +91,10 @@ public class CreateTestCasePackage extends DumbAwareAction {
         Path parentPath = selectedTestTestProject.getFilePath().resolve("testCases");
 
         TestPackage newTestPackage = new TestPackage()
-                .setDirectoryType(DirectoryType.PA)
+                .setPackageType(PackageType.PA)
                 .setName(name);
 
-        String folderName = String.format("%s_%s", newTestPackage.getDirectoryType().name(), newTestPackage.getName());
+        String folderName = String.format("%s_%s", newTestPackage.getPackageType().name(), newTestPackage.getName());
         Path fullPath = parentPath.resolve(folderName);
 
         newTestPackage.setFileName(folderName)
@@ -114,7 +114,7 @@ public class CreateTestCasePackage extends DumbAwareAction {
         boolean isFeature = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
                 node.getUserObject() instanceof TestPackage item &&
-                item.getDirectoryType() == DirectoryType.TS);
+                item.getPackageType() == PackageType.TS);
 
         e.getPresentation().setVisible(true);
         e.getPresentation().setEnabled(!isFeature);

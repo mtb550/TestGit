@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
-import testGit.projectPanel.TransferHandlerImpl;
+import testGit.projectPanel.tree.TransferHandlerImpl;
 import testGit.util.KeyboardSet;
 
 public class Escape extends DumbAwareAction {

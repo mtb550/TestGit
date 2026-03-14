@@ -1,6 +1,7 @@
 package testGit.actions;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
@@ -18,5 +19,15 @@ public class ExpandAll extends DumbAwareAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         for (int i = 0; i < tree.getRowCount(); i++)
             tree.expandRow(i);
+    }
+
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+        e.getPresentation().setEnabled(tree != null);
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
     }
 }

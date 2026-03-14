@@ -17,6 +17,7 @@ import testGit.actions.Refresh;
 import testGit.pojo.Config;
 import testGit.pojo.ProjectStatus;
 import testGit.pojo.TestPackage;
+import testGit.pojo.TestProject;
 import testGit.projectPanel.ProjectPanel;
 import testGit.projectPanel.projectSelector.RendererImpl;
 import testGit.settings.service.ProjectPanelService;
@@ -34,8 +35,8 @@ public class AppSettingsConfigurable implements Configurable {
     private final JBTextField rootAutomationPathField = new JBTextField();
 
     // Store projects as Directory objects in a Model
-    private final DefaultComboBoxModel<TestPackage> testProjectList = new DefaultComboBoxModel<>();
-    private final ComboBox<TestPackage> projectComboBox = new ComboBox<>(testProjectList);
+    private final DefaultComboBoxModel<TestProject> testProjectList = new DefaultComboBoxModel<>();
+    private final ComboBox<TestProject> projectComboBox = new ComboBox<>(testProjectList);
 
     private final JBCheckBox readModeCheckBox = new JBCheckBox("Enable read mode (view only)");
 
@@ -140,7 +141,7 @@ public class AppSettingsConfigurable implements Configurable {
             File[] projects = root.listFiles(f -> f.isDirectory() && f.getName().startsWith("PR_"));
             if (projects != null) {
                 Arrays.stream(projects)
-                        .map(DirectoryMapper::map) // Maps File to Directory object
+                        .map(DirectoryMapper::mapProject) // Maps File to Directory object
                         .filter(Objects::nonNull)
                         .forEach(testProjectList::addElement);
             }

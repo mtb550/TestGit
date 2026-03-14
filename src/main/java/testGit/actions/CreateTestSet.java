@@ -9,7 +9,7 @@ import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.editorPanel.testCaseEditor.TestCaseEditor;
-import testGit.pojo.DirectoryType;
+import testGit.pojo.PackageType;
 import testGit.pojo.TestPackage;
 import testGit.util.TreeUtilImpl;
 
@@ -37,20 +37,20 @@ public class CreateTestSet extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof TestPackage treeItem) || treeItem.getDirectoryType() == DirectoryType.TS) return;
+        if (!(userObject instanceof TestPackage treeItem) || treeItem.getPackageType() == PackageType.TS) return;
 
         String name = Messages.showInputDialog("Enter feature name:", "Add Feature", null);
         if (name == null || name.isBlank()) return;
         name = name.replace("_", " ");
 
         TestPackage newTestSet = new TestPackage()
-                .setDirectoryType(DirectoryType.TS)
+                .setPackageType(PackageType.TS)
                 .setName(name);
 
-        newTestSet.setFileName(String.format("%s_%s", newTestSet.getDirectoryType().toString(), newTestSet.getName()));
+        newTestSet.setFileName(String.format("%s_%s", newTestSet.getPackageType().toString(), newTestSet.getName()));
 
         Path parentPath;
-        if (treeItem.getDirectoryType() == DirectoryType.PR) {
+        if (treeItem.getPackageType() == PackageType.PR) {
             parentPath = treeItem.getFilePath().resolve("testCases");
             newTestSet.setFilePath(treeItem.getFilePath().resolve("testCases").resolve(newTestSet.getFileName()));
 
@@ -75,7 +75,7 @@ public class CreateTestSet extends DumbAwareAction {
         boolean isFeature = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
                 node.getUserObject() instanceof TestPackage item &&
-                item.getDirectoryType() == DirectoryType.TS);
+                item.getPackageType() == PackageType.TS);
 
         e.getPresentation().setVisible(true);
         e.getPresentation().setEnabled(!isFeature);

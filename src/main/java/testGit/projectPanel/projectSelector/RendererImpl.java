@@ -1,19 +1,17 @@
 package testGit.projectPanel.projectSelector;
 
+import com.intellij.ui.ColoredListCellRenderer;
+import com.intellij.ui.SimpleTextAttributes;
+import org.jetbrains.annotations.NotNull;
 import testGit.pojo.TestProject;
 
 import javax.swing.*;
-import java.awt.*;
 
-public class RendererImpl extends DefaultListCellRenderer {
+public class RendererImpl extends ColoredListCellRenderer<TestProject> {
     @Override
-    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+    protected void customizeCellRenderer(@NotNull JList<? extends TestProject> list, TestProject value, int index, boolean selected, boolean hasFocus) {
 
-        if (value instanceof TestProject pr) {
-            setText(pr.getName());
-        }
-
-        return this;
+        if (value != null)
+            append(value.getName(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
     }
 }

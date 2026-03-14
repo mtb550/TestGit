@@ -5,11 +5,14 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum DirectoryType {
+public enum PackageType {
     PR("Project"),
+    /// to be removed
     PA("Package"),
     TS("Test Set"),
-    TR("Test Run");
+    TR("Test Run"),
+    TCP("Test Cases Directory"),
+    TRP("Test Runs Directory");
 
     private final String description;
 }

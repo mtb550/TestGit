@@ -1,11 +1,12 @@
-package testGit.projectPanel.testCaseTab;
+package testGit.projectPanel.tree;
 
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.ui.treeStructure.SimpleTree;
 import testGit.editorPanel.testCaseEditor.TestCaseEditor;
-import testGit.pojo.DirectoryType;
+import testGit.editorPanel.testRunEditor.TestRunEditor;
+import testGit.pojo.PackageType;
 import testGit.pojo.TestPackage;
 import testGit.projectPanel.ProjectPanel;
 
@@ -19,9 +20,9 @@ public class MouseAdapterImpl extends MouseAdapter {
     private final SimpleTree tree;
     private final ProjectPanel projectPanel;
 
-    public MouseAdapterImpl(ProjectPanel projectPanel) {
+    public MouseAdapterImpl(ProjectPanel projectPanel, SimpleTree tree) {
         this.projectPanel = projectPanel;
-        this.tree = projectPanel.getTestCaseTabController().getTree();
+        this.tree = tree;
     }
 
     @Override
@@ -40,8 +41,25 @@ public class MouseAdapterImpl extends MouseAdapter {
             ContextMenu contextMenu = new ContextMenu(projectPanel);
             ActionPopupMenu popupMenu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, contextMenu);
             popupMenu.getComponent().show(e.getComponent(), e.getX(), e.getY());
+            return;
 
-        } else if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e) && treeItem.getDirectoryType() == DirectoryType.TS)
-            TestCaseEditor.open(treeItem);
+        }
+
+        if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+
+            if (treeItem.getPackageType() == PackageType.TS) {
+                System.out.println("double left click test set");
+                TestCaseEditor.open(treeItem);
+                return;
+            }
+
+            if (treeItem.getPackageType() == PackageType.TR) {
+                System.out.println("double left click test run");
+                TestRunEditor.open(treeItem.getFilePath(), projectPanel);
+            }
+
+        }
+
     }
+
 }

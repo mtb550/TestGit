@@ -1,4 +1,4 @@
-package testGit.projectPanel.testCaseTab;
+package testGit.projectPanel.tree;
 
 import com.intellij.ui.treeStructure.SimpleTree;
 import testGit.actions.Escape;
@@ -6,7 +6,6 @@ import testGit.actions.OpenTestSet;
 import testGit.actions.Remove;
 import testGit.actions.Rename;
 import testGit.projectPanel.ProjectPanel;
-import testGit.projectPanel.TransferHandlerImpl;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;

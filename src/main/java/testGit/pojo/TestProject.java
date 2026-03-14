@@ -1,6 +1,7 @@
 package testGit.pojo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,16 +15,17 @@ import java.nio.file.Path;
 @NoArgsConstructor
 @Accessors(chain = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@EqualsAndHashCode(callSuper = true)
 public class TestProject extends Directory {
     private ProjectStatus projectStatus;
 
-    private File testCasePath;
+    private TestPackage testCase;
 
-    private File testRunPath;
+    private TestPackage testRun;
 
     @Override
     public TestProject setName(String name) {
-        super.name = name;
+        super.setName(name);
         return this;
     }
 
@@ -42,6 +44,17 @@ public class TestProject extends Directory {
     @Override
     public TestProject setFileName(String fileName) {
         super.setFileName(fileName);
+        return this;
+    }
+
+    @Override
+    public DirectoryIcon getIcon() {
+        return icon;
+    }
+
+    @Override
+    public TestProject setIcon(DirectoryIcon directoryIcon) {
+        super.setIcon(directoryIcon);
         return this;
     }
 }

@@ -38,7 +38,7 @@ public class ImportExcel extends DumbAwareAction {
 
     public ImportExcel(ProjectPanel projectPanel) {
         super("From Excel", "Import test cases from excel", AllIcons.Providers.Microsoft);
-        this.testCasesTree = projectPanel.getTestCaseTabController().getTree();
+        this.testCasesTree = projectPanel.getProjectTree().getMainTree();
     }
 
     @Override
@@ -52,7 +52,7 @@ public class ImportExcel extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof TestPackage treeItem) || treeItem.getDirectoryType() != DirectoryType.TS) {
+        if (!(userObject instanceof TestPackage treeItem) || treeItem.getPackageType() != PackageType.TS) {
             Notifier.error("Import Error", "Please select a valid TS Directory.");
             return;
         }

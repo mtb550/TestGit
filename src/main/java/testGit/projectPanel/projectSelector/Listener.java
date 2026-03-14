@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 
 public class Listener implements ActionListener {
     private final ProjectPanel projectPanel;
+    private TestProject lastSelected = null;
 
     public Listener(ProjectPanel projectPanel) {
         this.projectPanel = projectPanel;
@@ -17,10 +18,17 @@ public class Listener implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() instanceof JComboBox<?> comboBox) {
-            TestProject selected = (TestProject) comboBox.getSelectedItem();
-            if (selected != null && projectPanel.getTestProjectSelector() != null) {
-                System.out.println("Selection changed to: " + selected.getName());
-                projectPanel.getTestProjectSelector().filterByTestProject(selected);
+            if (comboBox.getSelectedItem() instanceof TestProject selected) {
+                if (selected.equals(lastSelected)) {
+                    return;
+                }
+
+                lastSelected = selected;
+
+                if (projectPanel.getTestProjectSelector() != null) {
+                    System.out.println("Selection changed to: " + selected.getName());
+                    projectPanel.getTestProjectSelector().filterByTestProject(selected);
+                }
             }
         }
     }

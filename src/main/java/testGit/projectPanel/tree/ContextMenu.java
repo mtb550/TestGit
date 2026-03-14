@@ -1,4 +1,4 @@
-package testGit.projectPanel.testCaseTab;
+package testGit.projectPanel.tree;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
@@ -16,17 +16,17 @@ import javax.swing.*;
 public class ContextMenu extends DefaultActionGroup {
 
     public ContextMenu(ProjectPanel projectPanel) {
-        super("Test Case Context", true);
+        super("Tree Context Menu", true);
 
-        SimpleTree testCaseTree = projectPanel.getTestCaseTabController().getTree();
+        SimpleTree tree = projectPanel.getProjectTree().getMainTree();
 
-        add(new OpenTestSet2(testCaseTree));
-        add(new AddGroup(projectPanel, testCaseTree));
+        add(new OpenTestSet2(tree));
+        add(new AddGroup(projectPanel, tree));
         addSeparator();
-        add(new Remove(projectPanel, testCaseTree));
-        add(new Rename(projectPanel, testCaseTree));
+        add(new Remove(projectPanel, tree));
+        add(new Rename(projectPanel, tree));
         addSeparator();
-        add(new RunTestSet(testCaseTree));
+        add(new RunTestSet(tree));
         addSeparator();
         add(createSubGroup("Export", AllIcons.ToolbarDecorator.Export, new ExportCsv(), new ExportHtml(), new ExportExcel(), new ExportJson()));
         add(createSubGroup("Import", AllIcons.ToolbarDecorator.Import, new ImportCsv(), new ImportExcel(projectPanel), new ImportJson()));
@@ -59,6 +59,8 @@ public class ContextMenu extends DefaultActionGroup {
 
             add(new CreateTestCasePackage(projectPanel, tree));
             add(new CreateTestSet(tree));
+            add(new CreateTestRunPackage(tree));
+            add(new CreateTestRun(projectPanel));
         }
 
 

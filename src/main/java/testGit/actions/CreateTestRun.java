@@ -8,7 +8,7 @@ import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.editorPanel.testRunEditor.TestRunEditor;
-import testGit.pojo.DirectoryType;
+import testGit.pojo.PackageType;
 import testGit.pojo.TestPackage;
 import testGit.pojo.TestRun;
 import testGit.pojo.TestRunStatus;
@@ -24,7 +24,7 @@ public class CreateTestRun extends DumbAwareAction {
     public CreateTestRun(ProjectPanel projectPanel) {
         super("New Test Run", "Create a new test run", AllIcons.Actions.GroupBy);
         this.projectPanel = projectPanel;
-        this.testRunTree = projectPanel.getTestRunTabController().getTree();
+        this.testRunTree = projectPanel.getProjectTree().getMainTree();
     }
 
     @Override
@@ -38,7 +38,7 @@ public class CreateTestRun extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof TestPackage treeItem) || treeItem.getDirectoryType() == DirectoryType.TR) {
+        if (!(userObject instanceof TestPackage treeItem) || treeItem.getPackageType() == PackageType.TR) {
             System.out.println("!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TR");
             return;
         }
@@ -67,7 +67,7 @@ public class CreateTestRun extends DumbAwareAction {
         boolean isTestRun = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
                 node.getUserObject() instanceof TestPackage item &&
-                item.getDirectoryType() == DirectoryType.TR);
+                item.getPackageType() == PackageType.TR);
 
         e.getPresentation().setVisible(true);
         e.getPresentation().setEnabled(!isTestRun);

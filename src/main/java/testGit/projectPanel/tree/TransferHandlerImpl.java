@@ -1,4 +1,4 @@
-package testGit.projectPanel;
+package testGit.projectPanel.tree;
 
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -6,7 +6,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import testGit.pojo.DirectoryType;
+import testGit.pojo.PackageType;
 import testGit.pojo.TestPackage;
 
 import javax.swing.*;
@@ -110,7 +110,7 @@ public class TransferHandlerImpl extends TransferHandler {
             if (targetNode == null) return false;
 
             if (targetNode.getUserObject() instanceof TestPackage targetDir) {
-                if (targetDir.getDirectoryType() == DirectoryType.PR) {
+                if (targetDir.getPackageType() == PackageType.PR) {
                     Path newPath = targetDir.getFilePath().resolve("testCases");
                     targetDir.setFilePath(newPath).setFile(newPath.toFile());
 
@@ -153,7 +153,7 @@ public class TransferHandlerImpl extends TransferHandler {
     private DefaultMutableTreeNode cloneNode(DefaultMutableTreeNode node) {
         TestPackage dir = (TestPackage) node.getUserObject();
         TestPackage newDir = new TestPackage()
-                .setDirectoryType(dir.getDirectoryType())
+                .setPackageType(dir.getPackageType())
                 .setName(dir.getName())
                 .setFile(dir.getFile());
 

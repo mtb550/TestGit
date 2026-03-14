@@ -10,8 +10,9 @@ import com.intellij.util.ui.StatusText;
 import lombok.Getter;
 import testGit.actions.CreateTestProject;
 import testGit.projectPanel.projectSelector.TestProjectSelector;
-import testGit.projectPanel.testCaseTab.TestCaseTabController;
-import testGit.projectPanel.testRunTab.TestRunTabController;
+import testGit.projectPanel.tree.ProjectTree;
+import testGit.projectPanel.tree.TestCaseTabController;
+import testGit.projectPanel.tree.TestRunTabController;
 import testGit.projectPanel.versionSelector.VersionSelector;
 
 import java.awt.*;
@@ -23,7 +24,7 @@ public class ProjectPanel implements Disposable {
     private final TestCaseTabController testCaseTabController;
     private final TestRunTabController testRunTabController;
     private VersionSelector versionSelector;
-    private Tabs tabs;
+    private ProjectTree projectTree;
 
     public ProjectPanel(Project project) {
         System.out.println("ProjectPanel.ProjectPanel()");
@@ -46,11 +47,8 @@ public class ProjectPanel implements Disposable {
 
             panel.add(topBar, BorderLayout.NORTH);
 
-            tabs = new Tabs(this);
-            panel.add(tabs.getComponent(), BorderLayout.CENTER);
-
-            testCaseTabController.init();
-            testRunTabController.init();
+            projectTree = new ProjectTree(this);
+            panel.add(projectTree.getComponent(), BorderLayout.CENTER);
 
         } else {
             System.out.println("ProjectPanel(). not projects found");
@@ -77,11 +75,10 @@ public class ProjectPanel implements Disposable {
 
             panel.add(topBar, BorderLayout.NORTH);
 
-            tabs = new Tabs(this);
-            panel.add(tabs.getComponent(), BorderLayout.CENTER);
 
-            testCaseTabController.init();
-            testRunTabController.init();
+            projectTree = new ProjectTree(this);
+            panel.add(projectTree.getComponent(), BorderLayout.CENTER);
+
         } else {
             System.out.println("ProjectPanel(). not projects found");
             showEmptyState();
@@ -121,7 +118,8 @@ public class ProjectPanel implements Disposable {
 
     @Override
     public void dispose() {
-        testCaseTabController.getTree().setModel(null);
-        testRunTabController.getTree().setModel(null);
+        if (projectTree != null && projectTree.getMainTree() != null) {
+            projectTree.getMainTree().setModel(null);
+        }
     }
 }

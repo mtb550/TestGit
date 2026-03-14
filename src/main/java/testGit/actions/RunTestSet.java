@@ -6,7 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
-import testGit.pojo.DirectoryType;
+import testGit.pojo.PackageType;
 import testGit.pojo.TestPackage;
 import testGit.util.Notifier;
 import testGit.util.Runner.TestNGRunnerByClass;
@@ -38,7 +38,7 @@ public class RunTestSet extends DumbAwareAction {
         }
 
         Object userObject = ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
-        e.getPresentation().setEnabled(userObject instanceof TestPackage treeItem && treeItem.getDirectoryType() == DirectoryType.TS);
+        e.getPresentation().setEnabled(userObject instanceof TestPackage treeItem && treeItem.getPackageType() == PackageType.TS);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class RunTestSet extends DumbAwareAction {
         // Extract the selected Directory object
         Object userObject = ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
 
-        if (userObject instanceof TestPackage treeItem && treeItem.getDirectoryType() == DirectoryType.TS) {
+        if (userObject instanceof TestPackage treeItem && treeItem.getPackageType() == PackageType.TS) {
             // 1. Convert the physical File path into a Java FQCN
             System.out.println(this.getClass() + "directory file: " + treeItem.getFile());
             String fqcn = Tools.fileToFqcn(treeItem.getFile());

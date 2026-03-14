@@ -315,7 +315,7 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
             run.setDeviceType(metadata.getDeviceType());
         }
 
-        String fileName = DirectoryType.TR.name() + "_" + metadata.getBuildNumber() + "_" + ProjectStatus.AC.name() + ".json";
+        String fileName = PackageType.TR.name() + "_" + metadata.getBuildNumber() + "_" + ProjectStatus.AC.name() + ".json";
         run.setRunName(fileName);
         run.setCreatedAt(LocalDateTime.now());
         run.setStatus(TestRunStatus.CREATED);
