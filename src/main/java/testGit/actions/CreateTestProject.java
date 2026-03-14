@@ -10,9 +10,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import testGit.pojo.Config;
-import testGit.pojo.ProjectStatus;
-import testGit.pojo.TestProject;
+import testGit.pojo.*;
 import testGit.projectPanel.ProjectPanel;
 import testGit.ui.CreateNewTestProjectDialog;
 import testGit.util.Notifier;
@@ -44,6 +42,26 @@ public class CreateTestProject extends DumbAwareAction {
         newTestProject.setFileName(folderName)
                 .setFilePath(projectPath)
                 .setFile(projectPath.toFile());
+
+        newTestProject.setIcon(DirectoryIcon.PR);
+        newTestProject.setTestCase(
+                        new TestPackage()
+                                .setIcon(DirectoryIcon.TCP)
+                                .setFileName("TCP_testCases")
+                                .setPackageType(PackageType.TCP)
+                                .setFile(newTestProject.getFile().toPath().resolve("TCP_testCases").toFile())
+                                .setFilePath(newTestProject.getFile().toPath().resolve("TCP_testCases"))
+                                .setName("Test Cases")
+                )
+                .setTestRun(
+                        new TestPackage()
+                                .setIcon(DirectoryIcon.TRP)
+                                .setFileName("TRP_testRuns")
+                                .setPackageType(PackageType.TRP)
+                                .setFile(newTestProject.getFile().toPath().resolve("TRP_testRuns").toFile())
+                                .setFilePath(newTestProject.getFile().toPath().resolve("TRP_testRuns"))
+                                .setName("Test Runs")
+                );
 
         WriteAction.run(() -> {
             try {

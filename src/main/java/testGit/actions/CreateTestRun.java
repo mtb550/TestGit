@@ -38,7 +38,8 @@ public class CreateTestRun extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof TestPackage treeItem) || treeItem.getPackageType() == PackageType.TR) {
+        if (!(userObject instanceof TestPackage treeItem)
+                || treeItem.getPackageType() == PackageType.TR) {
             System.out.println("!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TR");
             return;
         }
@@ -64,18 +65,21 @@ public class CreateTestRun extends DumbAwareAction {
     public void update(@NotNull AnActionEvent e) {
         TreePath path = testRunTree.getSelectionPath();
 
-        boolean isTestRun = (path != null &&
+        boolean shouldEnable = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
                 node.getUserObject() instanceof TestPackage item &&
-                item.getPackageType() == PackageType.TR);
+                item.getPackageType() != PackageType.TR &&
+                item.getPackageType() != PackageType.TS &&
+                !item.getFilePath().toString().contains("TCP_testCases")
+        );
 
         e.getPresentation().setVisible(true);
-        e.getPresentation().setEnabled(!isTestRun);
+        e.getPresentation().setEnabled(shouldEnable);
     }
 
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.EDT;
+        return ActionUpdateThread.BGT;
     }
 
 }

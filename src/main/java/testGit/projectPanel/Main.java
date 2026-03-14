@@ -1,5 +1,6 @@
 package testGit.projectPanel;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
@@ -17,16 +18,21 @@ public class Main implements ToolWindowFactory, DumbAware {
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         System.out.println("ToolWindowFactory.createToolWindowContent()");
 
-        StartupActivity.execute(project);
 
-        ProjectPanel projectPanel = new ProjectPanel(project);
+        ApplicationManager.getApplication().invokeLater(() -> {
+            if (!project.isDisposed()) {
+                StartupActivity.execute(project);
+            }
 
-        toolWindow.setTitleActions(TitleActions.create(projectPanel));
+            ProjectPanel projectPanel = new ProjectPanel(project);
 
-        ProjectPanelService.getInstance(project).setPanel(projectPanel);
+            toolWindow.setTitleActions(TitleActions.create(projectPanel));
 
-        Content content = ContentFactory.getInstance().createContent(projectPanel.getPanel(), null, false);
-        Disposer.register(content, projectPanel);
-        toolWindow.getContentManager().addContent(content);
+            ProjectPanelService.getInstance(project).setPanel(projectPanel);
+
+            Content content = ContentFactory.getInstance().createContent(projectPanel.getPanel(), null, false);
+            Disposer.register(content, projectPanel);
+            toolWindow.getContentManager().addContent(content);
+        });
     }
 }

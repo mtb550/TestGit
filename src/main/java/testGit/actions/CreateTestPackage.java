@@ -7,6 +7,7 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import testGit.pojo.DirectoryIcon;
 import testGit.pojo.PackageType;
 import testGit.pojo.TestPackage;
 import testGit.pojo.TestProject;
@@ -20,11 +21,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.nio.file.Path;
 
-public class CreateTestCasePackage extends DumbAwareAction {
+public class CreateTestPackage extends DumbAwareAction {
     private final ProjectPanel projectPanel;
     private final SimpleTree tree;
 
-    public CreateTestCasePackage(ProjectPanel projectPanel, SimpleTree tree) {
+    public CreateTestPackage(ProjectPanel projectPanel, SimpleTree tree) {
         super("New Package", "Create a new package", AllIcons.Nodes.Package);
         this.projectPanel = projectPanel;
         this.tree = tree;
@@ -37,7 +38,7 @@ public class CreateTestCasePackage extends DumbAwareAction {
         TreePath path = tree.getSelectionPath();
         if (path == null) {
             System.out.println("path is null !!, first case package");
-            TestProject selectedTestTestProject = projectPanel.getTestProjectSelector().getSelectedTestProject().getItem();
+            TestProject selectedTestProject = projectPanel.getTestProjectSelector().getSelectedTestProject().getItem();
 
 //            InputDialog.show("Test Project Name", AllIcons.Nodes.Package, (enteredName) -> {
 //                System.out.println("Processing: " + enteredName);
@@ -49,7 +50,7 @@ public class CreateTestCasePackage extends DumbAwareAction {
             InputDialogList.show("Test Project Name", (enteredName, selectedItem) -> {
                 System.out.println("Processing: " + enteredName + " | Selected Type: " + selectedItem.name());
                 if (enteredName != null && !enteredName.isEmpty()) {
-                    add_new(selectedTestTestProject, enteredName);
+                    add_new(selectedTestProject, enteredName);
                 }
             });
 
@@ -60,33 +61,31 @@ public class CreateTestCasePackage extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof TestPackage treeItem) || treeItem.getPackageType() == PackageType.TS) return;
+        if (!(userObject instanceof TestPackage treeItem) || treeItem.getPackageType() == PackageType.TS || treeItem.getPackageType() == PackageType.TR)
+            return;
 
         String name = CreateTestPackageDialog.show();
 
-        if (name == null)
-            return;
-
-        Path parentPath = (treeItem.getPackageType() == PackageType.PR)
-                ? treeItem.getFilePath().resolve("testCases")
-                : treeItem.getFilePath();
+        if (name == null || name.isBlank()) return;
 
         TestPackage newTestPackage = new TestPackage()
                 .setPackageType(PackageType.PA)
                 .setName(name);
 
         String folderName = String.format("%s_%s", newTestPackage.getPackageType().name(), newTestPackage.getName());
-        Path fullPath = parentPath.resolve(folderName);
+        Path fullPath = treeItem.getFilePath().resolve(folderName);
 
         newTestPackage.setFileName(folderName)
                 .setFilePath(fullPath)
-                .setFile(fullPath.toFile());
+                .setFile(fullPath.toFile())
+                .setIcon(DirectoryIcon.PA);
 
-        TreeUtilImpl.insertVf(this, parentPath, folderName);
+        TreeUtilImpl.insertVf(this, treeItem.getFilePath(), folderName);
         TreeUtilImpl.insertNode(tree, parentNode, newTestPackage);
 
     }
 
+    /// to be removed
     private void add_new(TestProject selectedTestTestProject, String name) {
         Path parentPath = selectedTestTestProject.getFilePath().resolve("testCases");
 
@@ -111,17 +110,19 @@ public class CreateTestCasePackage extends DumbAwareAction {
     public void update(@NotNull AnActionEvent e) {
         TreePath path = tree.getSelectionPath();
 
-        boolean isFeature = (path != null &&
+        boolean shouldEnable = (path != null &&
                 path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
                 node.getUserObject() instanceof TestPackage item &&
-                item.getPackageType() == PackageType.TS);
+                item.getPackageType() != PackageType.TS &&
+                item.getPackageType() != PackageType.TR
+        );
 
         e.getPresentation().setVisible(true);
-        e.getPresentation().setEnabled(!isFeature);
+        e.getPresentation().setEnabled(shouldEnable);
     }
 
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.EDT;
+        return ActionUpdateThread.BGT;
     }
 }

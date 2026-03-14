@@ -20,7 +20,7 @@ public class ContextMenu extends DefaultActionGroup {
 
         SimpleTree tree = projectPanel.getProjectTree().getMainTree();
 
-        add(new OpenTestSet2(tree));
+        add(new OpenTestSetRun(projectPanel, tree));
         add(new AddGroup(projectPanel, tree));
         addSeparator();
         add(new Remove(projectPanel, tree));
@@ -48,7 +48,7 @@ public class ContextMenu extends DefaultActionGroup {
 
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.EDT;
+        return ActionUpdateThread.BGT;
     }
 
     private static class AddGroup extends DefaultActionGroup {
@@ -57,9 +57,9 @@ public class ContextMenu extends DefaultActionGroup {
             super("Create", "Create new items", AllIcons.General.Add);
             setPopup(true);
 
-            add(new CreateTestCasePackage(projectPanel, tree));
+            add(new CreateTestPackage(projectPanel, tree));
             add(new CreateTestSet(tree));
-            add(new CreateTestRunPackage(tree));
+            //add(new CreateTestRunPackage(tree));
             add(new CreateTestRun(projectPanel));
         }
 

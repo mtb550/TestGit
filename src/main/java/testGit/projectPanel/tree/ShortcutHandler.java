@@ -2,7 +2,7 @@ package testGit.projectPanel.tree;
 
 import com.intellij.ui.treeStructure.SimpleTree;
 import testGit.actions.Escape;
-import testGit.actions.OpenTestSet;
+import testGit.actions.OpenTestSetRun;
 import testGit.actions.Remove;
 import testGit.actions.Rename;
 import testGit.projectPanel.ProjectPanel;
@@ -14,7 +14,7 @@ public class ShortcutHandler {
     public static void register(final ProjectPanel projectPanel, final SimpleTree tree, TransferHandlerImpl transferHandler) {
 
         new Remove(projectPanel, tree);
-        new OpenTestSet(tree);
+        new OpenTestSetRun(projectPanel, tree);
         new Rename(projectPanel, tree);
         new Escape(tree, transferHandler);
 
