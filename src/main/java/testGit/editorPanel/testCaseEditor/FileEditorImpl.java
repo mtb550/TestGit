@@ -270,8 +270,20 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor, To
 
     @Override
     public void dispose() {
+        System.out.println("Disposing TestCase FileEditorImpl...");
+
         TestCase selectedInThisFile = list.getSelectedValue();
         ViewPanel.hideIfShowing(selectedInThisFile);
-        model.removeListDataListener(syncListener);
+
+        if (model != null && syncListener != null) {
+            model.removeListDataListener(syncListener);
+        }
+
+        if (model != null) {
+            model.removeAll();
+        }
+        if (panel != null) {
+            panel.removeAll();
+        }
     }
 }

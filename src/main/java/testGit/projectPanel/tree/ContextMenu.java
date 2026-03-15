@@ -20,10 +20,10 @@ public class ContextMenu extends DefaultActionGroup {
 
         SimpleTree tree = projectPanel.getProjectTree().getMainTree();
 
-        add(new OpenTestSetRun(projectPanel, tree));
+        add(new Open(projectPanel, tree));
         add(new AddGroup(projectPanel, tree));
         addSeparator();
-        add(new Remove(projectPanel, tree));
+        add(new Remove(tree));
         add(new Rename(projectPanel, tree));
         addSeparator();
         add(new RunTestSet(tree));

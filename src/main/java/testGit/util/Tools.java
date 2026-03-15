@@ -1,11 +1,13 @@
 package testGit.util;
 
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import testGit.pojo.Config;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -134,4 +136,30 @@ public class Tools {
 
         return fqcn.toString();
     }
+
+    public static boolean isEditorOpen(String editorName) {
+        FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
+        VirtualFile[] openFiles = editorManager.getOpenFiles();
+
+        for (VirtualFile file : openFiles) {
+            if (editorName.equals(file.getName())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static void closeEditor(String editorName) {
+        FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
+        VirtualFile[] openFiles = editorManager.getOpenFiles();
+
+        for (VirtualFile file : openFiles) {
+            if (editorName.equals(file.getName())) {
+                editorManager.closeFile(file);
+                break;
+            }
+        }
+    }
+
 }

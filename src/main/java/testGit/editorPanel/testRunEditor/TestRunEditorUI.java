@@ -23,6 +23,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.io.File;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
@@ -69,7 +70,7 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
         return switch (vf.getEditorType()) {
             case TEST_RUN_OPENING -> buildOpeningPanel();
             case TEST_RUN_CREATION ->
-                    buildCreationPanel(vf.getTestCasesTreeModel(), vf.getRunPath(), vf.getProjectPanel());
+                    buildCreationPanel(vf.getTestCasesTreeModel(), vf.getPkg().getFilePath(), vf.getProjectPanel());
             default -> throw new IllegalArgumentException("Unsupported editor type: " + vf.getEditorType());
         };
     }
@@ -217,7 +218,7 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
     // Creation mode
     // -------------------------------------------------------------------------
 
-    private JComponent buildCreationPanel(DefaultTreeModel testCaseModel, String savePath, ProjectPanel projectPanel) {
+    private JComponent buildCreationPanel(DefaultTreeModel testCaseModel, Path savePath, ProjectPanel projectPanel) {
         CheckedTreeNode root = convertToCheckedNodes((DefaultMutableTreeNode) testCaseModel.getRoot());
 
         mainPanel = new JBPanel<>(new BorderLayout());
@@ -279,7 +280,7 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
         };
     }
 
-    private JButton createSaveButton(CheckedTreeNode root, String savePath, ProjectPanel projectPanel) {
+    private JButton createSaveButton(CheckedTreeNode root, Path savePath, ProjectPanel projectPanel) {
         JButton saveButton = new JButton("Save Test Run");
         saveButton.addActionListener(e -> {
             if (!metadataHeader.validate()) {
@@ -305,7 +306,7 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
         return newNode;
     }
 
-    private void saveSelectedToJSON(CheckedTreeNode root, String savePath, ProjectPanel projectPanel) {
+    private void saveSelectedToJSON(CheckedTreeNode root, Path savePath, ProjectPanel projectPanel) {
         TestRun run = new TestRun();
         if (metadata != null) {
             run.setBuildNumber(metadata.getBuildNumber());
@@ -325,7 +326,7 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
         run.setResults(items);
 
         try {
-            Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(new File(savePath, fileName), run);
+            Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(new File(savePath.toFile(), fileName), run);
         } catch (Exception e) {
             System.err.println("Failed to save Test Run: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -361,5 +362,16 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
 
     @Override
     public void dispose() {
+        System.out.println("Disposing TestRunEditorUI to free memory...");
+
+        if (initialTestCases != null) initialTestCases.clear();
+        if (initialTestCaseUids != null) initialTestCaseUids.clear();
+        if (resultsMap != null) resultsMap.clear();
+
+        if (mainPanel != null) {
+            mainPanel.removeAll();
+        }
+
+        selectedCard = null;
     }
 }

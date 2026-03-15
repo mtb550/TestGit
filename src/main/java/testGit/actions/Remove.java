@@ -7,9 +7,9 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
+import testGit.pojo.PackageType;
 import testGit.pojo.TestPackage;
-import testGit.pojo.TestProject;
-import testGit.projectPanel.ProjectPanel;
+import testGit.util.Tools;
 import testGit.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -18,11 +18,9 @@ import static testGit.util.KeyboardSet.DeletePackage;
 
 public class Remove extends DumbAwareAction {
     private final SimpleTree tree;
-    private final ProjectPanel projectPanel;
 
-    public Remove(ProjectPanel projectPanel, SimpleTree tree) {
-        super("Delete", "Delete selected node", AllIcons.Actions.GC);
-        this.projectPanel = projectPanel;
+    public Remove(SimpleTree tree) {
+        super("Remove", "Remove selected node", AllIcons.Actions.GC);
         this.tree = tree;
         this.registerCustomShortcutSet(DeletePackage.get(), tree);
     }
@@ -30,42 +28,49 @@ public class Remove extends DumbAwareAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-        if (node.getUserObject() instanceof TestProject pr) {
+
+        if (node != null && node.getUserObject() instanceof TestPackage pkg) {
+
+            if (pkg.getPackageType() == PackageType.PR ||
+                    pkg.getPackageType() == PackageType.TCP ||
+                    pkg.getPackageType() == PackageType.TRP) {
+                return;
+            }
 
             int confirm = Messages.showYesNoDialog(
-                    "Are you sure you want to remove '" + pr.getName() + "'?",
-                    "Confirm",
+                    "Are you sure you want to remove '" + pkg.getName() + "'?",
+                    "Confirm Removing",
                     Messages.getQuestionIcon()
             );
 
             if (confirm == Messages.YES) {
-                TreeUtilImpl.removeVf(this, pr.getFile());
+                System.out.println("Removing node: " + pkg.getName());
 
-                System.out.println("remove project");
-                projectPanel.getTestProjectSelector().removeTestProject(tree, pr);
-            } else {
-                System.out.println(node.getParent() == null);
+                if (pkg.getPackageType() == PackageType.TS || pkg.getPackageType() == PackageType.TR)
+                    Tools.closeEditor(pkg.getName());
+
+                TreeUtilImpl.removeVf(this, pkg.getFile());
                 TreeUtilImpl.removeNode(node, tree);
-
             }
-
-            return;
         }
-
-        if (node.getUserObject() instanceof TestPackage pkg) {
-
-        }
-
     }
 
     @Override
     public void update(@NotNull AnActionEvent e) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-        e.getPresentation().setEnabled(node != null && node.getUserObject() instanceof TestPackage);
+
+        boolean shouldEnable = (node != null &&
+                node.getUserObject() instanceof TestPackage pkg &&
+                pkg.getPackageType() != PackageType.PR &&
+                pkg.getPackageType() != PackageType.TCP &&
+                pkg.getPackageType() != PackageType.TRP
+        );
+
+        e.getPresentation().setEnabled(shouldEnable);
     }
 
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.BGT;
+        return ActionUpdateThread.EDT;
     }
 }

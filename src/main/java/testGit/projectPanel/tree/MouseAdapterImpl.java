@@ -35,7 +35,7 @@ public class MouseAdapterImpl extends MouseAdapter {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
         Object userObject = node.getUserObject();
 
-        if (!(userObject instanceof TestPackage treeItem)) return;
+        if (!(userObject instanceof TestPackage pkg)) return;
 
         if (SwingUtilities.isRightMouseButton(e)) {
             ContextMenu contextMenu = new ContextMenu(projectPanel);
@@ -47,15 +47,15 @@ public class MouseAdapterImpl extends MouseAdapter {
 
         if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
 
-            if (treeItem.getPackageType() == PackageType.TS) {
+            if (pkg.getPackageType() == PackageType.TS) {
                 System.out.println("double left click test set");
-                TestCaseEditor.open(treeItem);
+                TestCaseEditor.open(pkg);
                 return;
             }
 
-            if (treeItem.getPackageType() == PackageType.TR) {
+            if (pkg.getPackageType() == PackageType.TR) {
                 System.out.println("double left click test run");
-                TestRunEditor.open(treeItem.getFilePath(), projectPanel);
+                TestRunEditor.open(pkg, projectPanel);
             }
 
         }

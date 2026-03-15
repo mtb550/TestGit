@@ -34,7 +34,7 @@ public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
 
     @Override
     public @NotNull String getName() {
-        return "Test Run Editor";
+        return virtualFile.getPkg().getName();
     }
 
     @Override

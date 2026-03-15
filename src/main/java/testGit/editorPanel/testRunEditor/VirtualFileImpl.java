@@ -6,26 +6,26 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.EditorType;
 import testGit.pojo.TestCase;
+import testGit.pojo.TestPackage;
 import testGit.pojo.TestRun;
 import testGit.projectPanel.ProjectPanel;
 
 import javax.swing.tree.DefaultTreeModel;
-import java.nio.file.Paths;
 import java.util.List;
 
 @Getter
 @Setter
 public class VirtualFileImpl extends LightVirtualFile {
     private final ProjectPanel projectPanel;
-    private final String runPath;
+    private final TestPackage pkg;
     private final DefaultTreeModel testCasesTreeModel;
     private final List<TestCase> testCases;
     private TestRun metadata;
     private EditorType editorType;
 
-    public VirtualFileImpl(@NotNull String runPath, @NotNull DefaultTreeModel treeModel, List<TestCase> testCases, EditorType editorType, ProjectPanel projectPanel) {
-        super(String.format("Run: %s", Paths.get(runPath).getFileName()));
-        this.runPath = runPath;
+    public VirtualFileImpl(@NotNull TestPackage pkg, @NotNull DefaultTreeModel treeModel, List<TestCase> testCases, EditorType editorType, ProjectPanel projectPanel) {
+        super(pkg.getName());
+        this.pkg = pkg;
         this.testCasesTreeModel = treeModel;
         this.testCases = testCases;
         this.editorType = editorType;

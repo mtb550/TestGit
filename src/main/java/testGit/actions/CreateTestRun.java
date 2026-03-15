@@ -38,13 +38,13 @@ public class CreateTestRun extends DumbAwareAction {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof TestPackage treeItem)
-                || treeItem.getPackageType() == PackageType.TR) {
-            System.out.println("!(userObject instanceof Directory treeItem) || treeItem.getType() == DirectoryType.TR");
+        if (!(userObject instanceof TestPackage pkg)
+                || pkg.getPackageType() == PackageType.TR) {
+            System.out.println("!(userObject instanceof Directory pkg) || pkg.getType() == DirectoryType.TR");
             return;
         }
 
-        /*TestRunEditor.open(treeItem.getFilePath(), projectPanel, parentNode);*/
+        /*TestRunEditor.open(pkg.getFilePath(), projectPanel, parentNode);*/
         //NewTestRunDialog dialog = new NewTestRunDialog();
         //if (dialog.showAndGet()) {
         //TestRun metadata = dialog.getMetadata();
@@ -53,7 +53,7 @@ public class CreateTestRun extends DumbAwareAction {
         metadata.setStatus(TestRunStatus.CREATED);
 
         TestRunEditor.create(
-                treeItem.getFilePath(),
+                pkg,
                 projectPanel,
                 projectPanel.getTestProjectSelector().getSelectedTestProject().getItem(),
                 metadata

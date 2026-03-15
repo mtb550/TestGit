@@ -17,14 +17,14 @@ import java.util.stream.Collectors;
 
 public class TestRunEditor {
 
-    public static void open(Path runFilePath, ProjectPanel projectPanel) {
+    public static void open(TestPackage pkg, ProjectPanel projectPanel) {
         try {
-            TestRun metadata = Config.getMapper().readValue(runFilePath.toFile(), TestRun.class);
+            TestRun metadata = Config.getMapper().readValue(pkg.getFile(), TestRun.class);
             List<TestCase> testCases = loadTestCasesForRun(metadata, projectPanel);
             List<TestCase> sorted = TestCaseSorter.sortTestCases(testCases);
 
             VirtualFileImpl virtualFile = new VirtualFileImpl(
-                    runFilePath.toAbsolutePath().toString(),
+                    pkg,
                     buildFilteredModel(sorted),
                     sorted,
                     EditorType.TEST_RUN_OPENING,
@@ -38,12 +38,12 @@ public class TestRunEditor {
         }
     }
 
-    public static void create(Path runFilePath, ProjectPanel projectPanel, TestProject testProjectName, TestRun metadata) {
+    public static void create(TestPackage pkg, ProjectPanel projectPanel, TestProject testProjectName, TestRun metadata) {
         Path testCasesPath = Config.getTestGitPath().resolve(testProjectName.getFileName()).resolve("testCases");
         DefaultTreeModel fullModel = new DefaultTreeModel(buildDirectoryTree(testCasesPath.toFile(), true));
 
         VirtualFileImpl virtualFile = new VirtualFileImpl(
-                runFilePath.toAbsolutePath().toString(),
+                pkg,
                 fullModel,
                 new ArrayList<>(),
                 EditorType.TEST_RUN_CREATION,

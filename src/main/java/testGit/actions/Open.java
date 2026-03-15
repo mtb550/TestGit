@@ -16,11 +16,11 @@ import testGit.util.KeyboardSet;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-public class OpenTestSetRun extends DumbAwareAction {
+public class Open extends DumbAwareAction {
     private final ProjectPanel projectPanel;
     private final SimpleTree tree;
 
-    public OpenTestSetRun(ProjectPanel projectPanel, SimpleTree tree) {
+    public Open(ProjectPanel projectPanel, SimpleTree tree) {
         super("Open", "Open selected test set", AllIcons.Actions.MenuOpen);
         this.projectPanel = projectPanel;
         this.tree = tree;
@@ -39,7 +39,7 @@ public class OpenTestSetRun extends DumbAwareAction {
                 TestCaseEditor.open(pkg);
 
             if (pkg.getPackageType() == PackageType.TR)
-                TestRunEditor.open(pkg.getFilePath(), projectPanel);
+                TestRunEditor.open(pkg, projectPanel);
         }
     }
 
