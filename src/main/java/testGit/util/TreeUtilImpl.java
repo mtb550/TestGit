@@ -30,6 +30,23 @@ public class TreeUtilImpl {
         });
     }
 
+    public static void executeVfsAction(Path sourcePath, Path targetPath, String errorTitle, VfsBiOperation operation) {
+        WriteAction.run(() -> {
+            try {
+                VirtualFile sourceVf = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(sourcePath);
+                VirtualFile targetVf = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(targetPath);
+
+                if (sourceVf != null && targetVf != null) {
+                    operation.execute(sourceVf, targetVf);
+                } else {
+                    Messages.showErrorDialog("Could not find source or target path on disk.", errorTitle);
+                }
+            } catch (IOException ex) {
+                Messages.showErrorDialog("Operation failed: " + ex.getMessage(), errorTitle);
+            }
+        });
+    }
+
     public static DefaultMutableTreeNode insertNode(final SimpleTree tree, final DefaultMutableTreeNode parentNode, final TestPackage newTestPackage) {
 
         DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
@@ -41,10 +58,6 @@ public class TreeUtilImpl {
 
         return newNode;
     }
-
-    // -------------------------------------------------------------------------
-    // دوال إدارة واجهة الشجرة (UI Tree Operations)
-    // -------------------------------------------------------------------------
 
     public static void removeNode(DefaultMutableTreeNode node, final SimpleTree tree) {
         DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
@@ -64,10 +77,6 @@ public class TreeUtilImpl {
         });
     }
 
-    // -------------------------------------------------------------------------
-    // دوال نظام الملفات بعد تطبيق المركزية (أنظف بكثير!)
-    // -------------------------------------------------------------------------
-
     public static void removeVf(final Object requester, final File path) {
         WriteAction.run(() -> {
             try {
@@ -83,5 +92,9 @@ public class TreeUtilImpl {
 
     public interface VfsOperation {
         void execute(VirtualFile vf) throws IOException;
+    }
+
+    public interface VfsBiOperation {
+        void execute(VirtualFile sourceVf, VirtualFile targetVf) throws IOException;
     }
 }

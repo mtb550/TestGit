@@ -3,11 +3,8 @@ package testGit.actions;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,11 +13,11 @@ import testGit.pojo.DirectoryType;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.KeyboardSet;
 import testGit.util.Tools;
+import testGit.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
@@ -52,38 +49,27 @@ public class Rename extends DumbAwareAction {
 
         Tools.closeEditor(dir.getName());
 
-        VirtualFile vf = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(dir.getFile());
+        String newFileName = dir.getFileName().replace(dir.getName(), newName);
 
-        if (vf != null) {
-            String newFileName = dir.getFileName().replace(dir.getName(), newName);
+        TreeUtilImpl.executeVfsAction(dir.getFilePath(), "Rename Failed", vf -> {
+            vf.rename(this, newFileName);
 
-            WriteAction.run(() -> {
-                try {
-                    vf.rename(this, newFileName);
+            Path newFilePath = dir.getFilePath().getParent().resolve(newFileName);
+            dir.setName(newName)
+                    .setFileName(newFileName)
+                    .setFilePath(newFilePath)
+                    .setFile(newFilePath.toFile())
+                    .setModifiedAt(LocalDateTime.now())
+                    .setModifiedBy("Muteb almughyiri");
 
-                    Path newFilePath = dir.getFilePath().getParent().resolve(newFileName);
-                    dir.setName(newName)
-                            .setFileName(newFileName)
-                            .setFilePath(newFilePath)
-                            .setFile(newFilePath.toFile())
-                            .setModifiedAt(LocalDateTime.now())
-                            .setModifiedBy("Muteb almughyiri");
+            ((DefaultTreeModel) tree.getModel()).nodeChanged(node);
 
-                    ((DefaultTreeModel) tree.getModel()).nodeChanged(node);
+            if (dir.getType() == DirectoryType.PR && projectPanel.getTestProjectSelector() != null) {
+                projectPanel.getTestProjectSelector().loadTestProjectList();
+            }
 
-                    if (dir.getType() == DirectoryType.PR && projectPanel.getTestProjectSelector() != null) {
-                        projectPanel.getTestProjectSelector().loadTestProjectList();
-                    }
-
-                    System.out.println("Success! Renamed to: " + newName);
-
-                } catch (IOException ex) {
-                    Messages.showErrorDialog("Could not rename folder. Make sure it's not open in another program.\n" + ex.getMessage(), "Rename Failed");
-                }
-            });
-        } else {
-            Messages.showErrorDialog("Could not find the original file on disk.", "Rename Failed");
-        }
+            System.out.println("Success! Renamed to: " + newName);
+        });
     }
 
     @Override

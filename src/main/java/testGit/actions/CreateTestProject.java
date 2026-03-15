@@ -3,10 +3,7 @@ package testGit.actions;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.project.DumbAwareAction;
-import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,8 +11,8 @@ import testGit.pojo.*;
 import testGit.projectPanel.ProjectPanel;
 import testGit.ui.CreateNewTestProjectDialog;
 import testGit.util.Notifier;
+import testGit.util.TreeUtilImpl;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 public class CreateTestProject extends DumbAwareAction {
@@ -63,24 +60,16 @@ public class CreateTestProject extends DumbAwareAction {
                                 .setName("Test Runs")
                 );
 
-        WriteAction.run(() -> {
-            try {
-                VirtualFile rootVf = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(Config.getTestGitPath().toFile());
+        TreeUtilImpl.executeVfsAction(Config.getTestGitPath(), "IO Error", vf -> {
+            VirtualFile projectDir = vf.createChildDirectory(this, folderName);
 
-                if (rootVf != null) {
-                    VirtualFile projectDir = rootVf.createChildDirectory(this, folderName);
+            projectDir.createChildDirectory(this, "TCP_testCases");
+            projectDir.createChildDirectory(this, "TRP_testRuns");
+            projectDir.refresh(false, true);
 
-                    projectDir.createChildDirectory(this, "TCP_testCases");
-                    projectDir.createChildDirectory(this, "TRP_testRuns");
-                    projectDir.refresh(false, true);
+            projectPanel.getTestProjectSelector().addTestProject(newTestProject);
 
-                    projectPanel.getTestProjectSelector().addTestProject(newTestProject);
-
-                    Notifier.info("New Test Project", String.format("Test Project %s has been added", name));
-                }
-            } catch (IOException ex) {
-                Messages.showErrorDialog("Error creating project structure: " + ex.getMessage(), "IO Error");
-            }
+            Notifier.info("New Test Project", String.format("Test Project %s has been added", name));
         });
     }
 

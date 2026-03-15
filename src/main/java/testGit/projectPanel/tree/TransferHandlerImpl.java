@@ -1,12 +1,10 @@
 package testGit.projectPanel.tree;
 
-import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.TestPackage;
+import testGit.util.TreeUtilImpl;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -15,7 +13,6 @@ import javax.swing.tree.TreePath;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Set;
@@ -83,22 +80,24 @@ public class TransferHandlerImpl extends TransferHandler {
 
             int action = support.isDrop() ? support.getDropAction() : (this.lastAction != null ? this.lastAction : COPY);
 
-            WriteAction.run(() -> {
-                DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                for (DefaultMutableTreeNode node : nodes) {
-                    if (action == MOVE) {
-                        if (node.equals(targetNode) || node.isNodeDescendant(targetNode)) continue;
-                        model.removeNodeFromParent(node);
-                        persistMove((TestPackage) node.getUserObject(), (TestPackage) targetNode.getUserObject());
-                        model.insertNodeInto(node, targetNode, targetNode.getChildCount());
-                    } else {
-                        DefaultMutableTreeNode clone = cloneNode(node);
-                        persistCopy((TestPackage) node.getUserObject(), (TestPackage) targetNode.getUserObject(), (TestPackage) clone.getUserObject());
-                        model.insertNodeInto(clone, targetNode, targetNode.getChildCount());
-                    }
+            DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+            for (DefaultMutableTreeNode node : nodes) {
+                if (action == MOVE) {
+
+                    if (node.equals(targetNode) || node.isNodeDescendant(targetNode)) continue;
+                    model.removeNodeFromParent(node);
+                    persistMove((TestPackage) node.getUserObject(), (TestPackage) targetNode.getUserObject());
+                    model.insertNodeInto(node, targetNode, targetNode.getChildCount());
+
+                } else {
+                    DefaultMutableTreeNode clone = cloneNode(node);
+                    persistCopy((TestPackage) node.getUserObject(), (TestPackage) targetNode.getUserObject(), (TestPackage) clone.getUserObject());
+                    model.insertNodeInto(clone, targetNode, targetNode.getChildCount());
                 }
-                resetLastAction();
-            });
+            }
+
+            resetLastAction();
+
             return true;
         } catch (Exception e) {
             return false;
@@ -118,31 +117,19 @@ public class TransferHandlerImpl extends TransferHandler {
     }
 
     private void persistMove(TestPackage source, TestPackage target) {
-        VirtualFile vFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(source.getFile());
-        VirtualFile targetDir = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(target.getFile());
-
-        try {
-            if (vFile != null && targetDir != null) {
-                vFile.move(this, targetDir);
-                Path newPath = target.getFilePath().resolve(source.getFileName());
-                source.setFilePath(newPath).setFile(newPath.toFile());
-            }
-        } catch (IOException ignored) {
-        }
+        TreeUtilImpl.executeVfsAction(source.getFilePath(), target.getFilePath(), "Move Failed", (sourceVf, targetVf) -> {
+            sourceVf.move(this, targetVf);
+            Path newPath = target.getFilePath().resolve(source.getFileName());
+            source.setFilePath(newPath).setFile(newPath.toFile());
+        });
     }
 
     private void persistCopy(TestPackage source, TestPackage target, TestPackage cloned) {
-        VirtualFile vFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(source.getFile());
-        VirtualFile targetDir = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(target.getFile());
-
-        try {
-            if (vFile != null && targetDir != null) {
-                vFile.copy(this, targetDir, vFile.getName());
-                Path newPath = target.getFilePath().resolve(source.getFileName());
-                cloned.setFilePath(newPath).setFile(newPath.toFile());
-            }
-        } catch (IOException ignored) {
-        }
+        TreeUtilImpl.executeVfsAction(source.getFilePath(), target.getFilePath(), "Copy Failed", (sourceVf, targetVf) -> {
+            sourceVf.copy(this, targetVf, sourceVf.getName());
+            Path newPath = target.getFilePath().resolve(source.getFileName());
+            cloned.setFilePath(newPath).setFile(newPath.toFile());
+        });
     }
 
     @Override
