@@ -13,6 +13,9 @@ import testGit.util.Tools;
 import testGit.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
+import java.util.ArrayList;
+import java.util.List;
 
 import static testGit.util.KeyboardSet.DeletePackage;
 
@@ -20,31 +23,43 @@ public class Remove extends DumbAwareAction {
     private final SimpleTree tree;
 
     public Remove(SimpleTree tree) {
-        super("Remove", "Remove selected node", AllIcons.Actions.GC);
+        super("Remove", "Remove selected nodes", AllIcons.Actions.GC);
         this.tree = tree;
         this.registerCustomShortcutSet(DeletePackage.get(), tree);
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        TreePath[] paths = tree.getSelectionPaths();
 
-        if (node != null && node.getUserObject() instanceof TestPackage pkg) {
+        if (paths == null || paths.length == 0) return;
 
-            if (pkg.getType() == DirectoryType.PR ||
-                    pkg.getType() == DirectoryType.TCP ||
-                    pkg.getType() == DirectoryType.TRP) {
-                return;
+        List<DefaultMutableTreeNode> nodesToRemove = new ArrayList<>();
+
+        for (TreePath path : paths) {
+            if (path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
+                    node.getUserObject() instanceof TestPackage pkg) {
+
+                if (pkg.getType() != DirectoryType.PR &&
+                        pkg.getType() != DirectoryType.TCP &&
+                        pkg.getType() != DirectoryType.TRP) {
+                    nodesToRemove.add(node);
+                }
             }
+        }
 
-            int confirm = Messages.showYesNoDialog(
-                    "Are you sure you want to remove '" + pkg.getName() + "'?",
-                    "Confirm Removing",
-                    Messages.getQuestionIcon()
-            );
+        if (nodesToRemove.isEmpty()) return;
 
-            if (confirm == Messages.YES) {
-                System.out.println("Removing node: " + pkg.getName());
+        String message = nodesToRemove.size() == 1
+                ? "Are you sure you want to remove '" + ((TestPackage) nodesToRemove.getFirst().getUserObject()).getName() + "'?"
+                : "Are you sure you want to remove these " + nodesToRemove.size() + " items?";
+
+        int confirm = Messages.showYesNoDialog(message, "Confirm Removing", Messages.getQuestionIcon());
+
+        if (confirm == Messages.YES) {
+
+            for (DefaultMutableTreeNode node : nodesToRemove) {
+                TestPackage pkg = (TestPackage) node.getUserObject();
 
                 if (pkg.getType() == DirectoryType.TS || pkg.getType() == DirectoryType.TR)
                     Tools.closeEditor(pkg.getName());
@@ -52,21 +67,31 @@ public class Remove extends DumbAwareAction {
                 TreeUtilImpl.removeVf(this, pkg.getFile());
                 TreeUtilImpl.removeNode(node, tree);
             }
+            System.out.println("Removed " + nodesToRemove.size() + " nodes.");
         }
     }
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        TreePath[] paths = tree.getSelectionPaths();
+        boolean canRemove = false;
 
-        boolean shouldEnable = (node != null &&
-                node.getUserObject() instanceof TestPackage pkg &&
-                pkg.getType() != DirectoryType.PR &&
-                pkg.getType() != DirectoryType.TCP &&
-                pkg.getType() != DirectoryType.TRP
-        );
+        if (paths != null) {
+            for (TreePath path : paths) {
+                if (path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
+                        node.getUserObject() instanceof TestPackage pkg) {
 
-        e.getPresentation().setEnabled(shouldEnable);
+                    if (pkg.getType() != DirectoryType.PR &&
+                            pkg.getType() != DirectoryType.TCP &&
+                            pkg.getType() != DirectoryType.TRP) {
+                        canRemove = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        e.getPresentation().setEnabled(canRemove);
     }
 
     @Override

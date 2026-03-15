@@ -37,3 +37,5 @@ to show add button without sub group.
 update copy action to prevent copy same file twice in same folder. in project panel
 
 change color to gray once cut. in project panel
+
+implement project panel multi removal
