@@ -30,12 +30,12 @@ public class TransferHandlerImpl extends TransferHandler {
 
     private final SimpleTree tree;
     @Getter
-    private final Set<DefaultMutableTreeNode> cutNodes;
+    private final Set<DefaultMutableTreeNode> selectedNodes;
     private Integer lastAction;
 
-    public TransferHandlerImpl(SimpleTree tree, Set<DefaultMutableTreeNode> cutNodes) {
+    public TransferHandlerImpl(SimpleTree tree, Set<DefaultMutableTreeNode> selectedNodes) {
         this.tree = tree;
-        this.cutNodes = cutNodes;
+        this.selectedNodes = selectedNodes;
     }
 
     @Override
@@ -139,7 +139,7 @@ public class TransferHandlerImpl extends TransferHandler {
 
     public void resetLastAction() {
         this.lastAction = null;
-        cutNodes.clear();
+        selectedNodes.clear();
         tree.repaint();
     }
 
@@ -148,12 +148,12 @@ public class TransferHandlerImpl extends TransferHandler {
         super.exportToClipboard(comp, clip, action);
         this.lastAction = action;
 
-        cutNodes.clear();
+        selectedNodes.clear();
         if (action == MOVE) {
             TreePath[] paths = tree.getSelectionPaths();
             if (paths != null) {
                 for (TreePath path : paths) {
-                    cutNodes.add((DefaultMutableTreeNode) path.getLastPathComponent());
+                    selectedNodes.add((DefaultMutableTreeNode) path.getLastPathComponent());
                 }
             }
         }

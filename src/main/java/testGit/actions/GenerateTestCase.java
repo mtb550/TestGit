@@ -14,7 +14,7 @@ public class GenerateTestCase extends DumbAwareAction {
     public GenerateTestCase(TestCase tc, final JBList<TestCase> list) {
         super("Generate Test", "", AllIcons.Actions.IntentionBulb);
         this.tc = tc;
-        this.registerCustomShortcutSet(KeyboardSet.GenerateTestCase.get(), list);
+        this.registerCustomShortcutSet(KeyboardSet.GenerateTestCase.getShortcut(), list);
     }
 
     @Override

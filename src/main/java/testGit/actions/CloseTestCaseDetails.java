@@ -12,7 +12,7 @@ public class CloseTestCaseDetails extends DumbAwareAction {
 
     public CloseTestCaseDetails(JComponent component) {
         super("Close View Panel");
-        this.registerCustomShortcutSet(KeyboardSet.Escape.get(), component);
+        this.registerCustomShortcutSet(KeyboardSet.Escape.getShortcut(), component);
     }
 
     @Override

@@ -15,17 +15,17 @@ import testGit.util.KeyboardSet;
 
 import java.awt.*;
 
-public class ShowTestCaseContextMenu extends DumbAwareAction {
+public class ShowTestCaseCM extends DumbAwareAction {
     private final TestPackage dir;
     private final JBList<TestCase> list;
     private final CollectionListModel<TestCase> model;
 
-    public ShowTestCaseContextMenu(TestPackage dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
+    public ShowTestCaseCM(TestPackage dir, JBList<TestCase> list, CollectionListModel<TestCase> model) {
         super("Show Context Menu");
         this.dir = dir;
         this.list = list;
         this.model = model;
-        this.registerCustomShortcutSet(KeyboardSet.ContextMenu.get(), list);
+        this.registerCustomShortcutSet(KeyboardSet.ContextMenu.getShortcut(), list);
 
     }
 

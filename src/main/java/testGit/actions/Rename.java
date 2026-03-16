@@ -29,7 +29,7 @@ public class Rename extends DumbAwareAction {
         super("Rename", "Rename selected node", AllIcons.Actions.Edit);
         this.projectPanel = projectPanel;
         this.tree = tree;
-        this.registerCustomShortcutSet(KeyboardSet.Rename.get(), tree);
+        this.registerCustomShortcutSet(KeyboardSet.RenameNode.getShortcut(), tree);
     }
 
     @Override

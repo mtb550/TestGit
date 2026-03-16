@@ -17,17 +17,26 @@ public class ContextMenu extends DefaultActionGroup {
 
     public ContextMenu(ProjectPanel projectPanel) {
         super("Tree Context Menu", true);
-
         SimpleTree tree = projectPanel.getProjectTree().getMainTree();
 
         add(new Open(projectPanel, tree));
         add(new AddGroup(projectPanel, tree));
+        add(new CreateTreeNode(projectPanel, tree)); /// to be implemented
         addSeparator();
-        add(new Remove(tree));
-        add(new Rename(projectPanel, tree));
+        add(createSubGroup("Actions", AllIcons.Actions.Edit,
+                new UndoNode(tree),
+                new RedoNode(tree),
+                new Remove(tree),
+                new Rename(projectPanel, tree),
+                new CopyTreeNode(tree),
+                new CutTreeNode(tree),
+                new PasteNode(tree)
+        ));
         addSeparator();
         add(new RunTestSet(tree));
         addSeparator();
+
+        ///  update below to be same above createSubGroup
         add(createSubGroup("Export", AllIcons.ToolbarDecorator.Export, new ExportCsv(), new ExportHtml(), new ExportExcel(), new ExportJson()));
         add(createSubGroup("Import", AllIcons.ToolbarDecorator.Import, new ImportCsv(), new ImportExcel(projectPanel), new ImportJson()));
         add(createSubGroup("Integrate", AllIcons.Nodes.Related, new IntegrateTestRail(), new IntegrateJira(), new IntegrateAzure()));
@@ -35,6 +44,12 @@ public class ContextMenu extends DefaultActionGroup {
         add(new OpenOldVersions());
         add(new ViewCommits());
         add(new TestRuns());
+    }
+
+    public static void registerShortcuts(final ProjectPanel projectPanel, final SimpleTree tree, TransferHandlerImpl transferHandler) {
+        new Escape(tree, transferHandler);
+        new ShowTreeCM(projectPanel, tree);
+
     }
 
     private DefaultActionGroup createSubGroup(String title, Icon icon, AnAction... actions) {
@@ -62,7 +77,6 @@ public class ContextMenu extends DefaultActionGroup {
             //add(new CreateTestRunPackage(tree));
             add(new CreateTestRun(projectPanel));
         }
-
 
     }
 }

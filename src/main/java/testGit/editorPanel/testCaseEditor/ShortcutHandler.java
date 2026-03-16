@@ -13,7 +13,7 @@ public class ShortcutHandler {
         new CreateTestCase(dir, list, model);
         new RemoveTestCase(dir, list, model);
         new OpenTestCaseDetails(list);
-        new ShowTestCaseContextMenu(dir, list, model);
+        new ShowTestCaseCM(dir, list, model);
         new CloseTestCaseDetails(list);
 
     }

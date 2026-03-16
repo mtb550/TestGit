@@ -33,7 +33,7 @@ public class CreateTestCase extends DumbAwareAction {
         this.list = list;
         this.dir = dir;
         this.model = model;
-        this.registerCustomShortcutSet(KeyboardSet.CreateTestCase.get(), list);
+        this.registerCustomShortcutSet(KeyboardSet.CreateTestCase.getShortcut(), list);
 
     }
 

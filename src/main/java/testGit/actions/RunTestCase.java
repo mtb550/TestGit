@@ -17,7 +17,7 @@ public class RunTestCase extends DumbAwareAction {
     public RunTestCase(TestCase tc, JBList<TestCase> list) {
         super("Run Test", "", AllIcons.RunConfigurations.TestState.Run);
         this.tc = tc;
-        this.registerCustomShortcutSet(KeyboardSet.RunTestCase.get(), list);
+        this.registerCustomShortcutSet(KeyboardSet.RunTestCase.getShortcut(), list);
     }
 
     @Override

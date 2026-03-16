@@ -14,6 +14,7 @@ import testGit.pojo.TestProject;
 import testGit.projectPanel.ProjectPanel;
 import testGit.ui.CreateTestPackageDialog;
 import testGit.ui.InputDialogList;
+import testGit.util.KeyboardSet;
 import testGit.util.Notifier;
 import testGit.util.TreeUtilImpl;
 
@@ -29,7 +30,10 @@ public class CreateTestPackage extends DumbAwareAction {
         super("New Package", "Create a new package", AllIcons.Nodes.Package);
         this.projectPanel = projectPanel;
         this.tree = tree;
+        this.registerCustomShortcutSet(KeyboardSet.CreateNode.getShortcut(), tree);
     }
+
+    ///  add static execute method in CreateTestPackage
 
     @Override
     public void actionPerformed(@Nullable AnActionEvent e) {

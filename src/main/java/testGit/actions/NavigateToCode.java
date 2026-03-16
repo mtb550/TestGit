@@ -15,7 +15,7 @@ public class NavigateToCode extends DumbAwareAction {
     public NavigateToCode(TestCase tc, JBList<TestCase> list) {
         super("Navigate to Code", "Jump to the automated test case", AllIcons.General.ArrowRight);
         this.tc = tc;
-        this.registerCustomShortcutSet(KeyboardSet.NavigateToCode.get(), list);
+        this.registerCustomShortcutSet(KeyboardSet.NavigateToCode.getShortcut(), list);
     }
 
     @Override

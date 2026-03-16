@@ -16,13 +16,13 @@ public class Escape extends DumbAwareAction {
         super("Escape Action", "", AllIcons.Actions.InlayGear);
         this.tree = tree;
         this.transferHandler = transferHandler;
-        this.registerCustomShortcutSet(KeyboardSet.Escape.get(), tree);
+        this.registerCustomShortcutSet(KeyboardSet.Escape.getShortcut(), tree);
 
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        transferHandler.getCutNodes().clear();
+        transferHandler.getSelectedNodes().clear();
         transferHandler.resetLastAction();
         tree.repaint();
         System.out.println("Clipboard/Cut state cleared via ESC.");

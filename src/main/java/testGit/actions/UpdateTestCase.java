@@ -14,7 +14,7 @@ public class UpdateTestCase extends DumbAwareAction {
     public UpdateTestCase(final TestCase tc, final JBList<TestCase> list) {
         super("Update", "Update test case", AllIcons.Actions.Edit);
         this.tc = tc;
-        this.registerCustomShortcutSet(KeyboardSet.UpdateTestCase.get(), list);
+        this.registerCustomShortcutSet(KeyboardSet.UpdateTestCase.getShortcut(), list);
     }
 
     @Override
