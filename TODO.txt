@@ -42,7 +42,7 @@ public enum DirectoryType {
     TCP("Test Case Package"),
     TRP("Test Run Package"),
     TS("Test Set"),
-    TR("Test Run"),
+    TR("Test Run"),                 /// no, you can do it by interfaces, instanceof
     TCR("Test Cases Directory"),
     TRR("Test Runs Directory");
 also need create or update actions
@@ -52,4 +52,12 @@ change color to gray once cut. in project panel
 add static execute method in CreateTestPackage and other methods that call actions direct
 
 make focus on test case tree once open plugin.
+
+add final @NotNull for all methods in project
+
+shortcuts not registered until open context menu. tryed shortcut: CTRL+M in project panel tree. check and fix.
+
+remove DirectoryIcon and use refactor code to use DirectoryType instead
+
+create the new ui same creation for delete tree node
 

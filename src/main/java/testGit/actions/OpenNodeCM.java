@@ -12,11 +12,11 @@ import testGit.util.KeyboardSet;
 
 import java.awt.*;
 
-public class ShowTreeCM extends DumbAwareAction {
+public class OpenNodeCM extends DumbAwareAction {
     private final ProjectPanel projectPanel;
     private final SimpleTree tree;
 
-    public ShowTreeCM(ProjectPanel projectPanel, SimpleTree tree) {
+    public OpenNodeCM(ProjectPanel projectPanel, SimpleTree tree) {
         super("Show Context Menu");
         this.projectPanel = projectPanel;
         this.tree = tree;

@@ -36,9 +36,4 @@ public enum KeyboardSet {
     public CustomShortcutSet getShortcut() {
         return new CustomShortcutSet(KeyStroke.getKeyStroke(this.keyCode, this.modifiers));
     }
-
-    @SuppressWarnings("MagicConstant")
-    public KeyStroke getKeyStroke() {
-        return KeyStroke.getKeyStroke(this.keyCode, this.modifiers);
-    }
 }

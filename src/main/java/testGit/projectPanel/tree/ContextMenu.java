@@ -20,16 +20,15 @@ public class ContextMenu extends DefaultActionGroup {
         SimpleTree tree = projectPanel.getProjectTree().getMainTree();
 
         add(new Open(projectPanel, tree));
-        add(new AddGroup(projectPanel, tree));
-        add(new CreateTreeNode(projectPanel, tree)); /// to be implemented
+        add(new CreateNode(projectPanel, tree));
         addSeparator();
         add(createSubGroup("Actions", AllIcons.Actions.Edit,
                 new UndoNode(tree),
                 new RedoNode(tree),
                 new Remove(tree),
                 new Rename(projectPanel, tree),
-                new CopyTreeNode(tree),
-                new CutTreeNode(tree),
+                new CopyNode(tree),
+                new CutNode(tree),
                 new PasteNode(tree)
         ));
         addSeparator();
@@ -48,7 +47,7 @@ public class ContextMenu extends DefaultActionGroup {
 
     public static void registerShortcuts(final ProjectPanel projectPanel, final SimpleTree tree, TransferHandlerImpl transferHandler) {
         new Escape(tree, transferHandler);
-        new ShowTreeCM(projectPanel, tree);
+        new OpenNodeCM(projectPanel, tree);
 
     }
 
@@ -66,17 +65,4 @@ public class ContextMenu extends DefaultActionGroup {
         return ActionUpdateThread.EDT;
     }
 
-    private static class AddGroup extends DefaultActionGroup {
-
-        public AddGroup(ProjectPanel projectPanel, SimpleTree tree) {
-            super("Create", "Create new items", AllIcons.General.Add);
-            setPopup(true);
-
-            add(new CreateTestPackage(projectPanel, tree));
-            add(new CreateTestSet(tree));
-            //add(new CreateTestRunPackage(tree));
-            add(new CreateTestRun(projectPanel));
-        }
-
-    }
 }

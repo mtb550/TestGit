@@ -1,6 +1,5 @@
 package testGit.ui;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.util.IconLoader;
@@ -13,6 +12,7 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
+import testGit.pojo.DirectoryType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,19 +21,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
 public class InputDialogList {
 
-    public static void show(String title, BiConsumer<String, TemplateItem> onSelected) {
-        TemplateItem[] items = {
-                new TemplateItem("Class", AllIcons.Nodes.Class, false),
-                new TemplateItem("Interface", AllIcons.Nodes.Interface, true),
-                new TemplateItem("Record", AllIcons.Nodes.Record, true),
-                new TemplateItem("Enum", AllIcons.Nodes.Enum, true),
-                // Notice the 'true' flag here to disable this specific item
-                new TemplateItem("Annotation", AllIcons.Nodes.Annotationtype, true),
-                new TemplateItem("Exception", AllIcons.Nodes.ExceptionClass, true)
-        };
+    public static void show(String title, DirectoryType[] items, Predicate<DirectoryType> isDisabled, BiConsumer<String, DirectoryType> onSelected) {
 
         ExtendableTextField textField = new ExtendableTextField();
         textField.getEmptyText().setText("Name");
@@ -41,50 +33,46 @@ public class InputDialogList {
         textField.setBorder(JBUI.Borders.empty(6, 10));
         textField.putClientProperty("JTextField.Search.noBorderRing", Boolean.TRUE);
 
-        JBList<TemplateItem> list = new JBList<>(items);
+        JBList<DirectoryType> list = new JBList<>(items);
         list.setBorder(JBUI.Borders.empty());
 
-        // 2. Prevent the mouse/system from selecting disabled items
         list.setSelectionModel(new DefaultListSelectionModel() {
             @Override
             public void setSelectionInterval(int index0, int index1) {
-                if (index0 >= 0 && index0 < items.length && !items[index0].disabled()) {
+                if (index0 >= 0 && index0 < items.length && !isDisabled.test(items[index0])) {
                     super.setSelectionInterval(index0, index1);
                 }
             }
         });
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        // FIX: Automatically select the first enabled item instead of hardcoding index 0
-        int firstAvailableIndex = getNextEnabledIndex(items, -1, 1);
+        int firstAvailableIndex = getNextEnabledIndex(items, isDisabled, -1, 1);
         if (firstAvailableIndex != -1) {
             list.setSelectedIndex(firstAvailableIndex);
         } else {
-            list.clearSelection(); // Failsafe in case every single item is disabled
+            list.clearSelection();
         }
 
-        // 3. Render disabled items as grayed out
         list.setCellRenderer(new ColoredListCellRenderer<>() {
             @Override
-            protected void customizeCellRenderer(@NotNull JList<? extends TemplateItem> list, TemplateItem value, int index, boolean selected, boolean hasFocus) {
-                if (value.disabled()) {
-                    // Gray out the icon and text
-                    setIcon(IconLoader.getDisabledIcon(value.icon));
-                    append(value.name, SimpleTextAttributes.GRAYED_ATTRIBUTES);
+            protected void customizeCellRenderer(@NotNull JList<? extends DirectoryType> list, DirectoryType value, int index, boolean selected, boolean hasFocus) {
+                if (isDisabled.test(value)) {
+                    setIcon(IconLoader.getDisabledIcon(value.getIcon()));
+                    append(value.getDescription(), SimpleTextAttributes.GRAYED_ATTRIBUTES);
                 } else {
-                    setIcon(value.icon);
-                    append(value.name);
+                    setIcon(value.getIcon());
+                    append(value.getDescription());
                 }
                 setBorder(JBUI.Borders.empty(4, 12));
             }
         });
 
         Runnable updateIcon = () -> {
-            TemplateItem selected = list.getSelectedValue();
-            if (selected != null && !selected.disabled()) {
+            DirectoryType selected = list.getSelectedValue();
+            if (selected != null && !isDisabled.test(selected)) {
                 textField.setExtensions(new ExtendableTextComponent.Extension() {
                     @Override
                     public Icon getIcon(boolean hovered) {
-                        return selected.icon;
+                        return selected.getIcon();
                     }
 
                     @Override
@@ -126,17 +114,16 @@ public class InputDialogList {
                 .setMovable(false)
                 .createPopup();
 
-        // 4. Update Keyboard Navigation to skip over disabled items
         textField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    int newIdx = getNextEnabledIndex(items, list.getSelectedIndex(), 1);
+                    int newIdx = getNextEnabledIndex(items, isDisabled, list.getSelectedIndex(), 1);
                     list.setSelectedIndex(newIdx);
                     list.ensureIndexIsVisible(newIdx);
                     e.consume();
                 } else if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    int newIdx = getNextEnabledIndex(items, list.getSelectedIndex(), -1);
+                    int newIdx = getNextEnabledIndex(items, isDisabled, list.getSelectedIndex(), -1);
                     list.setSelectedIndex(newIdx);
                     list.ensureIndexIsVisible(newIdx);
                     e.consume();
@@ -148,13 +135,12 @@ public class InputDialogList {
             }
         });
 
-        // 5. Ensure mouse clicks strictly on disabled items do nothing
         list.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1 || e.getClickCount() == 2) {
                     int clickedIndex = list.locationToIndex(e.getPoint());
-                    if (clickedIndex >= 0 && !items[clickedIndex].disabled()) {
+                    if (clickedIndex >= 0 && !isDisabled.test(items[clickedIndex])) {
                         submit(textField, list, popup, onSelected);
                     }
                 }
@@ -169,32 +155,24 @@ public class InputDialogList {
         });
     }
 
-    // Helper: Finds the next index that isn't disabled, skipping over gray items
-    private static int getNextEnabledIndex(TemplateItem[] items, int currentIdx, int direction) {
+    private static int getNextEnabledIndex(DirectoryType[] items, Predicate<DirectoryType> isDisabled, int currentIdx, int direction) {
         int idx = currentIdx + direction;
         while (idx >= 0 && idx < items.length) {
-            if (!items[idx].disabled()) {
+            if (!isDisabled.test(items[idx])) {
                 return idx;
             }
-            idx += direction; // Keep skipping
+            idx += direction;
         }
-        return currentIdx; // Stop at boundaries if no more valid items
+        return currentIdx;
     }
 
-    private static void submit(ExtendableTextField textField, JBList<TemplateItem> list, JBPopup popup, BiConsumer<String, TemplateItem> onSelected) {
+    private static void submit(ExtendableTextField textField, JBList<DirectoryType> list, JBPopup popup, BiConsumer<String, DirectoryType> onSelected) {
         String text = textField.getText().trim();
         if (!text.isEmpty() && list.getSelectedValue() != null) {
             onSelected.accept(text, list.getSelectedValue());
             popup.closeOk(null);
         } else {
             textField.requestFocus();
-        }
-    }
-
-    // 1. Added 'disabled' boolean to the model. Created a secondary constructor for convenience.
-    public record TemplateItem(String name, Icon icon, boolean disabled) {
-        public TemplateItem(String name, Icon icon) {
-            this(name, icon, false);
         }
     }
 }
