@@ -1,22 +1,20 @@
-view method code in details panel.
 add new tool window (To Do or Notes) that stored content in db.
+
 implement all notifications.
-DONE - implement class runner
-DONE - implement method runner
+
 implement class debugger
+
 implement method debugger
-persist session for test case explorer and test plan explorer. once open intellij, explorer should show last opened hierarchy with focus in module.
+
+persist session for test case explorer and test plan explorer. once open intellij,
+explorer should show last opened hierarchy with focus in module.
 plan & implement delegation between leaders to leaders or leaders to members.
 
 fixes:
 add message that the loading tree in panel
 show buttons in test caseeditor tab like test run (run) and (view code)
 
-support mult removal for project panel nodes
-
-create action: RemoveTestProject
-
-no need for pr, pa, tc, tr..etc you can know folder type without write the type. to be implemented.
+create action: RemoveTestProject in testGit setting
 
 zoom in, out by mouse and scroll. to allow user to control the size. in editor only.
 
@@ -24,28 +22,12 @@ project panel tree shows the message (nothing to show) once startup on first run
 to (loading)
 
 implement this in control panel tree:
-/*
-inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), "undoAction");
-inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK), "redoAction");
-inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK), "addNewNode");
-inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_CONTEXT_MENU, 0), "showContextMenu");
-*/
+undoAction
+redoAction
 
-unify add items in project panel to the new ui you created. and update the context menu
-to show add button without sub group.
 
 update copy and move , drag drop action to prevent copy same file twice in same folder. in project tree
 and prevent move test run to test case tree.
-new directory type will be like this:
-public enum DirectoryType {
-    PR("Project"),
-    TCP("Test Case Package"),
-    TRP("Test Run Package"),
-    TS("Test Set"),
-    TR("Test Run"),                 /// no, you can do it by interfaces, instanceof
-    TCR("Test Cases Directory"),
-    TRR("Test Runs Directory");
-also need create or update actions
 
 change color to gray once cut. in project panel
 
@@ -55,12 +37,30 @@ make focus on test case tree once open plugin.
 
 add final @NotNull for all methods in project
 
-shortcuts not registered until open context menu. tryed shortcut: CTRL+M in project panel tree. check and fix.
-
-remove DirectoryIcon and use refactor code to use DirectoryType instead
-
 create the new ui same creation for delete tree node
 
 project activity status to be removed from folder name and use separate xml that has rules
 
 implement details in marker file like created time date by modified, number of test cases , open bugss
+
+add icons to the test case card in the buttom right corner once one click the test case card:
+run test method icone, navigate to code icon, ask ai icon
+
+view method code in details panel.
+
+update create new test case ui
+
+try to read the current root node for controller, no need to seach again in test run.
+you need just a move to check box object
+
+build changes page to do the commit and push.
+
+enhance the test case editor panel
+
+enhance the test run editor panel
+
+enhance view panel. easy thing you can do it next step.
+
+make automation referrence automatic & create class and packages in project root automatic
+
+change test case and test run editor size by mouse wheel. or make the font control in testGit setting
