@@ -147,17 +147,20 @@ public class TestCaseDetailsPanel {
         addRow("Automation Ref:", createValueLabel(currentTestCase.getAutoRef()), detailsTab, gbc, row++);
         addRow("Business Ref:", createValueLabel(currentTestCase.getBusiRef()), detailsTab, gbc, row++);
         addRow("Groups:", createValueLabel(currentTestCase.getGroups() != null ? currentTestCase.getGroups().toString() : "-"), detailsTab, gbc, row++);
-
-        addCommonMetaRows(gbc, row);
-    }
-
-    private void addCommonMetaRows(GridBagConstraints gbc, int row) {
         addRow("UID:", createValueLabel(String.valueOf(currentTestCase.getUid())), detailsTab, gbc, row++);
         addRow("Module:", createValueLabel(currentTestCase.getModule()), detailsTab, gbc, row++);
         addRow("Created By:", createValueLabel(currentTestCase.getCreateBy()), detailsTab, gbc, row++);
         addRow("Updated By:", createValueLabel(currentTestCase.getUpdateBy()), detailsTab, gbc, row++);
         addRow("Created At:", createValueLabel(currentTestCase.getCreateAt() != null ? currentTestCase.getCreateAt().toString() : "-"), detailsTab, gbc, row++);
         addRow("Updated At:", createValueLabel(currentTestCase.getUpdateAt() != null ? currentTestCase.getUpdateAt().toString() : "-"), detailsTab, gbc, row++);
+        addRow("Is Head:", createValueLabel(currentTestCase.getIsHead() != null ? currentTestCase.getIsHead().toString() : "-"), detailsTab, gbc, row++);
+        addRow("Next:", createValueLabel(currentTestCase.getNext() != null ? currentTestCase.getNext().toString() : "-"), detailsTab, gbc, row++);
+
+        addCommonMetaRows(gbc, row);
+    }
+
+    private void addCommonMetaRows(GridBagConstraints gbc, int row) {
+
     }
 
     private void onSave() {

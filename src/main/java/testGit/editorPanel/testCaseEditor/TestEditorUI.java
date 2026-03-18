@@ -71,7 +71,7 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         TestMouseListener testMouseListener = new TestMouseListener(list, model, vf.getTestSet(), editorContextMenu);
         list.addMouseListener(testMouseListener);
 
-        list.setTransferHandler(new TransferImpl(vf.getTestSet(), model, this::applyFilters));
+        list.setTransferHandler(new TransferImpl(vf.getTestSet(), model, syncListener));
 
         // 🌟 تمرير this إلى الريندرر (بما أن هذا الكلاس يملك دوال isShowGroups وغيرها)
         list.setCellRenderer(new TestListRenderer(this));
