@@ -1,6 +1,7 @@
 package testGit.editorPanel.testRunEditor;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import testGit.editorPanel.UnifiedVirtualFile;
 import testGit.pojo.Config;
 import testGit.pojo.EditorType;
 import testGit.pojo.TestProject;
@@ -21,16 +22,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TestRunEditor {
+public class RunEditor {
 
-    public static void open(TestRun pkg, ProjectPanel projectPanel) {
+    public static void open(TestRun tr, ProjectPanel projectPanel) {
         try {
-            TestRunJsonMapper metadata = Config.getMapper().readValue(pkg.getPath().toFile(), TestRunJsonMapper.class);
+            TestRunJsonMapper metadata = Config.getMapper().readValue(tr.getPath().toFile(), TestRunJsonMapper.class);
             List<TestCaseJsonMapper> testCaseJsonMappers = loadTestCasesForRun(metadata, projectPanel);
             List<TestCaseJsonMapper> sorted = TestCaseSorter.sortTestCases(testCaseJsonMappers);
 
-            VirtualFileImpl virtualFile = new VirtualFileImpl(
-                    pkg,
+            UnifiedVirtualFile virtualFile = new UnifiedVirtualFile(
+                    tr,
                     buildFilteredModel(sorted),
                     sorted,
                     EditorType.TEST_RUN_OPENING,
@@ -49,7 +50,7 @@ public class TestRunEditor {
 
         DefaultTreeModel fullModel = new DefaultTreeModel(buildDirectoryTree(testCasesPath, true));
 
-        VirtualFileImpl virtualFile = new VirtualFileImpl(
+        UnifiedVirtualFile virtualFile = new UnifiedVirtualFile(
                 tr,
                 fullModel,
                 new ArrayList<>(),

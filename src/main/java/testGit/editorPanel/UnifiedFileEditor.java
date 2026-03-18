@@ -1,4 +1,4 @@
-package testGit.editorPanel.testRunEditor;
+package testGit.editorPanel;
 
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorState;
@@ -10,36 +10,34 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
 
-public class FileEditorImpl extends UserDataHolderBase implements FileEditor {
+public class UnifiedFileEditor extends UserDataHolderBase implements FileEditor {
 
-    private final JComponent component;
-    private final TestRunEditorUI ui;
-    private final VirtualFileImpl virtualFile;
+    private final BaseEditorUI ui;
+    private final UnifiedVirtualFile vf;
 
-    public FileEditorImpl(VirtualFileImpl vf) {
-        this.virtualFile = vf;
-        this.ui = new TestRunEditorUI(vf);
-        this.component = ui.createEditorPanel();
+    public UnifiedFileEditor(UnifiedVirtualFile vf, BaseEditorUI ui) {
+        this.vf = vf;
+        this.ui = ui;
     }
 
     @Override
     public @NotNull JComponent getComponent() {
-        return component;
+        return ui.getComponent();
     }
 
     @Override
     public @Nullable JComponent getPreferredFocusedComponent() {
-        return component;
+        return ui.getPreferredFocusedComponent();
     }
 
     @Override
     public @NotNull String getName() {
-        return virtualFile.getPkg().getName();
+        return vf.getDirectory().getName();
     }
 
     @Override
     public @NotNull VirtualFile getFile() {
-        return virtualFile;
+        return vf;
     }
 
     @Override

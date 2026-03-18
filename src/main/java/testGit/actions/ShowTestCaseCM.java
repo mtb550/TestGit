@@ -8,7 +8,7 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
-import testGit.editorPanel.testCaseEditor.ContextMenu;
+import testGit.editorPanel.EditorContextMenu;
 import testGit.pojo.Directory;
 import testGit.pojo.mappers.TestCaseJsonMapper;
 import testGit.util.KeyboardSet;
@@ -42,7 +42,7 @@ public class ShowTestCaseCM extends DumbAwareAction {
             Rectangle rect = list.getCellBounds(index, index);
             if (rect == null) return;
 
-            group.add(new ContextMenu(dir, list, model, model.getElementAt(index)));
+            group.add(new EditorContextMenu(dir, list, model));
             showPopup(group, rect.x + (rect.width / 4), rect.y + (rect.height / 2));
         } else {
             group.add(new CreateTestCase(dir, list, model));

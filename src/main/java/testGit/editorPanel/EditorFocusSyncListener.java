@@ -5,7 +5,6 @@ import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
-import testGit.editorPanel.testCaseEditor.VirtualFileImpl;
 import testGit.pojo.mappers.TestCaseJsonMapper;
 import testGit.viewPanel.ViewPanel;
 
@@ -21,7 +20,7 @@ public class EditorFocusSyncListener implements FileEditorManagerListener {
     @Override
     public void selectionChanged(@NotNull FileEditorManagerEvent event) {
 
-        if (event.getNewFile() instanceof VirtualFileImpl) {
+        if (event.getNewFile() instanceof UnifiedVirtualFile) {
             System.out.println(this.getClass() + " slection changed");
             ToolWindow viewPanel = ViewPanel.getToolWindow();
 

@@ -10,16 +10,18 @@ import testGit.util.CodeNavigator;
 import testGit.util.KeyboardSet;
 
 public class NavigateToCode extends DumbAwareAction {
-    private final TestCaseJsonMapper tc;
+    private final JBList<TestCaseJsonMapper> list;
 
-    public NavigateToCode(TestCaseJsonMapper tc, JBList<TestCaseJsonMapper> list) {
+    public NavigateToCode(final JBList<TestCaseJsonMapper> list) {
         super("Navigate to Code", "Jump to the automated test case", AllIcons.General.ArrowRight);
-        this.tc = tc;
+        this.list = list;
         this.registerCustomShortcutSet(KeyboardSet.NavigateToCode.getShortcut(), list);
     }
 
     @Override
     public void actionPerformed(@Nullable AnActionEvent e) {
+        TestCaseJsonMapper tc = list.getSelectedValue();
+
         System.out.println("[TRACE] Navigating to: " + tc.getTitle());
         System.out.println("[TRACE] AutoRef: " + tc.getAutoRef());
 

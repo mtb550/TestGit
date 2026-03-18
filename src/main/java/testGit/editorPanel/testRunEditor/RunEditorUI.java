@@ -12,8 +12,11 @@ import com.intellij.util.ui.tree.TreeUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import testGit.editorPanel.BaseEditorUI;
 import testGit.editorPanel.StatusBar;
 import testGit.editorPanel.ToolBar;
+import testGit.editorPanel.UnifiedVirtualFile;
 import testGit.pojo.*;
 import testGit.pojo.mappers.TestCaseJsonMapper;
 import testGit.pojo.mappers.TestRunJsonMapper;
@@ -33,16 +36,16 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
-public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
+public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI {
 
     // --- Shared ---
-    private final VirtualFileImpl vf;
+    private final UnifiedVirtualFile vf;
     private final List<TestCaseJsonMapper> initialTestCaseJsonMappers;
     private final Set<Integer> initialTestCaseUids;
     private JBPanel<?> mainPanel = new JBPanel<>(new BorderLayout());
 
     // --- Opening-mode state ---
-    private TestRunCard selectedCard = null;
+    private RunCard selectedCard = null;
     private int currentPage = 1;
     private int pageSize = 10;
     private JPanel cardListPanel;
@@ -56,7 +59,7 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
     private Map<UUID, TestRunJsonMapper.TestRunItems> resultsMap;
     private TestRunMetadataHeader metadataHeader;
 
-    public TestRunEditorUI(VirtualFileImpl vf) {
+    public RunEditorUI(UnifiedVirtualFile vf) {
         this.vf = vf;
         this.metadata = vf.getMetadata();
         this.currentFile = vf;
@@ -66,15 +69,17 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
         this.initialTestCaseUids = this.initialTestCaseJsonMappers.stream()
                 .map(TestCaseJsonMapper::getUid)
                 .collect(Collectors.toSet());
+
+        createEditorPanel();
     }
 
-    public JComponent createEditorPanel() {
-        return switch (vf.getEditorType()) {
+    public void createEditorPanel() {
+        switch (vf.getEditorType()) {
             case TEST_RUN_OPENING -> buildOpeningPanel();
             case TEST_RUN_CREATION ->
-                    buildCreationPanel(vf.getTestCasesTreeModel(), vf.getPkg().getPath(), vf.getProjectPanel());
+                    buildCreationPanel(vf.getTestCasesTreeModel(), vf.getDirectory().getPath(), vf.getProjectPanel());
             default -> throw new IllegalArgumentException("Unsupported editor type: " + vf.getEditorType());
-        };
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -97,7 +102,7 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
     // Opening mode
     // -------------------------------------------------------------------------
 
-    private JComponent buildOpeningPanel() {
+    private void buildOpeningPanel() {
         // Header — 'this' implements Callbacks
         toolBar = new ToolBar(this);
 
@@ -120,7 +125,6 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
         mainPanel.add(statusBar, BorderLayout.SOUTH);
 
         renderPage();
-        return mainPanel;
     }
 
     private void renderPage() {
@@ -142,7 +146,7 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
 
         cardListPanel.removeAll();
         for (int i = 0; i < pageItems.size(); i++) {
-            TestRunCard card = new TestRunCard(fromIndex + i, pageItems.get(i));
+            RunCard card = new RunCard(fromIndex + i, pageItems.get(i));
             card.setSelectionListener(this::handleCardSelected);
             // Apply current header state to each freshly built card
             card.updateData(
@@ -211,7 +215,7 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
         });
     }
 
-    private void handleCardSelected(TestRunCard newlySelected) {
+    private void handleCardSelected(RunCard newlySelected) {
         if (selectedCard != null && selectedCard != newlySelected) selectedCard.deselect();
         selectedCard = newlySelected;
     }
@@ -220,13 +224,13 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
     // Creation mode
     // -------------------------------------------------------------------------
 
-    private JComponent buildCreationPanel(DefaultTreeModel testCaseModel, Path savePath, ProjectPanel projectPanel) {
+    private void buildCreationPanel(DefaultTreeModel testCaseModel, Path savePath, ProjectPanel projectPanel) {
         CheckedTreeNode root = convertToCheckedNodes((DefaultMutableTreeNode) testCaseModel.getRoot());
 
         mainPanel = new JBPanel<>(new BorderLayout());
 
         metadataHeader = new TestRunMetadataHeader();
-        metadataHeader.setRunNameDisabled(vf.getPkg().getName());
+        metadataHeader.setRunNameDisabled(vf.getDirectory().getName());
         mainPanel.add(metadataHeader.getPanel(), BorderLayout.NORTH);
 
         checklistTree = new CheckboxTree(createTreeRenderer(), root,
@@ -236,7 +240,6 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
         mainPanel.add(new JBScrollPane(checklistTree), BorderLayout.CENTER);
         mainPanel.add(createSaveButton(root, savePath, projectPanel), BorderLayout.SOUTH);
 
-        return mainPanel;
     }
 
     private CheckboxTree.CheckboxTreeCellRenderer createTreeRenderer() {
@@ -319,7 +322,7 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
             run.setDeviceType(metadata.getDeviceType());
         }
 
-        String fileName = DirectoryType.TR.name() + "_" + vf.getPkg().getName() + "_" + ProjectStatus.AC.name() + ".json";
+        String fileName = DirectoryType.TR.name() + "_" + vf.getDirectory().getName() + "_" + ProjectStatus.AC.name() + ".json";
         run.setRunName(fileName);
         run.setCreatedAt(LocalDateTime.now());
         run.setStatus(TestRunStatus.CREATED);
@@ -376,5 +379,13 @@ public class TestRunEditorUI implements Disposable, ToolBar.Callbacks {
         }
 
         selectedCard = null;
+    }
+
+    public @Nullable JComponent getPreferredFocusedComponent() {
+        return cardListPanel;
+    }
+
+    public @NotNull JComponent getComponent() {
+        return mainPanel;
     }
 }

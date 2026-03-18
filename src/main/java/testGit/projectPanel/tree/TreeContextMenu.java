@@ -15,7 +15,7 @@ import javax.swing.*;
 @NoArgsConstructor
 public class TreeContextMenu extends DefaultActionGroup {
 
-    public TreeContextMenu(ProjectPanel projectPanel, SimpleTree tree) {
+    public TreeContextMenu(final ProjectPanel projectPanel, final SimpleTree tree) {
         super("Tree Context Menu", true);
 
         add(new Open(projectPanel, tree));
@@ -62,13 +62,13 @@ public class TreeContextMenu extends DefaultActionGroup {
         add(new TestRuns());
     }
 
-    public static void registerShortcuts(final SimpleTree tree, TreeTransferHandler transferHandler, TreeContextMenu treeContextMenu) {
+    public static void registerShortcuts(final SimpleTree tree, final TreeTransferHandler transferHandler, final TreeContextMenu treeContextMenu) {
         new Escape(tree, transferHandler);
         new OpenNodeCM(tree, treeContextMenu);
 
     }
 
-    private DefaultActionGroup createSubGroup(String title, Icon icon, AnAction... actions) {
+    private DefaultActionGroup createSubGroup(final String title, final Icon icon, final AnAction... actions) {
         DefaultActionGroup group = new DefaultActionGroup(title, true);
         group.getTemplatePresentation().setIcon(icon);
         for (AnAction action : actions) {

@@ -6,8 +6,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
-import testGit.editorPanel.testCaseEditor.TestCaseEditor;
-import testGit.editorPanel.testRunEditor.TestRunEditor;
+import testGit.editorPanel.testCaseEditor.TestEditor;
+import testGit.editorPanel.testRunEditor.RunEditor;
 import testGit.pojo.*;
 import testGit.pojo.mappers.TestRunJsonMapper;
 import testGit.projectPanel.ProjectPanel;
@@ -79,7 +79,7 @@ public class CreateTreeNode extends DumbAwareAction {
                 .setName(name)
                 .setPath(newDirPath);
 
-        TestRunEditor.create(
+        RunEditor.create(
                 // attribute name not used!! to be use it and pass it here.
                 newTestRun,
                 projectPanel,
@@ -97,7 +97,7 @@ public class CreateTreeNode extends DumbAwareAction {
         TreeUtilImpl.insertVf(this, parentDir.getPath(), newTestSet.getName());
         TreeUtilImpl.createDataVf(this, newDirPath, DirectoryType.TS.getMarker());
         TreeUtilImpl.insertNode(tree, parentNode, newTestSet);
-        TestCaseEditor.open(newTestSet);
+        TestEditor.open(newTestSet);
     }
 
     private void createTestSetPackage(String name, DefaultMutableTreeNode parentNode, Directory parentDir, Path newDirPath) {

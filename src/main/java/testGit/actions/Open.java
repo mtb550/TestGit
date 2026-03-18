@@ -6,8 +6,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
-import testGit.editorPanel.testCaseEditor.TestCaseEditor;
-import testGit.editorPanel.testRunEditor.TestRunEditor;
+import testGit.editorPanel.testCaseEditor.TestEditor;
+import testGit.editorPanel.testRunEditor.RunEditor;
 import testGit.pojo.Directory;
 import testGit.pojo.TestRun;
 import testGit.pojo.TestSet;
@@ -42,10 +42,10 @@ public class Open extends DumbAwareAction {
 
             System.out.println("Opening Test Set: " + pkg.getPath());
             if (pkg instanceof TestSet ts)
-                TestCaseEditor.open(ts);
+                TestEditor.open(ts);
 
             if (pkg instanceof TestRun tr)
-                TestRunEditor.open(tr, projectPanel);
+                RunEditor.open(tr, projectPanel);
         }
     }
 

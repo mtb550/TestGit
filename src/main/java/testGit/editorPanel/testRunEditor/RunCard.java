@@ -2,6 +2,7 @@ package testGit.editorPanel.testRunEditor;
 
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPlaces;
+import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
@@ -12,6 +13,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import lombok.Setter;
+import testGit.editorPanel.EditorContextMenu;
 import testGit.editorPanel.Shared;
 import testGit.pojo.GroupType;
 import testGit.pojo.mappers.TestCaseJsonMapper;
@@ -25,7 +27,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Set;
 
-public class TestRunCard extends JBPanel<TestRunCard> {
+public class RunCard extends JBPanel<RunCard> {
 
     private static final int CARD_HEIGHT = 130;
     private static final int BORDER_THICKNESS = 1;
@@ -44,7 +46,7 @@ public class TestRunCard extends JBPanel<TestRunCard> {
     @Setter
     private SelectionListener selectionListener;
 
-    public TestRunCard(int index, TestCaseJsonMapper tc) {
+    public RunCard(int index, TestCaseJsonMapper tc) {
         super(new BorderLayout());
         this.tc = tc;
 
@@ -97,7 +99,8 @@ public class TestRunCard extends JBPanel<TestRunCard> {
         setBorder(defaultBorder);
 
         setupClickListener();
-        addMouseListener(createContextMenuListener());
+        EditorContextMenu editorContextMenu = new EditorContextMenu(null, null, null);
+        addMouseListener(createContextMenuListener(editorContextMenu));
     }
 
     public void deselect() {
@@ -163,7 +166,7 @@ public class TestRunCard extends JBPanel<TestRunCard> {
                 isSelected = !isSelected;
                 if (isSelected) {
                     select();
-                    if (selectionListener != null) selectionListener.onSelected(TestRunCard.this);
+                    if (selectionListener != null) selectionListener.onSelected(RunCard.this);
                 } else {
                     deselect();
                 }
@@ -175,7 +178,7 @@ public class TestRunCard extends JBPanel<TestRunCard> {
     // Private helpers
     // -------------------------------------------------------------------------
 
-    private MouseListener createContextMenuListener() {
+    private MouseListener createContextMenuListener(EditorContextMenu editorContextMenu) {
         return new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -188,10 +191,8 @@ public class TestRunCard extends JBPanel<TestRunCard> {
             }
 
             private void showContextMenu(MouseEvent e) {
-                ContextMenu group = new ContextMenu(null, null, null, TestRunCard.this.tc);
-                ActionManager.getInstance()
-                        .createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, group)
-                        .getComponent().show(e.getComponent(), e.getX(), e.getY());
+                ActionPopupMenu popupMenu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, editorContextMenu);
+                popupMenu.getComponent().show(e.getComponent(), e.getX(), e.getY());
             }
         };
     }
@@ -255,6 +256,6 @@ public class TestRunCard extends JBPanel<TestRunCard> {
     }
 
     public interface SelectionListener {
-        void onSelected(TestRunCard card);
+        void onSelected(RunCard card);
     }
 }

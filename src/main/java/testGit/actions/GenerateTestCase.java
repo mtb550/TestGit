@@ -9,16 +9,18 @@ import testGit.pojo.mappers.TestCaseJsonMapper;
 import testGit.util.KeyboardSet;
 
 public class GenerateTestCase extends DumbAwareAction {
-    private final TestCaseJsonMapper tc;
+    private final JBList<TestCaseJsonMapper> list;
 
-    public GenerateTestCase(TestCaseJsonMapper tc, final JBList<TestCaseJsonMapper> list) {
+    public GenerateTestCase(final JBList<TestCaseJsonMapper> list) {
         super("Generate Test", "", AllIcons.Actions.IntentionBulb);
-        this.tc = tc;
+        this.list = list;
         this.registerCustomShortcutSet(KeyboardSet.GenerateTestCase.getShortcut(), list);
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
+        TestCaseJsonMapper tc = list.getSelectedValue();
+
         /// to be implemented
         System.out.println(tc.getTitle());
     }

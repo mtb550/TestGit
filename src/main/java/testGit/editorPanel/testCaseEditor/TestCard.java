@@ -17,7 +17,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.Set;
 
-public class TestCaseCard extends JBPanel<TestCaseCard> {
+public class TestCard extends JBPanel<TestCard> {
     private static final int CARD_HEIGHT = 130;
     private final JBLabel titleLabel = new JBLabel();
     private final JBPanel<?> badgePanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(10), 0));
@@ -28,7 +28,7 @@ public class TestCaseCard extends JBPanel<TestCaseCard> {
     private final JBLabel moduleLabel = createDetailLabel();
     private final JBLabel idLabel = createDetailLabel();
 
-    public TestCaseCard() {
+    public TestCard() {
         setLayout(new BorderLayout());
         setOpaque(true);
         setMaximumSize(new Dimension(Integer.MAX_VALUE, JBUI.scale(CARD_HEIGHT)));

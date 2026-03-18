@@ -2,6 +2,7 @@ package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
+import testGit.editorPanel.UnifiedVirtualFile;
 import testGit.pojo.Config;
 import testGit.pojo.TestSet;
 import testGit.pojo.mappers.TestCaseJsonMapper;
@@ -10,12 +11,12 @@ import testGit.util.Notifier;
 import java.io.File;
 import java.util.*;
 
-public class TestCaseEditor {
+public class TestEditor {
 
-    public static void open(final TestSet testSet) {
+    public static void open(final TestSet ts) {
         FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
 
-        VirtualFile newVirtualFile = createVirtualFile(testSet);
+        VirtualFile newVirtualFile = createVirtualFile(ts);
         editorManager.openFile(newVirtualFile, true);
     }
 
@@ -25,13 +26,12 @@ public class TestCaseEditor {
                 .map(f -> f.listFiles((d, name) -> name.endsWith(".json")))
                 .stream()
                 .flatMap(Arrays::stream)
-                //.parallel()
-                .map(TestCaseEditor::addTestCase)
+                .map(TestEditor::addTestCase)
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparing(TestCaseJsonMapper::getTitle))
                 .toList();
 
-        return new VirtualFileImpl(testSet, testCaseJsonMappers);
+        return new UnifiedVirtualFile(testSet, testCaseJsonMappers);
     }
 
     private static TestCaseJsonMapper addTestCase(File file) {

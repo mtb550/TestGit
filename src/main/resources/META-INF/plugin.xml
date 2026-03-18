@@ -41,8 +41,7 @@
     <!-- ================================================================== -->
     <extensions defaultExtensionNs="com.intellij">
         <!-- File editors -->
-        <fileEditorProvider implementation="testGit.editorPanel.testCaseEditor.ProviderImpl"/>
-        <fileEditorProvider implementation="testGit.editorPanel.testRunEditor.FileEditorProviderImpl"/>
+        <fileEditorProvider implementation="testGit.editorPanel.UnifiedEditorProvider"/>
 
         <!-- Services -->
         <applicationService serviceImplementation="testGit.settings.AppSettingsState"/>

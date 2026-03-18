@@ -7,19 +7,21 @@ import testGit.pojo.mappers.TestCaseJsonMapper;
 import javax.swing.*;
 import java.awt.*;
 
-public class RendererImpl implements ListCellRenderer<TestCaseJsonMapper> {
-    private final TestCaseCard rendererCard = new TestCaseCard();
-    private final FileEditorImpl editor;
+public class TestListRenderer implements ListCellRenderer<TestCaseJsonMapper> {
+    private final TestCard rendererCard = new TestCard();
 
-    public RendererImpl(FileEditorImpl editor) {
-        this.editor = editor;
+    private final TestEditorUI ui;
+
+    public TestListRenderer(TestEditorUI ui) {
+        this.ui = ui;
     }
 
     @Override
     public Component getListCellRendererComponent(JList<? extends TestCaseJsonMapper> list, TestCaseJsonMapper tc, int index, boolean isSelected, boolean cellHasFocus) {
-        int globalIndex = ((editor.getCurrentPage() - 1) * editor.getPageSize()) + index;
 
-        rendererCard.updateData(globalIndex, tc, editor.isShowGroups(), editor.isShowPriority(), editor.getSelectedDetails());
+        int globalIndex = ((ui.getCurrentPage() - 1) * ui.getPageSize()) + index;
+
+        rendererCard.updateData(globalIndex, tc, ui.isShowGroups(), ui.isShowPriority(), ui.getSelectedDetails());
 
         rendererCard.setBorder(isSelected ?
                 JBUI.Borders.customLine(JBColor.blue, 1) :

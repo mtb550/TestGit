@@ -12,16 +12,18 @@ import testGit.util.Runner.TestNGRunnerByMethod;
 import testGit.util.Tools;
 
 public class RunTestCase extends DumbAwareAction {
-    TestCaseJsonMapper tc;
+    private final JBList<TestCaseJsonMapper> list;
 
-    public RunTestCase(TestCaseJsonMapper tc, JBList<TestCaseJsonMapper> list) {
+    public RunTestCase(final JBList<TestCaseJsonMapper> list) {
         super("Run Test", "", AllIcons.RunConfigurations.TestState.Run);
-        this.tc = tc;
+        this.list = list;
         this.registerCustomShortcutSet(KeyboardSet.RunTestCase.getShortcut(), list);
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
+        TestCaseJsonMapper tc = list.getSelectedValue();
+
         TestNGRunnerByMethod.runTestMethod(tc.getAutoRef(), Tools.toCamelCase(tc.getTitle()));
         Notifier.info("Running Test Case: ", tc.getTitle());
     }
