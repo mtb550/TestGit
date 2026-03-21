@@ -1,6 +1,7 @@
 package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.ui.ColorUtil;
 import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
@@ -31,6 +32,7 @@ public class TestCard extends JBPanel<TestCard> {
     private final JBLabel idLabel = createDetailLabel();
     private final JBLabel navigateIcon = new JBLabel(AllIcons.General.ArrowRight);
     private final JBLabel runIcon = new JBLabel(AllIcons.RunConfigurations.TestState.Run);
+    private Color currentRowColor;
 
     // 🌟 1. اللوحة التي ستحتوي على الأيقونات (ستكون مخفية افتراضياً)
     private final JBPanel<?> actionPanel = new JBPanel<>();
@@ -103,7 +105,9 @@ public class TestCard extends JBPanel<TestCard> {
         moduleLabel.setText("Module: " + tc.getModule());
         idLabel.setText("ID: " + tc.getId());
 
-        setBackground(index % 2 == 0 ? new JBColor(Gray._245, Gray._60) : new JBColor(Gray._230, Gray._45));
+        // 🌟 حساب لون الصف وحفظه في المتغير، ثم تطبيقه
+        currentRowColor = index % 2 == 0 ? new JBColor(Gray._245, Gray._60) : new JBColor(Gray._230, Gray._45);
+        setBackground(currentRowColor);
         setBorder(JBUI.Borders.customLine(JBColor.border(), 1, 0, 1, 0));
 
         expectedLabel.setVisible(activeDetails.contains("Expected Result"));
@@ -143,8 +147,10 @@ public class TestCard extends JBPanel<TestCard> {
         }
 
         if (isHovered) {
-            // 🌟 استخدام لون الـ Hover الرسمي الخاص بـ IntelliJ للأزرار!
-            Color hoverColor = JBUI.CurrentTheme.ActionButton.hoverBackground();
+            // 🌟 الذكاء هنا: إذا كانت الخلفية داكنة، نقوم بتفتيحها قليلاً. وإذا كانت فاتحة، نقوم بتغميقها.
+            Color hoverColor = ColorUtil.isDark(currentRowColor)
+                    ? ColorUtil.brighter(currentRowColor, 2)  // تفتيح للوضع الداكن
+                    : ColorUtil.darker(currentRowColor, 1);   // تغميق للوضع الفاتح
 
             navigateIcon.setBackground("NAVIGATE".equals(hoveredIconName) ? hoverColor : UIUtil.TRANSPARENT_COLOR);
             runIcon.setBackground("RUN".equals(hoveredIconName) ? hoverColor : UIUtil.TRANSPARENT_COLOR);
