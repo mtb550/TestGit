@@ -48,6 +48,14 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     @Setter
     private int pageSize = 50;
 
+    @Getter
+    @Setter
+    private int hoveredIndex = -1;
+
+    @Getter
+    @Setter
+    private String hoveredIconAction = null;
+
     public TestEditorUI(@NotNull UnifiedVirtualFile vf) {
         this.allTestCaseDtos = new ArrayList<>(vf.getTestCaseDtos());
         sortAndIdentifyUnsorted();
@@ -99,9 +107,9 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         //list.addKeyListener(new KeyListener(list, this));
         new TestFocusListener(this.list, vf).register(this);
 
-        //HoverListener hoverListener = new HoverListener(list, this);
-        //list.addMouseMotionListener(hoverListener);
-        //list.addMouseListener(hoverListener);
+        HoverListener hoverListener = new HoverListener(list, this);
+        list.addMouseMotionListener(hoverListener);
+        list.addMouseListener(hoverListener);
 
 
     }

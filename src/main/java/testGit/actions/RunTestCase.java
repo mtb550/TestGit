@@ -20,11 +20,14 @@ public class RunTestCase extends DumbAwareAction {
         this.registerCustomShortcutSet(KeyboardSet.RunTestCase.getShortcut(), list);
     }
 
-    @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
-        TestCaseDto tc = list.getSelectedValue();
-
+    public static void execute(final TestCaseDto tc) {
+        if (tc == null) return;
         TestNGRunnerByMethod.runTestMethod(tc.getAutoRef(), Tools.toCamelCase(tc.getTitle()));
         Notifier.info("Running Test Case: ", tc.getTitle());
+    }
+
+    @Override
+    public void actionPerformed(@NotNull AnActionEvent e) {
+        execute(list.getSelectedValue());
     }
 }

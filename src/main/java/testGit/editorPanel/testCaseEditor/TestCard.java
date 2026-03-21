@@ -1,5 +1,6 @@
 package testGit.editorPanel.testCaseEditor;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
@@ -13,6 +14,7 @@ import testGit.editorPanel.Shared;
 import testGit.pojo.GroupType;
 import testGit.pojo.dto.TestCaseDto;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +29,11 @@ public class TestCard extends JBPanel<TestCard> {
     private final JBLabel businessRefLabel = createDetailLabel();
     private final JBLabel moduleLabel = createDetailLabel();
     private final JBLabel idLabel = createDetailLabel();
+    private final JBLabel navigateIcon = new JBLabel(AllIcons.General.ArrowRight);
+    private final JBLabel runIcon = new JBLabel(AllIcons.RunConfigurations.TestState.Run);
+
+    // 🌟 1. اللوحة التي ستحتوي على الأيقونات (ستكون مخفية افتراضياً)
+    private final JBPanel<?> actionPanel = new JBPanel<>();
 
     public TestCard() {
         setLayout(new BorderLayout());
@@ -55,10 +62,35 @@ public class TestCard extends JBPanel<TestCard> {
         content.add(moduleLabel);
         content.add(idLabel);
 
+        // 🌟 2. تجهيز لوحة الأيقونات (Action Panel)
+        actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.X_AXIS));
+        actionPanel.setOpaque(false); // شفافة ليظهر لون الخلفية
+
+        // إعداد أيقونة الانتقال (استخدمنا المتغير العام مباشرة بدون كتابة JBLabel قبله)
+        navigateIcon.setToolTipText("Navigate to Code");
+        navigateIcon.setOpaque(true); // مهم جداً ليقبل لون الـ Hover
+        navigateIcon.setBorder(JBUI.Borders.empty(4, 6)); // مساحة داخلية أنيقة
+
+        // إعداد أيقونة التشغيل
+        runIcon.setToolTipText("Run test case");
+        runIcon.setOpaque(true); // مهم جداً ليقبل لون الـ Hover
+        runIcon.setBorder(JBUI.Borders.empty(4, 6)); // مساحة داخلية أنيقة
+
+        // ترتيب الأيقونات داخل اللوحة مع مسافة دقيقة بينهما
+        actionPanel.add(navigateIcon);
+        actionPanel.add(Box.createRigidArea(new Dimension(8, 0))); // فاصل مساحته 8 بكسل
+        actionPanel.add(runIcon);
+
+        actionPanel.setVisible(false);
+
         BorderLayoutPanel wrapper = new BorderLayoutPanel();
         wrapper.setOpaque(false);
         wrapper.setBorder(JBUI.Borders.empty(12, 16));
         wrapper.addToCenter(content);
+
+        // 🌟 3. إضافة لوحة الأيقونات إلى أقصى اليمين في الـ wrapper
+        wrapper.addToRight(actionPanel);
+
         add(wrapper, BorderLayout.CENTER);
     }
 
@@ -102,6 +134,24 @@ public class TestCard extends JBPanel<TestCard> {
         }
         badgePanel.revalidate();
         badgePanel.repaint();
+    }
+
+    // 🌟 4. الدالة التي يناديها الـ TestListRenderer عند مرور الماوس
+    public void setHovered(boolean isHovered, String hoveredIconName) {
+        if (actionPanel.isVisible() != isHovered) {
+            actionPanel.setVisible(isHovered);
+        }
+
+        if (isHovered) {
+            // 🌟 استخدام لون الـ Hover الرسمي الخاص بـ IntelliJ للأزرار!
+            Color hoverColor = JBUI.CurrentTheme.ActionButton.hoverBackground();
+
+            navigateIcon.setBackground("NAVIGATE".equals(hoveredIconName) ? hoverColor : UIUtil.TRANSPARENT_COLOR);
+            runIcon.setBackground("RUN".equals(hoveredIconName) ? hoverColor : UIUtil.TRANSPARENT_COLOR);
+        } else {
+            navigateIcon.setBackground(UIUtil.TRANSPARENT_COLOR);
+            runIcon.setBackground(UIUtil.TRANSPARENT_COLOR);
+        }
     }
 
     private JBLabel createDetailLabel() {

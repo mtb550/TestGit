@@ -18,13 +18,15 @@ public class NavigateToCode extends DumbAwareAction {
         this.registerCustomShortcutSet(KeyboardSet.NavigateToCode.getShortcut(), list);
     }
 
-    @Override
-    public void actionPerformed(@Nullable AnActionEvent e) {
-        TestCaseDto tc = list.getSelectedValue();
-
+    public static void execute(final TestCaseDto tc) {
+        if (tc == null) return;
         System.out.println("[TRACE] Navigating to: " + tc.getTitle());
         System.out.println("[TRACE] AutoRef: " + tc.getAutoRef());
-
         CodeNavigator.toCode(tc.getAutoRef(), tc.getTitle());
+    }
+
+    @Override
+    public void actionPerformed(@Nullable AnActionEvent e) {
+        execute(list.getSelectedValue());
     }
 }

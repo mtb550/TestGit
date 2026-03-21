@@ -24,7 +24,13 @@ public class TestListRenderer implements ListCellRenderer<TestCaseDto> {
 
         boolean isUnsorted = ui.getUnsortedIds().contains(tc.getId());
 
+        // 🌟 1. هل الماوس يقف فوق هذا الصف حالياً؟
+        boolean isHovered = (index == ui.getHoveredIndex());
+
         rendererCard.updateData(globalIndex, tc, ui.isShowGroups(), ui.isShowPriority(), ui.getSelectedDetails(), isUnsorted);
+
+        // 🌟 2. استدعاء الدالة! (بمجرد إضافة هذا السطر سيختفي التحذير وتعمل الأيقونات)
+        rendererCard.setHovered(isHovered, isHovered ? ui.getHoveredIconAction() : null);
 
         rendererCard.setBorder(isSelected ?
                 JBUI.Borders.customLine(JBColor.blue, 1) :
