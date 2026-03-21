@@ -22,7 +22,7 @@ public class Open extends DumbAwareAction {
     private final ProjectPanel projectPanel;
     private final SimpleTree tree;
 
-    public Open(ProjectPanel projectPanel, SimpleTree tree) {
+    public Open(final ProjectPanel projectPanel, final SimpleTree tree) {
         super("Open", "Open selected test set", AllIcons.Actions.MenuOpen);
         this.projectPanel = projectPanel;
         this.tree = tree;
@@ -30,7 +30,7 @@ public class Open extends DumbAwareAction {
         this.registerCustomShortcutSet(KeyboardSet.Enter.getShortcut(), tree);
     }
 
-    public static void execute(ProjectPanel projectPanel, SimpleTree tree) {
+    public static void execute(final ProjectPanel projectPanel, final SimpleTree tree) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
         if (node == null) return;
 
@@ -50,12 +50,12 @@ public class Open extends DumbAwareAction {
     }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public void actionPerformed(final @NotNull AnActionEvent e) {
         execute(projectPanel, tree);
     }
 
     @Override
-    public void update(@NotNull AnActionEvent e) {
+    public void update(final @NotNull AnActionEvent e) {
         TreePath path = tree.getSelectionPath();
 
         boolean shouldEnable = (path != null &&

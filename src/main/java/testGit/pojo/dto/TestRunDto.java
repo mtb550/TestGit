@@ -2,6 +2,7 @@ package testGit.pojo.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import testGit.pojo.TestRunStatus;
 
 import java.time.Duration;
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@Accessors(chain = true)
 public class TestRunDto {
     private String runName;
     private String buildNumber;

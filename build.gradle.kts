@@ -23,7 +23,7 @@ java {
 
 dependencies {
     intellijPlatform {
-        intellijIdea("2025.3.3")
+        intellijIdea("2025.3.4")
 
         bundledPlugins(
             listOf(
@@ -39,8 +39,8 @@ dependencies {
         testFramework(TestFrameworkType.Platform)
     }
 
-    compileOnly("org.projectlombok:lombok:1.18.30")
-    annotationProcessor("org.projectlombok:lombok:1.18.30")
+    implementation("org.projectlombok:lombok:1.18.44")
+    annotationProcessor("org.projectlombok:lombok:1.18.44")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2")
     implementation("com.jayway.jsonpath:json-path:3.0.0")
@@ -51,7 +51,7 @@ dependencies {
 
 intellijPlatform {
     pluginConfiguration {
-        id.set("testGit.demo")
+        id.set("testGit")
         name.set("Test Git")
         version.set(project.version.toString())
 

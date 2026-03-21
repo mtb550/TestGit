@@ -1,7 +1,9 @@
-package testGit.editorPanel.testCaseEditor;
+package testGit.editorPanel.listeners;
 
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
+import testGit.editorPanel.testCaseEditor.TestCard;
+import testGit.editorPanel.testCaseEditor.TestEditorUI;
 import testGit.pojo.dto.TestCaseDto;
 
 import javax.swing.*;

@@ -31,7 +31,7 @@ public abstract class AbstractTreeBuilder {
 
             if (Files.exists(rootPath) && Files.isDirectory(rootPath)) {
                 try (Stream<Path> paths = Files.list(rootPath)) {
-                    paths.map(this::mapPathToDirectory) // سيتم استدعاء الدالة من الكلاس الابن
+                    paths.map(this::mapPathToDirectory)
                             .filter(Objects::nonNull)
                             .forEachOrdered(dir -> localRoot.add(buildNodeRecursive(dir)));
 

@@ -11,7 +11,7 @@ import java.nio.file.Path;
 
 public class TestRunTreeBuilder extends AbstractTreeBuilder {
 
-    public TestRunTreeBuilder(ProjectPanel projectPanel) {
+    public TestRunTreeBuilder(final ProjectPanel projectPanel) {
         super(projectPanel);
     }
 
@@ -20,7 +20,7 @@ public class TestRunTreeBuilder extends AbstractTreeBuilder {
     }
 
     @Override
-    protected DirectoryDto mapPathToDirectory(Path path) {
+    protected DirectoryDto mapPathToDirectory(final Path path) {
         if (Files.exists(path.resolve(DirectoryType.TRP.getMarker()))) return DirectoryMapper.testRunPackageNode(path);
         if (Files.exists(path.resolve(DirectoryType.TR.getMarker()))) return DirectoryMapper.testRunNode(path);
         return null;

@@ -45,7 +45,7 @@ public class TreeUtilImpl {
         });
     }
 
-    public static DefaultMutableTreeNode insertNode(final SimpleTree tree, final DefaultMutableTreeNode parentNode, final Object newTestPackage) {
+    public static DefaultMutableTreeNode createNode(final SimpleTree tree, final DefaultMutableTreeNode parentNode, final Object newTestPackage) {
 
         DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
         DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newTestPackage);
@@ -62,7 +62,7 @@ public class TreeUtilImpl {
         model.removeNodeFromParent(node);
     }
 
-    public static void insertVf(final Object requester, final Path parentPath, final String folderName) {
+    public static void createVf(final Object requester, final Path parentPath, final String folderName) {
         WriteAction.run(() -> {
             try {
                 VirtualFile parentVf = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(parentPath);

@@ -17,7 +17,9 @@ import testGit.editorPanel.BaseEditorUI;
 import testGit.editorPanel.StatusBar;
 import testGit.editorPanel.ToolBar;
 import testGit.editorPanel.UnifiedVirtualFile;
-import testGit.pojo.*;
+import testGit.pojo.Config;
+import testGit.pojo.GroupType;
+import testGit.pojo.TestRunStatus;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.TestRunDto;
 import testGit.pojo.dto.dirs.DirectoryDto;
@@ -313,17 +315,19 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         return newNode;
     }
 
-    private void saveSelectedToJSON(CheckedTreeNode root, Path savePath, ProjectPanel projectPanel) {
+    private void saveSelectedToJSON(final CheckedTreeNode root, final Path savePath, final ProjectPanel projectPanel) {
         TestRunDto run = new TestRunDto();
         if (metadata != null) {
-            run.setBuildNumber(metadata.getBuildNumber());
-            run.setPlatform(metadata.getPlatform());
-            run.setLanguage(metadata.getLanguage());
-            run.setBrowser(metadata.getBrowser());
-            run.setDeviceType(metadata.getDeviceType());
+            run.setBuildNumber(metadata.getBuildNumber())
+                    .setPlatform(metadata.getPlatform())
+                    .setLanguage(metadata.getLanguage())
+                    .setBrowser(metadata.getBrowser())
+                    .setDeviceType(metadata.getDeviceType());
         }
 
-        String fileName = DirectoryType.TR.name() + "_" + vf.getDirectoryDto().getName() + "_" + ProjectStatus.AC.name() + ".json";
+        System.out.println("path: " + savePath);
+
+        String fileName = vf.getDirectoryDto().getName() + ".json";
         run.setRunName(fileName);
         run.setCreatedAt(LocalDateTime.now());
         run.setStatus(TestRunStatus.CREATED);

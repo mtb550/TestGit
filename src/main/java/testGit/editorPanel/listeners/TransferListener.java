@@ -1,8 +1,7 @@
-package testGit.editorPanel.testCaseEditor;
+package testGit.editorPanel.listeners;
 
 import com.intellij.ui.CollectionListModel;
 import org.jetbrains.annotations.NotNull;
-import testGit.editorPanel.listeners.ModelSyncListener;
 import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.dirs.DirectoryDto;
@@ -17,14 +16,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class TransferImpl extends TransferHandler {
+public class TransferListener extends TransferHandler {
     private static final DataFlavor FLAVOR = new DataFlavor(List.class, "List of TestCase");
     private final CollectionListModel<TestCaseDto> model;
     private final DirectoryDto dir;
     private final ModelSyncListener<TestCaseDto> syncListener; // 🌟 إضافة المستمع للتحكم به
     private int[] draggedIndices;
 
-    public TransferImpl(DirectoryDto dir, CollectionListModel<TestCaseDto> model, ModelSyncListener<TestCaseDto> syncListener) {
+    public TransferListener(DirectoryDto dir, CollectionListModel<TestCaseDto> model, ModelSyncListener<TestCaseDto> syncListener) {
         this.model = model;
         this.dir = dir;
         this.syncListener = syncListener;

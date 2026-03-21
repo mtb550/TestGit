@@ -73,6 +73,13 @@ public class CreateTestProject extends DumbAwareAction {
     }
 
     @Override
+    public void update(final @NotNull AnActionEvent e) {
+        if (e.getProject() == null) {
+            e.getPresentation().setEnabledAndVisible(false);
+        }
+    }
+
+    @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
         return ActionUpdateThread.BGT;
     }

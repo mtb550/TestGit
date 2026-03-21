@@ -30,12 +30,17 @@ public class CollapseAll extends DumbAwareAction {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
+        if (e.getProject() == null) {
+            e.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+
         boolean hasTree = projectPanel.getProjectTree() != null && projectPanel.getProjectTree().getMainTree() != null;
         e.getPresentation().setEnabled(hasTree);
     }
 
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.EDT;
+        return ActionUpdateThread.BGT;
     }
 }

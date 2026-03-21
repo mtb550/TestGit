@@ -2,20 +2,16 @@ package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
-import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.editorPanel.*;
-import testGit.editorPanel.listeners.ModelSyncListener;
-import testGit.editorPanel.listeners.SelectionListener;
-import testGit.editorPanel.listeners.TestMouseListener;
-import testGit.pojo.Config;
+import testGit.editorPanel.listeners.*;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.viewPanel.ViewPanel;
 
@@ -34,16 +30,23 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     private final CollectionListModel<TestCaseDto> model;
     private final ModelSyncListener<TestCaseDto> syncListener;
     private final ToolBar toolBar;
+
+    @Getter
     private final StatusBar statusBar;
+
+    @Getter
     private List<TestCaseDto> allTestCaseDtos;
 
     @Getter
     private Set<String> unsortedIds = new HashSet<>();
 
     @Getter
+    @Setter
     private int currentPage = 1;
+
     @Getter
-    private int pageSize = 10;
+    @Setter
+    private int pageSize = 50;
 
     public TestEditorUI(@NotNull UnifiedVirtualFile vf) {
         this.allTestCaseDtos = new ArrayList<>(vf.getTestCaseDtos());
@@ -51,7 +54,7 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
 
         this.mainPanel = new JBPanel<>(new BorderLayout());
 
-        pageSize = PropertiesComponent.getInstance().getInt("testGit.pageSize", 10);
+        pageSize = PropertiesComponent.getInstance().getInt("testGit.pageSize", 50);
 
         // Header — 'this' implements Callbacks so the header can notify us of changes
         this.toolBar = new ToolBar(this);
@@ -74,15 +77,12 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         list.setDragEnabled(true);
         list.setDropMode(DropMode.INSERT);
-        list.addListSelectionListener(new SelectionListener(list));
 
         EditorContextMenu editorContextMenu = new EditorContextMenu(vf.getTestSet(), list, model);
         TestMouseListener testMouseListener = new TestMouseListener(list, model, vf.getTestSet(), editorContextMenu);
         list.addMouseListener(testMouseListener);
 
-        list.setTransferHandler(new TransferImpl(vf.getTestSet(), model, syncListener));
-
-        // 🌟 تمرير this إلى الريندرر (بما أن هذا الكلاس يملك دوال isShowGroups وغيرها)
+        list.setTransferHandler(new TransferListener(vf.getTestSet(), model, syncListener));
         list.setCellRenderer(new TestListRenderer(this));
 
         EditorContextMenu.registerShortcuts(vf.getTestSet(), list, model);
@@ -91,34 +91,23 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         // Status bar
         this.statusBar = new StatusBar();
         mainPanel.add(statusBar, BorderLayout.SOUTH);
-        attachPaginationListeners();
-        list.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                // نمرر التحديد الحالي، ورقم الصفحة، وإجمالي عدد الاختبارات
-                statusBar.updateSelectionState(
-                        list.getSelectedIndices(),
-                        currentPage,
-                        pageSize,
-                        allTestCaseDtos.size()
-                );
-            }
-        });
+        PaginationController.attach(this);
+        list.addListSelectionListener(new SelectionListener(list, this));
 
         refreshView();
-        EditorFocusSyncListener focusSyncListener = new EditorFocusSyncListener(this.list);
 
-        // 🌟 تسجيل Listener آمن على مستوى المشروع واستخدام this للـ Disposable
-        Config.getProject()
-                .getMessageBus()
-                .connect(this)
-                .subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
-                    @Override
-                    public void selectionChanged(@NotNull FileEditorManagerEvent event) {
-                        if (event.getNewFile() != null && event.getNewFile().equals(vf)) {
-                            focusSyncListener.selectionChanged(event);
-                        }
-                    }
-                });
+        //list.addKeyListener(new KeyListener(list, this));
+        new TestFocusListener(this.list, vf).register(this);
+
+        //HoverListener hoverListener = new HoverListener(list, this);
+        //list.addMouseMotionListener(hoverListener);
+        //list.addMouseListener(hoverListener);
+
+
+    }
+
+    public int getTotalPageCount() {
+        return getTotalPages(getFilteredList());
     }
 
     public @NotNull JComponent getComponent() {
@@ -213,41 +202,6 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
 
     private int getTotalPages(List<TestCaseDto> filtered) {
         return filtered.isEmpty() ? 1 : (int) Math.ceil((double) filtered.size() / pageSize);
-    }
-
-    private void attachPaginationListeners() {
-        statusBar.getFirstButton().addActionListener(e -> {
-            currentPage = 1;
-            refreshView();
-        });
-        statusBar.getPrevButton().addActionListener(e -> {
-            if (currentPage > 1) {
-                currentPage--;
-                refreshView();
-            }
-        });
-        statusBar.getNextButton().addActionListener(e -> {
-            if (currentPage < getTotalPages(getFilteredList())) {
-                currentPage++;
-                refreshView();
-            }
-        });
-        statusBar.getLastButton().addActionListener(e -> {
-            currentPage = getTotalPages(getFilteredList());
-            refreshView();
-        });
-        statusBar.getPageSizeField().addActionListener(e -> {
-            try {
-                int newSize = Integer.parseInt(statusBar.getPageSizeField().getText().trim());
-                if (newSize > 0) {
-                    pageSize = newSize;
-                    currentPage = 1;
-                    refreshView();
-                }
-            } catch (NumberFormatException ex) {
-                statusBar.getPageSizeField().setText(String.valueOf(pageSize));
-            }
-        });
     }
 
     private void sortAndIdentifyUnsorted() {

@@ -16,7 +16,7 @@ import javax.swing.*;
 public class TreeContextMenu extends DefaultActionGroup {
 
     public TreeContextMenu(final ProjectPanel projectPanel, final SimpleTree tree) {
-        super("Tree Context Menu", true);
+        super("Tree Popup Menu", true);
 
         add(new Open(projectPanel, tree));
         add(new CreateTreeNode(projectPanel, tree));

@@ -74,3 +74,17 @@ add badge (un-sorted) if the test case not linked to to the before one
 faild create test runs, error in path
 
 move editor ui classes to the util, ui package
+
+Summary of list listeners:
+MotionListener: Used for your beautiful hover icons (Run / Navigate).
+AnAction System: Replaces KeyListener for professional, cross-platform keyboard shortcuts (Delete, Copy, Paste).
+MouseAdapter (ClickCount==2): Used for Double-Click to open.
+** PopupHandler: Replaces manual right-click math for context menus.
+** Dynamic Tooltips: Quick peeks at data without clicking.
+
+change structure of test run to be same test set, folder and inside it will be the jsons
+
+bug, after add new test case, it is not linked to the sorting.
+
+add shortcut, if click CTRL+C on the selected test case on editor, then copy test case title.
+

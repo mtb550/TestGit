@@ -73,23 +73,23 @@ public class CreateTreeNode extends DumbAwareAction {
         });
     }
 
-    private void createTestRun(String name, DirectoryDto parentDir, Path newDirPath) {
-        ///  use name that you recieve
+    private void createTestRun(final String name, final DirectoryDto parentDir, final Path newDirPath) {
         TestRunDto metadata = new TestRunDto();
         metadata.setStatus(TestRunStatus.CREATED);
 
-        TestRunDirectoryDto newTestRunDirectory = new TestRunDirectoryDto()
+        TestRunDirectoryDto tr = new TestRunDirectoryDto()
                 .setName(name)
                 .setPath(newDirPath);
 
+        TreeUtilImpl.createVf(this, parentDir.getPath(), name);
+        TreeUtilImpl.createDataVf(this, newDirPath, DirectoryType.TR.getMarker());
+
         RunEditor.create(
-                // attribute name not used!! to be use it and pass it here.
-                newTestRunDirectory,
+                tr,
                 projectPanel,
                 projectPanel.getTestProjectSelector().getSelectedTestProject().getItem(),
                 metadata
         );
-        TreeUtilImpl.createDataVf(this, parentDir.getPath(), DirectoryType.TR.getMarker());
     }
 
     private void createTestSet(String name, DefaultMutableTreeNode parentNode, DirectoryDto parentDir, Path newDirPath) {
@@ -97,9 +97,9 @@ public class CreateTreeNode extends DumbAwareAction {
                 .setName(name)
                 .setPath(parentDir.getPath().resolve(name));
 
-        TreeUtilImpl.insertVf(this, parentDir.getPath(), newTestSetDirectory.getName());
+        TreeUtilImpl.createVf(this, parentDir.getPath(), newTestSetDirectory.getName());
         TreeUtilImpl.createDataVf(this, newDirPath, DirectoryType.TS.getMarker());
-        TreeUtilImpl.insertNode(tree, parentNode, newTestSetDirectory);
+        TreeUtilImpl.createNode(tree, parentNode, newTestSetDirectory);
         TestEditor.open(newTestSetDirectory);
     }
 
@@ -108,8 +108,8 @@ public class CreateTreeNode extends DumbAwareAction {
                 .setName(name)
                 .setPath(parentDir.getPath().resolve(name));
 
-        TreeUtilImpl.insertVf(this, parentDir.getPath(), name);
-        TreeUtilImpl.insertNode(tree, parentNode, newTestSetPackageDirectory);
+        TreeUtilImpl.createVf(this, parentDir.getPath(), name);
+        TreeUtilImpl.createNode(tree, parentNode, newTestSetPackageDirectory);
         TreeUtilImpl.createDataVf(this, newDirPath, DirectoryType.TSP.getMarker());
     }
 
@@ -118,8 +118,8 @@ public class CreateTreeNode extends DumbAwareAction {
                 .setName(name)
                 .setPath(parentDir.getPath().resolve(name));
 
-        TreeUtilImpl.insertVf(this, parentDir.getPath(), name);
-        TreeUtilImpl.insertNode(tree, parentNode, newTestRunPackageDirectory);
+        TreeUtilImpl.createVf(this, parentDir.getPath(), name);
+        TreeUtilImpl.createNode(tree, parentNode, newTestRunPackageDirectory);
         TreeUtilImpl.createDataVf(this, newDirPath, DirectoryType.TRP.getMarker());
     }
 

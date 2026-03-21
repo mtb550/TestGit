@@ -26,7 +26,14 @@ public class RunEditor {
 
     public static void open(TestRunDirectoryDto tr, ProjectPanel projectPanel) {
         try {
-            TestRunDto metadata = Config.getMapper().readValue(tr.getPath().toFile(), TestRunDto.class);
+            Path jsonFilePath = tr.getPath().resolve(tr.getName() + ".json");
+
+            if (!Files.exists(jsonFilePath)) {
+                System.err.println("JSON file not found: " + jsonFilePath);
+                return;
+            }
+
+            TestRunDto metadata = Config.getMapper().readValue(jsonFilePath.toFile(), TestRunDto.class);
             List<TestCaseDto> testCaseDtos = loadTestCasesForRun(metadata, projectPanel);
             List<TestCaseDto> sorted = TestCaseSorter.sortTestCases(testCaseDtos);
 
