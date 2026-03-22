@@ -4,10 +4,10 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.*;
+import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
-import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.tree.TreeUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +17,8 @@ import testGit.editorPanel.BaseEditorUI;
 import testGit.editorPanel.StatusBar;
 import testGit.editorPanel.ToolBar;
 import testGit.editorPanel.UnifiedVirtualFile;
+import testGit.editorPanel.listeners.RunInteractionListener;
+import testGit.editorPanel.listeners.RunListRenderer;
 import testGit.pojo.Config;
 import testGit.pojo.GroupType;
 import testGit.pojo.TestRunStatus;
@@ -47,15 +49,16 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     private final Set<Integer> initialTestCaseUids;
     private JBPanel<?> mainPanel = new JBPanel<>(new BorderLayout());
 
-    // --- Opening-mode state ---
-    private RunCard selectedCard = null;
+    // --- Opening-mode state (New Architecture) ---
+    private JBList<TestCaseDto> list;
+    private CollectionListModel<TestCaseDto> model;
+    private String hoveredIconAction = null;
     private int currentPage = 1;
     private int pageSize = 10;
-    private JPanel cardListPanel;
     private StatusBar statusBar;
-    private ToolBar toolBar;  // only used in opening mode
+    private ToolBar toolBar;
 
-    // --- Creation-mode state ---
+    // --- Creation-mode state (Keep exactly as is) ---
     private CheckboxTree checklistTree;
     private TestRunDto metadata;
     private VirtualFile currentFile;
@@ -85,39 +88,49 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         }
     }
 
-    // -------------------------------------------------------------------------
-    // EditorHeader.Callbacks  (opening mode only)
-    // -------------------------------------------------------------------------
-
     @Override
     public void onFilterChanged() {
         currentPage = 1;
-        renderPage();
+        refreshView();
     }
 
     @Override
     public void onDetailsChanged() {
-        // renderPage() rebuilds every card from scratch, so detail visibility is applied automatically
-        renderPage();
+        if (list != null) {
+            list.setFixedCellHeight(-1);
+            list.setCellRenderer(new RunListRenderer(this));
+            list.revalidate();
+            list.repaint();
+        }
     }
 
-    // -------------------------------------------------------------------------
-    // Opening mode
-    // -------------------------------------------------------------------------
+    public boolean isShowGroups() {
+        return toolBar != null && toolBar.isShowGroups();
+    }
+
+    public boolean isShowPriority() {
+        return toolBar != null && toolBar.isShowPriority();
+    }
+
+    public Set<String> getSelectedDetails() {
+        return toolBar != null ? toolBar.getSelectedDetails() : Collections.emptySet();
+    }
 
     private void buildOpeningPanel() {
-        // Header — 'this' implements Callbacks
         toolBar = new ToolBar(this);
 
-        cardListPanel = new JPanel();
-        cardListPanel.setLayout(new BoxLayout(cardListPanel, BoxLayout.Y_AXIS));
-        cardListPanel.setBackground(UIUtil.getTreeBackground());
-        cardListPanel.setOpaque(true);
+        model = new CollectionListModel<>();
+        list = new JBList<>(model);
+        list.setOpaque(true);
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        list.setCellRenderer(new RunListRenderer(this));
 
-        JBScrollPane scrollPane = new JBScrollPane(cardListPanel);
-        scrollPane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
+        RunInteractionListener actionListener = new RunInteractionListener(list, this);
+        list.addMouseMotionListener(actionListener);
+        list.addMouseListener(actionListener);
+
+        JBScrollPane scrollPane = new JBScrollPane(list);
         scrollPane.setBorder(JBUI.Borders.empty());
-        scrollPane.getVerticalScrollBar().setUnitIncrement(25);
 
         statusBar = new StatusBar();
         wirePaginationButtons();
@@ -127,11 +140,10 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         mainPanel.add(statusBar, BorderLayout.SOUTH);
 
-        renderPage();
+        refreshView();
     }
 
-    private void renderPage() {
-        // Sync pageSize from the StatusBar's text field in case the user edited it
+    private void refreshView() {
         try {
             int parsed = Integer.parseInt(statusBar.getPageSizeField().getText().trim());
             if (parsed > 0) pageSize = parsed;
@@ -147,38 +159,11 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         int toIndex = Math.min(fromIndex + pageSize, total);
         List<TestCaseDto> pageItems = filtered.subList(fromIndex, toIndex);
 
-        cardListPanel.removeAll();
-        for (int i = 0; i < pageItems.size(); i++) {
-            RunCard card = new RunCard(fromIndex + i, pageItems.get(i));
-            card.setSelectionListener(this::handleCardSelected);
-            // Apply current header state to each freshly built card
-            card.updateData(
-                    fromIndex + i,
-                    pageItems.get(i),
-                    toolBar.isShowGroups(),
-                    toolBar.isShowPriority(),
-                    toolBar.getSelectedDetails()
-            );
-            cardListPanel.add(card);
-        }
-        cardListPanel.add(Box.createVerticalGlue());
-        cardListPanel.revalidate();
-        cardListPanel.repaint();
-
-        // Scroll back to top after every page change
-        SwingUtilities.invokeLater(() -> {
-            JScrollPane sp = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, cardListPanel);
-            if (sp != null) sp.getVerticalScrollBar().setValue(0);
-        });
+        model.replaceAll(pageItems);
 
         statusBar.updatePaginationState(currentPage, totalPages, pageItems.size(), total);
-        selectedCard = null;
     }
 
-    /**
-     * Returns the subset of initialTestCases that match the current search query
-     * and group filter from the header.
-     */
     private List<TestCaseDto> getFilteredList() {
         String query = toolBar != null ? toolBar.getSearchQuery() : "";
         Set<GroupType> groups = toolBar != null ? toolBar.getSelectedGroups() : Collections.emptySet();
@@ -197,34 +182,29 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     private void wirePaginationButtons() {
         statusBar.getFirstButton().addActionListener(e -> {
             currentPage = 1;
-            renderPage();
+            refreshView();
         });
         statusBar.getPrevButton().addActionListener(e -> {
             currentPage--;
-            renderPage();
+            refreshView();
         });
         statusBar.getNextButton().addActionListener(e -> {
             currentPage++;
-            renderPage();
+            refreshView();
         });
         statusBar.getLastButton().addActionListener(e -> {
             int total = getFilteredList().size();
             currentPage = Math.max(1, (int) Math.ceil((double) total / pageSize));
-            renderPage();
+            refreshView();
         });
         statusBar.getPageSizeField().addActionListener(e -> {
             currentPage = 1;
-            renderPage();
+            refreshView();
         });
     }
 
-    private void handleCardSelected(RunCard newlySelected) {
-        if (selectedCard != null && selectedCard != newlySelected) selectedCard.deselect();
-        selectedCard = newlySelected;
-    }
-
     // -------------------------------------------------------------------------
-    // Creation mode
+    // Creation mode (Remain untouched)
     // -------------------------------------------------------------------------
 
     private void buildCreationPanel(DefaultTreeModel testCaseModel, Path savePath, ProjectPanel projectPanel) {
@@ -373,8 +353,6 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
 
     @Override
     public void dispose() {
-        System.out.println("Disposing TestRunEditorUI to free memory...");
-
         if (initialTestCaseDtos != null) initialTestCaseDtos.clear();
         if (initialTestCaseUids != null) initialTestCaseUids.clear();
         if (resultsMap != null) resultsMap.clear();
@@ -382,12 +360,10 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         if (mainPanel != null) {
             mainPanel.removeAll();
         }
-
-        selectedCard = null;
     }
 
     public @Nullable JComponent getPreferredFocusedComponent() {
-        return cardListPanel;
+        return list; // تحديث التركيز
     }
 
     public @NotNull JComponent getComponent() {
