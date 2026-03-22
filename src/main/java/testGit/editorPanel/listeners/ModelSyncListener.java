@@ -13,9 +13,9 @@ public class ModelSyncListener<T> implements ListDataListener {
     private final CollectionListModel<T> model;
     private boolean active = true;
     @Setter
-    private Runnable onUpdate;
+    private UpdateCallback onUpdateCallback;
 
-    public ModelSyncListener(List<T> masterList, CollectionListModel<T> model) {
+    public ModelSyncListener(final List<T> masterList, final CollectionListModel<T> model) {
         this.masterList = masterList;
         this.model = model;
     }
@@ -29,7 +29,7 @@ public class ModelSyncListener<T> implements ListDataListener {
     }
 
     @Override
-    public void intervalAdded(ListDataEvent e) {
+    public void intervalAdded(final ListDataEvent e) {
         if (!active) return;
         for (int i = e.getIndex0(); i <= e.getIndex1(); i++) {
             T item = model.getElementAt(i);
@@ -38,16 +38,20 @@ public class ModelSyncListener<T> implements ListDataListener {
             }
         }
 
-        if (onUpdate != null) {
-            SwingUtilities.invokeLater(onUpdate);
+        if (onUpdateCallback != null) {
+            SwingUtilities.invokeLater(() -> onUpdateCallback.onUpdate());
         }
     }
 
     @Override
-    public void intervalRemoved(ListDataEvent e) {
+    public void intervalRemoved(final ListDataEvent e) {
     }
 
     @Override
-    public void contentsChanged(ListDataEvent e) {
+    public void contentsChanged(final ListDataEvent e) {
+    }
+
+    public interface UpdateCallback {
+        void onUpdate();
     }
 }

@@ -48,7 +48,6 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     @Setter
     private int pageSize = 50;
 
-    // 🌟 المتغير الوحيد المتبقي لتلوين الأيقونة عند التمرير فوقها
     @Getter
     @Setter
     private String hoveredIconAction = null;
@@ -66,11 +65,7 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
 
         this.model = new CollectionListModel<>(new ArrayList<>());
         this.syncListener = new ModelSyncListener<>(allTestCaseDtos, model);
-        this.syncListener.setOnUpdate(() -> {
-            toolBar.resetFilters();
-            sortAndIdentifyUnsorted();
-            refreshView();
-        });
+        this.syncListener.setOnUpdateCallback(this::onDataSynced);
         this.model.addListDataListener(syncListener);
 
         this.list = new JBList<>(model);
@@ -98,10 +93,14 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         refreshView();
         new TestFocusListener(this.list, vf).register(this);
 
-        // 🌟 المستمع الجديد الذكي (يجمع بين التلوين والنقر)
         ActionInteractionListener actionListener = new ActionInteractionListener(list, this);
         list.addMouseMotionListener(actionListener);
         list.addMouseListener(actionListener);
+    }
+
+    private void onDataSynced() {
+        sortAndIdentifyUnsorted();
+        refreshView();
     }
 
     public int getTotalPageCount() {
@@ -163,13 +162,6 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         syncListener.resume();
 
         statusBar.updatePaginationState(currentPage, totalPages, pageItems.size(), totalItems);
-    }
-
-    public void loadData(List<TestCaseDto> loadedData) {
-        this.allTestCaseDtos = loadedData;
-        sortAndIdentifyUnsorted();
-        this.currentPage = 1;
-        refreshView();
     }
 
     private List<TestCaseDto> getFilteredList() {
