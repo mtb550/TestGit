@@ -43,30 +43,30 @@ public class RunCard extends JBPanel<RunCard> {
         titleLabel.setForeground(UIUtil.getLabelForeground());
         badgePanel.setOpaque(false);
 
-        // 🌟 تجهيز سطر العنوان والأزرار أفقياً
+        // 🌟 1. سطر العنوان (أصبح يحتوي على العنوان فقط)
         JBPanel<?> titleLine = new JBPanel<>();
         titleLine.setLayout(new BoxLayout(titleLine, BoxLayout.X_AXIS));
         titleLine.setOpaque(false);
         titleLine.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleLine.add(titleLabel);
 
-        actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.X_AXIS));
+        // 🌟 2. لوحة الأزرار (عمودية على اليمين وتقسم الارتفاع بالتساوي)
+        actionPanel.setLayout(new GridLayout(3, 1, 0, JBUI.scale(4))); // 3 صفوف، عمود واحد، مسافة عمودية 4px
         actionPanel.setOpaque(false);
+        actionPanel.setPreferredSize(new Dimension(JBUI.scale(90), 0)); // العرض ثابت (90px)، الارتفاع يتمدد تلقائياً
+
         actionPanel.add(passedBtn);
-        actionPanel.add(Box.createRigidArea(new Dimension(8, 0)));
         actionPanel.add(failedBtn);
-        actionPanel.add(Box.createRigidArea(new Dimension(8, 0)));
         actionPanel.add(blockedBtn);
         actionPanel.setVisible(false);
-
-        titleLine.add(titleLabel);
-        titleLine.add(Box.createRigidArea(new Dimension(10, 0)));
-        titleLine.add(actionPanel);
 
         badgePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JBPanel<?> content = new JBPanel<>(new VerticalLayout(JBUI.scale(4)));
         content.setOpaque(false);
         content.setAlignmentX(Component.LEFT_ALIGNMENT);
+        content.setBorder(JBUI.Borders.emptyRight(10)); // مسافة بين النصوص والأزرار
+
         content.add(titleLine);
         content.add(badgePanel);
         content.add(expectedLabel);
@@ -75,8 +75,9 @@ public class RunCard extends JBPanel<RunCard> {
 
         BorderLayoutPanel wrapper = new BorderLayoutPanel();
         wrapper.setOpaque(false);
-        wrapper.setBorder(JBUI.Borders.empty(12, 16));
+        wrapper.setBorder(JBUI.Borders.empty(12, 16)); // 12 هو الهامش العلوي والسفلي
         wrapper.addToCenter(content);
+        wrapper.addToRight(actionPanel); // 🌟 وضع الأزرار في أقصى اليمين
 
         add(wrapper, BorderLayout.CENTER);
     }
@@ -121,11 +122,11 @@ public class RunCard extends JBPanel<RunCard> {
     }
 
     private JBLabel createActionLabel(String text) {
-        JBLabel lbl = new JBLabel(text, SwingConstants.CENTER);
+        JBLabel lbl = new JBLabel(text, SwingConstants.CENTER); // النص في المنتصف
         lbl.setOpaque(true);
         lbl.setFont(JBFont.regular().asBold());
         lbl.setForeground(JBColor.WHITE);
-        lbl.setBorder(JBUI.Borders.empty(4, 10)); // مساحة داخلية للزر
+        lbl.setBorder(JBUI.Borders.empty()); // إزالة الهوامش الداخلية ليتمدد الزر بحرية
         return lbl;
     }
 

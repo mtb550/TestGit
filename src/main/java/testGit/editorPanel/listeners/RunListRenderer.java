@@ -23,7 +23,6 @@ public class RunListRenderer implements ListCellRenderer<TestCaseDto> {
 
         rendererCard.updateData(globalIndex, tc, ui.isShowGroups(), ui.isShowPriority(), ui.getSelectedDetails());
 
-        // 🌟 تظهر الأزرار فقط إذا كان الصف محدداً (بناءً على طلبك: Reveal on Click)
         rendererCard.setActionsState(isSelected, isSelected ? ui.getHoveredIconAction() : null);
 
         rendererCard.setBorder(isSelected ?
