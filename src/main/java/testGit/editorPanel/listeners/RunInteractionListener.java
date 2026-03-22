@@ -20,27 +20,23 @@ public class RunInteractionListener extends MouseAdapter {
         this.ui = ui;
     }
 
-    // 🌟 حساب المنطقة في اليمين (Dynamic Height Hitbox)
     private String getActionAtPoint(int index, int xInCell, int yInCell, Rectangle bounds) {
         if (index == -1 || !list.isSelectedIndex(index)) return null;
 
         int rightPadding = JBUI.scale(16);
-        int topBottomPadding = JBUI.scale(12);
-        int actionWidth = JBUI.scale(90); // نفس العرض الذي حددناه في RunCard
+        // 🌟 تطابق مع الهامش الجديد (2 بكسل) ليحسب منطقة النقر بشكل مثالي
+        int topBottomPadding = JBUI.scale(2);
+        int actionWidth = JBUI.scale(90);
 
-        // بداية الأزرار من جهة اليمين
         int actionStartX = bounds.width - rightPadding - actionWidth;
         int actionEndX = bounds.width - rightPadding;
 
-        // هل الماوس في منطقة الأزرار (أفقياً)؟
         if (xInCell >= actionStartX && xInCell <= actionEndX) {
 
-            // حساب الارتفاع المتاح للأزرار (الارتفاع الكلي ناقص الهوامش العلوية والسفلية)
             int usableHeight = bounds.height - (topBottomPadding * 2);
             int relativeY = yInCell - topBottomPadding;
 
             if (relativeY >= 0 && relativeY <= usableHeight) {
-                // تقسيم الارتفاع على 3 لمعرفة الزر
                 int chunk = usableHeight / 3;
 
                 if (relativeY < chunk) return "PASSED";

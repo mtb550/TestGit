@@ -49,16 +49,17 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     private final Set<Integer> initialTestCaseUids;
     private JBPanel<?> mainPanel = new JBPanel<>(new BorderLayout());
 
-    // --- Opening-mode state (New Architecture) ---
+    // --- Opening-mode state ---
     private JBList<TestCaseDto> list;
     private CollectionListModel<TestCaseDto> model;
     private String hoveredIconAction = null;
+    private int hoveredIndex = -1;
     private int currentPage = 1;
     private int pageSize = 10;
     private StatusBar statusBar;
     private ToolBar toolBar;
 
-    // --- Creation-mode state (Keep exactly as is) ---
+    // --- Creation-mode state ---
     private CheckboxTree checklistTree;
     private TestRunDto metadata;
     private VirtualFile currentFile;
@@ -204,7 +205,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     }
 
     // -------------------------------------------------------------------------
-    // Creation mode (Remain untouched)
+    // Creation mode
     // -------------------------------------------------------------------------
 
     private void buildCreationPanel(DefaultTreeModel testCaseModel, Path savePath, ProjectPanel projectPanel) {
@@ -222,7 +223,6 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
 
         mainPanel.add(new JBScrollPane(checklistTree), BorderLayout.CENTER);
         mainPanel.add(createSaveButton(root, savePath, projectPanel), BorderLayout.SOUTH);
-
     }
 
     private CheckboxTree.CheckboxTreeCellRenderer createTreeRenderer() {
@@ -363,7 +363,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     }
 
     public @Nullable JComponent getPreferredFocusedComponent() {
-        return list; // تحديث التركيز
+        return list;
     }
 
     public @NotNull JComponent getComponent() {

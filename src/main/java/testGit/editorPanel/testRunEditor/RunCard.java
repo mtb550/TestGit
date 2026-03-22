@@ -43,29 +43,32 @@ public class RunCard extends JBPanel<RunCard> {
         titleLabel.setForeground(UIUtil.getLabelForeground());
         badgePanel.setOpaque(false);
 
-        // 🌟 1. سطر العنوان (أصبح يحتوي على العنوان فقط)
         JBPanel<?> titleLine = new JBPanel<>();
         titleLine.setLayout(new BoxLayout(titleLine, BoxLayout.X_AXIS));
         titleLine.setOpaque(false);
         titleLine.setAlignmentX(Component.LEFT_ALIGNMENT);
         titleLine.add(titleLabel);
 
-        // 🌟 2. لوحة الأزرار (عمودية على اليمين وتقسم الارتفاع بالتساوي)
-        actionPanel.setLayout(new GridLayout(3, 1, 0, JBUI.scale(4))); // 3 صفوف، عمود واحد، مسافة عمودية 4px
+        actionPanel.setLayout(new GridLayout(3, 1, 0, JBUI.scale(4)));
         actionPanel.setOpaque(false);
-        actionPanel.setPreferredSize(new Dimension(JBUI.scale(90), 0)); // العرض ثابت (90px)، الارتفاع يتمدد تلقائياً
+        actionPanel.setPreferredSize(new Dimension(JBUI.scale(90), 0));
 
         actionPanel.add(passedBtn);
         actionPanel.add(failedBtn);
         actionPanel.add(blockedBtn);
         actionPanel.setVisible(false);
 
+        // 🌟 تقليل الهامش العلوي والسفلي للأزرار ليصبح 2 بكسل فقط
+        actionPanel.setBorder(JBUI.Borders.empty(2, 0));
+
         badgePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JBPanel<?> content = new JBPanel<>(new VerticalLayout(JBUI.scale(4)));
         content.setOpaque(false);
         content.setAlignmentX(Component.LEFT_ALIGNMENT);
-        content.setBorder(JBUI.Borders.emptyRight(10)); // مسافة بين النصوص والأزرار
+
+        // 🌟 إعطاء الهامش (12) للنصوص فقط لكي تحافظ على شكلها
+        content.setBorder(JBUI.Borders.empty(12, 0, 12, 10));
 
         content.add(titleLine);
         content.add(badgePanel);
@@ -75,9 +78,11 @@ public class RunCard extends JBPanel<RunCard> {
 
         BorderLayoutPanel wrapper = new BorderLayoutPanel();
         wrapper.setOpaque(false);
-        wrapper.setBorder(JBUI.Borders.empty(12, 16)); // 12 هو الهامش العلوي والسفلي
+
+        // 🌟 الـ Wrapper يأخذ هامش يمين ويسار فقط
+        wrapper.setBorder(JBUI.Borders.empty(0, 16));
         wrapper.addToCenter(content);
-        wrapper.addToRight(actionPanel); // 🌟 وضع الأزرار في أقصى اليمين
+        wrapper.addToRight(actionPanel);
 
         add(wrapper, BorderLayout.CENTER);
     }
@@ -122,11 +127,11 @@ public class RunCard extends JBPanel<RunCard> {
     }
 
     private JBLabel createActionLabel(String text) {
-        JBLabel lbl = new JBLabel(text, SwingConstants.CENTER); // النص في المنتصف
+        JBLabel lbl = new JBLabel(text, SwingConstants.CENTER);
         lbl.setOpaque(true);
         lbl.setFont(JBFont.regular().asBold());
         lbl.setForeground(JBColor.WHITE);
-        lbl.setBorder(JBUI.Borders.empty()); // إزالة الهوامش الداخلية ليتمدد الزر بحرية
+        lbl.setBorder(JBUI.Borders.empty());
         return lbl;
     }
 
