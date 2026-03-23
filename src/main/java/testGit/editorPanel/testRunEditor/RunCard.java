@@ -18,19 +18,20 @@ import java.awt.*;
 import java.util.Set;
 
 public class RunCard extends JBPanel<RunCard> {
-
     private static final int CARD_HEIGHT = 130;
+
     private final JBLabel titleLabel = new JBLabel();
-    private final JBPanel<?> badgePanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(6), 0));
+    private final JBPanel<?> badgePanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(10), 0));
     private final JBLabel expectedLabel = createDetailLabel();
     private final JBLabel stepsLabel = createDetailLabel();
     private final JBLabel automationRefLabel = createDetailLabel();
-
+    private final JBLabel businessRefLabel = createDetailLabel();
+    private final JBLabel moduleLabel = createDetailLabel();
+    private final JBLabel idLabel = createDetailLabel();
     private final JBPanel<?> actionPanel = new JBPanel<>();
     private final JBLabel passedBtn = createActionLabel("PASSED");
     private final JBLabel failedBtn = createActionLabel("FAILED");
     private final JBLabel blockedBtn = createActionLabel("BLOCKED");
-
     private boolean isSelected;
 
     public RunCard() {
@@ -48,38 +49,36 @@ public class RunCard extends JBPanel<RunCard> {
         titleLine.setAlignmentX(Component.LEFT_ALIGNMENT);
         titleLine.add(titleLabel);
 
+        badgePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         actionPanel.setLayout(new GridLayout(3, 1, 0, JBUI.scale(4)));
         actionPanel.setOpaque(false);
         actionPanel.setPreferredSize(new Dimension(JBUI.scale(90), 0));
-
         actionPanel.add(passedBtn);
         actionPanel.add(failedBtn);
         actionPanel.add(blockedBtn);
         actionPanel.setVisible(false);
-
         actionPanel.setBorder(JBUI.Borders.empty(2, 0));
-
-        badgePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JBPanel<?> content = new JBPanel<>(new VerticalLayout(JBUI.scale(4)));
         content.setOpaque(false);
         content.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        content.setBorder(JBUI.Borders.empty(12, 0, 12, 10));
+        //content.setBorder(JBUI.Borders.empty(12, 0, 12, 10));
 
         content.add(titleLine);
         content.add(badgePanel);
         content.add(expectedLabel);
         content.add(stepsLabel);
         content.add(automationRefLabel);
+        content.add(businessRefLabel);
+        content.add(moduleLabel);
+        content.add(idLabel);
 
         BorderLayoutPanel wrapper = new BorderLayoutPanel();
         wrapper.setOpaque(false);
-
-        wrapper.setBorder(JBUI.Borders.empty(0, 16));
+        wrapper.setBorder(JBUI.Borders.empty(12, 16));
         wrapper.addToCenter(content);
         wrapper.addToRight(actionPanel);
-
         add(wrapper, BorderLayout.CENTER);
     }
 
@@ -88,26 +87,38 @@ public class RunCard extends JBPanel<RunCard> {
         expectedLabel.setText("Expected Result: " + tc.getExpected());
         stepsLabel.setText("Steps: " + tc.getSteps());
         automationRefLabel.setText("Automation Reference: " + tc.getAutoRef());
-
-        expectedLabel.setVisible(activeDetails.contains("Expected Result"));
-        stepsLabel.setVisible(activeDetails.contains("Steps"));
-        automationRefLabel.setVisible(activeDetails.contains("Automation Ref"));
+        businessRefLabel.setText("Business Reference: " + tc.getBusiRef());
+        moduleLabel.setText("Module: " + tc.getModule());
+        idLabel.setText("ID: " + tc.getId());
 
         Color currentRowColor = index % 2 == 0 ? new JBColor(Gray._245, Gray._60) : new JBColor(Gray._230, Gray._45);
         setBackground(currentRowColor);
         setBorder(JBUI.Borders.customLine(JBColor.border(), 1, 0, 1, 0));
 
+        expectedLabel.setVisible(activeDetails.contains("Expected Result"));
+        stepsLabel.setVisible(activeDetails.contains("Steps"));
+        automationRefLabel.setVisible(activeDetails.contains("Automation Ref"));
+        businessRefLabel.setVisible(activeDetails.contains("Business Ref"));
+        moduleLabel.setVisible(activeDetails.contains("Module"));
+        idLabel.setVisible(activeDetails.contains("ID"));
+
         badgePanel.removeAll();
+
+        /// if isUnsorted not found
+
         if (showPriority) badgePanel.add(Shared.createPriorityBadge(tc));
-        if (showGroups && tc.getGroups() != null)
+
+        if (showGroups && tc.getGroups() != null) {
             for (GroupType group : tc.getGroups())
                 badgePanel.add(Shared.createGroupBadge(group));
+        }
         badgePanel.revalidate();
         badgePanel.repaint();
     }
 
     public void setActionsState(boolean isSelected) {
         this.isSelected = isSelected;
+
         if (actionPanel.isVisible() != isSelected) {
             actionPanel.setVisible(isSelected);
         }
@@ -127,6 +138,14 @@ public class RunCard extends JBPanel<RunCard> {
         }
     }
 
+    private JBLabel createDetailLabel() {
+        JBLabel label = new JBLabel();
+        label.setFont(UIUtil.getLabelFont(UIUtil.FontSize.NORMAL));
+        label.setForeground(UIUtil.getContextHelpForeground());
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return label;
+    }
+
     private JBLabel createActionLabel(String text) {
         JBLabel lbl = new JBLabel(text, SwingConstants.CENTER);
         lbl.setOpaque(true);
@@ -134,13 +153,5 @@ public class RunCard extends JBPanel<RunCard> {
         lbl.setForeground(JBColor.WHITE);
         lbl.setBorder(JBUI.Borders.empty());
         return lbl;
-    }
-
-    private JBLabel createDetailLabel() {
-        JBLabel label = new JBLabel();
-        label.setFont(UIUtil.getLabelFont(UIUtil.FontSize.NORMAL));
-        label.setForeground(UIUtil.getContextHelpForeground());
-        label.setAlignmentX(Component.LEFT_ALIGNMENT);
-        return label;
     }
 }

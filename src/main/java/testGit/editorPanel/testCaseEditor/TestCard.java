@@ -15,11 +15,11 @@ import testGit.pojo.dto.TestCaseDto;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 import java.util.Set;
 
 public class TestCard extends JBPanel<TestCard> {
     private static final int CARD_HEIGHT = 130;
+
     private final JBLabel titleLabel = new JBLabel();
     private final JBPanel<?> badgePanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(10), 0));
     private final JBLabel expectedLabel = createDetailLabel();
@@ -51,6 +51,8 @@ public class TestCard extends JBPanel<TestCard> {
         JBPanel<?> content = new JBPanel<>(new VerticalLayout(JBUI.scale(4)));
         content.setOpaque(false);
         content.setAlignmentX(Component.LEFT_ALIGNMENT);
+        //content.setBorder(JBUI.Borders.empty(12, 0, 12, 10));
+
         content.add(titleLine);
         content.add(badgePanel);
         content.add(expectedLabel);
@@ -64,12 +66,11 @@ public class TestCard extends JBPanel<TestCard> {
         wrapper.setOpaque(false);
         wrapper.setBorder(JBUI.Borders.empty(12, 16));
         wrapper.addToCenter(content);
-
         add(wrapper, BorderLayout.CENTER);
     }
 
     public void updateData(final int index, final TestCaseDto tc, final boolean showGroups, final boolean showPriority, final Set<String> activeDetails, final boolean isUnsorted) {
-        titleLabel.setText((index + 1) + ". " + tc.getTitle());
+        titleLabel.setText(String.format("%d. %s", index + 1, tc.getTitle()));
         expectedLabel.setText("Expected Result: " + tc.getExpected());
         stepsLabel.setText("Steps: " + tc.getSteps());
         automationRefLabel.setText("Automation Reference: " + tc.getAutoRef());
@@ -100,11 +101,10 @@ public class TestCard extends JBPanel<TestCard> {
         }
 
         if (showPriority) badgePanel.add(Shared.createPriorityBadge(tc));
-        if (showGroups) {
-            List<GroupType> groups = tc.getGroups();
-            if (groups != null)
-                for (GroupType groupName : groups)
-                    badgePanel.add(Shared.createGroupBadge(groupName));
+
+        if (showGroups && tc.getGroups() != null) {
+            for (GroupType groupName : tc.getGroups())
+                badgePanel.add(Shared.createGroupBadge(groupName));
         }
         badgePanel.revalidate();
         badgePanel.repaint();
