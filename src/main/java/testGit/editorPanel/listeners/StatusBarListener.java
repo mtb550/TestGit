@@ -40,6 +40,10 @@ public class StatusBarListener {
             } catch (NumberFormatException ex) {
                 ui.getStatusBar().getPageSizeField().setText(String.valueOf(ui.getPageSize()));
             }
+
+            if (ui.getPreferredFocusedComponent() != null) {
+                ui.getPreferredFocusedComponent().requestFocusInWindow();
+            }
         });
     }
 }
