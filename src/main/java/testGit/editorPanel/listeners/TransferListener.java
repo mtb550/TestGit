@@ -1,32 +1,23 @@
 package testGit.editorPanel.listeners;
 
-import com.intellij.ui.CollectionListModel;
 import org.jetbrains.annotations.NotNull;
-import testGit.pojo.Config;
+import testGit.editorPanel.BaseEditorUI;
 import testGit.pojo.dto.TestCaseDto;
-import testGit.pojo.dto.dirs.DirectoryDto;
 
 import javax.swing.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class TransferListener extends TransferHandler {
     private static final DataFlavor FLAVOR = new DataFlavor(List.class, "List of TestCase");
-    private final CollectionListModel<TestCaseDto> model;
-    private final DirectoryDto dir;
-    private final ModelSyncListener<TestCaseDto> syncListener; // 🌟 إضافة المستمع للتحكم به
+    private final BaseEditorUI ui; // 🌟 استخدام الواجهة الأب
     private int[] draggedIndices;
 
-    public TransferListener(DirectoryDto dir, CollectionListModel<TestCaseDto> model, ModelSyncListener<TestCaseDto> syncListener) {
-        this.model = model;
-        this.dir = dir;
-        this.syncListener = syncListener;
+    public TransferListener(BaseEditorUI ui) {
+        this.ui = ui;
     }
 
     @Override
@@ -81,51 +72,42 @@ public class TransferListener extends TransferHandler {
 
             if (items.isEmpty()) return false;
 
-            if (syncListener != null) syncListener.pause();
-
             JList.DropLocation dl = (JList.DropLocation) support.getDropLocation();
-            int insertAt = dl.getIndex();
+            int insertAtLocal = dl.getIndex();
+            int insertAtGlobal = (ui.getCurrentPage() - 1) * ui.getPageSize() + insertAtLocal;
+
+            int[] globalDraggedIndices = new int[draggedIndices.length];
+            for (int i = 0; i < draggedIndices.length; i++) {
+                globalDraggedIndices[i] = (ui.getCurrentPage() - 1) * ui.getPageSize() + draggedIndices[i];
+            }
+
+            List<TestCaseDto> allItems = ui.getAllTestCaseDtos();
 
             int shift = 0;
-            for (int draggedIndex : draggedIndices) {
-                if (draggedIndex < insertAt) shift++;
+            for (int globalDraggedIndex : globalDraggedIndices) {
+                if (globalDraggedIndex < insertAtGlobal) shift++;
             }
-            insertAt -= shift;
+            insertAtGlobal -= shift;
 
-            for (int i = draggedIndices.length - 1; i >= 0; i--) {
-                model.remove(draggedIndices[i]);
-            }
-
-            for (TestCaseDto item : items) {
-                model.add(insertAt++, item);
+            List<TestCaseDto> itemsToMove = new ArrayList<>();
+            for (int i = globalDraggedIndices.length - 1; i >= 0; i--) {
+                itemsToMove.add(0, allItems.remove(globalDraggedIndices[i]));
             }
 
-            updateSequenceAndSave();
+            allItems.addAll(insertAtGlobal, itemsToMove);
 
-            if (syncListener != null) syncListener.resume();
+            ui.updateSequenceAndSaveAll();
+
+            if (!itemsToMove.isEmpty()) {
+                ui.selectTestCase(itemsToMove.get(0));
+            } else {
+                ui.refreshView();
+            }
 
             return true;
         } catch (Exception e) {
-            if (syncListener != null) syncListener.resume();
             e.printStackTrace(System.err);
             return false;
         }
-    }
-
-    private void updateSequenceAndSave() {
-        List<TestCaseDto> snapshot = new ArrayList<>(model.getItems());
-
-        SwingUtilities.invokeLater(() -> {
-            for (int i = 0; i < snapshot.size(); i++) {
-                TestCaseDto current = snapshot.get(i);
-                current.setIsHead(i == 0);
-                current.setNext(i < snapshot.size() - 1 ? UUID.fromString(snapshot.get(i + 1).getId()) : null);
-
-                try {
-                    Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(new File(dir.getPath().toFile(), current.getId() + ".json"), current);
-                } catch (IOException ignored) {
-                }
-            }
-        });
     }
 }

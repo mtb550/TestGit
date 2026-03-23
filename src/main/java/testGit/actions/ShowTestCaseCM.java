@@ -8,6 +8,7 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
+import testGit.editorPanel.BaseEditorUI;
 import testGit.editorPanel.EditorContextMenu;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.dirs.DirectoryDto;
@@ -19,14 +20,15 @@ public class ShowTestCaseCM extends DumbAwareAction {
     private final DirectoryDto dir;
     private final JBList<TestCaseDto> list;
     private final CollectionListModel<TestCaseDto> model;
+    private final BaseEditorUI ui;
 
-    public ShowTestCaseCM(DirectoryDto dir, JBList<TestCaseDto> list, CollectionListModel<TestCaseDto> model) {
+    public ShowTestCaseCM(BaseEditorUI ui, DirectoryDto dir, JBList<TestCaseDto> list, CollectionListModel<TestCaseDto> model) {
         super("Show Context Menu");
         this.dir = dir;
         this.list = list;
         this.model = model;
+        this.ui = ui;
         this.registerCustomShortcutSet(KeyboardSet.ContextMenu.getShortcut(), list);
-
     }
 
     @Override
@@ -42,10 +44,10 @@ public class ShowTestCaseCM extends DumbAwareAction {
             Rectangle rect = list.getCellBounds(index, index);
             if (rect == null) return;
 
-            group.add(new EditorContextMenu(dir, list, model));
+            group.add(new EditorContextMenu(ui, dir, list, model));
             showPopup(group, rect.x + (rect.width / 4), rect.y + (rect.height / 2));
         } else {
-            group.add(new CreateTestCase(dir, list, model));
+            group.add(new CreateTestCase(ui, dir, list, model));
             showPopup(group, 10, 10);
         }
     }

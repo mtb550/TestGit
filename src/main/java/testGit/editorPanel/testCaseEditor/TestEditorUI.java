@@ -2,6 +2,8 @@ package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBPanel;
@@ -12,15 +14,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.editorPanel.*;
 import testGit.editorPanel.listeners.*;
+import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.viewPanel.ViewPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.io.File;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI {
@@ -28,8 +30,11 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     private final JBPanel<?> mainPanel;
     private final JBList<TestCaseDto> list;
     private final CollectionListModel<TestCaseDto> model;
-    private final ModelSyncListener<TestCaseDto> syncListener;
+    private final ModelSyncListener syncListener;
     private final ToolBar toolBar;
+
+    @Getter
+    private final UnifiedVirtualFile vf;
 
     @Getter
     private final StatusBar statusBar;
@@ -53,18 +58,18 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     private String hoveredIconAction = null;
 
     public TestEditorUI(@NotNull UnifiedVirtualFile vf) {
+        this.vf = vf;
         this.allTestCaseDtos = new ArrayList<>(vf.getTestCaseDtos());
         sortAndIdentifyUnsorted();
 
         this.mainPanel = new JBPanel<>(new BorderLayout());
-
-        pageSize = PropertiesComponent.getInstance().getInt("testGit.pageSize", 50);
+        this.pageSize = PropertiesComponent.getInstance().getInt("testGit.pageSize", 50);
 
         this.toolBar = new ToolBar(this);
         mainPanel.add(toolBar, BorderLayout.NORTH);
 
         this.model = new CollectionListModel<>(new ArrayList<>());
-        this.syncListener = new ModelSyncListener<>(allTestCaseDtos, model);
+        this.syncListener = new ModelSyncListener(this, model);
         this.syncListener.setOnUpdateCallback(this::onDataSynced);
         this.model.addListDataListener(syncListener);
 
@@ -75,26 +80,25 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         list.setDragEnabled(true);
         list.setDropMode(DropMode.INSERT);
 
-        EditorContextMenu editorContextMenu = new EditorContextMenu(vf.getTestSet(), list, model);
-        TestMouseListener testMouseListener = new TestMouseListener(list, model, vf.getTestSet(), editorContextMenu);
+        EditorContextMenu editorContextMenu = new EditorContextMenu(this, vf.getTestSet(), list, model);
+        TestMouseListener testMouseListener = new TestMouseListener(this, list, model, vf.getTestSet(), editorContextMenu);
         list.addMouseListener(testMouseListener);
 
-        list.setTransferHandler(new TransferListener(vf.getTestSet(), model, syncListener));
+        list.setTransferHandler(new TransferListener(this));
         list.setCellRenderer(new TestListRenderer(this));
 
-        EditorContextMenu.registerShortcuts(vf.getTestSet(), list, model);
+        EditorContextMenu.registerShortcuts(this, vf.getTestSet(), list, model);
         mainPanel.add(new JBScrollPane(list), BorderLayout.CENTER);
 
         this.statusBar = new StatusBar();
         mainPanel.add(statusBar, BorderLayout.SOUTH);
-        PaginationController.attach(this);
+        StatusBarListener.attach(this);
         list.addListSelectionListener(new SelectionListener(list, this));
 
         refreshView();
         new TestFocusListener(this.list, vf).register(this);
 
         ActionInteractionListener actionListener = new ActionInteractionListener(list, this);
-        list.addMouseMotionListener(actionListener);
         list.addMouseListener(actionListener);
     }
 
@@ -103,6 +107,66 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         refreshView();
     }
 
+    public void updateSequenceAndSaveAll() {
+        List<TestCaseDto> snapshot = new ArrayList<>(this.allTestCaseDtos);
+        java.nio.file.Path dirPath = vf.getTestSet().getPath();
+
+        SwingUtilities.invokeLater(() -> {
+            for (int i = 0; i < snapshot.size(); i++) {
+                TestCaseDto current = snapshot.get(i);
+                current.setIsHead(i == 0);
+                current.setNext(i < snapshot.size() - 1 ? UUID.fromString(snapshot.get(i + 1).getId()) : null);
+
+                try {
+                    Config.getMapper().writerWithDefaultPrettyPrinter()
+                            .writeValue(new File(dirPath.toFile(), current.getId() + ".json"), current);
+                } catch (Exception ignored) {
+                }
+            }
+        });
+    }
+
+    public void selectTestCase(TestCaseDto tc) {
+        if (tc == null) return;
+
+        List<TestCaseDto> filtered = getFilteredList();
+        if (!filtered.contains(tc)) {
+            toolBar.resetFilters();
+            filtered = getFilteredList();
+        }
+
+        int index = filtered.indexOf(tc);
+        if (index == -1) return;
+
+        int targetPage = (index / pageSize) + 1;
+        this.currentPage = targetPage;
+        refreshView();
+
+        int localIndex = index % pageSize;
+        SwingUtilities.invokeLater(() -> {
+            list.setSelectedIndex(localIndex);
+            list.ensureIndexIsVisible(localIndex);
+            list.requestFocusInWindow();
+        });
+    }
+
+    @Override
+    public void appendNewTestCase(TestCaseDto tc) {
+        this.allTestCaseDtos.add(tc);
+        updateSequenceAndSaveAll();
+
+        VirtualFile vDir = LocalFileSystem.getInstance().findFileByIoFile(vf.getTestSet().getPath().toFile());
+        if (vDir != null) vDir.refresh(false, true);
+
+        selectTestCase(tc);
+    }
+
+    @Override
+    public int getTotalItemsCount() {
+        return allTestCaseDtos != null ? allTestCaseDtos.size() : 0;
+    }
+
+    @Override
     public int getTotalPageCount() {
         return getTotalPages(getFilteredList());
     }
@@ -164,6 +228,13 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         statusBar.updatePaginationState(currentPage, totalPages, pageItems.size(), totalItems);
     }
 
+    public void loadData(List<TestCaseDto> loadedData) {
+        this.allTestCaseDtos = loadedData;
+        sortAndIdentifyUnsorted();
+        this.currentPage = 1;
+        refreshView();
+    }
+
     private List<TestCaseDto> getFilteredList() {
         String query = toolBar.getSearchQuery();
         return allTestCaseDtos.stream()
@@ -181,7 +252,7 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         return filtered.isEmpty() ? 1 : (int) Math.ceil((double) filtered.size() / pageSize);
     }
 
-    private void sortAndIdentifyUnsorted() {
+    public void sortAndIdentifyUnsorted() {
         if (allTestCaseDtos == null || allTestCaseDtos.isEmpty()) return;
         java.util.Map<String, TestCaseDto> map = allTestCaseDtos.stream().collect(Collectors.toMap(TestCaseDto::getId, tc -> tc));
         TestCaseDto head = allTestCaseDtos.stream().filter(tc -> Boolean.TRUE.equals(tc.getIsHead())).findFirst().orElse(null);

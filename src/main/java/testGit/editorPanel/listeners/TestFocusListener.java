@@ -19,7 +19,6 @@ public class TestFocusListener {
     private final UnifiedVirtualFile vf;
     private final ToolWindow viewPanel = ViewPanel.getToolWindow();
 
-
     public TestFocusListener(final JBList<TestCaseDto> list, final UnifiedVirtualFile vf) {
         this.list = list;
         this.vf = vf;
@@ -40,12 +39,10 @@ public class TestFocusListener {
         if (vf.equals(event.getNewFile())) {
             TestCaseDto selected = list.getSelectedValue();
 
-            if (viewPanel != null && viewPanel.isVisible()) {
-
-                if (selected != null)
-                    SwingUtilities.invokeLater(() -> ViewPanel.show(selected));
+            // 🌟 دمج الشروط في سطر واحد لتبسيط القراءة
+            if (viewPanel != null && viewPanel.isVisible() && selected != null) {
+                SwingUtilities.invokeLater(() -> ViewPanel.show(selected));
             }
         }
-
     }
 }

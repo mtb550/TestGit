@@ -2,8 +2,8 @@ package testGit.editorPanel.listeners;
 
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
+import testGit.editorPanel.BaseEditorUI;
 import testGit.editorPanel.testCaseEditor.TestCard;
-import testGit.editorPanel.testCaseEditor.TestEditorUI;
 import testGit.pojo.dto.TestCaseDto;
 
 import javax.swing.*;
@@ -11,9 +11,9 @@ import java.awt.*;
 
 public class TestListRenderer implements ListCellRenderer<TestCaseDto> {
     private final TestCard rendererCard = new TestCard();
-    private final TestEditorUI ui;
+    private final BaseEditorUI ui; // 🌟 استخدام الواجهة الأب
 
-    public TestListRenderer(final TestEditorUI ui) {
+    public TestListRenderer(final BaseEditorUI ui) {
         this.ui = ui;
     }
 
@@ -25,7 +25,6 @@ public class TestListRenderer implements ListCellRenderer<TestCaseDto> {
 
         rendererCard.updateData(globalIndex, tc, ui.isShowGroups(), ui.isShowPriority(), ui.getSelectedDetails(), isUnsorted);
 
-        // 🌟 1. الأيقونات تظهر فقط إذا كان الصف محدداً!
         rendererCard.setActionsState(isSelected, isSelected ? ui.getHoveredIconAction() : null);
 
         rendererCard.setBorder(isSelected ?

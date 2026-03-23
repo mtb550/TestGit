@@ -10,13 +10,12 @@ import testGit.actions.*;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.dirs.DirectoryDto;
 
-import javax.swing.*;
-
 public class EditorContextMenu extends DefaultActionGroup {
-    public EditorContextMenu(final DirectoryDto dir, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model) {
+
+    public EditorContextMenu(final BaseEditorUI ui, final DirectoryDto dir, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model) {
         super("Editor Context Menu", true);
 
-        add(new CreateTestCase(dir, list, model));
+        add(new CreateTestCase(ui, dir, list, model));
         add(new ViewDetails(list));
         addSeparator();
         add(new UpdateTestCase(list));
@@ -28,13 +27,13 @@ public class EditorContextMenu extends DefaultActionGroup {
         add(new NavigateToCode(list));
     }
 
-    public static void registerShortcuts(DirectoryDto dir, JBList<TestCaseDto> list, CollectionListModel<TestCaseDto> model) {
+    public static void registerShortcuts(BaseEditorUI ui, DirectoryDto dir, JBList<TestCaseDto> list, CollectionListModel<TestCaseDto> model) {
         //new Escape(tree, transferHandler);
         //new OpenNodeCM(tree, treeContextMenu);
-        new CreateTestCase(dir, list, model);
+        new CreateTestCase(ui, dir, list, model);
         new RemoveTestCase(dir, list, model);
         new OpenTestCaseDetails(list);
-        new ShowTestCaseCM(dir, list, model);
+        new ShowTestCaseCM(ui, dir, list, model);
         new CloseTestCaseDetails(list);
         new CopyTestCaseTitle(list);
     }
@@ -52,5 +51,4 @@ public class EditorContextMenu extends DefaultActionGroup {
     public @NotNull ActionUpdateThread getActionUpdateThread() {
         return ActionUpdateThread.EDT;
     }
-
 }

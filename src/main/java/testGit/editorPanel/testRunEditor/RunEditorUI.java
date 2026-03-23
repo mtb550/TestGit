@@ -13,12 +13,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import testGit.editorPanel.BaseEditorUI;
-import testGit.editorPanel.StatusBar;
-import testGit.editorPanel.ToolBar;
-import testGit.editorPanel.UnifiedVirtualFile;
-import testGit.editorPanel.listeners.RunInteractionListener;
-import testGit.editorPanel.listeners.RunListRenderer;
+import testGit.editorPanel.*;
+import testGit.editorPanel.listeners.*;
 import testGit.pojo.Config;
 import testGit.pojo.GroupType;
 import testGit.pojo.TestRunStatus;
@@ -43,13 +39,11 @@ import java.util.stream.Collectors;
 @Setter
 public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI {
 
-    // --- Shared ---
     private final UnifiedVirtualFile vf;
     private final List<TestCaseDto> initialTestCaseDtos;
     private final Set<Integer> initialTestCaseUids;
     private JBPanel<?> mainPanel = new JBPanel<>(new BorderLayout());
 
-    // --- Opening-mode state ---
     private JBList<TestCaseDto> list;
     private CollectionListModel<TestCaseDto> model;
     private String hoveredIconAction = null;
@@ -59,7 +53,6 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     private StatusBar statusBar;
     private ToolBar toolBar;
 
-    // --- Creation-mode state ---
     private CheckboxTree checklistTree;
     private TestRunDto metadata;
     private VirtualFile currentFile;
@@ -117,6 +110,24 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         return toolBar != null ? toolBar.getSelectedDetails() : Collections.emptySet();
     }
 
+    @Override
+    public int getTotalPageCount() {
+        return Math.max(1, (int) Math.ceil((double) getFilteredList().size() / pageSize));
+    }
+
+    @Override
+    public int getTotalItemsCount() {
+        return initialTestCaseDtos != null ? initialTestCaseDtos.size() : 0;
+    }
+
+    @Override
+    public void appendNewTestCase(TestCaseDto tc) {
+        if (this.initialTestCaseDtos != null) {
+            this.initialTestCaseDtos.add(tc);
+            refreshView();
+        }
+    }
+
     private void buildOpeningPanel() {
         toolBar = new ToolBar(this);
 
@@ -127,14 +138,21 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         list.setCellRenderer(new RunListRenderer(this));
 
         RunInteractionListener actionListener = new RunInteractionListener(list, this);
-        list.addMouseMotionListener(actionListener);
         list.addMouseListener(actionListener);
+        list.addMouseMotionListener(actionListener);
+
+        EditorContextMenu editorContextMenu = new EditorContextMenu(this, vf.getDirectoryDto(), list, model);
+        TestMouseListener testMouseListener = new TestMouseListener(this, list, model, vf.getDirectoryDto(), editorContextMenu);
+        list.addMouseListener(testMouseListener);
+        EditorContextMenu.registerShortcuts(this, vf.getDirectoryDto(), list, model);
+
+        list.addListSelectionListener(new SelectionListener(list, this));
 
         JBScrollPane scrollPane = new JBScrollPane(list);
         scrollPane.setBorder(JBUI.Borders.empty());
 
         statusBar = new StatusBar();
-        wirePaginationButtons();
+        StatusBarListener.attach(this);
 
         mainPanel = new JBPanel<>(new BorderLayout());
         mainPanel.add(toolBar, BorderLayout.NORTH);
@@ -144,16 +162,10 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         refreshView();
     }
 
-    private void refreshView() {
-        try {
-            int parsed = Integer.parseInt(statusBar.getPageSizeField().getText().trim());
-            if (parsed > 0) pageSize = parsed;
-        } catch (NumberFormatException ignored) {
-        }
-
+    public void refreshView() {
         List<TestCaseDto> filtered = getFilteredList();
         int total = filtered.size();
-        int totalPages = Math.max(1, (int) Math.ceil((double) total / pageSize));
+        int totalPages = getTotalPageCount();
         currentPage = Math.max(1, Math.min(currentPage, totalPages));
 
         int fromIndex = (currentPage - 1) * pageSize;
@@ -180,35 +192,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
                 .collect(Collectors.toList());
     }
 
-    private void wirePaginationButtons() {
-        statusBar.getFirstButton().addActionListener(e -> {
-            currentPage = 1;
-            refreshView();
-        });
-        statusBar.getPrevButton().addActionListener(e -> {
-            currentPage--;
-            refreshView();
-        });
-        statusBar.getNextButton().addActionListener(e -> {
-            currentPage++;
-            refreshView();
-        });
-        statusBar.getLastButton().addActionListener(e -> {
-            int total = getFilteredList().size();
-            currentPage = Math.max(1, (int) Math.ceil((double) total / pageSize));
-            refreshView();
-        });
-        statusBar.getPageSizeField().addActionListener(e -> {
-            currentPage = 1;
-            refreshView();
-        });
-    }
-
-    // -------------------------------------------------------------------------
-    // Creation mode
-    // -------------------------------------------------------------------------
-
-    private void buildCreationPanel(DefaultTreeModel testCaseModel, Path savePath, ProjectPanel projectPanel) {
+    private void buildCreationPanel(final DefaultTreeModel testCaseModel, final Path savePath, final ProjectPanel projectPanel) {
         CheckedTreeNode root = convertToCheckedNodes((DefaultMutableTreeNode) testCaseModel.getRoot());
 
         mainPanel = new JBPanel<>(new BorderLayout());
@@ -305,8 +289,6 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
                     .setDeviceType(metadata.getDeviceType());
         }
 
-        System.out.println("path: " + savePath);
-
         String fileName = vf.getDirectoryDto().getName() + ".json";
         run.setRunName(fileName);
         run.setCreatedAt(LocalDateTime.now());
@@ -319,12 +301,10 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         try {
             Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(new File(savePath.toFile(), fileName), run);
         } catch (Exception e) {
-            System.err.println("Failed to save Test Run: " + e.getMessage());
             e.printStackTrace(System.err);
         }
 
-        projectPanel.getTestRunTreeBuilder().buildTree(
-                projectPanel.getTestProjectSelector().getSelectedTestProject().getItem());
+        projectPanel.getTestRunTreeBuilder().buildTree(projectPanel.getTestProjectSelector().getSelectedTestProject().getItem());
         FileEditorManager.getInstance(Config.getProject()).closeFile(currentFile);
     }
 
@@ -356,10 +336,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         if (initialTestCaseDtos != null) initialTestCaseDtos.clear();
         if (initialTestCaseUids != null) initialTestCaseUids.clear();
         if (resultsMap != null) resultsMap.clear();
-
-        if (mainPanel != null) {
-            mainPanel.removeAll();
-        }
+        if (mainPanel != null) mainPanel.removeAll();
     }
 
     public @Nullable JComponent getPreferredFocusedComponent() {
@@ -368,5 +345,30 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
 
     public @NotNull JComponent getComponent() {
         return mainPanel;
+    }
+
+    @Override
+    public List<TestCaseDto> getAllTestCaseDtos() {
+        return initialTestCaseDtos;
+    }
+
+    @Override
+    public void updateSequenceAndSaveAll() {
+        // RunEditor لا يغير الترتيب بالسحب والإفلات، لذلك تظل فارغة
+    }
+
+    @Override
+    public void selectTestCase(TestCaseDto tc) {
+        if (tc == null) return;
+        int index = model.getItems().indexOf(tc);
+        if (index != -1) {
+            list.setSelectedIndex(index);
+            list.ensureIndexIsVisible(index);
+        }
+    }
+
+    @Override
+    public Set<String> getUnsortedIds() {
+        return Collections.emptySet(); // RunEditor لا يستخدم منطق Unsorted
     }
 }
