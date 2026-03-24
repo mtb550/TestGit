@@ -12,7 +12,7 @@ public enum KeyboardSet {
     CreateTestCase(KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK),
     Escape(KeyEvent.VK_ESCAPE, 0),
     Enter(KeyEvent.VK_ENTER, 0),
-    ContextMenu(KeyEvent.VK_CONTEXT_MENU, 0),
+    OpenContextMenu(KeyEvent.VK_CONTEXT_MENU, 0),
     UpdateTestCase(KeyEvent.VK_F2, 0),
     RunTestCase(KeyEvent.VK_F5, 0),
     NavigateToCode(KeyEvent.VK_F5, InputEvent.SHIFT_DOWN_MASK),

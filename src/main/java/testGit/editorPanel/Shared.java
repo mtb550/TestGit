@@ -3,6 +3,7 @@ package testGit.editorPanel;
 import com.intellij.icons.AllIcons;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.util.IconUtil;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import testGit.pojo.GroupType;
@@ -31,25 +32,31 @@ public class Shared {
     }
 
     public static void drawTitleActionIcons(Component c, Graphics g, int titleWidth, int y, String hoveredAction) {
-        // تطابق تام مع JBUI.scale الموجودة في مستمع الماوس!
         int startX = JBUI.scale(16) + titleWidth + JBUI.scale(10);
+        float scaleFactor = 1.5f;
 
-        Icon navIcon = AllIcons.General.ArrowRight;
+        Icon navIcon = AllIcons.Nodes.Class;
         if ("NAVIGATE".equals(hoveredAction)) {
-            // 🌟 استخدام اللون الرسمي لتظليل الأزرار في الـ IDE
-            g.setColor(JBUI.CurrentTheme.ActionButton.hoverBackground());
-            g.fillRoundRect(startX - JBUI.scale(4), y - JBUI.scale(4), navIcon.getIconWidth() + JBUI.scale(8), navIcon.getIconHeight() + JBUI.scale(8), JBUI.scale(6), JBUI.scale(6));
+            Icon scaledIcon = IconUtil.scale(navIcon, c, scaleFactor);
+            int offsetX = (scaledIcon.getIconWidth() - navIcon.getIconWidth()) / 2;
+            int offsetY = (scaledIcon.getIconHeight() - navIcon.getIconHeight()) / 2;
+            scaledIcon.paintIcon(c, g, startX - offsetX, y - offsetY);
+
+        } else {
+            navIcon.paintIcon(c, g, startX, y);
         }
-        navIcon.paintIcon(c, g, startX, y);
 
         int runStartX = startX + navIcon.getIconWidth() + JBUI.scale(8);
         Icon runIcon = AllIcons.RunConfigurations.TestState.Run;
         if ("RUN".equals(hoveredAction)) {
-            // 🌟 استخدام اللون الرسمي لتظليل الأزرار في الـ IDE
-            g.setColor(JBUI.CurrentTheme.ActionButton.hoverBackground());
-            g.fillRoundRect(runStartX - JBUI.scale(4), y - JBUI.scale(4), runIcon.getIconWidth() + JBUI.scale(8), runIcon.getIconHeight() + JBUI.scale(8), JBUI.scale(6), JBUI.scale(6));
+            Icon scaledIcon = IconUtil.scale(runIcon, c, scaleFactor);
+            int offsetX = (scaledIcon.getIconWidth() - runIcon.getIconWidth()) / 2;
+            int offsetY = (scaledIcon.getIconHeight() - runIcon.getIconHeight()) / 2;
+            scaledIcon.paintIcon(c, g, runStartX - offsetX, y - offsetY);
+
+        } else {
+            runIcon.paintIcon(c, g, runStartX, y);
         }
-        runIcon.paintIcon(c, g, runStartX, y);
     }
 
     public static class RoundedBadge extends JBLabel {

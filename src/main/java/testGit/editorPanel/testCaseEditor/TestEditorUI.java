@@ -84,14 +84,14 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         list.setDragEnabled(true);
         list.setDropMode(DropMode.INSERT);
 
-        EditorContextMenu editorContextMenu = new EditorContextMenu(this, vf.getTestSet(), list, model);
-        TestMouseListener testMouseListener = new TestMouseListener(this, list, model, vf.getTestSet(), editorContextMenu);
+        EditorCM editorCM = new EditorCM(this, vf.getTestSet(), list, model);
+        TestMouseListener testMouseListener = new TestMouseListener(this, list, model, vf.getTestSet(), editorCM);
         list.addMouseListener(testMouseListener);
 
         list.setTransferHandler(new TransferListener(this));
         list.setCellRenderer(new TestListRenderer(this));
 
-        EditorContextMenu.registerShortcuts(this, vf.getTestSet(), list, model);
+        EditorCM.registerShortcuts(this, vf.getTestSet(), list, model, editorCM);
         mainPanel.add(new JBScrollPane(list), BorderLayout.CENTER);
 
         this.statusBar = new StatusBar();
@@ -102,9 +102,9 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         refreshView();
         new TestFocusListener(this.list, vf).register(this);
 
-        ActionInteractionListener actionListener = new ActionInteractionListener(list, this);
-        list.addMouseListener(actionListener);
-        list.addMouseMotionListener(actionListener);
+        HoverListener hoverListener = new HoverListener(list, this);
+        list.addMouseListener(hoverListener);
+        list.addMouseMotionListener(hoverListener);
     }
 
     private void onDataSynced() {

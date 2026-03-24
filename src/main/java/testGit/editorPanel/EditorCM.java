@@ -12,9 +12,9 @@ import testGit.pojo.dto.dirs.DirectoryDto;
 
 import javax.swing.*;
 
-public class EditorContextMenu extends DefaultActionGroup {
+public class EditorCM extends DefaultActionGroup {
 
-    public EditorContextMenu(final BaseEditorUI ui, final DirectoryDto dir, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model) {
+    public EditorCM(final BaseEditorUI ui, final DirectoryDto dir, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model) {
         super("Editor Context Menu", true);
 
         add(new CreateTestCase(ui, dir, list, model));
@@ -29,13 +29,12 @@ public class EditorContextMenu extends DefaultActionGroup {
         add(new NavigateToCode(list));
     }
 
-    public static void registerShortcuts(BaseEditorUI ui, DirectoryDto dir, JBList<TestCaseDto> list, CollectionListModel<TestCaseDto> model) {
-        //new Escape(tree, transferHandler);
-        //new OpenNodeCM(tree, treeContextMenu);
+    public static void registerShortcuts(final BaseEditorUI ui, final DirectoryDto dir, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model, final EditorCM editorCM) {
+        new Escape(list);
+        new OpenCM(list, editorCM);
         new CreateTestCase(ui, dir, list, model);
         new RemoveTestCase(dir, list, model);
         new OpenTestCaseDetails(list);
-        new ShowTestCaseCM(ui, dir, list, model);
         new CloseTestCaseDetails(list);
         new CopyTestCaseTitle(list);
     }

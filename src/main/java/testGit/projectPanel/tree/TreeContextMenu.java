@@ -64,7 +64,7 @@ public class TreeContextMenu extends DefaultActionGroup {
 
     public static void registerShortcuts(final SimpleTree tree, final TreeTransferHandler transferHandler, final TreeContextMenu treeContextMenu) {
         new Escape(tree, transferHandler);
-        new OpenNodeCM(tree, treeContextMenu);
+        new OpenCM(tree, treeContextMenu);
 
     }
 

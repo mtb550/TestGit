@@ -7,7 +7,7 @@ import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import testGit.actions.CreateTestCase;
 import testGit.editorPanel.BaseEditorUI;
-import testGit.editorPanel.EditorContextMenu;
+import testGit.editorPanel.EditorCM;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.dirs.DirectoryDto;
 import testGit.viewPanel.ViewPanel;
@@ -19,13 +19,13 @@ import java.awt.event.MouseEvent;
 public class TestMouseListener extends MouseAdapter {
     private final JBList<TestCaseDto> list;
     private final CollectionListModel<TestCaseDto> model;
-    private final EditorContextMenu editorContextMenu;
+    private final EditorCM editorCM;
     private final DefaultActionGroup emptyMenu;
 
-    public TestMouseListener(BaseEditorUI ui, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model, final DirectoryDto dir, final EditorContextMenu editorContextMenu) {
+    public TestMouseListener(BaseEditorUI ui, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model, final DirectoryDto dir, final EditorCM editorCM) {
         this.list = list;
         this.model = model;
-        this.editorContextMenu = editorContextMenu;
+        this.editorCM = editorCM;
         this.emptyMenu = new DefaultActionGroup();
         this.emptyMenu.add(new CreateTestCase(ui, dir, list, model));
     }
@@ -51,7 +51,7 @@ public class TestMouseListener extends MouseAdapter {
                     list.setSelectedIndex(index);
                 }
                 ActionManager.getInstance()
-                        .createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, editorContextMenu)
+                        .createActionPopupMenu(ActionPlaces.TOOLWINDOW_POPUP, editorCM)
                         .getComponent().show(e.getComponent(), e.getX(), e.getY());
             } else {
                 list.clearSelection();

@@ -145,14 +145,15 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         RunInteractionListener runActionListener = new RunInteractionListener(list, this);
         list.addMouseListener(runActionListener);
 
-        ActionInteractionListener actionIconListener = new ActionInteractionListener(list, this);
-        list.addMouseListener(actionIconListener);
-        list.addMouseMotionListener(actionIconListener);
+        HoverListener hoverListener = new HoverListener(list, this);
+        list.addMouseListener(hoverListener);
+        list.addMouseMotionListener(hoverListener);
 
-        EditorContextMenu editorContextMenu = new EditorContextMenu(this, vf.getDirectoryDto(), list, model);
-        TestMouseListener testMouseListener = new TestMouseListener(this, list, model, vf.getDirectoryDto(), editorContextMenu);
+        EditorCM editorCM = new EditorCM(this, vf.getDirectoryDto(), list, model);
+        TestMouseListener testMouseListener = new TestMouseListener(this, list, model, vf.getDirectoryDto(), editorCM);
         list.addMouseListener(testMouseListener);
-        EditorContextMenu.registerShortcuts(this, vf.getDirectoryDto(), list, model);
+
+        EditorCM.registerShortcuts(this, vf.getDirectoryDto(), list, model, editorCM);
 
         list.addListSelectionListener(new SelectionListener(list, this));
 
