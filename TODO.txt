@@ -106,7 +106,20 @@ put shortcuts for passed, failed and blocked in run editor
 
 add toolbar item, show (passed, failed, blocked)
 
+add dictionary to correct test cases titles
 
+generate reports.
+
+drag and drop for test runs, multi
+
+add dasboards and result in charts for each test run. right click details the show in view panel.
+
+
+auto complete steps.
+
+grid view editor.
+
+guttur beside test case method
 
 
 

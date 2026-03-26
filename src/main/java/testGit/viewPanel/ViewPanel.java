@@ -1,5 +1,6 @@
 package testGit.viewPanel;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
@@ -8,12 +9,17 @@ import testGit.pojo.dto.TestCaseDto;
 
 public class ViewPanel {
 
-    public static ToolWindow getToolWindow() {
-        return ToolWindowManager.getInstance(Config.getProject()).getToolWindow("Details");
+    public static ToolWindow getToolWindow(Project project) {
+        if (project == null) return null;
+        return ToolWindowManager.getInstance(project).getToolWindow("Details");
     }
 
-    public static void show(TestCaseDto testCaseDto) {
-        ToolWindow tw = getToolWindow();
+    public static ToolWindow getToolWindow() {
+        return getToolWindow(Config.getProject());
+    }
+
+    public static void show(Project project, TestCaseDto testCaseDto) {
+        ToolWindow tw = getToolWindow(project);
         if (tw != null) {
             if (!tw.isVisible()) tw.show();
 
@@ -24,6 +30,10 @@ public class ViewPanel {
                 viewer.update(testCaseDto);
             }
         }
+    }
+
+    public static void show(TestCaseDto testCaseDto) {
+        show(Config.getProject(), testCaseDto);
     }
 
     public static void hide() {

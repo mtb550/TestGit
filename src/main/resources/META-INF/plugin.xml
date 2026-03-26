@@ -79,6 +79,10 @@
                 bundle="messages.bundle"
                 groupId="tools"
         />
+
+        <!-- gutter -->
+        <codeInsight.lineMarkerProvider language="JAVA"
+                                        implementationClass="testGit.gutter.TestCaseGutterIconProvider"/>
     </extensions>
 
     <!--    <actions>-->
