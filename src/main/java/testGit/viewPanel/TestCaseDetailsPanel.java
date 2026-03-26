@@ -1,13 +1,17 @@
 package testGit.viewPanel;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.*;
+import com.intellij.util.IconUtil;
 import com.intellij.util.ui.JBUI;
 import lombok.Getter;
 import testGit.actions.CancelTestCaseEdit;
 import testGit.actions.EditTestCase;
 import testGit.actions.SaveTestCase;
+import testGit.actions.NavigateToCode;
+import testGit.actions.RunTestCase;
 import testGit.pojo.DB;
 import testGit.pojo.Groups;
 import testGit.pojo.Priority;
@@ -16,6 +20,8 @@ import testGit.pojo.dto.TestCaseHistoryDto;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -170,6 +176,74 @@ public class TestCaseDetailsPanel {
     private void setupViewMode(GridBagConstraints gbc, int row) {
         addRow("ID:", createValueLabel(currentTestCaseDto.getId()), detailsTab, gbc, row++);
         addRow("Title:", createValueLabel(currentTestCaseDto.getTitle()), detailsTab, gbc, row++);
+
+        JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        actionsPanel.setOpaque(false);
+
+        Icon navIcon = AllIcons.Nodes.Class;
+        JLabel navLabel = new JLabel(navIcon);
+        navLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        navLabel.setToolTipText("Navigate to Code");
+
+        int navTargetWidth = (int) (navIcon.getIconWidth() * 1.5f);
+        int navTargetHeight = (int) (navIcon.getIconHeight() * 1.5f);
+        navLabel.setPreferredSize(new Dimension(navTargetWidth, navTargetHeight));
+        navLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        navLabel.setVerticalAlignment(SwingConstants.CENTER);
+
+        navLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                navLabel.setIcon(IconUtil.scale(navIcon, navLabel, 1.5f));
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                navLabel.setIcon(navIcon);
+            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                NavigateToCode.execute(currentTestCaseDto);
+            }
+        });
+
+        Icon runIcon = AllIcons.RunConfigurations.TestState.Run;
+        JLabel runLabel = new JLabel(runIcon);
+        runLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        runLabel.setToolTipText("Run Test");
+
+        int runTargetWidth = (int) (runIcon.getIconWidth() * 1.5f);
+        int runTargetHeight = (int) (runIcon.getIconHeight() * 1.5f);
+        runLabel.setPreferredSize(new Dimension(runTargetWidth, runTargetHeight));
+        runLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        runLabel.setVerticalAlignment(SwingConstants.CENTER);
+
+        runLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                runLabel.setIcon(IconUtil.scale(runIcon, runLabel, 1.5f));
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                runLabel.setIcon(runIcon);
+            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                RunTestCase.execute(currentTestCaseDto);
+            }
+        });
+
+        actionsPanel.add(navLabel);
+        actionsPanel.add(Box.createHorizontalStrut(JBUI.scale(4))); // مسافة صغيرة
+        actionsPanel.add(runLabel);
+
+        gbc.gridx = 1;
+        gbc.gridy = row++;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        detailsTab.add(actionsPanel, gbc);
+
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
         addRow("Expected Result:", createValueLabel(currentTestCaseDto.getExpected()), detailsTab, gbc, row++);
         addRow("Steps:", createValueLabel(currentTestCaseDto.getSteps()), detailsTab, gbc, row++);
         addRow("Priority:", createValueLabel(currentTestCaseDto.getPriority() != null ? currentTestCaseDto.getPriority().getDescription() : "-"), detailsTab, gbc, row++);
