@@ -26,7 +26,9 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TestCaseDetailsPanel {
     @Getter
@@ -315,7 +317,7 @@ public class TestCaseDetailsPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         addRow("Expected Result:", createValueLabel(currentTestCaseDto.getExpected()), detailsTab, gbc, row++);
-        addRow("Steps:", createValueLabel(currentTestCaseDto.getSteps()), detailsTab, gbc, row++);
+        addRow("Steps:", createStepsLabel(currentTestCaseDto.getSteps()), detailsTab, gbc, row++);
         addRow("Automation Ref:", createValueLabel(currentTestCaseDto.getAutoRef()), detailsTab, gbc, row++);
         addRow("Business Ref:", createValueLabel(currentTestCaseDto.getBusiRef()), detailsTab, gbc, row++);
         addRow("Module:", createValueLabel(currentTestCaseDto.getModule()), detailsTab, gbc, row++);
@@ -331,7 +333,7 @@ public class TestCaseDetailsPanel {
         currentTestCaseDto.setTitle(titleField.getText().trim());
         currentTestCaseDto.setExpected(expectedArea.getText().trim());
 
-        currentTestCaseDto.setSteps(stepsEditor.getStepsText());
+        currentTestCaseDto.setSteps(stepsEditor.getStepsList());
 
         if (priorityComboBox.getSelectedItem() != null) {
             currentTestCaseDto.setPriority((Priority) priorityComboBox.getSelectedItem());
@@ -357,6 +359,27 @@ public class TestCaseDetailsPanel {
         bugTab.add(new JBLabel("No bugs found for this test case."), BorderLayout.NORTH);
     }
 
+    private JBLabel createStepsLabel(List<String> steps) {
+        if (steps == null || steps.isEmpty()) {
+            JBLabel label = new JBLabel("-");
+            label.setFont(JBUI.Fonts.label(14));
+            return label;
+        }
+
+        StringBuilder html = new StringBuilder("<html><body style='padding: 0; margin: 0;'>");
+        for (int i = 0; i < steps.size(); i++) {
+            String escaped = steps.get(i).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+            html.append("<p style='margin-top: 3px; margin-bottom: 5px;'>")
+                    .append("<b>").append((i + 1)).append("-</b> ").append(escaped)
+                    .append("</p>");
+        }
+        html.append("</body></html>");
+
+        JBLabel label = new JBLabel(html.toString());
+        label.setFont(JBUI.Fonts.label(14));
+        return label;
+    }
+
     private JBLabel createValueLabel(String text) {
         if (text == null || text.trim().isEmpty()) {
             JBLabel label = new JBLabel("-");
@@ -365,9 +388,14 @@ public class TestCaseDetailsPanel {
         }
 
         String escaped = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
-        String htmlText = "<html><body>" + escaped.replace("\n", "<br>") + "</body></html>";
+        StringBuilder html = new StringBuilder("<html><body style='padding: 0; margin: 0;'>");
+        String[] lines = escaped.split("\n");
+        for (String line : lines) {
+            html.append("<p style='margin-top: 3px; margin-bottom: 5px;'>").append(line).append("</p>");
+        }
+        html.append("</body></html>");
 
-        JBLabel label = new JBLabel(htmlText);
+        JBLabel label = new JBLabel(html.toString());
         label.setFont(JBUI.Fonts.label(14));
         return label;
     }
@@ -375,7 +403,7 @@ public class TestCaseDetailsPanel {
     private void addRow(String label, JComponent input, JBPanel<?> panel, GridBagConstraints gbc, int row) {
         JBLabel keyLabel = new JBLabel(label);
         keyLabel.setFont(JBUI.Fonts.label(14));
-        keyLabel.setForeground(Gray._120); // لون رمادي خفيف لتمييز العنوان عن القيمة
+        keyLabel.setForeground(Gray._120);
 
         gbc.gridx = 0;
         gbc.gridy = row;
@@ -390,18 +418,18 @@ public class TestCaseDetailsPanel {
     }
 
     // =========================================================================
-    // 🌟 محرر الخطوات الذكي (Smart Steps Editor Component)
-    // =========================================================================
+
     private static class StepsEditorComponent extends JBPanel<StepsEditorComponent> {
         private final JBTextArea rawArea = new JBTextArea();
-        private final JBPanel<?> listPanel = new JBPanel<>();
+        private final JBPanel<?> listPanel = new JBPanel<>(new BorderLayout());
+        private final JBPanel<?> fieldsContainer = new JBPanel<>();
         private final List<JBTextField> fields = new ArrayList<>();
         private final JButton toggleBtn = new JButton("Switch to Text Area");
         private final JPanel cards;
         private final CardLayout cardLayout;
         private boolean rawMode = false;
 
-        public StepsEditorComponent(String initialText) {
+        public StepsEditorComponent(List<String> initialSteps) {
             super(new BorderLayout());
 
             cardLayout = new CardLayout();
@@ -413,7 +441,20 @@ public class TestCaseDetailsPanel {
             JBScrollPane rawScroll = new JBScrollPane(rawArea);
             rawScroll.setPreferredSize(new Dimension(-1, 120));
 
-            listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+            fieldsContainer.setLayout(new BoxLayout(fieldsContainer, BoxLayout.Y_AXIS));
+
+            JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            JButton addBtn = new JButton("+ Add Step");
+            addBtn.addActionListener(e -> {
+                addStepField("");
+                fieldsContainer.revalidate();
+                fieldsContainer.repaint();
+            });
+            btnPanel.add(addBtn);
+            btnPanel.setBorder(JBUI.Borders.emptyTop(6));
+
+            listPanel.add(fieldsContainer, BorderLayout.CENTER);
+            listPanel.add(btnPanel, BorderLayout.SOUTH);
 
             cards.add(listPanel, "LIST");
             cards.add(rawScroll, "RAW");
@@ -425,68 +466,52 @@ public class TestCaseDetailsPanel {
             add(topBar, BorderLayout.NORTH);
             add(cards, BorderLayout.CENTER);
 
-            if (initialText == null) initialText = "";
+            if (initialSteps == null) initialSteps = new ArrayList<>();
 
-            // 💡 خدعة ذكية: إذا كانت الخطوات القديمة ملتصقة في سطر واحد "1- ... 2- ..." نقوم بفصلها تلقائياً بمسافات جديدة
-            if (!initialText.isEmpty() && !initialText.contains("\n") && initialText.matches(".*\\s\\d+[-.].*")) {
-                initialText = initialText.replaceAll("(\\s)(?=\\d+[-.])", "\n").trim();
-            }
-
-            buildListFromText(initialText);
-            rawArea.setText(initialText);
+            buildListFromSteps(initialSteps);
+            rawArea.setText(String.join("\n", initialSteps));
 
             cardLayout.show(cards, "LIST");
         }
 
         private void toggleMode() {
             if (rawMode) {
-                // العودة إلى وضع القائمة (List)
-                buildListFromText(rawArea.getText());
+                List<String> lines = Arrays.stream(rawArea.getText().split("\n"))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .collect(Collectors.toList());
+                buildListFromSteps(lines);
                 cardLayout.show(cards, "LIST");
                 toggleBtn.setText("Switch to Text Area");
                 rawMode = false;
             } else {
-                // الذهاب إلى وضع النص (Raw)
-                rawArea.setText(getTextFromList());
+                rawArea.setText(String.join("\n", getStepsList()));
                 cardLayout.show(cards, "RAW");
                 toggleBtn.setText("Switch to List");
                 rawMode = true;
             }
         }
 
-        private void buildListFromText(String text) {
-            listPanel.removeAll();
+        private void buildListFromSteps(List<String> steps) {
+            fieldsContainer.removeAll();
             fields.clear();
 
-            String[] lines = text.split("\n");
-            for (String line : lines) {
-                // إزالة الأرقام القديمة مثل "1- " أو "1. " لكي لا تتكرر
-                String cleanLine = line.replaceFirst("^\\d+[-.]\\s*", "").trim();
-                if (!cleanLine.isEmpty()) {
-                    addStepField(cleanLine);
+            for (String step : steps) {
+                if (!step.trim().isEmpty()) {
+                    addStepField(step);
                 }
             }
             if (fields.isEmpty()) {
                 addStepField("");
             }
 
-            JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-            JButton addBtn = new JButton("+ Add Step");
-            addBtn.addActionListener(e -> {
-                addStepField("");
-                listPanel.revalidate();
-                listPanel.repaint();
-            });
-            btnPanel.add(addBtn);
-            listPanel.add(btnPanel);
-
-            listPanel.revalidate();
-            listPanel.repaint();
+            fieldsContainer.revalidate();
+            fieldsContainer.repaint();
         }
 
         private void addStepField(String text) {
             JPanel row = new JPanel(new BorderLayout(5, 5));
-            row.setBorder(JBUI.Borders.empty(2, 0));
+            row.setBorder(JBUI.Borders.empty(4, 0));
 
             JBLabel indexLabel = new JBLabel((fields.size() + 1) + "- ");
             indexLabel.setForeground(JBColor.GRAY);
@@ -501,24 +526,19 @@ public class TestCaseDetailsPanel {
             removeBtn.setToolTipText("Remove step");
             removeBtn.addActionListener(e -> {
                 fields.remove(field);
-                listPanel.remove(row);
+                fieldsContainer.remove(row);
                 reindexLabels();
-                listPanel.revalidate();
-                listPanel.repaint();
+                fieldsContainer.revalidate();
+                fieldsContainer.repaint();
             });
             row.add(removeBtn, BorderLayout.EAST);
 
-            int count = listPanel.getComponentCount();
-            if (count > 0) {
-                listPanel.add(row, count - 1); // وضع الخطوة قبل زر الإضافة
-            } else {
-                listPanel.add(row);
-            }
+            fieldsContainer.add(row);
         }
 
         private void reindexLabels() {
             int index = 1;
-            for (Component comp : listPanel.getComponents()) {
+            for (Component comp : fieldsContainer.getComponents()) {
                 if (comp instanceof JPanel row && row.getLayout() instanceof BorderLayout) {
                     Component west = ((BorderLayout) row.getLayout()).getLayoutComponent(BorderLayout.WEST);
                     if (west instanceof JBLabel label) {
@@ -529,26 +549,18 @@ public class TestCaseDetailsPanel {
             }
         }
 
-        public String getStepsText() {
+        public List<String> getStepsList() {
             if (rawMode) {
-                return rawArea.getText().trim();
+                return Arrays.stream(rawArea.getText().split("\n"))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .collect(Collectors.toList());
             } else {
-                return getTextFromList();
+                return fields.stream()
+                        .map(f -> f.getText().trim())
+                        .filter(s -> !s.isEmpty())
+                        .collect(Collectors.toList());
             }
-        }
-
-        private String getTextFromList() {
-            StringBuilder sb = new StringBuilder();
-            int index = 1;
-            for (JBTextField field : fields) {
-                String val = field.getText().trim();
-                if (!val.isEmpty()) {
-                    if (!sb.isEmpty()) sb.append("\n");
-                    sb.append(index).append("- ").append(val);
-                    index++;
-                }
-            }
-            return sb.toString();
         }
     }
 }

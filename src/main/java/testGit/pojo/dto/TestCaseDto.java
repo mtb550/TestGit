@@ -32,7 +32,7 @@ public class TestCaseDto {
 
     private String expected;
 
-    private String steps;
+    private List<String> steps;
 
     private Priority priority;
 

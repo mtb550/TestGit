@@ -33,7 +33,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class ImportExcel extends DumbAwareAction {
 
@@ -125,7 +128,7 @@ public class ImportExcel extends DumbAwareAction {
                 testCaseDto.setId(generatedUuid);
                 testCaseDto.setTitle(title);
                 testCaseDto.setExpected(getFieldSafe(recordset, "expected"));
-                testCaseDto.setSteps(getFieldSafe(recordset, "steps"));
+                testCaseDto.setSteps(parseStepsSafe(getFieldSafe(recordset, "steps")));
 
                 testCaseDto.setPriority(parsePrioritySafe(getFieldSafe(recordset, "priority")));
 
@@ -173,7 +176,23 @@ public class ImportExcel extends DumbAwareAction {
         }
     }
 
-    // Helper to map Excel string to Priority Enum
+    private List<String> parseStepsSafe(String stepsRaw) {
+        if (stepsRaw == null || stepsRaw.isBlank()) {
+            return new ArrayList<>();
+        }
+
+        String text = stepsRaw;
+
+        if (!text.contains("\n") && text.matches(".*\\s\\d+[-.].*")) {
+            text = text.replaceAll("(\\s)(?=\\d+[-.])", "\n");
+        }
+
+        return Arrays.stream(text.split("\n"))
+                .map(line -> line.replaceFirst("^\\d+[-.]\\s*", "").trim()) // إزالة الأرقام اليدوية القديمة
+                .filter(line -> !line.isEmpty())
+                .collect(Collectors.toList());
+    }
+
     private Priority parsePrioritySafe(String priorityStr) {
         if (priorityStr == null || priorityStr.isBlank()) {
             return null;
