@@ -1,6 +1,7 @@
 package testGit.pojo.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,9 +17,8 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TestCaseDto {
-
-    private int uid;
 
     private List<String> path;
 
@@ -26,7 +26,7 @@ public class TestCaseDto {
 
     private Boolean isHead;
 
-    private String id;
+    private String id; // next step, change this to UUID
 
     private String title;
 

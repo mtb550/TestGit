@@ -1,5 +1,6 @@
 package testGit.editorPanel.testCaseEditor;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import testGit.editorPanel.UnifiedVirtualFile;
@@ -17,13 +18,19 @@ import java.util.Optional;
 public class TestEditor {
 
     public static void open(final TestSetDirectoryDto ts) {
-        FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
 
-        VirtualFile newVirtualFile = createVirtualFile(ts);
-        editorManager.openFile(newVirtualFile, true);
+            VirtualFile newVirtualFile = createVirtualFile(ts);
+
+            ApplicationManager.getApplication().invokeLater(() -> {
+                FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
+                editorManager.openFile(newVirtualFile, true);
+            });
+        });
     }
 
     private static VirtualFile createVirtualFile(TestSetDirectoryDto testSetDirectory) {
+
         List<TestCaseDto> testCaseDtos = Optional.of(testSetDirectory.getPath().toFile())
                 .filter(f -> f.exists() && f.isDirectory())
                 .map(f -> f.listFiles((d, name) -> name.endsWith(".json")))
@@ -38,9 +45,11 @@ public class TestEditor {
 
     private static TestCaseDto addTestCase(File file) {
         try {
+
             return Config.getMapper().readValue(file, TestCaseDto.class);
+
         } catch (Exception e) {
-            Notifier.error("Read Test Case failed", e.getMessage());
+            Notifier.error("Read Test Case failed", file.getName() + ": " + e.getMessage());
             e.printStackTrace(System.err);
             return null;
         }

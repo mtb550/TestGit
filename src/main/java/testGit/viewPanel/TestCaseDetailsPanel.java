@@ -311,7 +311,6 @@ public class TestCaseDetailsPanel {
         addRow("Steps:", createValueLabel(currentTestCaseDto.getSteps()), detailsTab, gbc, row++);
         addRow("Automation Ref:", createValueLabel(currentTestCaseDto.getAutoRef()), detailsTab, gbc, row++);
         addRow("Business Ref:", createValueLabel(currentTestCaseDto.getBusiRef()), detailsTab, gbc, row++);
-        addRow("UID:", createValueLabel(String.valueOf(currentTestCaseDto.getUid())), detailsTab, gbc, row++);
         addRow("Module:", createValueLabel(currentTestCaseDto.getModule()), detailsTab, gbc, row++);
         addRow("Created By:", createValueLabel(currentTestCaseDto.getCreateBy()), detailsTab, gbc, row++);
         addRow("Updated By:", createValueLabel(currentTestCaseDto.getUpdateBy()), detailsTab, gbc, row++);

@@ -1,5 +1,6 @@
 package testGit.editorPanel.testRunEditor;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import testGit.editorPanel.UnifiedVirtualFile;
 import testGit.pojo.Config;
@@ -25,51 +26,58 @@ import java.util.stream.Stream;
 public class RunEditor {
 
     public static void open(TestRunDirectoryDto tr, ProjectPanel projectPanel) {
-        try {
-            Path jsonFilePath = tr.getPath().resolve(tr.getName() + ".json");
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try {
+                Path jsonFilePath = tr.getPath().resolve(tr.getName() + ".json");
 
-            if (!Files.exists(jsonFilePath)) {
-                System.err.println("JSON file not found: " + jsonFilePath);
-                return;
+                if (!Files.exists(jsonFilePath)) {
+                    System.err.println("JSON file not found: " + jsonFilePath);
+                    return;
+                }
+
+                TestRunDto metadata = Config.getMapper().readValue(jsonFilePath.toFile(), TestRunDto.class);
+                List<TestCaseDto> testCaseDtos = loadTestCasesForRun(metadata, projectPanel);
+                List<TestCaseDto> sorted = TestCaseSorter.sortTestCases(testCaseDtos);
+
+                UnifiedVirtualFile virtualFile = new UnifiedVirtualFile(
+                        tr,
+                        buildFilteredModel(sorted),
+                        sorted,
+                        EditorType.TEST_RUN_OPENING,
+                        projectPanel
+                );
+                virtualFile.setMetadata(metadata);
+
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    FileEditorManager.getInstance(Config.getProject()).openFile(virtualFile, true);
+                });
+
+            } catch (IOException e) {
+                System.err.println("Failed to open Test Run: " + e.getMessage());
             }
+        });
+    }
 
-            TestRunDto metadata = Config.getMapper().readValue(jsonFilePath.toFile(), TestRunDto.class);
-            List<TestCaseDto> testCaseDtos = loadTestCasesForRun(metadata, projectPanel);
-            List<TestCaseDto> sorted = TestCaseSorter.sortTestCases(testCaseDtos);
+    public static void create(TestRunDirectoryDto tr, ProjectPanel projectPanel, TestProjectDirectoryDto tp, TestRunDto metadata) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            Path testCasesPath = tp.getTestCasesDirectory().getPath();
+
+            DefaultTreeModel fullModel = new DefaultTreeModel(buildDirectoryTree(testCasesPath, true));
 
             UnifiedVirtualFile virtualFile = new UnifiedVirtualFile(
                     tr,
-                    buildFilteredModel(sorted),
-                    sorted,
-                    EditorType.TEST_RUN_OPENING,
+                    fullModel,
+                    new ArrayList<>(),
+                    EditorType.TEST_RUN_CREATION,
                     projectPanel
             );
             virtualFile.setMetadata(metadata);
 
-            FileEditorManager.getInstance(Config.getProject()).openFile(virtualFile, true);
-        } catch (IOException e) {
-            System.err.println("Failed to open Test Run: " + e.getMessage());
-        }
+            ApplicationManager.getApplication().invokeLater(() -> {
+                FileEditorManager.getInstance(Config.getProject()).openFile(virtualFile, true);
+            });
+        });
     }
-
-    public static void create(TestRunDirectoryDto tr, ProjectPanel projectPanel, TestProjectDirectoryDto tp, TestRunDto metadata) {
-        Path testCasesPath = tp.getTestCasesDirectory().getPath();
-
-        DefaultTreeModel fullModel = new DefaultTreeModel(buildDirectoryTree(testCasesPath, true));
-
-        UnifiedVirtualFile virtualFile = new UnifiedVirtualFile(
-                tr,
-                fullModel,
-                new ArrayList<>(),
-                EditorType.TEST_RUN_CREATION,
-                projectPanel
-        );
-        virtualFile.setMetadata(metadata);
-
-        FileEditorManager.getInstance(Config.getProject()).openFile(virtualFile, true);
-    }
-
-    // --- Private helpers ---
 
     private static List<TestCaseDto> loadTestCasesForRun(TestRunDto metadata, ProjectPanel projectPanel) {
         if (metadata.getResults() == null) return Collections.emptyList();
@@ -94,7 +102,6 @@ public class RunEditor {
                                 cases.add(tc);
                             }
                         } catch (Exception ignored) {
-                            // تجاهل الملفات غير الصالحة بصمت
                         }
                     });
         } catch (IOException e) {
@@ -113,7 +120,7 @@ public class RunEditor {
     private static DefaultMutableTreeNode buildDirectoryTree(Path folder, boolean isRoot) {
         Object label = isRoot
                 ? "Test Cases (" + folder.getParent().getFileName().toString() + ")"
-                : resolveDirectoryObject(folder); // 🌟 استخدام دالة مساعدة ذكية للمابرز
+                : resolveDirectoryObject(folder);
 
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(label);
 

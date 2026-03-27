@@ -41,7 +41,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
 
     private final UnifiedVirtualFile vf;
     private final List<TestCaseDto> initialTestCaseDtos;
-    private final Set<Integer> initialTestCaseUids;
+    private final Set<String> initialTestCaseIds;
     private JBPanel<?> mainPanel = new JBPanel<>(new BorderLayout());
 
     private JBList<TestCaseDto> list;
@@ -71,8 +71,8 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
 
         List<TestCaseDto> cases = vf.getTestCaseDtos() != null ? vf.getTestCaseDtos() : Collections.emptyList();
         this.initialTestCaseDtos = TestCaseSorter.sortTestCases(cases);
-        this.initialTestCaseUids = this.initialTestCaseDtos.stream()
-                .map(TestCaseDto::getUid)
+        this.initialTestCaseIds = this.initialTestCaseDtos.stream()
+                .map(TestCaseDto::getId)
                 .collect(Collectors.toSet());
 
         createEditorPanel();
@@ -276,7 +276,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         Object userObj = node.getUserObject();
         CheckedTreeNode newNode = new CheckedTreeNode(userObj);
 
-        if (userObj instanceof TestCaseDto tc && initialTestCaseUids.contains(tc.getUid())) {
+        if (userObj instanceof TestCaseDto tc && initialTestCaseIds.contains(tc.getId())) {
             newNode.setChecked(true);
         }
         for (int i = 0; i < node.getChildCount(); i++) {
@@ -340,7 +340,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     @Override
     public void dispose() {
         if (initialTestCaseDtos != null) initialTestCaseDtos.clear();
-        if (initialTestCaseUids != null) initialTestCaseUids.clear();
+        if (initialTestCaseIds != null) initialTestCaseIds.clear();
         if (resultsMap != null) resultsMap.clear();
         if (mainPanel != null) mainPanel.removeAll();
         BaseEditorUI.super.dispose();

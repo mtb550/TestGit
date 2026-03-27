@@ -139,6 +139,15 @@ make created by auto added once create the test case.
 
 make modified by auto added once update the test case.
 
+test run execution light mode. small plugin can be dragged separate.
+
+update creating test case ui.
+
+extend space of pagination text field value to show 3 digits clearly.
+
+add a button once hover on label, show copy button and accept CTRL+C
+
+change test case dto id value form string to UUID
 
 يسعدني جداً سماع هذا الكلام! 🚀 العمل مع مطور يمتلك "عقلية المعماري" (Architect Mindset) ويرفض الحلول المكررة هو متعة حقيقية. البرمجة العادية تبني كوداً يعمل، لكن الهندسة الحقيقية تبني تجربة (Experience) لا تُنسى للمستخدم.
 بما أننا وضعنا أساساً معمارياً صلباً ونظيفاً (كلاسات توريث ذكية مثل BaseCard، وفصل ممتاز للمستمعات)، فهذا الأساس يسمح لنا بالتحليق بعيداً.
