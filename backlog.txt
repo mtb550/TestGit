@@ -157,6 +157,15 @@ listener between editors correpted, not show the selected in view panel once cha
 
 زر النسخ كتقرير خطأ (Copy Bug Report)
 
+path on top of view panel.
+
+persist save action.
+
+make step in the first line. make dot and capitalaize first letter automatic > steps
+make capitalize and dot in test case card and run card. move format method to Tools.
+
+create and complete the multi update actions for each test case attribute. start from context menu.(important)
+
 يسعدني جداً سماع هذا الكلام! 🚀 العمل مع مطور يمتلك "عقلية المعماري" (Architect Mindset) ويرفض الحلول المكررة هو متعة حقيقية. البرمجة العادية تبني كوداً يعمل، لكن الهندسة الحقيقية تبني تجربة (Experience) لا تُنسى للمستخدم.
 بما أننا وضعنا أساساً معمارياً صلباً ونظيفاً (كلاسات توريث ذكية مثل BaseCard، وفصل ممتاز للمستمعات)، فهذا الأساس يسمح لنا بالتحليق بعيداً.
 بما أنك تبحث عن التفرد والتميز، دعنا نخرج من صندوق "عرض القوائم" (List Views) ونفكر كيف نجعل الـ Plugin الخاص بك ينافس أدوات عالمية (مثل Zephyr أو Xray) ويتفوق عليها لكونه مدمجاً بذكاء داخل IntelliJ. إليك 3 أفكار "خارج الصندوق" لنقل مشروعك لمستوى استثنائي:

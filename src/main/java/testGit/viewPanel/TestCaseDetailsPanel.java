@@ -2,6 +2,7 @@ package testGit.viewPanel;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.*;
@@ -73,6 +74,12 @@ public class TestCaseDetailsPanel {
         new EditTestCase(this, detailsTab);
         new CancelTestCaseEdit(detailsTab);
         //new SaveTestCase(this, detailsTab);
+    }
+
+    private static String format(String text) {
+        if (StringUtil.isEmptyOrSpaces(text)) return "";
+        String s = text.trim();
+        return StringUtil.capitalize(s) + ".";
     }
 
     public void update(TestCaseDto testCaseDto) {
@@ -205,7 +212,7 @@ public class TestCaseDetailsPanel {
         gbc.insets = JBUI.insets(8, 16, 2, 16);
         detailsTab.add(idBadge, gbc);
 
-        JBLabel mainTitleLabel = new JBLabel(currentTestCaseDto.getTitle());
+        JBLabel mainTitleLabel = new JBLabel(format(currentTestCaseDto.getTitle()));
         mainTitleLabel.setFont(JBFont.label().deriveFont(Font.BOLD, UIUtil.getLabelFont().getSize() + 10.0f));
         mainTitleLabel.setForeground(UIUtil.getLabelForeground());
 
@@ -313,8 +320,6 @@ public class TestCaseDetailsPanel {
         detailsTab.add(badgesPanel, gbc);
 
         gbc.gridwidth = 1;
-        gbc.insets = JBUI.insets(6, 16);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         addRow("Expected Result:", createValueLabel(currentTestCaseDto.getExpected()), detailsTab, gbc, row++);
         addRow("Steps:", createStepsLabel(currentTestCaseDto.getSteps()), detailsTab, gbc, row++);
@@ -368,7 +373,9 @@ public class TestCaseDetailsPanel {
 
         StringBuilder html = new StringBuilder("<html><body style='padding: 0; margin: 0;'>");
         for (int i = 0; i < steps.size(); i++) {
-            String escaped = steps.get(i).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+            String formatted = format(steps.get(i));
+            String escaped = formatted.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+
             html.append("<p style='margin-top: 3px; margin-bottom: 5px;'>")
                     .append("<b>").append((i + 1)).append("-</b> ").append(escaped)
                     .append("</p>");
@@ -387,7 +394,9 @@ public class TestCaseDetailsPanel {
             return label;
         }
 
-        String escaped = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+        String formatted = format(text);
+        String escaped = formatted.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+
         StringBuilder html = new StringBuilder("<html><body style='padding: 0; margin: 0;'>");
         String[] lines = escaped.split("\n");
         for (String line : lines) {
@@ -409,11 +418,14 @@ public class TestCaseDetailsPanel {
         gbc.gridy = row;
         gbc.weightx = 0;
         gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.insets = JBUI.insets(8, 16, 6, 10);
         panel.add(keyLabel, gbc);
 
         gbc.gridx = 1;
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = JBUI.insets(6, 0, 6, 16);
         panel.add(input, gbc);
     }
 
