@@ -1,6 +1,7 @@
 package testGit.viewPanel;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.ide.projectView.ProjectView;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.util.text.StringUtil;
@@ -17,6 +18,7 @@ import testGit.actions.EditTestCase;
 import testGit.actions.NavigateToCode;
 import testGit.actions.RunTestCase;
 import testGit.editorPanel.Shared;
+import testGit.pojo.Config;
 import testGit.pojo.DB;
 import testGit.pojo.Groups;
 import testGit.pojo.Priority;
@@ -35,23 +37,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TestCaseDetailsPanel {
-    private final Project project;
 
     @Getter
-    private final JBPanel<?> panel;
+    private final JBPanel<?> panel, detailsTab, historyTab, bugTab;
+
     private final JBTabbedPane tabbedPane;
-    @Getter
-    private final JBPanel<?> detailsTab;
-    @Getter
-    private final JBPanel<?> historyTab;
-    @Getter
-    private final JBPanel<?> bugTab;
 
-    private JBTextField titleField, expectedArea;
-    private JBTextField autoRefField, busiRefField;
+    private JBTextField titleField, expectedArea, autoRefField, busiRefField;
+
     private StepsEditorComponent stepsEditor;
 
     private ComboBox<Priority> priorityComboBox;
+
     private JBList<Groups> groupsList;
 
     private JButton saveButton;
@@ -64,9 +61,7 @@ public class TestCaseDetailsPanel {
     @Getter
     private boolean isEditing = false;
 
-    public TestCaseDetailsPanel(final Project project) {
-        this.project = project;
-
+    public TestCaseDetailsPanel() {
         panel = new JBPanel<>(new BorderLayout());
         tabbedPane = new JBTabbedPane();
 
@@ -132,15 +127,16 @@ public class TestCaseDetailsPanel {
 
         detailsTab.revalidate();
         detailsTab.repaint();
+
     }
 
     private void setupEditMode(final GridBagConstraints gbc, int row) {
-        gbc.gridx = 0;
-        gbc.gridy = row++;
-        gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = JBUI.insets(12, 0, 8, 0);
-        detailsTab.add(createPathPanel(currentPath), gbc);
+//        gbc.gridx = 0;
+//        gbc.gridy = row++;
+//        gbc.gridwidth = 2;
+//        gbc.fill = GridBagConstraints.HORIZONTAL;
+//        gbc.insets = JBUI.insets(12, 0, 8, 0);
+//        detailsTab.add(navigationBar(currentPath), gbc);
 
         titleField = new JBTextField(currentTestCaseDto.getTitle());
         expectedArea = new JBTextField(currentTestCaseDto.getExpected());
@@ -212,7 +208,7 @@ public class TestCaseDetailsPanel {
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = JBUI.insetsTop(12);
-        detailsTab.add(createPathPanel(currentPath), gbc);
+        detailsTab.add(navigationBar(currentPath), gbc);
 
         JBLabel idBadge = new JBLabel(currentTestCaseDto.getId()) {
             @Override
@@ -458,43 +454,97 @@ public class TestCaseDetailsPanel {
 
     // =========================================================================
 
-    private JComponent createPathPanel(final Path currentPath) {
+    private JComponent navigationBar(Path currentPath) {
+
         JPanel pathPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pathPanel.setOpaque(false);
 
-        if (currentPath == null) {
+        if (currentPath == null || Config.getProject() == null) {
             return pathPanel;
         }
 
-        List<String> pathList = new ArrayList<>();
-        String basePathString = project.getBasePath();
+        List<File> fileList = new ArrayList<>();
+        String basePathString = Config.getProject().getBasePath();
         File currentDir = currentPath.toFile();
 
         if (basePathString != null) {
             File baseDir = new File(basePathString);
-
             while (currentDir != null && !currentDir.getAbsolutePath().equalsIgnoreCase(baseDir.getAbsolutePath())) {
-                pathList.add(0, currentDir.getName());
+                fileList.add(0, currentDir);
                 currentDir = currentDir.getParentFile();
             }
-        }
-        pathList.add(0, project.getName());
 
-        for (int i = 0; i < pathList.size(); i++) {
-            JBLabel folderLabel = new JBLabel(pathList.get(i));
-            folderLabel.setFont(JBUI.Fonts.smallFont());
-            folderLabel.setForeground(JBColor.GRAY);
+            fileList.add(0, baseDir);
+        } else {
+            fileList.add(0, currentDir);
+        }
+
+        for (int i = 0; i < fileList.size(); i++) {
+            Project project = Config.getProject();
+            File file = fileList.get(i);
+            String labelText = (i == 0) ? project.getName() : file.getName();
+            boolean isTestSet = (i == fileList.size() - 1);
+
+            JBLabel folderLabel = new JBLabel(labelText);
+
+            folderLabel.setFont(JBUI.Fonts.label(14));
+            folderLabel.setForeground(Gray._120);
+            folderLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+            folderLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    folderLabel.setForeground(JBUI.CurrentTheme.Link.Foreground.ENABLED);
+                    setUnderline(folderLabel, true);
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    folderLabel.setForeground(Gray._120);
+                    setUnderline(folderLabel, false);
+                }
+
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    com.intellij.openapi.vfs.VirtualFile vf =
+                            com.intellij.openapi.vfs.LocalFileSystem.getInstance().findFileByIoFile(file);
+                    if (vf == null) return;
+
+                    if (isTestSet) {
+                        testGit.pojo.dto.dirs.TestSetDirectoryDto ts = new testGit.pojo.dto.dirs.TestSetDirectoryDto();
+                        ts.setPath(file.toPath());
+                        ts.setName(file.getName());
+                        testGit.editorPanel.testCaseEditor.TestEditor.open(ts);
+
+                        /* 💡 ملاحظة هامة حول "Focus on selected test case":
+                         لكي ينتقل التحديد (Selection) إلى الـ Test Case المفتوح حالياً بمجرد فتح الإضافة،
+                         ستحتاج إلى تمرير الـ ID إلى دالة TestEditor.open(ts, currentTestCaseDto.getId())
+                         ثم جعل الإضافة الخاصة بك تبحث عن هذا الـ ID في الـ JBList وتعمل list.setSelectedValue(dto)
+                        */
+                    } else {
+                        ProjectView.getInstance(project).select(null, vf, true);
+                    }
+                }
+            });
+
             pathPanel.add(folderLabel);
 
-            if (i < pathList.size() - 1) {
+            if (i < fileList.size() - 1) {
                 JBLabel separator = new JBLabel(AllIcons.General.ArrowRight);
-                separator.setBorder(JBUI.Borders.empty(0, 4)); // إضافة مسافات حول السهم
+                separator.setBorder(JBUI.Borders.empty(0, 6)); // تكبير المسافة لتناسب الخط الجديد
                 pathPanel.add(separator);
             }
         }
 
-        pathPanel.setBorder(JBUI.Borders.empty(0, 16, 8, 16));
+        pathPanel.setBorder(JBUI.Borders.empty(0, 16, 12, 16));
         return pathPanel;
+    }
+
+    private void setUnderline(JLabel label, boolean underline) {
+        Font font = label.getFont();
+        java.util.Map<java.awt.font.TextAttribute, Object> attributes = new java.util.HashMap<>(font.getAttributes());
+        attributes.put(java.awt.font.TextAttribute.UNDERLINE, underline ? java.awt.font.TextAttribute.UNDERLINE_ON : -1);
+        label.setFont(font.deriveFont(attributes));
     }
 
     private static class StepsEditorComponent extends JBPanel<StepsEditorComponent> {

@@ -8,6 +8,7 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import testGit.pojo.Config;
 
 public class ToolWindowFactoryImpl implements ToolWindowFactory, DumbAware {
     @Getter
@@ -15,8 +16,9 @@ public class ToolWindowFactoryImpl implements ToolWindowFactory, DumbAware {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+        Config.setProject(project); /// to be added for all other components. tree, editor. as we may run one of them first
 
-        detailsInstance = new TestCaseDetailsPanel(project);
+        detailsInstance = new TestCaseDetailsPanel();
 
         ContentFactory contentFactory = ContentFactory.getInstance();
 

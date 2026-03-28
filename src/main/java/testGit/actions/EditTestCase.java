@@ -37,22 +37,29 @@ public class EditTestCase extends DumbAwareAction {
 
     @Override
     public void actionPerformed(final @NotNull AnActionEvent e) {
-        TestCaseDto targetDto = null;
+        if (panelContext != null) {
 
-        if (list != null) {
-            targetDto = list.getSelectedValue();
-
-        } else if (panelContext != null) {
-            targetDto = panelContext.getCurrentTestCaseDto();
+            if (!panelContext.isEditing()) {
+                panelContext.toggleEditMode(true);
+            }
+            return;
         }
 
-        if (targetDto == null) return;
+        if (list != null) {
+            TestCaseDto targetDto = list.getSelectedValue();
 
-        ViewPanel.show(targetDto, path);
+            if (targetDto == null) return;
 
-        TestCaseDetailsPanel detailsPanel = ToolWindowFactoryImpl.getDetailsInstance();
-        if (detailsPanel != null && !detailsPanel.isEditing()) {
-            detailsPanel.toggleEditMode(true);
+            ViewPanel.show(targetDto, path);
+
+            SwingUtilities.invokeLater(() -> {
+                TestCaseDetailsPanel detailsPanel = ToolWindowFactoryImpl.getDetailsInstance();
+
+                if (detailsPanel != null && !detailsPanel.isEditing()) {
+                    detailsPanel.toggleEditMode(true);
+                }
+            });
+
         }
     }
 }
