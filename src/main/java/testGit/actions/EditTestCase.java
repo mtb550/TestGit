@@ -2,6 +2,7 @@ package testGit.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.CustomShortcutSet;
 import com.intellij.openapi.editor.*;
 import com.intellij.openapi.editor.colors.ColorKey;
 import com.intellij.openapi.editor.colors.EditorColors;
@@ -13,8 +14,6 @@ import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.JBPopupListener;
 import com.intellij.openapi.ui.popup.LightweightWindowEvent;
-import com.intellij.ui.JBColor;
-import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBList;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +29,6 @@ import testGit.viewPanel.ViewPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.nio.file.Path;
 import java.util.List;
@@ -141,28 +139,28 @@ public class EditTestCase extends DumbAwareAction {
         );
     }
 
-    // 🌟 الشاشة السحرية لتعديل العناوين بالـ Multi-Cursor
+    // 🌟 الشاشة السحرية لتعديل العناوين بالـ Multi-Cursor (تصميم Buttonless)
     private void showTitleBulkEditPopup(List<TestCaseDto> selectedItems) {
         Project project = Config.getProject();
         if (project == null) return;
 
-        // 1. تجهيز النص الحالي للعناوين
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < selectedItems.size(); i++) {
             sb.append(selectedItems.get(i).getTitle());
             if (i < selectedItems.size() - 1) sb.append("\n");
         }
 
-        // 2. إنشاء محرر ذكي (IntelliJ Native Editor) ليدعم الـ Alt
         Document document = EditorFactory.getInstance().createDocument(sb.toString());
         Editor editor = EditorFactory.getInstance().createEditor(document, project);
         EditorSettings settings = editor.getSettings();
         settings.setLineNumbersShown(true);
         settings.setLineMarkerAreaShown(false);
         settings.setFoldingOutlineShown(false);
-        settings.setVirtualSpace(true); // مهم جداً لتشغيل الـ Multi-Cursor بشكل سليم
+        settings.setVirtualSpace(true); // ضروري لدعم الـ Multi-Caret
+        settings.setUseSoftWraps(false); // إجبار التمرير الأفقي (Horizontal Scroll) إذا كان النص طويلاً
+        settings.setAdditionalLinesCount(0); // إزالة المساحة الفارغة في الأسفل
+        settings.setAdditionalColumnsCount(5); // إعطاء مساحة أفقية مريحة للكتابة
 
-        // 3. إضافة "العمود الأول" (Original Titles) بشكل غير قابل للتعديل باستخدام الـ Gutter
         if (editor instanceof EditorEx) {
             ((EditorEx) editor).getGutterComponentEx().registerTextAnnotation(new TextAnnotationGutterProvider() {
                 @Nullable
@@ -170,7 +168,7 @@ public class EditTestCase extends DumbAwareAction {
                 public String getLineText(int line, Editor editor) {
                     if (line >= 0 && line < selectedItems.size()) {
                         String orig = selectedItems.get(line).getTitle();
-                        return orig.length() > 45 ? orig.substring(0, 42) + "..." : orig; // قص النص الطويل جداً
+                        return orig.length() > 40 ? orig.substring(0, 37) + "..." : orig;
                     }
                     return null;
                 }
@@ -211,35 +209,21 @@ public class EditTestCase extends DumbAwareAction {
             ((EditorEx) editor).getGutterComponentEx().revalidateMarkup();
         }
 
-        // 4. بناء الواجهة حول المحرر
-        JPanel topPanel = new JPanel(new BorderLayout());
-        JBLabel infoLabel = new JBLabel(" Original Titles (Left)   |   Edit New Titles (Right) - Use Alt+Click or Middle-Mouse for Multi-Caret");
-        infoLabel.setFont(JBUI.Fonts.smallFont());
-        infoLabel.setForeground(JBColor.GRAY);
-        infoLabel.setBorder(JBUI.Borders.empty(6, 8));
-        topPanel.add(infoLabel, BorderLayout.CENTER);
-
+        // تصميم الـ Buttonless (محرر فقط بدون نصوص أو أزرار)
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(editor.getComponent(), BorderLayout.CENTER);
-
-        JButton saveBtn = new JButton("Save (Ctrl+Enter)");
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        bottomPanel.add(saveBtn);
-        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
-
-        mainPanel.setPreferredSize(new Dimension(JBUI.scale(800), JBUI.scale(400)));
+        mainPanel.setPreferredSize(new Dimension(JBUI.scale(700), JBUI.scale(250)));
 
         JBPopup popup = JBPopupFactory.getInstance()
                 .createComponentPopupBuilder(mainPanel, editor.getContentComponent())
                 .setTitle("Bulk Edit Titles")
                 .setRequestFocus(true)
-                .setCancelOnClickOutside(false) // لكي لا يغلق بالخطأ أثناء النقر بالـ Alt
+                .setCancelOnClickOutside(true) // السماح بالإغلاق عند النقر بالخارج
                 .setMovable(true)
                 .setResizable(true)
                 .createPopup();
 
-        // 5. دالة الحفظ
+        // منطق الحفظ
         Runnable saveLogic = () -> {
             String[] newTitles = document.getText().split("\n");
             int limit = Math.min(newTitles.length, selectedItems.size());
@@ -252,20 +236,15 @@ public class EditTestCase extends DumbAwareAction {
             popup.closeOk(null);
         };
 
-        saveBtn.addActionListener(e -> saveLogic.run());
-
-        // دعم اختصار Ctrl+Enter للحفظ السريع
-        editor.getContentComponent().addKeyListener(new KeyAdapter() {
+        // 🌟 منع إضافة أسطر جديدة واستخدام الـ Enter للحفظ مباشرة!
+        new DumbAwareAction() {
             @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER && e.isControlDown()) {
-                    saveLogic.run();
-                    e.consume();
-                }
+            public void actionPerformed(@NotNull AnActionEvent e) {
+                saveLogic.run();
             }
-        });
+        }.registerCustomShortcutSet(new CustomShortcutSet(
+                KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)), editor.getContentComponent());
 
-        // 6. تحرير الذاكرة عند إغلاق النافذة لمنع تسريب الذاكرة (Memory Leak)
         popup.addListener(new JBPopupListener() {
             @Override
             public void onClosed(@NotNull LightweightWindowEvent event) {
