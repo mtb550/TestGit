@@ -7,13 +7,13 @@ import java.util.List;
 
 public class BulkEditMenu {
 
-    public static void show(List<TestCaseDto> selectedItems, Runnable onUpdate) {
+    public static void show(final List<TestCaseDto> selectedItems, final Runnable onUpdate) {
         GenericSelectionPopup.show(
                 "Update " + selectedItems.size() + " Test Cases",
                 UpdateField.values(),
                 UpdateField::getLabel,
                 UpdateField::getShortcut,
-                item -> null,
+                UpdateField::getIcon,
                 selectedField -> {
                     if (selectedField == UpdateField.PRIORITY) {
                         PriorityBulkEditor.show(selectedItems, onUpdate);
