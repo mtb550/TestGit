@@ -180,6 +180,10 @@ there is a method in util that check the open editor. use it.
 
 make shortcuts to add nodes like edit menu.
 
+fix step issues: 1- remove use CTRL+D, 2- add new array item for all cursors not for the last only, 3-remove use cotation in step value, 4- step class not use the splitter class. it is too long
+
+add status bar to the edit all ui in JsonSplitterBulkEditor, and put all shortcuts
+
 يسعدني جداً سماع هذا الكلام! 🚀 العمل مع مطور يمتلك "عقلية المعماري" (Architect Mindset) ويرفض الحلول المكررة هو متعة حقيقية. البرمجة العادية تبني كوداً يعمل، لكن الهندسة الحقيقية تبني تجربة (Experience) لا تُنسى للمستخدم.
 بما أننا وضعنا أساساً معمارياً صلباً ونظيفاً (كلاسات توريث ذكية مثل BaseCard، وفصل ممتاز للمستمعات)، فهذا الأساس يسمح لنا بالتحليق بعيداً.
 بما أنك تبحث عن التفرد والتميز، دعنا نخرج من صندوق "عرض القوائم" (List Views) ونفكر كيف نجعل الـ Plugin الخاص بك ينافس أدوات عالمية (مثل Zephyr أو Xray) ويتفوق عليها لكونه مدمجاً بذكاء داخل IntelliJ. إليك 3 أفكار "خارج الصندوق" لنقل مشروعك لمستوى استثنائي:

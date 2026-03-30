@@ -37,16 +37,16 @@ public class PersistenceManager {
     }
 
     // 🌟 الدالة الجديدة الخاصة بالخطوات
-    public static void updateSteps(List<TestCaseDto> items, List<String> newSteps, Runnable onUpdate) {
-        // تنظيف الخطوات الفارغة من النهاية إذا وجدت
-        List<String> cleanSteps = newSteps.stream()
-                .filter(step -> !step.trim().isEmpty())
-                .toList();
+    public static void updateSteps(List<TestCaseDto> items, List<List<String>> newSteps, Runnable onUpdate) {
+        int limit = Math.min(newSteps.size(), items.size());
+        for (int i = 0; i < limit; i++) {
+            // تنظيف الخطوات الفارغة تماماً
+            List<String> cleanSteps = newSteps.get(i).stream()
+                    .filter(step -> !step.trim().isEmpty())
+                    .toList();
 
-        for (TestCaseDto tc : items) {
-            // افترضت هنا أن Dto يقبل List من النصوص.
-            // إذا كان يقبل String يمكنك استخدام: tc.setSteps(String.join("\n", cleanSteps));
-            tc.setSteps(cleanSteps);
+            // تحديث كائن DTO الخاص بهذا الـ TestCase
+            items.get(i).setSteps(cleanSteps);
         }
 
         if (onUpdate != null) onUpdate.run();
