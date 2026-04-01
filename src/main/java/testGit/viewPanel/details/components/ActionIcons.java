@@ -16,18 +16,34 @@ import java.awt.event.MouseEvent;
 
 public class ActionIcons extends BaseDetails {
 
+    private static final float BASE_SCALE = 1.3f;
+    private static final float HOVER_SCALE = 1.8f;
+    private static final int STRUT_WIDTH = 8;
+    private static final int INSETS_TOP = 8;
+    private static final int INSETS_LEFT = 16;
+    private static final int INSETS_BOTTOM = 0;
+    private static final int INSETS_RIGHT = 16;
+    private static final String NAVIGATE_TOOLTIP = "Navigate to Code";
+    private static final String RUN_TOOLTIP = "Run Test Case";
+    private static final Icon navIconRaw = AllIcons.Nodes.Class;
+    private static final Icon runIconRaw = AllIcons.RunConfigurations.TestState.Run;
+
     @Override
-    public int render(@NotNull JBPanel<?> panel, @NotNull GridBagConstraints gbc, @NotNull TestCaseDto dto, int currentRow) {
+    public int render(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final TestCaseDto dto, final int currentRow) {
         JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         actionsPanel.setOpaque(false);
 
-        Icon navIcon = AllIcons.Nodes.Class;
-        JLabel navLabel = new JLabel(navIcon);
-        navLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        navLabel.setToolTipText("Navigate to Code");
+        JLabel navLabel = new JLabel();
 
-        int navTargetWidth = (int) (navIcon.getIconWidth() * 1.5f);
-        int navTargetHeight = (int) (navIcon.getIconHeight() * 1.5f);
+        Icon navIconBase = IconUtil.scale(navIconRaw, navLabel, BASE_SCALE);
+        Icon navIconHover = IconUtil.scale(navIconRaw, navLabel, HOVER_SCALE);
+
+        navLabel.setIcon(navIconBase);
+        navLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        navLabel.setToolTipText(NAVIGATE_TOOLTIP);
+
+        int navTargetWidth = (int) (navIconRaw.getIconWidth() * HOVER_SCALE);
+        int navTargetHeight = (int) (navIconRaw.getIconHeight() * HOVER_SCALE);
         navLabel.setPreferredSize(new Dimension(navTargetWidth, navTargetHeight));
         navLabel.setHorizontalAlignment(SwingConstants.CENTER);
         navLabel.setVerticalAlignment(SwingConstants.CENTER);
@@ -35,12 +51,12 @@ public class ActionIcons extends BaseDetails {
         navLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                navLabel.setIcon(IconUtil.scale(navIcon, navLabel, 1.5f));
+                navLabel.setIcon(navIconHover);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                navLabel.setIcon(navIcon);
+                navLabel.setIcon(navIconBase);
             }
 
             @Override
@@ -49,13 +65,17 @@ public class ActionIcons extends BaseDetails {
             }
         });
 
-        Icon runIcon = AllIcons.RunConfigurations.TestState.Run;
-        JLabel runLabel = new JLabel(runIcon);
-        runLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        runLabel.setToolTipText("Run Test Case");
+        JLabel runLabel = new JLabel();
 
-        int runTargetWidth = (int) (runIcon.getIconWidth() * 1.5f);
-        int runTargetHeight = (int) (runIcon.getIconHeight() * 1.5f);
+        Icon runIconBase = IconUtil.scale(runIconRaw, runLabel, BASE_SCALE);
+        Icon runIconHover = IconUtil.scale(runIconRaw, runLabel, HOVER_SCALE);
+
+        runLabel.setIcon(runIconBase);
+        runLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        runLabel.setToolTipText(RUN_TOOLTIP);
+
+        int runTargetWidth = (int) (runIconRaw.getIconWidth() * HOVER_SCALE);
+        int runTargetHeight = (int) (runIconRaw.getIconHeight() * HOVER_SCALE);
         runLabel.setPreferredSize(new Dimension(runTargetWidth, runTargetHeight));
         runLabel.setHorizontalAlignment(SwingConstants.CENTER);
         runLabel.setVerticalAlignment(SwingConstants.CENTER);
@@ -63,12 +83,12 @@ public class ActionIcons extends BaseDetails {
         runLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                runLabel.setIcon(IconUtil.scale(runIcon, runLabel, 1.5f));
+                runLabel.setIcon(runIconHover);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                runLabel.setIcon(runIcon);
+                runLabel.setIcon(runIconBase);
             }
 
             @Override
@@ -78,7 +98,7 @@ public class ActionIcons extends BaseDetails {
         });
 
         actionsPanel.add(navLabel);
-        actionsPanel.add(Box.createHorizontalStrut(JBUI.scale(4)));
+        actionsPanel.add(Box.createHorizontalStrut(JBUI.scale(STRUT_WIDTH)));
         actionsPanel.add(runLabel);
 
         gbc.gridx = 0;
@@ -86,7 +106,7 @@ public class ActionIcons extends BaseDetails {
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = JBUI.insets(0, 16, 8, 16);
+        gbc.insets = JBUI.insets(INSETS_TOP, INSETS_LEFT, INSETS_BOTTOM, INSETS_RIGHT);
         panel.add(actionsPanel, gbc);
 
         return currentRow + 1;

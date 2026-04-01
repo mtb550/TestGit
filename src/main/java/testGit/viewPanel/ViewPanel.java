@@ -3,6 +3,7 @@ package testGit.viewPanel;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
@@ -17,18 +18,39 @@ import java.awt.*;
 import java.nio.file.Path;
 import java.util.List;
 
-@Getter
 public class ViewPanel {
     private final JBPanel<?> detailsTab;
     private final JBPanel<?> historyTab;
     private final JBPanel<?> openBugsTab;
+
+    @Getter
+    private final JBScrollPane detailsScrollPane;
+    @Getter
+    private final JBScrollPane historyScrollPane;
+    @Getter
+    private final JBScrollPane openBugsScrollPane;
+
+    @Getter
     private final ViewPagination page;
 
     public ViewPanel() {
         detailsTab = new JBPanel<>(new GridBagLayout());
         historyTab = new JBPanel<>(new BorderLayout());
         openBugsTab = new JBPanel<>(new BorderLayout());
+
+        detailsScrollPane = createScrollPane(detailsTab);
+        historyScrollPane = createScrollPane(historyTab);
+        openBugsScrollPane = createScrollPane(openBugsTab);
+
         page = new ViewPagination(this);
+    }
+
+    private JBScrollPane createScrollPane(Component view) {
+        JBScrollPane sp = new JBScrollPane(view);
+        sp.setBorder(null);
+        sp.setViewportBorder(null);
+        sp.setFocusable(false);
+        return sp;
     }
 
     public void show(final Project project, final List<TestCaseDto> testCases, final Path path) {

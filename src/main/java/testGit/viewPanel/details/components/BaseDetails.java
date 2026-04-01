@@ -1,88 +1,73 @@
 package testGit.viewPanel.details.components;
 
-import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.ui.Gray;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.pojo.dto.TestCaseDto;
-import testGit.util.Tools;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 public abstract class BaseDetails {
-    public abstract int render(@NotNull JBPanel<?> panel, @NotNull GridBagConstraints gbc, @NotNull TestCaseDto dto, int currentRow);
 
-    protected void addRow(@NotNull String label, @NotNull JComponent input, @NotNull JBPanel<?> panel, @NotNull GridBagConstraints gbc, int row) {
-        JBLabel keyLabel = new JBLabel(label);
-        keyLabel.setFont(JBUI.Fonts.label(14));
-        keyLabel.setForeground(Gray._120);
+    protected static final int LABEL_WIDTH = 255;
+    protected static final float LABEL_FONT_SIZE = 20.0f;
+    protected static final float VALUE_FONT_SIZE = 23.0f;
+    private static final String EMPTY_VALUE_PLACEHOLDER = "-";
+    private static final int LABEL_INSETS_TOP = 12;
+    private static final int LABEL_INSETS_LEFT = 16;
+    private static final int LABEL_INSETS_BOTTOM = 12;
+    private static final int LABEL_INSETS_RIGHT = 8;
+    private static final int VALUE_INSETS_TOP = 12;
+    private static final int VALUE_INSETS_LEFT = 0;
+    private static final int VALUE_INSETS_BOTTOM = 12;
+    private static final int VALUE_INSETS_RIGHT = 16;
+
+    public abstract int render(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final TestCaseDto dto, final int currentRow);
+
+    protected int addRow(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final String labelText, @Nullable final String valueText, final int row) {
+
+        gbc.gridy = row;
+        gbc.gridwidth = 1;
 
         gbc.gridx = 0;
-        gbc.gridy = row;
-        gbc.weightx = 0.0;
-        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets = JBUI.insets(8, 16, 6, 10);
+        gbc.insets = JBUI.insets(LABEL_INSETS_TOP, LABEL_INSETS_LEFT, LABEL_INSETS_BOTTOM, LABEL_INSETS_RIGHT);
 
-        panel.add(keyLabel, gbc);
+        final JBLabel label = new JBLabel(labelText);
+        label.setForeground(JBColor.GRAY);
+        label.setFont(JBFont.label().deriveFont(Font.BOLD, LABEL_FONT_SIZE));
+
+        final Dimension prefSize = label.getPreferredSize();
+        label.setPreferredSize(new Dimension(LABEL_WIDTH, prefSize.height));
+        label.setMinimumSize(new Dimension(LABEL_WIDTH, prefSize.height));
+
+        panel.add(label, gbc);
 
         gbc.gridx = 1;
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = JBUI.insets(6, 0, 6, 16);
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.insets = JBUI.insets(VALUE_INSETS_TOP, VALUE_INSETS_LEFT, VALUE_INSETS_BOTTOM, VALUE_INSETS_RIGHT);
 
-        panel.add(input, gbc);
-    }
+        final String finalValue = (valueText == null || valueText.trim().isEmpty()) ? EMPTY_VALUE_PLACEHOLDER : valueText;
 
-    @NotNull
-    protected JBLabel createValueLabel(@Nullable String text) {
-        if (StringUtil.isEmptyOrSpaces(text)) {
-            JBLabel label = new JBLabel("-");
-            label.setFont(JBUI.Fonts.label(14));
-            return label;
-        }
+        final JTextArea valueArea = new JTextArea(finalValue);
+        valueArea.setFont(JBFont.label().deriveFont(Font.PLAIN, VALUE_FONT_SIZE));
+        valueArea.setLineWrap(true);
+        valueArea.setWrapStyleWord(true);
+        valueArea.setOpaque(false);
+        valueArea.setEditable(false);
+        valueArea.setBorder(null);
 
-        String formatted = Tools.format(text);
-        String escaped = StringUtil.escapeXmlEntities(formatted);
+        panel.add(valueArea, gbc);
 
-        StringBuilder html = new StringBuilder("<html><body style='padding: 0; margin: 0;'>");
-        String[] lines = escaped.split("\n");
-        for (String line : lines) {
-            html.append("<p style='margin-top: 3px; margin-bottom: 5px;'>").append(line).append("</p>");
-        }
-        html.append("</body></html>");
-
-        JBLabel label = new JBLabel(html.toString());
-        label.setFont(JBUI.Fonts.label(14));
-        return label;
-    }
-
-    @NotNull
-    protected JBLabel createStepsLabel(@Nullable List<String> steps) {
-        if (steps == null || steps.isEmpty()) {
-            JBLabel label = new JBLabel("-");
-            label.setFont(JBUI.Fonts.label(14));
-            return label;
-        }
-
-        StringBuilder html = new StringBuilder("<html><body style='padding: 0; margin: 0;'>");
-        for (int i = 0; i < steps.size(); i++) {
-            String formatted = Tools.format(steps.get(i));
-            String escaped = StringUtil.escapeXmlEntities(formatted);
-
-            html.append("<p style='margin-top: 3px; margin-bottom: 5px;'>")
-                    .append("<b>").append((i + 1)).append("-</b> ").append(escaped)
-                    .append("</p>");
-        }
-        html.append("</body></html>");
-
-        JBLabel label = new JBLabel(html.toString());
-        label.setFont(JBUI.Fonts.label(14));
-        return label;
+        return row + 1;
     }
 }

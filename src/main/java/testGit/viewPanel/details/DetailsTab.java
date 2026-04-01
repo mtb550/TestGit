@@ -1,8 +1,7 @@
 package testGit.viewPanel.details;
 
-import com.intellij.ui.JBColor;
-import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,53 +9,84 @@ import testGit.pojo.dto.TestCaseDto;
 import testGit.viewPanel.details.components.*;
 import testGit.viewPanel.details.components.Module;
 
+import javax.swing.*;
 import java.awt.*;
 import java.nio.file.Path;
 
 public class DetailsTab {
-    public static void load(@NotNull JBPanel<?> detailsTab, @Nullable TestCaseDto dto, @Nullable Path currentPath) {
+
+    private static final int SCROLL_UNIT_INCREMENT = 16;
+    private static final String PLACEHOLDER_TEXT = "Select a test case to view details";
+    private static final int INSETS_DEFAULT = 5;
+    private static final double WEIGHT_X = 1.0;
+    private static final double SPACER_WEIGHT_Y = 1.0;
+
+    public static void load(@NotNull final JBPanel<?> detailsTab, @Nullable final TestCaseDto dto, @Nullable final Path currentPath) {
         detailsTab.removeAll();
+        detailsTab.setLayout(new BorderLayout());
+        detailsTab.setBorder(BorderFactory.createEmptyBorder());
 
         if (dto == null) {
-            JBLabel placeholder = new JBLabel("Select a test case to view details");
-            placeholder.setForeground(JBColor.GRAY);
-
-            detailsTab.add(placeholder, new GridBagConstraints());
-
+            renderPlaceholder(detailsTab);
         } else {
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = JBUI.insets(8, 16);
-            gbc.anchor = GridBagConstraints.WEST;
-            gbc.fill = GridBagConstraints.HORIZONTAL;
-            gbc.weightx = 1.0;
-            int row = 0;
+            final JBPanel<?> contentPanel = new JBPanel<>(new GridBagLayout());
+            contentPanel.setOpaque(false);
 
-            setupViewMode(detailsTab, gbc, dto, currentPath, row);
+            renderStoneLayout(contentPanel, dto, currentPath);
+
+            final JBScrollPane scrollPane = new JBScrollPane(contentPanel);
+            scrollPane.setBorder(null);
+            scrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_UNIT_INCREMENT);
+
+            detailsTab.add(scrollPane, BorderLayout.CENTER);
         }
 
         detailsTab.revalidate();
         detailsTab.repaint();
     }
 
-    private static void setupViewMode(@NotNull JBPanel<?> detailsTabPanel, @NotNull GridBagConstraints gbc, @NotNull TestCaseDto dto, @Nullable Path currentPath, int row) {
-        gbc.gridwidth = 2;
+    private static void renderPlaceholder(@NotNull final JBPanel<?> panel) {
+        panel.setLayout(new GridBagLayout());
+        final JLabel placeholder = new JLabel(PLACEHOLDER_TEXT);
+        panel.add(placeholder);
+    }
 
-        row = new NavigationBar(currentPath).render(detailsTabPanel, gbc, dto, row);
-        row = new Id().render(detailsTabPanel, gbc, dto, row);
-        row = new Title().render(detailsTabPanel, gbc, dto, row);
-        row = new ActionIcons().render(detailsTabPanel, gbc, dto, row);
-        row = new Badges().render(detailsTabPanel, gbc, dto, row);
+    private static void renderStoneLayout(final JBPanel<?> panel, final TestCaseDto dto, final Path currentPath) {
+        final GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = JBUI.insets(INSETS_DEFAULT);
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = WEIGHT_X;
 
-        gbc.gridwidth = 1;
+        final int row = setupFixedRows(panel, gbc, dto, currentPath);
+        addVerticalSpacer(panel, row);
+    }
 
-        row = new ExpectedResult().render(detailsTabPanel, gbc, dto, row);
-        row = new Steps().render(detailsTabPanel, gbc, dto, row);
-        row = new AutomationReferrence().render(detailsTabPanel, gbc, dto, row);
-        row = new BusinessReferrence().render(detailsTabPanel, gbc, dto, row);
-        row = new Module().render(detailsTabPanel, gbc, dto, row);
-        row = new CreateBy().render(detailsTabPanel, gbc, dto, row);
-        row = new UpdateBy().render(detailsTabPanel, gbc, dto, row);
-        row = new CreateAt().render(detailsTabPanel, gbc, dto, row);
-        row = new UpdateAt().render(detailsTabPanel, gbc, dto, row);
+    private static int setupFixedRows(final JBPanel<?> panel, final GridBagConstraints gbc, final TestCaseDto dto, final Path currentPath) {
+        int row = 0;
+
+        row = new NavigationBar(currentPath).render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new Id().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new Title().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new ActionIcons().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new Badges().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new ExpectedResult().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new Steps().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new AutomationReferrence().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new BusinessReferrence().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new Module().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new CreateBy().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new UpdateBy().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new CreateAt().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new UpdateAt().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+
+        return row;
+    }
+
+    private static void addVerticalSpacer(final JBPanel<?> panel, final int lastRow) {
+        final GridBagConstraints spacerGbc = new GridBagConstraints();
+        spacerGbc.gridy = lastRow;
+        spacerGbc.weighty = SPACER_WEIGHT_Y;
+        panel.add(Box.createVerticalGlue(), spacerGbc);
     }
 }

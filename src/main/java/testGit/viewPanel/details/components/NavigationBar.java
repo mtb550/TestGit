@@ -30,6 +30,20 @@ import java.util.List;
 import java.util.Map;
 
 public class NavigationBar extends BaseDetails {
+
+    private static final float FONT_SIZE = 14f;
+    private static final Color DEFAULT_TEXT_COLOR = Gray._120;
+    private static final int SEPARATOR_BORDER_V = 0;
+    private static final int SEPARATOR_BORDER_H = 6;
+    private static final int PANEL_BORDER_TOP = 10;
+    private static final int PANEL_BORDER_LEFT = 16;
+    private static final int PANEL_BORDER_BOTTOM = 5;
+    private static final int PANEL_BORDER_RIGHT = 0;
+    private static final int GBC_INSETS_TOP = 12;
+    private static final int GBC_INSETS_LEFT = 16;
+    private static final int GBC_INSETS_BOTTOM = 0;
+    private static final int GBC_INSETS_RIGHT = 16;
+
     private final Path currentPath;
 
     public NavigationBar(@Nullable final Path currentPath) {
@@ -38,46 +52,46 @@ public class NavigationBar extends BaseDetails {
 
     @Override
     public int render(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final TestCaseDto dto, final int currentRow) {
-        JPanel pathPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        final JPanel pathPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pathPanel.setOpaque(false);
 
         if (currentPath != null && Config.getProject() != null) {
-            List<File> fileList = buildPathFileList(currentPath);
+            final List<File> fileList = buildPathFileList(currentPath);
             for (int i = 0; i < fileList.size(); i++) {
-                Project project = Config.getProject();
-                File file = fileList.get(i);
-                String labelText = (i == 0) ? project.getName() : file.getName();
-                boolean isTestSet = (i == fileList.size() - 1);
+                final Project project = Config.getProject();
+                final File file = fileList.get(i);
+                final String labelText = (i == 0) ? project.getName() : file.getName();
+                final boolean isTestSet = (i == fileList.size() - 1);
 
-                JBLabel folderLabel = new JBLabel(labelText);
-                folderLabel.setFont(JBUI.Fonts.label(14));
-                folderLabel.setForeground(Gray._120);
+                final JBLabel folderLabel = new JBLabel(labelText);
+                folderLabel.setFont(JBUI.Fonts.label(FONT_SIZE));
+                folderLabel.setForeground(DEFAULT_TEXT_COLOR);
                 folderLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
                 folderLabel.addMouseListener(new MouseAdapter() {
                     @Override
-                    public void mouseEntered(MouseEvent e) {
+                    public void mouseEntered(final MouseEvent e) {
                         folderLabel.setForeground(JBUI.CurrentTheme.Link.Foreground.ENABLED);
                         setUnderline(folderLabel, true);
                     }
 
                     @Override
-                    public void mouseExited(MouseEvent e) {
-                        folderLabel.setForeground(Gray._120);
+                    public void mouseExited(final MouseEvent e) {
+                        folderLabel.setForeground(DEFAULT_TEXT_COLOR);
                         setUnderline(folderLabel, false);
                     }
 
                     @Override
-                    public void mouseClicked(MouseEvent e) {
-                        VirtualFile vf = LocalFileSystem.getInstance().findFileByIoFile(file);
+                    public void mouseClicked(final MouseEvent e) {
+                        final VirtualFile vf = LocalFileSystem.getInstance().findFileByIoFile(file);
                         if (vf == null) return;
-                        if (isTestSet) {
 
+                        if (isTestSet) {
                             if (Tools.isEditorOpen(file.getName())) {
                                 return;
                             }
 
-                            TestSetDirectoryDto ts = new TestSetDirectoryDto();
+                            final TestSetDirectoryDto ts = new TestSetDirectoryDto();
                             ts.setPath(file.toPath());
                             ts.setName(file.getName());
                             TestEditor.open(ts);
@@ -89,20 +103,21 @@ public class NavigationBar extends BaseDetails {
 
                 pathPanel.add(folderLabel);
                 if (i < fileList.size() - 1) {
-                    JBLabel separator = new JBLabel(AllIcons.General.ArrowRight);
-                    separator.setBorder(JBUI.Borders.empty(0, 6));
+                    final JBLabel separator = new JBLabel(AllIcons.General.ArrowRight);
+                    separator.setBorder(JBUI.Borders.empty(SEPARATOR_BORDER_V, SEPARATOR_BORDER_H));
                     pathPanel.add(separator);
                 }
             }
         }
 
-        pathPanel.setBorder(JBUI.Borders.empty(0, 16, 12, 16));
+        pathPanel.setBorder(JBUI.Borders.empty(PANEL_BORDER_TOP, PANEL_BORDER_LEFT, PANEL_BORDER_BOTTOM, PANEL_BORDER_RIGHT));
 
         gbc.gridx = 0;
         gbc.gridy = currentRow;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = JBUI.insetsTop(12);
+        gbc.insets = JBUI.insets(GBC_INSETS_TOP, GBC_INSETS_LEFT, GBC_INSETS_BOTTOM, GBC_INSETS_RIGHT);
+
         panel.add(pathPanel, gbc);
 
         return currentRow + 1;
@@ -110,14 +125,14 @@ public class NavigationBar extends BaseDetails {
 
     @NotNull
     private List<File> buildPathFileList(@NotNull final Path path) {
-        List<File> fileList = new ArrayList<>();
+        final List<File> fileList = new ArrayList<>();
         if (Config.getProject() == null) return fileList;
 
-        String basePathString = Config.getProject().getBasePath();
+        final String basePathString = Config.getProject().getBasePath();
         File currentDir = path.toFile();
 
         if (basePathString != null) {
-            File baseDir = new File(basePathString);
+            final File baseDir = new File(basePathString);
             while (currentDir != null && !currentDir.getAbsolutePath().equalsIgnoreCase(baseDir.getAbsolutePath())) {
                 fileList.addFirst(currentDir);
                 currentDir = currentDir.getParentFile();
@@ -130,8 +145,8 @@ public class NavigationBar extends BaseDetails {
     }
 
     private void setUnderline(@NotNull final JLabel label, final boolean underline) {
-        Font font = label.getFont();
-        Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());
+        final Font font = label.getFont();
+        final Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());
         attributes.put(TextAttribute.UNDERLINE, underline ? TextAttribute.UNDERLINE_ON : -1);
         label.setFont(font.deriveFont(attributes));
     }

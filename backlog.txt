@@ -194,3 +194,11 @@ i attached the classes.
 review and read it then:
 why dont use exted. it is better than static.
 also, enhance and arrange code more to make my maintinance easy.
+
+view panel enhancments:
+show copy icom once hover for each value.
+fix steps to show the sequence number as before.
+make spaces between step values litle bigger.
+implement created by at and updated by at.
+make width flixable with zoom in and zoom out.
+not shown: Select a test case to view details

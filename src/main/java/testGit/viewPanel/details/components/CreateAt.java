@@ -7,9 +7,12 @@ import testGit.pojo.dto.TestCaseDto;
 import java.awt.*;
 
 public class CreateAt extends BaseDetails {
+
+    private static final String LABEL_TEXT = "Created At:";
+
     @Override
-    public int render(@NotNull JBPanel<?> panel, @NotNull GridBagConstraints gbc, @NotNull TestCaseDto dto, int currentRow) {
-        addRow("Created At:", createValueLabel(dto.getCreateAt() != null ? dto.getCreateAt().toString() : "-"), panel, gbc, currentRow);
-        return currentRow + 1;
+    public int render(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final TestCaseDto dto, final int currentRow) {
+        final String date = (dto.getCreateAt() != null) ? dto.getCreateAt().toString() : "-";
+        return addRow(panel, gbc, LABEL_TEXT, date, currentRow);
     }
 }

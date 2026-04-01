@@ -11,19 +11,30 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Badges extends BaseDetails {
+
+    private static final int FLOW_GAP = 6;
+    private static final int EMPTY_STRUT_HEIGHT = 20;
+    private static final int INSETS_TOP = 8;
+    private static final int INSETS_LEFT = 16;
+    private static final int INSETS_BOTTOM = 16;
+    private static final int INSETS_RIGHT = 16;
+
     @Override
-    public int render(@NotNull JBPanel<?> panel, @NotNull GridBagConstraints gbc, @NotNull TestCaseDto dto, int currentRow) {
-        JPanel badgesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, JBUI.scale(6), 0));
+    public int render(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final TestCaseDto dto, final int currentRow) {
+        JPanel badgesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, JBUI.scale(FLOW_GAP), 0));
         badgesPanel.setOpaque(false);
 
+        boolean hasContent = false;
         if (dto.getPriority() != null) {
             badgesPanel.add(Shared.createPriorityBadge(dto));
+            hasContent = true;
         }
 
         if (dto.getGroups() != null && !dto.getGroups().isEmpty()) {
             for (Groups groups : dto.getGroups()) {
                 if (groups != null) {
                     badgesPanel.add(Shared.createGroupBadge(groups));
+                    hasContent = true;
                 }
             }
         }
@@ -33,7 +44,12 @@ public class Badges extends BaseDetails {
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = JBUI.insets(0, 16, 16, 16);
+
+        if (!hasContent) {
+            badgesPanel.add(Box.createVerticalStrut(JBUI.scale(EMPTY_STRUT_HEIGHT)));
+        }
+
+        gbc.insets = JBUI.insets(INSETS_TOP, INSETS_LEFT, INSETS_BOTTOM, INSETS_RIGHT);
         panel.add(badgesPanel, gbc);
 
         return currentRow + 1;

@@ -18,41 +18,54 @@ import java.awt.event.MouseEvent;
 
 public class Id extends BaseDetails {
 
+    private static final int BADGE_ARC_SIZE = 16;
+    private static final int BADGE_BORDER_V = 3;
+    private static final int BADGE_BORDER_H = 10;
+    private static final int FLOW_GAP = 8;
+    private static final int COPY_SUCCESS_DELAY_MS = 1500;
+    private static final String COPY_TOOLTIP = "Copy ID";
+    private static final Color BG_COLOR = new JBColor(Gray._230, Gray._80);
+    private static final Color FG_COLOR = new JBColor(Gray._130, Gray._170);
+    private static final int INSETS_TOP = 5;
+    private static final int INSETS_LEFT = 16;
+    private static final int INSETS_BOTTOM = 0;
+    private static final int INSETS_RIGHT = 16;
+
     @Override
-    public int render(@NotNull JBPanel<?> panel, @NotNull GridBagConstraints gbc, @NotNull TestCaseDto dto, int currentRow) {
+    public int render(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final TestCaseDto dto, final int currentRow) {
         JBLabel idBadge = new JBLabel(dto.getId()) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new JBColor(Gray._230, Gray._80));
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
+                g2.setColor(BG_COLOR);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), BADGE_ARC_SIZE, BADGE_ARC_SIZE);
                 g2.dispose();
                 super.paintComponent(g);
             }
         };
 
         idBadge.setFont(JBUI.Fonts.smallFont());
-        idBadge.setForeground(new JBColor(Gray._130, Gray._170));
-        idBadge.setBorder(JBUI.Borders.empty(3, 10));
+        idBadge.setForeground(FG_COLOR);
+        idBadge.setBorder(JBUI.Borders.empty(BADGE_BORDER_V, BADGE_BORDER_H));
         idBadge.setOpaque(false);
 
         JBLabel copyIcon = new JBLabel(AllIcons.Actions.Copy);
-        copyIcon.setToolTipText("Copy ID");
+        copyIcon.setToolTipText(COPY_TOOLTIP);
         copyIcon.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         copyIcon.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseClicked(final MouseEvent e) {
                 CopyPasteManager.getInstance().setContents(new StringSelection(dto.getId()));
                 copyIcon.setIcon(AllIcons.General.InspectionsOK);
-                Timer timer = new Timer(1500, evt -> copyIcon.setIcon(AllIcons.Actions.Copy));
+                Timer timer = new Timer(COPY_SUCCESS_DELAY_MS, evt -> copyIcon.setIcon(AllIcons.Actions.Copy));
                 timer.setRepeats(false);
                 timer.start();
             }
         });
 
-        JPanel idContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, JBUI.scale(8), 0));
+        JPanel idContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, JBUI.scale(FLOW_GAP), 0));
         idContainer.setOpaque(false);
         idContainer.add(idBadge);
         idContainer.add(copyIcon);
@@ -62,7 +75,7 @@ public class Id extends BaseDetails {
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.insets = JBUI.insets(8, 16, 2, 16);
+        gbc.insets = JBUI.insets(INSETS_TOP, INSETS_LEFT, INSETS_BOTTOM, INSETS_RIGHT);
 
         panel.add(idContainer, gbc);
         return currentRow + 1;

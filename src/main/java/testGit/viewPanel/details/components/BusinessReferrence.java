@@ -7,9 +7,11 @@ import testGit.pojo.dto.TestCaseDto;
 import java.awt.*;
 
 public class BusinessReferrence extends BaseDetails {
+
+    private static final String LABEL_TEXT = "Business Reference:";
+
     @Override
-    public int render(@NotNull JBPanel<?> panel, @NotNull GridBagConstraints gbc, @NotNull TestCaseDto dto, int currentRow) {
-        addRow("Business Referrence:", createValueLabel(dto.getBusiRef()), panel, gbc, currentRow);
-        return currentRow + 1;
+    public int render(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final TestCaseDto dto, final int currentRow) {
+        return addRow(panel, gbc, LABEL_TEXT, dto.getBusiRef(), currentRow);
     }
 }
