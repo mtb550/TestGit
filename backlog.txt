@@ -110,17 +110,15 @@ add dictionary to correct test cases titles
 
 add pre condition test case attribute (or query or test data)
 
-generate reports.
+generate reports. (in progress)
 
 drag and drop for test runs, multi
 
 add dasboards and result in charts for each test run. right click details the show in view panel.
 
-auto complete steps.
+auto complete steps. (in progress)
 
 grid view editor.
-
-guttur beside test case method. DONE!!
 
 add new filter for test execution status. shown only in run editor (show: passed, failed, blocked, untested) and not shown in test editor. I will put it to the backlog.
 
@@ -180,9 +178,3 @@ JBPopupFactory.getInstance()
                 .setFadeoutTime(HINT_FADEOUT_MS)
                 .createBalloon()
                 .show(RelativePoint.getCenterOf(component), Balloon.Position.above);
-}
-
-how can I get the status after run test method and put it temporarly ad a badge in view panel and card
-ExecutionListener , SMTRunner, ProcessHandler. SMTRunnerEventsListener
-Key<Boolean> IS_MY_PLUGIN_RUN
-boolean isTestNG = env.getRunProfile().getClass().getSimpleName().equals("TestNGConfiguration");

@@ -9,11 +9,11 @@ import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
 import testGit.editorPanel.BaseEditorUI;
 import testGit.editorPanel.testCaseEditor.TestEditorUI;
-import testGit.pojo.Priority;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.dirs.DirectoryDto;
-import testGit.ui.CreateTestCaseDialog;
+import testGit.ui.single.SingleTestCaseEditor;
 import testGit.util.KeyboardSet;
+import testGit.util.Notifier;
 
 import java.util.UUID;
 
@@ -32,7 +32,7 @@ public class CreateTestCase extends DumbAwareAction {
         this.registerCustomShortcutSet(KeyboardSet.CreateTestCase.getShortcut(), list);
     }
 
-    @Override
+    /*@Override
     public void actionPerformed(final @NotNull AnActionEvent e) {
         CreateTestCaseDialog dialog = new CreateTestCaseDialog();
         if (dialog.showAndGet()) {
@@ -48,6 +48,21 @@ public class CreateTestCase extends DumbAwareAction {
                 model.add(newTestCaseDto);
             }
         }
+    }*/
+
+    @Override
+    public void actionPerformed(final @NotNull AnActionEvent e) {
+        SingleTestCaseEditor.show(null, newTestCaseDto -> {
+
+            newTestCaseDto.setId(UUID.randomUUID().toString());
+
+            if (ui != null) {
+                ui.appendNewTestCase(newTestCaseDto);
+            } else {
+                model.add(newTestCaseDto);
+            }
+            Notifier.info("Test Case Created", newTestCaseDto.getTitle());
+        });
     }
 
     @Override
