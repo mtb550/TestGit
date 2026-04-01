@@ -34,7 +34,7 @@ public class ViewPanel {
     private final ViewPagination page;
 
     public ViewPanel() {
-        detailsTab = new JBPanel<>(new GridBagLayout());
+        detailsTab = new JBPanel<>(new BorderLayout());
         historyTab = new JBPanel<>(new BorderLayout());
         openBugsTab = new JBPanel<>(new BorderLayout());
 
@@ -43,6 +43,8 @@ public class ViewPanel {
         openBugsScrollPane = createScrollPane(openBugsTab);
 
         page = new ViewPagination(this);
+
+        refreshCurrentView();
     }
 
     private JBScrollPane createScrollPane(Component view) {
@@ -50,6 +52,7 @@ public class ViewPanel {
         sp.setBorder(null);
         sp.setViewportBorder(null);
         sp.setFocusable(false);
+        sp.getVerticalScrollBar().setUnitIncrement(16);
         return sp;
     }
 
@@ -65,7 +68,7 @@ public class ViewPanel {
 
     public void show(final Project project, final List<TestCaseDto> testCases, final Path path, final ViewTab tab) {
         ToolWindow tw = ViewToolWindowFactory.getToolWindow(project);
-        if (tw == null || testCases == null || testCases.isEmpty()) return;
+        if (tw == null) return;
 
         tw.show(() -> {
             this.selectContent(tab);
@@ -127,6 +130,9 @@ public class ViewPanel {
         DetailsTab.load(detailsTab, currentTestCaseDto, currentPath);
         HistoryTab.load(historyTab);
         OpenBugsTab.load(openBugsTab);
+
+        detailsTab.revalidate();
+        detailsTab.repaint();
     }
 
     public TestCaseDto getCurrentTestCaseDto() {

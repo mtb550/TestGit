@@ -1,7 +1,9 @@
 package testGit.viewPanel.details;
 
+import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,9 +48,12 @@ public class DetailsTab {
     }
 
     private static void renderPlaceholder(@NotNull final JBPanel<?> panel) {
-        panel.setLayout(new GridBagLayout());
+        panel.setLayout(new BorderLayout());
+        panel.setBorder(JBUI.Borders.empty(25, 16, 0, 0));
         final JLabel placeholder = new JLabel(PLACEHOLDER_TEXT);
-        panel.add(placeholder);
+        placeholder.setForeground(JBColor.GRAY);
+        placeholder.setFont(JBFont.label().deriveFont(20.0f));
+        panel.add(placeholder, BorderLayout.NORTH);
     }
 
     private static void renderStoneLayout(final JBPanel<?> panel, final TestCaseDto dto, final Path currentPath) {
