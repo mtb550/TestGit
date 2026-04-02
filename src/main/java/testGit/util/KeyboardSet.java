@@ -25,7 +25,14 @@ public enum KeyboardSet {
     PasteNode(KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK),
     CopyTestCaseTitle(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK),
     NextTestCase(KeyEvent.VK_RIGHT, InputEvent.CTRL_DOWN_MASK),
-    PreviousTestCase(KeyEvent.VK_LEFT, InputEvent.CTRL_DOWN_MASK);
+    PreviousTestCase(KeyEvent.VK_LEFT, InputEvent.CTRL_DOWN_MASK),
+    SaveAlternate(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK),
+    AddStep(KeyEvent.VK_ENTER, InputEvent.CTRL_DOWN_MASK),
+    RemoveStep(KeyEvent.VK_DELETE, InputEvent.SHIFT_DOWN_MASK),
+    TabNext(KeyEvent.VK_TAB, 0),
+    TabPrevious(KeyEvent.VK_TAB, InputEvent.SHIFT_DOWN_MASK),
+    ArrowDown(KeyEvent.VK_DOWN, 0),
+    ArrowUp(KeyEvent.VK_UP, 0);
 
     private final int keyCode;
     private final int modifiers;
@@ -33,6 +40,11 @@ public enum KeyboardSet {
     KeyboardSet(final int keyCode, final int modifiers) {
         this.keyCode = keyCode;
         this.modifiers = modifiers;
+    }
+
+    @SuppressWarnings("MagicConstant")
+    public static CustomShortcutSet getShortcutFor(int keyCode, int modifiers) {
+        return new CustomShortcutSet(KeyStroke.getKeyStroke(keyCode, modifiers));
     }
 
     @SuppressWarnings("MagicConstant")

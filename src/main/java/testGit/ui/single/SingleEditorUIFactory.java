@@ -166,12 +166,12 @@ public class SingleEditorUIFactory {
         return panel;
     }
 
-    public static void registerShortcut(JComponent component, int keyCode, int modifiers, Runnable action) {
+    public static void registerShortcut(JComponent component, CustomShortcutSet shortcutSet, Runnable action) {
         new DumbAwareAction() {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 action.run();
             }
-        }.registerCustomShortcutSet(new CustomShortcutSet(KeyStroke.getKeyStroke(keyCode, modifiers)), component);
+        }.registerCustomShortcutSet(shortcutSet, component);
     }
 }

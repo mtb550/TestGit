@@ -7,17 +7,19 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.fields.ExtendableTextField;
 import com.intellij.util.ui.JBUI;
+import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
 import testGit.pojo.Groups;
 import testGit.pojo.Priority;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.ui.bulk.UpdateField;
+import testGit.util.KeyboardSet;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static testGit.ui.single.SingleEditorUIFactory.*;
@@ -121,21 +123,8 @@ public class SingleTestCaseEditor {
         statusBar.setOpaque(true);
         statusBar.setBackground(com.intellij.util.ui.UIUtil.getPanelBackground());
 
-        String shortcutText;
-        if (isExtendable) {
-            shortcutText = String.format("💡 [Enter] Save   |   [Ctrl+%c] %s   |   [Ctrl+%c] %s   |   [Ctrl+%c] %s   |   [Ctrl+%c] %s",
-                    UpdateField.EXPECTED.getShortcut(), UpdateField.EXPECTED.getLabel(),
-                    UpdateField.STEPS.getShortcut(), UpdateField.STEPS.getLabel(),
-                    UpdateField.PRIORITY.getShortcut(), UpdateField.PRIORITY.getLabel(),
-                    UpdateField.GROUPS.getShortcut(), UpdateField.GROUPS.getLabel());
-        } else if (targetField == UpdateField.STEPS) {
-            shortcutText = String.format("💡 Shortcuts:  [Enter] Save   |   [Ctrl+%c] Add Step   |   [Tab] / [Shift+Tab] Navigate", UpdateField.STEPS.getShortcut());
-        } else {
-            shortcutText = "💡 Shortcuts:  [Enter] Save   |   [Tab] / [Shift+Tab] Navigate";
-        }
-
-        JLabel shortcutLabel = new JLabel(shortcutText);
-        shortcutLabel.setForeground(com.intellij.util.ui.UIUtil.getLabelForeground());
+        JLabel shortcutLabel = getLabel(isExtendable, targetField);
+        //shortcutLabel.setForeground(com.intellij.util.ui.UIUtil.getLabelForeground());
         shortcutLabel.setFont(JBUI.Fonts.smallFont());
         shortcutLabel.setForeground(JBColor.GRAY);
         statusBar.add(shortcutLabel, BorderLayout.WEST);
@@ -144,47 +133,14 @@ public class SingleTestCaseEditor {
         // 5. Build Popup
         popupWrapper[0] = JBPopupFactory.getInstance()
                 .createComponentPopupBuilder(mainPanel, titleField != null ? titleField : expectedField)
-                .setTitle(isExtendable ? "Create Test Case" : "Edit " + targetField.getLabel())
+                .setTitle(isExtendable ? "Create Test Case" : "Edit " + Objects.requireNonNull(targetField).getLabel())
                 .setRequestFocus(true)
                 .setCancelOnClickOutside(true)
                 .setMovable(true)
                 .setResizable(true)
                 .createPopup();
 
-        // 6. Shortcuts & Focus
-        if (isExtendable) {
-            registerShortcut(mainPanel, UpdateField.EXPECTED.getShortcut(), KeyEvent.CTRL_DOWN_MASK, () -> {
-                if (expectedWrapper.getParent() == null) contentPanel.add(expectedWrapper);
-                repackPopup.run();
-                expectedField.requestFocus();
-            });
-            registerShortcut(mainPanel, UpdateField.PRIORITY.getShortcut(), KeyEvent.CTRL_DOWN_MASK, () -> {
-                if (priorityWrapper.getParent() == null) contentPanel.add(priorityWrapper);
-                repackPopup.run();
-                priorityCombo.requestFocus();
-            });
-            registerShortcut(mainPanel, UpdateField.GROUPS.getShortcut(), KeyEvent.CTRL_DOWN_MASK, () -> {
-                if (groupsWrapper.getParent() == null) contentPanel.add(groupsWrapper);
-                repackPopup.run();
-            });
-            registerShortcut(mainPanel, UpdateField.STEPS.getShortcut(), KeyEvent.CTRL_DOWN_MASK, () -> {
-                if (stepsWrapper.getParent() == null) contentPanel.add(stepsWrapper);
-                addStepField(stepsContainer, stepFields, "", repackPopup);
-                repackPopup.run();
-                stepFields.getLast().requestFocus();
-            });
-        } else if (targetField == UpdateField.STEPS) {
-            registerShortcut(mainPanel, UpdateField.STEPS.getShortcut(), KeyEvent.CTRL_DOWN_MASK, () -> {
-                addStepField(stepsContainer, stepFields, "", repackPopup);
-                repackPopup.run();
-                stepFields.getLast().requestFocus();
-            });
-        }
-
-        registerShortcut(mainPanel, KeyEvent.VK_TAB, 0, () -> KeyboardFocusManager.getCurrentKeyboardFocusManager().focusNextComponent());
-        registerShortcut(mainPanel, KeyEvent.VK_TAB, KeyEvent.SHIFT_DOWN_MASK, () -> KeyboardFocusManager.getCurrentKeyboardFocusManager().focusPreviousComponent());
-
-        // 7. Save Action
+        // 6. Save Action
         Runnable saveAction = () -> {
             if (titleField != null) dto.setTitle(titleField.getText().trim());
             if (expectedWrapper.getParent() != null) dto.setExpected(expectedField.getText().trim());
@@ -215,21 +171,72 @@ public class SingleTestCaseEditor {
                 popupWrapper[0].closeOk(null);
             }
         };
-        registerShortcut(mainPanel, KeyEvent.VK_ENTER, 0, saveAction);
+
+        // 7. Shortcuts & Focus
+        if (isExtendable) {
+            registerShortcut(mainPanel, KeyboardSet.getShortcutFor(UpdateField.EXPECTED.getShortcut(), java.awt.event.InputEvent.CTRL_DOWN_MASK), () -> {
+                if (expectedWrapper.getParent() == null) contentPanel.add(expectedWrapper);
+                repackPopup.run();
+                expectedField.requestFocus();
+            });
+            registerShortcut(mainPanel, KeyboardSet.getShortcutFor(UpdateField.PRIORITY.getShortcut(), java.awt.event.InputEvent.CTRL_DOWN_MASK), () -> {
+                if (priorityWrapper.getParent() == null) contentPanel.add(priorityWrapper);
+                repackPopup.run();
+                priorityCombo.requestFocus();
+            });
+            registerShortcut(mainPanel, KeyboardSet.getShortcutFor(UpdateField.GROUPS.getShortcut(), java.awt.event.InputEvent.CTRL_DOWN_MASK), () -> {
+                if (groupsWrapper.getParent() == null) contentPanel.add(groupsWrapper);
+                repackPopup.run();
+            });
+            registerShortcut(mainPanel, KeyboardSet.getShortcutFor(UpdateField.STEPS.getShortcut(), java.awt.event.InputEvent.CTRL_DOWN_MASK), () -> {
+                if (stepsWrapper.getParent() == null) contentPanel.add(stepsWrapper);
+                addStepField(stepsContainer, stepFields, "", repackPopup);
+                repackPopup.run();
+                stepFields.getLast().requestFocus();
+            });
+        } else if (targetField == UpdateField.STEPS) {
+            registerShortcut(mainPanel, KeyboardSet.getShortcutFor(UpdateField.STEPS.getShortcut(), java.awt.event.InputEvent.CTRL_DOWN_MASK), () -> {
+                addStepField(stepsContainer, stepFields, "", repackPopup);
+                repackPopup.run();
+                stepFields.getLast().requestFocus();
+            });
+        }
+
+        // استخدام KeyboardSet للتنقل والحفظ
+        registerShortcut(mainPanel, KeyboardSet.TabNext.getShortcut(), () -> KeyboardFocusManager.getCurrentKeyboardFocusManager().focusNextComponent());
+        registerShortcut(mainPanel, KeyboardSet.TabPrevious.getShortcut(), () -> KeyboardFocusManager.getCurrentKeyboardFocusManager().focusPreviousComponent());
+        registerShortcut(mainPanel, KeyboardSet.Enter.getShortcut(), saveAction);
 
         // 8. Initial Focus Setup
         SwingUtilities.invokeLater(() -> {
-            if (!isExtendable && targetField != null) {
+            if (!isExtendable) {
                 if (targetField == UpdateField.EXPECTED) expectedField.requestFocus();
                 else if (targetField == UpdateField.PRIORITY) priorityCombo.requestFocus();
                 else if (targetField == UpdateField.STEPS && !stepFields.isEmpty())
                     stepFields.getFirst().requestFocus();
                 else if (titleField != null) titleField.requestFocus();
-            } else if (titleField != null) {
+            } else {
                 titleField.requestFocus();
             }
         });
 
         popupWrapper[0].showCenteredInCurrentWindow(Config.getProject());
+    }
+
+    private static @NotNull JLabel getLabel(boolean isExtendable, UpdateField targetField) {
+        String shortcutText;
+        if (isExtendable) {
+            shortcutText = String.format("💡 [Enter] Save   |   [Ctrl+%c] %s   |   [Ctrl+%c] %s   |   [Ctrl+%c] %s   |   [Ctrl+%c] %s",
+                    UpdateField.EXPECTED.getShortcut(), UpdateField.EXPECTED.getLabel(),
+                    UpdateField.STEPS.getShortcut(), UpdateField.STEPS.getLabel(),
+                    UpdateField.PRIORITY.getShortcut(), UpdateField.PRIORITY.getLabel(),
+                    UpdateField.GROUPS.getShortcut(), UpdateField.GROUPS.getLabel());
+        } else if (targetField == UpdateField.STEPS) {
+            shortcutText = String.format("💡 Shortcuts:  [Enter] Save   |   [Ctrl+%c] Add Step   |   [Tab] / [Shift+Tab] Navigate", UpdateField.STEPS.getShortcut());
+        } else {
+            shortcutText = "💡 Shortcuts:  [Enter] Save   |   [Tab] / [Shift+Tab] Navigate";
+        }
+
+        return new JLabel(shortcutText);
     }
 }
