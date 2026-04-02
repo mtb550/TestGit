@@ -4,16 +4,13 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.ui.JBColor;
-import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.fields.ExtendableTextField;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
-import testGit.pojo.Groups;
 import testGit.pojo.Priority;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.ui.bulk.UpdateField;
-import testGit.util.KeyboardSet;
 
 import javax.swing.*;
 import java.awt.*;
@@ -140,72 +137,25 @@ public class SingleTestCaseEditor {
                 .setResizable(true)
                 .createPopup();
 
-        // 6. Save Action
-        Runnable saveAction = () -> {
-            if (titleField != null) dto.setTitle(titleField.getText().trim());
-            if (expectedWrapper.getParent() != null) dto.setExpected(expectedField.getText().trim());
+        // 🟢 6. Delegate Save Logic
+        Runnable saveAction = SingleEditorSaveManager.createSaveAction(
+                dto, titleField,
+                expectedWrapper, expectedField,
+                priorityWrapper, priorityCombo,
+                groupsWrapper, groupsPanel,
+                stepsWrapper, stepFields,
+                onSave, popupWrapper
+        );
 
-            if (priorityWrapper.getParent() != null) dto.setPriority((Priority) priorityCombo.getSelectedItem());
-            else if (dto.getPriority() == null) dto.setPriority(Priority.LOW);
-
-            if (groupsWrapper.getParent() != null) {
-                List<Groups> selectedGroups = new ArrayList<>();
-                for (Component c : groupsPanel.getComponents()) {
-                    if (c instanceof JBCheckBox checkBox && checkBox.isSelected()) {
-                        selectedGroups.add(Groups.valueOf(checkBox.getText()));
-                    }
-                }
-                dto.setGroups(selectedGroups.isEmpty() ? null : selectedGroups);
-            }
-
-            if (stepsWrapper.getParent() != null) {
-                List<String> finalSteps = new ArrayList<>();
-                for (ExtendableTextField sf : stepFields) {
-                    if (!sf.getText().trim().isEmpty()) finalSteps.add(sf.getText().trim());
-                }
-                dto.setSteps(finalSteps.isEmpty() ? null : finalSteps);
-            }
-
-            if (titleField == null || !dto.getTitle().isEmpty()) {
-                onSave.accept(dto);
-                popupWrapper[0].closeOk(null);
-            }
-        };
-
-        // 7. Shortcuts & Focus
-        if (isExtendable) {
-            registerShortcut(mainPanel, KeyboardSet.getShortcutFor(UpdateField.EXPECTED.getShortcut(), java.awt.event.InputEvent.CTRL_DOWN_MASK), () -> {
-                if (expectedWrapper.getParent() == null) contentPanel.add(expectedWrapper);
-                repackPopup.run();
-                expectedField.requestFocus();
-            });
-            registerShortcut(mainPanel, KeyboardSet.getShortcutFor(UpdateField.PRIORITY.getShortcut(), java.awt.event.InputEvent.CTRL_DOWN_MASK), () -> {
-                if (priorityWrapper.getParent() == null) contentPanel.add(priorityWrapper);
-                repackPopup.run();
-                priorityCombo.requestFocus();
-            });
-            registerShortcut(mainPanel, KeyboardSet.getShortcutFor(UpdateField.GROUPS.getShortcut(), java.awt.event.InputEvent.CTRL_DOWN_MASK), () -> {
-                if (groupsWrapper.getParent() == null) contentPanel.add(groupsWrapper);
-                repackPopup.run();
-            });
-            registerShortcut(mainPanel, KeyboardSet.getShortcutFor(UpdateField.STEPS.getShortcut(), java.awt.event.InputEvent.CTRL_DOWN_MASK), () -> {
-                if (stepsWrapper.getParent() == null) contentPanel.add(stepsWrapper);
-                addStepField(stepsContainer, stepFields, "", repackPopup);
-                repackPopup.run();
-                stepFields.getLast().requestFocus();
-            });
-        } else if (targetField == UpdateField.STEPS) {
-            registerShortcut(mainPanel, KeyboardSet.getShortcutFor(UpdateField.STEPS.getShortcut(), java.awt.event.InputEvent.CTRL_DOWN_MASK), () -> {
-                addStepField(stepsContainer, stepFields, "", repackPopup);
-                repackPopup.run();
-                stepFields.getLast().requestFocus();
-            });
-        }
-
-        // استخدام KeyboardSet للتنقل والحفظ
-        registerShortcut(mainPanel, KeyboardSet.TabNext.getShortcut(), () -> KeyboardFocusManager.getCurrentKeyboardFocusManager().focusNextComponent());
-        registerShortcut(mainPanel, KeyboardSet.TabPrevious.getShortcut(), () -> KeyboardFocusManager.getCurrentKeyboardFocusManager().focusPreviousComponent());
-        registerShortcut(mainPanel, KeyboardSet.Enter.getShortcut(), saveAction);
+        // 🟢 7. Delegate Shortcuts
+        SingleEditorShortcutManager.registerShortcuts(
+                mainPanel, contentPanel, isExtendable, targetField, repackPopup,
+                expectedWrapper, expectedField,
+                priorityWrapper, priorityCombo,
+                groupsWrapper,
+                stepsWrapper, stepsContainer, stepFields,
+                saveAction
+        );
 
         // 8. Initial Focus Setup
         SwingUtilities.invokeLater(() -> {
