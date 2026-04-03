@@ -4,9 +4,7 @@ import com.intellij.codeInsight.lookup.LookupManager;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.CustomShortcutSet;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
@@ -21,12 +19,14 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
+import testGit.pojo.Config;
 import testGit.pojo.Groups;
 import testGit.pojo.Priority;
 import testGit.ui.bulk.UpdateField;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -38,7 +38,32 @@ public class SingleEditorUIFactory {
     public static final float FIELD_FONT_SIZE = BASE_FONT_SIZE + 2f;
 
     public static ExtendableTextField createTextField(String placeholder, Icon icon, float fontSize) {
-        ExtendableTextField textField = new ExtendableTextField();
+        ExtendableTextField textField = new ExtendableTextField() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (getText().isEmpty() && hasFocus()) {
+                    try {
+                        Rectangle2D r = modelToView2D(0);
+                        if (r != null) {
+                            Graphics2D g2 = (Graphics2D) g.create();
+                            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                            g2.setColor(UIUtil.getContextHelpForeground());
+                            g2.setFont(getFont());
+                            FontMetrics fm = g2.getFontMetrics();
+
+                            int x = (int) r.getX() + JBUI.scale(1);
+                            int y = (int) r.getY() + fm.getAscent();
+
+                            g2.drawString(placeholder, x, y);
+                            g2.dispose();
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        };
+
         Font fieldFont = JBFont.regular().deriveFont(fontSize);
         textField.setFont(fieldFont);
         textField.getEmptyText().setFont(fieldFont);
@@ -69,6 +94,7 @@ public class SingleEditorUIFactory {
         TextFieldWithAutoCompletion<String> stepField = new TextFieldWithAutoCompletion<>(project, provider, true, text != null ? text : "");
         stepField.setFont(JBFont.regular().deriveFont(FIELD_FONT_SIZE));
         stepField.setPlaceholder("Step " + (stepFields.size() + 1));
+        stepField.setShowPlaceholderWhenFocused(true);
         stepField.setBorder(JBUI.Borders.empty(6, 10));
 
         JPanel stepRow = new JPanel(new BorderLayout(JBUI.scale(8), 0));
@@ -133,7 +159,7 @@ public class SingleEditorUIFactory {
     public static ComboBox<Priority> createPriorityCombo() {
         ComboBox<Priority> combo = new ComboBox<>(Priority.values());
         combo.setFont(JBFont.regular().deriveFont(FIELD_FONT_SIZE));
-        combo.setRenderer(new ColoredListCellRenderer<Priority>() {
+        combo.setRenderer(new ColoredListCellRenderer<>() {
             @Override
             protected void customizeCellRenderer(@NotNull JList<? extends Priority> list, Priority value, int index, boolean selected, boolean hasFocus) {
                 if (value != null) {
@@ -148,12 +174,16 @@ public class SingleEditorUIFactory {
     public static JPanel createGroupsPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, JBUI.scale(4), JBUI.scale(4)));
         panel.setOpaque(false);
+        panel.setFocusable(false);
 
         java.util.Arrays.stream(Groups.values())
                 .filter(Groups::isActive)
                 .map(group -> {
                     JBCheckBox checkBox = new JBCheckBox(group.name());
                     checkBox.setFont(JBFont.regular().deriveFont(FIELD_FONT_SIZE - 1f));
+                    checkBox.setFocusable(true);
+                    checkBox.setRequestFocusEnabled(true);
+                    checkBox.setFocusPainted(true);
                     return checkBox;
                 })
                 .forEach(panel::add);
@@ -165,8 +195,11 @@ public class SingleEditorUIFactory {
         if (groups == null || groups.isEmpty()) return;
         for (Component c : groupsPanel.getComponents()) {
             if (c instanceof JBCheckBox checkBox) {
-                if (groups.contains(Groups.valueOf(checkBox.getText()))) {
-                    checkBox.setSelected(true);
+                try {
+                    if (groups.contains(Groups.valueOf(checkBox.getText()))) {
+                        checkBox.setSelected(true);
+                    }
+                } catch (IllegalArgumentException ignored) {
                 }
             }
         }
@@ -201,13 +234,12 @@ public class SingleEditorUIFactory {
             @Override
             public void update(@NotNull AnActionEvent e) {
                 Project project = e.getProject();
-                Editor editor = e.getData(CommonDataKeys.EDITOR);
-
-                if (project != null && editor != null) {
-                    if (LookupManager.getInstance(project).getActiveLookup() != null) {
-                        e.getPresentation().setEnabled(false);
-                        return;
-                    }
+                if (project == null) {
+                    project = Config.getProject();
+                }
+                if (project != null && LookupManager.getInstance(project).getActiveLookup() != null) {
+                    e.getPresentation().setEnabled(false);
+                    return;
                 }
                 e.getPresentation().setEnabled(true);
             }
@@ -216,8 +248,6 @@ public class SingleEditorUIFactory {
             public @NotNull ActionUpdateThread getActionUpdateThread() {
                 return ActionUpdateThread.EDT;
             }
-
         }.registerCustomShortcutSet(shortcutSet, component);
     }
-
 }

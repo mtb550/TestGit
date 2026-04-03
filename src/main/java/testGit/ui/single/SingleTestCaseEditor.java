@@ -6,6 +6,7 @@ import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.TextFieldWithAutoCompletion;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.fields.ExtendableTextField;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,7 @@ import java.util.function.Consumer;
 import static testGit.ui.single.SingleEditorUIFactory.*;
 
 public class SingleTestCaseEditor {
+
     public static void showForCreate(Consumer<TestCaseDto> onSave, Set<String> uniqueStepsCache) {
         buildAndShow(new TestCaseDto(), true, null, onSave, uniqueStepsCache);
     }
@@ -61,7 +63,7 @@ public class SingleTestCaseEditor {
         contentPanel.setBorder(JBUI.Borders.empty(12));
 
         // 1. Read-Only Context
-        ExtendableTextField titleField;
+        ExtendableTextField titleField = null;
         if (!isExtendable && targetField != null) {
             if (targetField != UpdateField.TITLE)
                 contentPanel.add(createReadOnlyField(dto.getTitle(), UpdateField.TITLE.getIcon(), TITLE_FONT_SIZE));
@@ -75,8 +77,6 @@ public class SingleTestCaseEditor {
             titleField = createTextField(UpdateField.TITLE.getLabel(), UpdateField.TITLE.getIcon(), TITLE_FONT_SIZE);
             if (dto.getTitle() != null) titleField.setText(dto.getTitle());
             contentPanel.add(titleField);
-        } else {
-            titleField = null;
         }
 
         ExtendableTextField expectedField = createTextField(UpdateField.EXPECTED.getLabel(), UpdateField.EXPECTED.getIcon(), FIELD_FONT_SIZE);
@@ -131,15 +131,23 @@ public class SingleTestCaseEditor {
         statusBar.setBackground(com.intellij.util.ui.UIUtil.getPanelBackground());
 
         JLabel shortcutLabel = getLabel(isExtendable, targetField);
-        //shortcutLabel.setForeground(com.intellij.util.ui.UIUtil.getLabelForeground());
+        //shortcutLabel.setForeground(UIUtil.getLabelForeground());
         shortcutLabel.setFont(JBUI.Fonts.smallFont());
         shortcutLabel.setForeground(JBColor.GRAY);
         statusBar.add(shortcutLabel, BorderLayout.WEST);
         mainPanel.add(statusBar, BorderLayout.SOUTH);
 
-        // 5. Build Popup
+        // 5. Resolve initial focus — for GROUPS pass the first checkbox directly
+        final JBCheckBox firstCheckBox = getFirstCheckbox(groupsPanel);
+        final boolean focusGroups = !isExtendable && targetField == UpdateField.GROUPS && firstCheckBox != null;
+
+        JComponent initialFocus = focusGroups
+                ? firstCheckBox
+                : (titleField != null ? titleField : expectedField);
+
+        // 6. Build Popup
         popupWrapper[0] = JBPopupFactory.getInstance()
-                .createComponentPopupBuilder(mainPanel, titleField != null ? titleField : expectedField)
+                .createComponentPopupBuilder(mainPanel, initialFocus)
                 .setTitle(isExtendable ? "Create Test Case" : "Edit " + Objects.requireNonNull(targetField).getLabel())
                 .setRequestFocus(true)
                 .setCancelOnClickOutside(true)
@@ -147,7 +155,7 @@ public class SingleTestCaseEditor {
                 .setResizable(true)
                 .createPopup();
 
-        // 6. Delegate Save Logic
+        // 7. Delegate Save Logic
         Runnable saveAction = SingleEditorSaveManager.createSaveAction(
                 dto, titleField,
                 expectedWrapper, expectedField,
@@ -157,7 +165,7 @@ public class SingleTestCaseEditor {
                 onSave, popupWrapper
         );
 
-        // 7. Delegate Shortcuts
+        // 8. Delegate Shortcuts
         SingleEditorShortcutManager.registerShortcuts(
                 project, uniqueStepsCache,
                 mainPanel, contentPanel, isExtendable, targetField, repackPopup,
@@ -168,20 +176,24 @@ public class SingleTestCaseEditor {
                 saveAction
         );
 
-        // 8. Initial Focus Setup
-        SwingUtilities.invokeLater(() -> {
-            if (!isExtendable) {
-                if (targetField == UpdateField.EXPECTED) expectedField.requestFocus();
-                else if (targetField == UpdateField.PRIORITY) priorityCombo.requestFocus();
-                else if (targetField == UpdateField.STEPS && !stepFields.isEmpty())
-                    stepFields.getFirst().requestFocus();
-                else if (titleField != null) titleField.requestFocus();
-            } else {
-                titleField.requestFocus();
-            }
-        });
-
+        // 9. Show popup
         popupWrapper[0].showCenteredInCurrentWindow(Config.getProject());
+
+        if (focusGroups) {
+            SwingUtilities.invokeLater(() ->
+                    SwingUtilities.invokeLater(firstCheckBox::requestFocusInWindow)
+            );
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static JBCheckBox getFirstCheckbox(JPanel groupsPanel) {
+        List<JBCheckBox> checkBoxes = (List<JBCheckBox>) groupsPanel.getClientProperty("checkBoxes");
+        if (checkBoxes != null && !checkBoxes.isEmpty()) return checkBoxes.get(0);
+        for (Component c : groupsPanel.getComponents()) {
+            if (c instanceof JBCheckBox cb) return cb;
+        }
+        return null;
     }
 
     private static @NotNull JLabel getLabel(boolean isExtendable, UpdateField targetField) {
