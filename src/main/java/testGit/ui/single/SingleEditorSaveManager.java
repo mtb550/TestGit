@@ -22,10 +22,11 @@ public class SingleEditorSaveManager {
             form.getStepsSection().applyTo(dto);
 
             String title = dto.getTitle();
-            if (form.getTitleSection().getWrapper().getParent() == null || (title != null && !title.isEmpty())) {
+            if (form.getTitleSection().getWrapper().getParent() == null || (title != null && !title.trim().isEmpty())) {
                 onSave.accept(dto);
                 popupWrapper[0].closeOk(null);
-            }
+            } else
+                form.getTitleSection().setError(true);
         };
     }
 }

@@ -1,5 +1,7 @@
 package testGit.ui.single.nnew;
 
+import com.intellij.ui.JBColor;
+import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.components.fields.ExtendableTextComponent;
 import com.intellij.ui.components.fields.ExtendableTextField;
 import com.intellij.util.ui.JBFont;
@@ -9,6 +11,8 @@ import lombok.Getter;
 import testGit.pojo.dto.TestCaseDto;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
@@ -18,7 +22,7 @@ public class TitleSection {
     @Getter
     private final JPanel wrapper;
     Font fieldFont = JBFont.regular().deriveFont(JBUI.Fonts.label().getSize2D() + 6f);
-
+    private boolean isError = false;
 
     public TitleSection() {
         this.titleField = new ExtendableTextField() {
@@ -31,7 +35,7 @@ public class TitleSection {
                         if (r != null) {
                             Graphics2D g2 = (Graphics2D) g.create();
                             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                            g2.setColor(UIUtil.getContextHelpForeground());
+                            g2.setColor(isError ? JBColor.RED : UIUtil.getContextHelpForeground());
                             g2.setFont(getFont());
                             FontMetrics fm = g2.getFontMetrics();
 
@@ -51,6 +55,27 @@ public class TitleSection {
         this.titleField.getEmptyText().setFont(fieldFont);
         this.titleField.getEmptyText().setText(CreateField.TITLE.getLabel());
         this.titleField.setBorder(JBUI.Borders.empty(10));
+
+        this.titleField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                resetError();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                resetError();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                resetError();
+            }
+
+            private void resetError() {
+                if (isError) setError(false);
+            }
+        });
 
         this.titleField.setExtensions(new ExtendableTextComponent.Extension() {
             @Override
@@ -75,9 +100,22 @@ public class TitleSection {
         this.wrapper.setBorder(JBUI.Borders.emptyTop(8));
     }
 
+    public void setError(boolean error) {
+        this.isError = error;
+        titleField.getEmptyText().clear();
+
+        if (error) {
+            titleField.getEmptyText().appendText(CreateField.TITLE.getLabel(), new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.RED));
+            titleField.requestFocus();
+        } else
+            titleField.getEmptyText().appendText(CreateField.TITLE.getLabel());
+
+        titleField.repaint();
+    }
+
     public void showSection(JPanel contentPanel) {
         if (wrapper.getParent() == null)
-            contentPanel.add(wrapper, 0);
+            contentPanel.add(wrapper);
         titleField.requestFocus();
     }
 

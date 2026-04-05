@@ -181,7 +181,6 @@ JBPopupFactory.getInstance()
 
 ui enhance:
 enhance edit after finish create.
-add: if click enter without set title then show title and place holder with red font color.
 add edit shortcuts to KeybooardSet
 enable filter enum priority by active
 move shortcut logic from createtestCaseUI to related classes.
