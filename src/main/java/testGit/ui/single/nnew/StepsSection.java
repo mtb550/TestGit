@@ -1,13 +1,17 @@
 package testGit.ui.single.nnew;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.TextFieldWithAutoCompletion;
 import com.intellij.ui.TextFieldWithAutoCompletionListProvider;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
+import testGit.util.KeyboardSet;
 
 import javax.swing.*;
 import java.awt.*;
@@ -49,9 +53,12 @@ public class StepsSection {
     public void showSection(JPanel contentPanel, BaseCreateTestCase.UIAction repackAction, Set<String> uniqueStepsCache) {
         if (wrapper.getParent() == null)
             contentPanel.add(wrapper);
+        wrapper.setVisible(true);
         addStepField("", repackAction, uniqueStepsCache);
-        repackAction.execute();
-        stepFields.getLast().requestFocus();
+        SwingUtilities.invokeLater(() -> {
+            repackAction.execute();
+            stepFields.getLast().requestFocus();
+        });
     }
 
     public void addStepField(final String text, final BaseCreateTestCase.UIAction repackAction, final Set<String> uniqueStepsCache) {
@@ -69,7 +76,7 @@ public class StepsSection {
 
         JLabel removeButton = new JLabel(AllIcons.Actions.Cancel);
         removeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        removeButton.setToolTipText("Remove step");
+        removeButton.setToolTipText("Remove step " + KeyboardSet.CreateTestCaseRemoveStep.getShortcutText());
 
         removeButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -84,18 +91,20 @@ public class StepsSection {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                stepsContainer.remove(stepRow);
-                stepFields.remove(stepField);
-
-                for (int i = 0; i < stepFields.size(); i++) {
-                    stepFields.get(i).setPlaceholder("Step " + (i + 1));
-                }
-
-                stepsContainer.revalidate();
-                stepsContainer.repaint();
-                repackAction.execute();
+                removeStepAction(stepRow, stepField, repackAction);
             }
         });
+
+        new DumbAwareAction() {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent e) {
+                Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+
+                if (SwingUtilities.isDescendingFrom(focusOwner, stepField)) {
+                    removeStepAction(stepRow, stepField, repackAction);
+                }
+            }
+        }.registerCustomShortcutSet(KeyboardSet.CreateTestCaseRemoveStep.getShortcut(), stepField);
 
         JPanel buttonWrapper = new JPanel(new BorderLayout());
         buttonWrapper.setOpaque(false);
@@ -109,8 +118,21 @@ public class StepsSection {
         stepsContainer.add(stepRow);
     }
 
+    private void removeStepAction(JPanel stepRow, TextFieldWithAutoCompletion<String> stepField, BaseCreateTestCase.UIAction repackAction) {
+        stepsContainer.remove(stepRow);
+        stepFields.remove(stepField);
+
+        for (int i = 0; i < stepFields.size(); i++)
+            stepFields.get(i).setPlaceholder("Step " + (i + 1));
+
+        if (stepFields.isEmpty()) wrapper.setVisible(false);
+        else stepFields.getLast().requestFocus();
+
+        SwingUtilities.invokeLater(repackAction::execute);
+    }
+
     public void applyTo(TestCaseDto dto) {
-        if (wrapper.getParent() != null) {
+        if (wrapper.getParent() != null && wrapper.isVisible()) {
             List<String> finalSteps = new ArrayList<>();
             for (TextFieldWithAutoCompletion<String> sf : stepFields) {
                 if (!sf.getText().trim().isEmpty()) {

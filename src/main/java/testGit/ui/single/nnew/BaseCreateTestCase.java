@@ -41,6 +41,11 @@ public class BaseCreateTestCase {
                     e.getPresentation().setEnabled(false);
                     return;
                 }
+                if (prioritySection.getCombo() != null && prioritySection.getCombo().isPopupVisible()) {
+                    e.getPresentation().setEnabled(false);
+                    return;
+                }
+
                 e.getPresentation().setEnabled(true);
             }
 

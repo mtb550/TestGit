@@ -46,6 +46,10 @@ public class PrioritySection {
         priority.requestFocus();
     }
 
+    public ComboBox<Priority> getCombo() {
+        return priority;
+    }
+
     public void applyTo(TestCaseDto dto) {
         if (wrapper.getParent() != null) {
             dto.setPriority((Priority) priority.getSelectedItem());
