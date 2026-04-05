@@ -6,10 +6,12 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import testGit.pojo.dto.TestCaseDto;
+import testGit.util.KeyboardSet;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.util.Set;
 
 public class ExpectedSection implements CreateTestCaseSection {
     private final ExtendableTextField expectedField;
@@ -88,5 +90,18 @@ public class ExpectedSection implements CreateTestCaseSection {
         if (wrapper.getParent() != null) {
             dto.setExpected(expectedField.getText().trim());
         }
+    }
+
+    @Override
+    public void setupShortcut(final JComponent mainPanel, final JPanel slot, final CreateTestCaseBase base, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+        base.registerShortcut(mainPanel, KeyboardSet.CreateTestCaseExpected.getShortcut(), () -> {
+            showSection(slot);
+            repackAction.execute();
+        });
+    }
+
+    @Override
+    public JComponent getFocusComponent() {
+        return expectedField;
     }
 }

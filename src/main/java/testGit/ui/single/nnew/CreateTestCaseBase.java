@@ -24,19 +24,19 @@ public class CreateTestCaseBase {
     public CreateTestCaseBase() {
         this.titleSection = new TitleSection();
         this.expectedSection = new ExpectedSection();
+        this.stepsSection = new StepsSection();
         this.prioritySection = new PrioritySection();
         this.groupsSection = new GroupsSection();
-        this.stepsSection = new StepsSection();
         this.statusBar = new StatusBar();
     }
 
     public List<CreateTestCaseSection> getAllSections() {
         return Arrays.asList(
-                titleSection,
+                titleSection, // arranged, sequence that related to place of each component
                 expectedSection,
+                stepsSection,
                 prioritySection,
-                groupsSection,
-                stepsSection
+                groupsSection
         );
     }
 

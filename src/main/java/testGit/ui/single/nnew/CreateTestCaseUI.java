@@ -3,7 +3,6 @@ package testGit.ui.single.nnew;
 import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.components.fields.ExtendableTextField;
 import com.intellij.util.ui.JBUI;
 import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
@@ -45,55 +44,16 @@ public class CreateTestCaseUI extends CreateTestCaseBase {
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setBorder(JBUI.Borders.empty(12));
 
-        JPanel titleSlot = new JPanel(new BorderLayout());
-        titleSlot.setOpaque(false);
-        contentPanel.add(titleSlot);
+        for (CreateTestCaseSection section : getAllSections()) {
+            JPanel slot = new JPanel(new BorderLayout());
+            slot.setOpaque(false);
+            contentPanel.add(slot);
 
-        JPanel expectedSlot = new JPanel(new BorderLayout());
-        expectedSlot.setOpaque(false);
-        contentPanel.add(expectedSlot);
+            section.setupShortcut(mainPanel, slot, this, repackPopup, uniqueStepsCache);
 
-        JPanel stepsSlot = new JPanel(new BorderLayout());
-        stepsSlot.setOpaque(false);
-        contentPanel.add(stepsSlot);
-
-        JPanel prioritySlot = new JPanel(new BorderLayout());
-        prioritySlot.setOpaque(false);
-        contentPanel.add(prioritySlot);
-
-        JPanel groupsSlot = new JPanel(new BorderLayout());
-        groupsSlot.setOpaque(false);
-        contentPanel.add(groupsSlot);
-
-        // 1. Title
-        titleSection.showSection(titleSlot);
-        ExtendableTextField titleField = titleSection.getTitleField();
-        registerShortcut(mainPanel, KeyboardSet.CreateTestCaseTitle.getShortcut(), () -> {
-            titleSection.showSection(titleSlot);
-            repackPopup.execute();
-        });
-
-        // 2. Expected
-        registerShortcut(mainPanel, KeyboardSet.CreateTestCaseExpected.getShortcut(), () -> {
-            expectedSection.showSection(expectedSlot);
-            repackPopup.execute();
-        });
-
-        // 3. Priority
-        registerShortcut(mainPanel, KeyboardSet.CreateTestCasePriority.getShortcut(), () -> {
-            prioritySection.showSection(prioritySlot);
-            repackPopup.execute();
-        });
-
-        // 4. Groups
-        registerShortcut(mainPanel, KeyboardSet.CreateTestCaseGroups.getShortcut(), () -> {
-            groupsSection.showSection(groupsSlot);
-            repackPopup.execute();
-        });
-
-        // 5. Steps
-        registerShortcut(mainPanel, KeyboardSet.CreateTestCaseAddStep.getShortcut(), () ->
-                stepsSection.showSection(stepsSlot, repackPopup, uniqueStepsCache));
+            if (section instanceof TitleSection)
+                section.showSection(slot);
+        }
 
         JPanel anchorPanel = new JPanel(new BorderLayout());
         anchorPanel.setOpaque(false);
@@ -128,7 +88,7 @@ public class CreateTestCaseUI extends CreateTestCaseBase {
 
         // Popup
         popupWrapper[0] = JBPopupFactory.getInstance()
-                .createComponentPopupBuilder(mainPanel, titleField)
+                .createComponentPopupBuilder(mainPanel, titleSection.getFocusComponent())
                 .setTitle("Create Test Case")
                 //.setTitleIcon()
                 .setRequestFocus(true)

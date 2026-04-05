@@ -7,9 +7,11 @@ import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Priority;
 import testGit.pojo.dto.TestCaseDto;
+import testGit.util.KeyboardSet;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Set;
 
 public class PrioritySection implements CreateTestCaseSection {
     private final ComboBox<Priority> priority;
@@ -63,5 +65,18 @@ public class PrioritySection implements CreateTestCaseSection {
         } else if (dto.getPriority() == null) {
             dto.setPriority(Priority.LOW);
         }
+    }
+
+    @Override
+    public void setupShortcut(final JComponent mainPanel, final JPanel slot, final CreateTestCaseBase base, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+        base.registerShortcut(mainPanel, KeyboardSet.CreateTestCasePriority.getShortcut(), () -> {
+            showSection(slot);
+            repackAction.execute();
+        });
+    }
+
+    @Override
+    public JComponent getFocusComponent() {
+        return priority;
     }
 }

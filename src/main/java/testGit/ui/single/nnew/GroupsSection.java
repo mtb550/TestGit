@@ -5,11 +5,13 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import testGit.pojo.Groups;
 import testGit.pojo.dto.TestCaseDto;
+import testGit.util.KeyboardSet;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 
 public class GroupsSection implements CreateTestCaseSection {
     private final JPanel groups;
@@ -70,5 +72,23 @@ public class GroupsSection implements CreateTestCaseSection {
             }
             dto.setGroups(selectedGroups.isEmpty() ? null : selectedGroups);
         }
+    }
+
+    @Override
+    public void setupShortcut(final JComponent mainPanel, final JPanel slot, final CreateTestCaseBase base, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+        base.registerShortcut(mainPanel, KeyboardSet.CreateTestCaseGroups.getShortcut(), () -> {
+            showSection(slot);
+            repackAction.execute();
+        });
+    }
+
+    @Override
+    public JComponent getFocusComponent() {
+        for (Component c : groups.getComponents()) {
+            if (c instanceof JBCheckBox) {
+                return (JComponent) c;
+            }
+        }
+        return groups;
     }
 }

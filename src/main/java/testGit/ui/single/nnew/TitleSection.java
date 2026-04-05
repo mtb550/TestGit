@@ -9,12 +9,14 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import lombok.Getter;
 import testGit.pojo.dto.TestCaseDto;
+import testGit.util.KeyboardSet;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.util.Set;
 
 public class TitleSection implements CreateTestCaseSection {
     @Getter
@@ -129,5 +131,18 @@ public class TitleSection implements CreateTestCaseSection {
         if (wrapper.getParent() != null) {
             dto.setTitle(titleField.getText().trim());
         }
+    }
+
+    @Override
+    public void setupShortcut(final JComponent mainPanel, final JPanel slot, final CreateTestCaseBase base, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+        base.registerShortcut(mainPanel, KeyboardSet.CreateTestCaseTitle.getShortcut(), () -> {
+            showSection(slot);
+            repackAction.execute();
+        });
+    }
+
+    @Override
+    public JComponent getFocusComponent() {
+        return titleField;
     }
 }

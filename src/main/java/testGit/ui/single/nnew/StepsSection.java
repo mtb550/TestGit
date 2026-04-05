@@ -61,7 +61,7 @@ public class StepsSection implements CreateTestCaseSection {
             contentPanel.add(wrapper);
     }
 
-    public void showSection(JPanel contentPanel, CreateTestCaseBase.UIAction repackAction, Set<String> uniqueStepsCache) {
+    public void showSection(final JPanel contentPanel, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
         showSection(contentPanel);
         wrapper.setVisible(true);
         addStepField("", repackAction, uniqueStepsCache);
@@ -151,5 +151,19 @@ public class StepsSection implements CreateTestCaseSection {
             }
             dto.setSteps(finalSteps.isEmpty() ? null : finalSteps);
         }
+    }
+
+    @Override
+    public void setupShortcut(final JComponent mainPanel, final JPanel slot, final CreateTestCaseBase base, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+        base.registerShortcut(mainPanel, KeyboardSet.CreateTestCaseAddStep.getShortcut(), () ->
+                showSection(slot, repackAction, uniqueStepsCache));
+    }
+
+    @Override
+    public JComponent getFocusComponent() {
+        if (!stepFields.isEmpty()) {
+            return stepFields.getLast();
+        }
+        return stepsContainer;
     }
 }
