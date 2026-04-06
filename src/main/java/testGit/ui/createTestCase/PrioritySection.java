@@ -84,4 +84,11 @@ public class PrioritySection implements CreateTestCaseSection {
     public void setEditable(final boolean editable) {
         priority.setEnabled(editable);
     }
+
+    @Override
+    public void fillData(final TestCaseDto dto, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+        if (dto.getPriority() != null) {
+            priority.setSelectedItem(dto.getPriority());
+        }
+    }
 }

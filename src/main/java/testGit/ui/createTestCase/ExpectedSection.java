@@ -115,4 +115,11 @@ public class ExpectedSection implements CreateTestCaseSection {
             expectedField.setForeground(UIUtil.getContextHelpForeground());
         }
     }
+
+    @Override
+    public void fillData(final TestCaseDto dto, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+        if (dto.getExpected() != null) {
+            expectedField.setText(dto.getExpected());
+        }
+    }
 }

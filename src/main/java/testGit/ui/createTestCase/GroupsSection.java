@@ -115,4 +115,9 @@ public class GroupsSection implements CreateTestCaseSection {
             }
         }
     }
+
+    @Override
+    public void fillData(final TestCaseDto dto, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+        setSelectedGroups(dto.getGroups());
+    }
 }

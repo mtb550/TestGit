@@ -17,4 +17,6 @@ public interface CreateTestCaseSection {
     JComponent getFocusComponent();
 
     void setEditable(final boolean editable);
+
+    void fillData(final TestCaseDto dto, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache);
 }

@@ -100,13 +100,7 @@ public class CreateTestCaseUI extends CreateTestCaseBase {
         // save
         Runnable saveAction = SingleEditorSaveManager.createSaveAction(this, dto, onSave, popupWrapper);
 
-        // General Shortcuts
-        registerShortcut(mainPanel, KeyboardSet.TabNext.getShortcut(), () ->
-                KeyboardFocusManager.getCurrentKeyboardFocusManager().focusNextComponent());
-
-        registerShortcut(mainPanel, KeyboardSet.TabPrevious.getShortcut(), () ->
-                KeyboardFocusManager.getCurrentKeyboardFocusManager().focusPreviousComponent());
-
+        // registe enter shortcut
         registerShortcut(mainPanel, KeyboardSet.Enter.getShortcut(), saveAction::run);
 
         // show first

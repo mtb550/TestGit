@@ -191,4 +191,9 @@ public class StepsSection implements CreateTestCaseSection {
             }
         }
     }
+
+    @Override
+    public void fillData(final TestCaseDto dto, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+        setStepsData(dto.getSteps(), repackAction, uniqueStepsCache);
+    }
 }

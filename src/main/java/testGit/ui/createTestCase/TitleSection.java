@@ -154,4 +154,11 @@ public class TitleSection implements CreateTestCaseSection {
         else
             titleField.setForeground(UIUtil.getTextFieldForeground());
     }
+
+    @Override
+    public void fillData(final TestCaseDto dto, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+        if (dto.getTitle() != null) {
+            titleField.setText(dto.getTitle());
+        }
+    }
 }

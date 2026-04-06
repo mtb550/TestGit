@@ -4,6 +4,7 @@ import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
+import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.ui.createTestCase.*;
 import testGit.ui.editTestCase.single.SingleEditorSaveManager;
@@ -21,7 +22,23 @@ public class UpdateTestCaseUI extends CreateTestCaseBase {
             if (popupWrapper[0] != null) popupWrapper[0].pack(false, true);
         };
 
-        JPanel mainPanel = new JPanel(new BorderLayout());
+        JPanel mainPanel = new JPanel(new BorderLayout()) {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension pref = super.getPreferredSize();
+                Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+                pref.width = Math.max(pref.width, screenSize.width / 2);
+                int maxHeight = (int) (screenSize.height * 0.85);
+                pref.height = Math.min(pref.height, maxHeight);
+                return pref;
+            }
+        };
+
+        mainPanel.setBorder(JBUI.Borders.empty());
+
+        mainPanel.setFocusCycleRoot(true);
+        mainPanel.setFocusTraversalPolicy(new LayoutFocusTraversalPolicy());
+
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setBorder(JBUI.Borders.empty(12));
@@ -30,7 +47,7 @@ public class UpdateTestCaseUI extends CreateTestCaseBase {
             JPanel slot = new JPanel(new BorderLayout());
             slot.setOpaque(false);
 
-            fillSectionData(section, existingDto, uniqueStepsCache, repackPopup);
+            section.fillData(existingDto, repackPopup, uniqueStepsCache);
 
             boolean isTarget = isTargetSection(section, targetField);
             section.setEditable(isTarget);
@@ -49,20 +66,14 @@ public class UpdateTestCaseUI extends CreateTestCaseBase {
     }
 
     private boolean isTargetSection(final CreateTestCaseSection section, final UpdateField target) {
-        if (target == UpdateField.TITLE) return section instanceof TitleSection;
-        if (target == UpdateField.EXPECTED) return section instanceof ExpectedSection;
-        if (target == UpdateField.PRIORITY) return section instanceof PrioritySection;
-        if (target == UpdateField.GROUPS) return section instanceof GroupsSection;
-        if (target == UpdateField.STEPS) return section instanceof StepsSection;
-        return false;
-    }
-
-    private void fillSectionData(final CreateTestCaseSection section, final TestCaseDto dto, final Set<String> cache, final UIAction repack) {
-        if (section instanceof TitleSection s) s.getTitleField().setText(dto.getTitle());
-        if (section instanceof ExpectedSection s) s.getExpectedField().setText(dto.getExpected());
-        if (section instanceof PrioritySection s) s.getCombo().setSelectedItem(dto.getPriority());
-        if (section instanceof GroupsSection s) s.setSelectedGroups(dto.getGroups());
-        if (section instanceof StepsSection s) s.setStepsData(dto.getSteps(), repack, cache);
+        return switch (target) {
+            case TITLE -> section instanceof TitleSection;
+            case EXPECTED -> section instanceof ExpectedSection;
+            case PRIORITY -> section instanceof PrioritySection;
+            case GROUPS -> section instanceof GroupsSection;
+            case STEPS -> section instanceof StepsSection;
+            default -> false;
+        };
     }
 
     private JComponent getTargetFocus(final UpdateField target) {
@@ -85,9 +96,11 @@ public class UpdateTestCaseUI extends CreateTestCaseBase {
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
+        // status bar
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         mainPanel.add(statusBar.getPanel(), BorderLayout.SOUTH);
 
+        // Popup
         popupWrapper[0] = JBPopupFactory.getInstance()
                 .createComponentPopupBuilder(mainPanel, getTargetFocus(target))
                 .setTitle("Edit " + target.getLabel())
@@ -97,12 +110,14 @@ public class UpdateTestCaseUI extends CreateTestCaseBase {
                 .setResizable(true)
                 .createPopup();
 
+        // save
         Runnable saveAction = SingleEditorSaveManager.createSaveAction(this, dto, onUpdate, popupWrapper);
 
+        // registe enter shortcut
         registerShortcut(mainPanel, testGit.util.KeyboardSet.Enter.getShortcut(), saveAction::run);
 
-        popupWrapper[0].showCenteredInCurrentWindow(testGit.pojo.Config.getProject());
+        // show first
+        popupWrapper[0].showCenteredInCurrentWindow(Config.getProject());
     }
-
 
 }
