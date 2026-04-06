@@ -5,6 +5,7 @@ import com.intellij.ui.components.fields.ExtendableTextField;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
+import lombok.Getter;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.util.KeyboardSet;
 
@@ -14,6 +15,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.Set;
 
 public class ExpectedSection implements CreateTestCaseSection {
+    @Getter
     private final ExtendableTextField expectedField;
     private final JPanel wrapper;
     Font fieldFont = JBFont.regular().deriveFont(JBUI.Fonts.label().getSize2D() + 2f);
@@ -103,5 +105,14 @@ public class ExpectedSection implements CreateTestCaseSection {
     @Override
     public JComponent getFocusComponent() {
         return expectedField;
+    }
+
+    @Override
+    public void setEditable(final boolean editable) {
+        expectedField.setEditable(editable);
+        expectedField.setEnabled(editable);
+        if (!editable) {
+            expectedField.setForeground(UIUtil.getContextHelpForeground());
+        }
     }
 }

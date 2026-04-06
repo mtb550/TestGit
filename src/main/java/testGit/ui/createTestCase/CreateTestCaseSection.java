@@ -15,4 +15,6 @@ public interface CreateTestCaseSection {
     void setupShortcut(final JComponent mainPanel, final JPanel slot, final CreateTestCaseBase base, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache);
 
     JComponent getFocusComponent();
+
+    void setEditable(final boolean editable);
 }

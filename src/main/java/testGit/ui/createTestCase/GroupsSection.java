@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 public class GroupsSection implements CreateTestCaseSection {
@@ -90,5 +91,28 @@ public class GroupsSection implements CreateTestCaseSection {
             }
         }
         return groups;
+    }
+
+    @Override
+    public void setEditable(final boolean editable) {
+        for (Component c : groups.getComponents()) {
+            if (c instanceof JBCheckBox cb) {
+                cb.setEnabled(editable);
+            }
+        }
+    }
+
+    public void setSelectedGroups(final List<Groups> selectedList) {
+        if (selectedList == null) return;
+        for (Component c : groups.getComponents()) {
+            if (c instanceof JBCheckBox cb) {
+                try {
+                    Groups group = Groups.valueOf(cb.getText());
+                    cb.setSelected(selectedList.contains(group));
+                } catch (Exception ignored) {
+                    System.out.println("setSelectedGroups ignored");
+                }
+            }
+        }
     }
 }

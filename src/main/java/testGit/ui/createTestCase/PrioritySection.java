@@ -79,4 +79,9 @@ public class PrioritySection implements CreateTestCaseSection {
     public JComponent getFocusComponent() {
         return priority;
     }
+
+    @Override
+    public void setEditable(final boolean editable) {
+        priority.setEnabled(editable);
+    }
 }

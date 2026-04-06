@@ -128,9 +128,8 @@ public class TitleSection implements CreateTestCaseSection {
 
     @Override
     public void applyTo(TestCaseDto dto) {
-        if (wrapper.getParent() != null) {
+        if (wrapper.getParent() != null && titleField.isEditable())
             dto.setTitle(titleField.getText().trim());
-        }
     }
 
     @Override
@@ -144,5 +143,15 @@ public class TitleSection implements CreateTestCaseSection {
     @Override
     public JComponent getFocusComponent() {
         return titleField;
+    }
+
+    @Override
+    public void setEditable(final boolean editable) {
+        titleField.setEditable(editable);
+        titleField.setEnabled(editable);
+        if (!editable)
+            titleField.setForeground(UIUtil.getContextHelpForeground());
+        else
+            titleField.setForeground(UIUtil.getTextFieldForeground());
     }
 }

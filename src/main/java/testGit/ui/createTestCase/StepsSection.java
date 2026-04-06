@@ -166,4 +166,29 @@ public class StepsSection implements CreateTestCaseSection {
         }
         return stepsContainer;
     }
+
+    @Override
+    public void setEditable(final boolean editable) {
+        for (TextFieldWithAutoCompletion<String> field : stepFields) {
+            field.setEnabled(editable);
+            Container row = field.getParent();
+            if (row != null) {
+                for (Component c : row.getComponents()) {
+                    if (c instanceof JPanel buttonWrapper) {
+                        buttonWrapper.setVisible(editable);
+                    }
+                }
+            }
+        }
+    }
+
+    public void setStepsData(List<String> steps, CreateTestCaseBase.UIAction repack, Set<String> cache) {
+        stepsContainer.removeAll();
+        stepFields.clear();
+        if (steps != null && !steps.isEmpty()) {
+            for (String step : steps) {
+                addStepField(step, repack, cache);
+            }
+        }
+    }
 }
