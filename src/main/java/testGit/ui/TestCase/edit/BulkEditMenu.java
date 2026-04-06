@@ -1,11 +1,10 @@
-package testGit.ui.editTestCase;
+package testGit.ui.TestCase.edit;
 
 import testGit.pojo.dto.TestCaseDto;
-import testGit.ui.GenericSelectionPopup;
-import testGit.ui.editTestCase.bulk.ExpectedBulkEditor;
-import testGit.ui.editTestCase.bulk.PriorityBulkEditor;
-import testGit.ui.editTestCase.bulk.StepsBulkEditor;
-import testGit.ui.editTestCase.bulk.TitleBulkEditor;
+import testGit.ui.TestCase.edit.bulk.ExpectedBulkEditor;
+import testGit.ui.TestCase.edit.bulk.PriorityBulkEditor;
+import testGit.ui.TestCase.edit.bulk.StepsBulkEditor;
+import testGit.ui.TestCase.edit.bulk.TitleBulkEditor;
 
 import java.util.Arrays;
 import java.util.List;

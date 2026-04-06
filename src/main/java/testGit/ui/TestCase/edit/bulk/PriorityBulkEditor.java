@@ -1,9 +1,9 @@
-package testGit.ui.editTestCase.bulk;
+package testGit.ui.TestCase.edit.bulk;
 
 import testGit.pojo.Priority;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.repository.PersistenceManager;
-import testGit.ui.GenericSelectionPopup;
+import testGit.ui.TestCase.edit.GenericSelectionPopup;
 
 import java.util.List;
 

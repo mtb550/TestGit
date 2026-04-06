@@ -14,7 +14,7 @@ import testGit.editorPanel.UnifiedVirtualFile;
 import testGit.editorPanel.testCaseEditor.TestEditorUI;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.dirs.DirectoryDto;
-import testGit.ui.createTestCase.CreateTestCaseUI;
+import testGit.ui.TestCase.CreateTestCaseUI;
 import testGit.util.KeyboardSet;
 import testGit.util.Notifier;
 

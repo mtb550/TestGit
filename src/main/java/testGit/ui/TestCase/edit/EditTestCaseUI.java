@@ -1,26 +1,26 @@
-package testGit.ui.editTestCase;
+package testGit.ui.TestCase.edit;
 
 import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
-import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
-import com.intellij.util.ui.UIUtil;
 import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
-import testGit.ui.createTestCase.*;
+import testGit.ui.TestCase.*;
+import testGit.util.KeyboardSet;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class UpdateTestCaseUI extends CreateTestCaseBase {
+public class EditTestCaseUI extends TestCaseUIBase {
 
     public void show(final TestCaseDto existingDto, final UpdateField targetField, final Consumer<TestCaseDto> onUpdate, final Set<String> uniqueStepsCache) {
         final JBPopup[] popupWrapper = new JBPopup[1];
         UIAction repackPopup = () -> {
-            if (popupWrapper[0] != null) popupWrapper[0].pack(false, true);
+            if (popupWrapper[0] != null)
+                popupWrapper[0].pack(false, true);
         };
 
         JPanel mainPanel = new JPanel(new BorderLayout()) {
@@ -36,7 +36,6 @@ public class UpdateTestCaseUI extends CreateTestCaseBase {
         };
 
         mainPanel.setBorder(JBUI.Borders.empty());
-
         mainPanel.setFocusCycleRoot(true);
         mainPanel.setFocusTraversalPolicy(new LayoutFocusTraversalPolicy());
 
@@ -106,24 +105,10 @@ public class UpdateTestCaseUI extends CreateTestCaseBase {
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-        JPanel customStatusBar = new JPanel(new BorderLayout());
-        customStatusBar.setBorder(JBUI.Borders.empty(6, 10));
-        customStatusBar.setOpaque(true);
-        customStatusBar.setBackground(UIUtil.getPanelBackground());
-
-        String shortcutText = "💡 Shortcuts:  [Enter] Save   |   [Tab] / [Shift+Tab] Navigate";
-        if (target == UpdateField.STEPS) {
-            shortcutText = String.format("💡 Shortcuts:  [Enter] Save   |   [%s] Add Step   |   [Tab] / [Shift+Tab] Navigate",
-                    testGit.util.KeyboardSet.CreateTestCaseAddStep.getShortcutText());
-        }
-
-        JLabel shortcutLabel = new JLabel(shortcutText);
-        shortcutLabel.setFont(JBUI.Fonts.smallFont());
-        shortcutLabel.setForeground(JBColor.GRAY);
-        customStatusBar.add(shortcutLabel, BorderLayout.WEST);
+        statusBar.updateItems(target.getStatusBarItems());
 
         mainPanel.add(scrollPane, BorderLayout.CENTER);
-        mainPanel.add(customStatusBar, BorderLayout.SOUTH);
+        mainPanel.add(statusBar.getPanel(), BorderLayout.SOUTH);
 
         // Popup
         popupWrapper[0] = JBPopupFactory.getInstance()
@@ -139,7 +124,7 @@ public class UpdateTestCaseUI extends CreateTestCaseBase {
         Runnable saveAction = save(dto, onUpdate, popupWrapper);
 
         // register enter shortcut
-        registerShortcut(mainPanel, testGit.util.KeyboardSet.Enter.getShortcut(), saveAction::run);
+        registerShortcut(mainPanel, KeyboardSet.Enter.getShortcut(), saveAction::run);
 
         // show first
         popupWrapper[0].showCenteredInCurrentWindow(Config.getProject());

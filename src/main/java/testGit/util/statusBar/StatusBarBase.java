@@ -10,8 +10,8 @@ import javax.swing.border.Border;
 import java.awt.*;
 
 public abstract class StatusBarBase {
-    final String innerSeparator = " : ";
-    final String outerSeparator = "   ";
+    final String innerSeparator = ": ";
+    final String outerSeparator = ",  ";
     private final JPanel statusBar;
     private final Color shortcutColor = JBColor.GRAY;
     private final Color dotColor = JBColor.GRAY;
@@ -26,6 +26,12 @@ public abstract class StatusBarBase {
         this.statusBar.setBorder(JBUI.Borders.empty(6, 10));
         this.statusBar.setOpaque(true);
         this.statusBar.setBackground(UIUtil.getPanelBackground());
+
+        updateItems(items);
+    }
+
+    public void updateItems(final StatusBarItem[] items) {
+        this.statusBar.removeAll();
 
         JPanel contentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         contentPanel.setOpaque(false);
@@ -44,6 +50,9 @@ public abstract class StatusBarBase {
         }
 
         this.statusBar.add(contentPanel, BorderLayout.WEST);
+
+        this.statusBar.revalidate();
+        this.statusBar.repaint();
     }
 
     private JLabel setStatusBarIcon() {

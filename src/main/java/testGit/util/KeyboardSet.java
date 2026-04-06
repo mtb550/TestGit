@@ -46,7 +46,9 @@ public enum KeyboardSet {
     UpdateTestCaseGroups(KeyEvent.VK_G, 0),
     PriorityHigh(KeyEvent.VK_H, 0),
     PriorityMedium(KeyEvent.VK_M, 0),
-    PriorityLow(KeyEvent.VK_L, 0);
+    PriorityLow(KeyEvent.VK_L, 0),
+    AutoComplete(KeyEvent.VK_SPACE, InputEvent.CTRL_DOWN_MASK),
+    SelectGroup(KeyEvent.VK_SPACE, 0);
 
     private final int keyCode;
     private final int modifiers;

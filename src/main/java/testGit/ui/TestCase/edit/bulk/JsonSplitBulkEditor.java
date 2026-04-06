@@ -1,4 +1,4 @@
-package testGit.ui.editTestCase.bulk;
+package testGit.ui.TestCase.edit.bulk;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.AnActionEvent;

@@ -1,4 +1,4 @@
-package testGit.ui.createTestCase;
+package testGit.ui.TestCase;
 
 import com.intellij.codeInsight.lookup.LookupManager;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
@@ -9,28 +9,57 @@ import com.intellij.openapi.ui.popup.JBPopup;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.dto.TestCaseDto;
+import testGit.util.statusBar.StatusBarItem;
 
 import javax.swing.*;
+import java.awt.*;
+import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 @Getter
-public class CreateTestCaseBase {
+public abstract class TestCaseUIBase {
     protected final TitleSection titleSection;
     protected final ExpectedSection expectedSection;
     protected final PrioritySection prioritySection;
     protected final GroupsSection groupsSection;
     protected final StepsSection stepsSection;
     protected final StatusBar statusBar;
+    protected Map<CreateTestCaseSection, StatusBarItem[]> statusBarMapping;
+    private PropertyChangeListener focusListener;
 
-    public CreateTestCaseBase() {
+    public TestCaseUIBase() {
         this.titleSection = new TitleSection();
         this.expectedSection = new ExpectedSection();
         this.stepsSection = new StepsSection();
         this.prioritySection = new PrioritySection();
         this.groupsSection = new GroupsSection();
         this.statusBar = new StatusBar();
+    }
+
+    protected void initDynamicStatusBar(JComponent parentPanel) {
+        focusListener = evt -> {
+            Component focusOwner = (Component) evt.getNewValue();
+            if (focusOwner != null && SwingUtilities.isDescendingFrom(focusOwner, parentPanel)) {
+                for (CreateTestCaseSection section : getAllSections()) {
+                    if (SwingUtilities.isDescendingFrom(focusOwner, section.getWrapper())) {
+                        StatusBarItem[] items = statusBarMapping.getOrDefault(section, statusBarMapping.get(titleSection));
+                        if (items != null) statusBar.updateItems(items);
+                        return;
+                    }
+                }
+            }
+        };
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addPropertyChangeListener("focusOwner", focusListener);
+    }
+
+    public void dispose() {
+        if (focusListener != null) {
+            KeyboardFocusManager.getCurrentKeyboardFocusManager().removePropertyChangeListener("focusOwner", focusListener);
+            focusListener = null;
+        }
     }
 
     public List<CreateTestCaseSection> getAllSections() {

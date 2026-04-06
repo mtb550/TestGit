@@ -1,4 +1,4 @@
-package testGit.ui;
+package testGit.ui.TestCase.edit;
 
 import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;

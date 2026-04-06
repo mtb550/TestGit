@@ -1,4 +1,4 @@
-package testGit.ui.createTestCase;
+package testGit.ui.TestCase;
 
 import com.intellij.util.ui.JBUI;
 import testGit.pojo.dto.TestCaseDto;
@@ -14,13 +14,13 @@ public interface CreateTestCaseSection {
 
     void applyTo(final TestCaseDto dto);
 
-    void setupShortcut(final JComponent mainPanel, final JPanel slot, final CreateTestCaseBase base, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache);
+    void setupShortcut(final JComponent mainPanel, final JPanel slot, final TestCaseUIBase base, final TestCaseUIBase.UIAction repackAction, final Set<String> uniqueStepsCache);
 
     JComponent getFocusComponent();
 
     void setEditable(final boolean editable);
 
-    void fillData(final TestCaseDto dto, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache);
+    void fillData(final TestCaseDto dto, final TestCaseUIBase.UIAction repackAction, final Set<String> uniqueStepsCache);
 
     default JPanel createIconPanel(final Icon icon) {
         JPanel iconPanel = new JPanel(new GridBagLayout());

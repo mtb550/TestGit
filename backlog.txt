@@ -183,3 +183,5 @@ ui enhance:
 persist save and create
 make title and expected auto complete. find better way instead of get values in method attributes.
 add dictionary for title, steps, expected.
+refactor remove test case class: RemoveTestCaseDialog.java
+remove class GenericSelectionPopup and unify edit menu class. remove SingleEditMenu &BulkEditMenu

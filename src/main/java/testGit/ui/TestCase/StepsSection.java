@@ -1,4 +1,4 @@
-package testGit.ui.createTestCase;
+package testGit.ui.TestCase;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -54,7 +54,7 @@ public class StepsSection implements CreateTestCaseSection {
             contentPanel.add(wrapper);
     }
 
-    public void showSection(final JPanel contentPanel, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+    public void showSection(final JPanel contentPanel, final TestCaseUIBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
         showSection(contentPanel);
         wrapper.setVisible(true);
         addStepField("", repackAction, uniqueStepsCache);
@@ -64,7 +64,7 @@ public class StepsSection implements CreateTestCaseSection {
         });
     }
 
-    public void addStepField(final String text, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+    public void addStepField(final String text, final TestCaseUIBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
         TextFieldWithAutoCompletionListProvider<String> provider = new TextFieldWithAutoCompletion.StringsCompletionProvider(uniqueStepsCache != null ? uniqueStepsCache : Collections.emptySet(), null);
         TextFieldWithAutoCompletion<String> stepField = new TextFieldWithAutoCompletion<>(Config.getProject(), provider, true, text != null ? text : "");
 
@@ -120,7 +120,7 @@ public class StepsSection implements CreateTestCaseSection {
         stepsContainer.add(stepRow);
     }
 
-    private void removeStepAction(JPanel stepRow, TextFieldWithAutoCompletion<String> stepField, CreateTestCaseBase.UIAction repackAction) {
+    private void removeStepAction(JPanel stepRow, TextFieldWithAutoCompletion<String> stepField, TestCaseUIBase.UIAction repackAction) {
         if (stepFields.size() == 1) {
             stepField.setText("");
             stepField.requestFocus();
@@ -151,7 +151,7 @@ public class StepsSection implements CreateTestCaseSection {
     }
 
     @Override
-    public void setupShortcut(final JComponent mainPanel, final JPanel slot, final CreateTestCaseBase base, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+    public void setupShortcut(final JComponent mainPanel, final JPanel slot, final TestCaseUIBase base, final TestCaseUIBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
         base.registerShortcut(mainPanel, KeyboardSet.CreateTestCaseAddStep.getShortcut(), () ->
                 showSection(slot, repackAction, uniqueStepsCache));
     }
@@ -179,7 +179,7 @@ public class StepsSection implements CreateTestCaseSection {
         }
     }
 
-    public void setStepsData(List<String> steps, CreateTestCaseBase.UIAction repack, Set<String> cache) {
+    public void setStepsData(List<String> steps, TestCaseUIBase.UIAction repack, Set<String> cache) {
         stepsContainer.removeAll();
         stepFields.clear();
         if (steps != null && !steps.isEmpty()) {
@@ -190,7 +190,7 @@ public class StepsSection implements CreateTestCaseSection {
     }
 
     @Override
-    public void fillData(final TestCaseDto dto, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+    public void fillData(final TestCaseDto dto, final TestCaseUIBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
         setStepsData(dto.getSteps(), repackAction, uniqueStepsCache);
     }
 }

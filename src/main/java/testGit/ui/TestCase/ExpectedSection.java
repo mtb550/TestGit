@@ -1,4 +1,4 @@
-package testGit.ui.createTestCase;
+package testGit.ui.TestCase;
 
 import com.intellij.ui.components.fields.ExtendableTextField;
 import com.intellij.util.ui.JBFont;
@@ -78,7 +78,7 @@ public class ExpectedSection implements CreateTestCaseSection {
     }
 
     @Override
-    public void setupShortcut(final JComponent mainPanel, final JPanel slot, final CreateTestCaseBase base, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+    public void setupShortcut(final JComponent mainPanel, final JPanel slot, final TestCaseUIBase base, final TestCaseUIBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
         base.registerShortcut(mainPanel, KeyboardSet.CreateTestCaseExpected.getShortcut(), () -> {
             showSection(slot);
             repackAction.execute();
@@ -100,7 +100,7 @@ public class ExpectedSection implements CreateTestCaseSection {
     }
 
     @Override
-    public void fillData(final TestCaseDto dto, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+    public void fillData(final TestCaseDto dto, final TestCaseUIBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
         if (dto.getExpected() != null) {
             expectedField.setText(dto.getExpected());
         }

@@ -1,4 +1,4 @@
-package testGit.ui.createTestCase;
+package testGit.ui.TestCase;
 
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.util.ui.JBFont;
@@ -74,7 +74,7 @@ public class GroupsSection implements CreateTestCaseSection {
     }
 
     @Override
-    public void setupShortcut(final JComponent mainPanel, final JPanel slot, final CreateTestCaseBase base, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+    public void setupShortcut(final JComponent mainPanel, final JPanel slot, final TestCaseUIBase base, final TestCaseUIBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
         base.registerShortcut(mainPanel, KeyboardSet.CreateTestCaseGroups.getShortcut(), () -> {
             showSection(slot);
             repackAction.execute();
@@ -115,7 +115,7 @@ public class GroupsSection implements CreateTestCaseSection {
     }
 
     @Override
-    public void fillData(final TestCaseDto dto, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+    public void fillData(final TestCaseDto dto, final TestCaseUIBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
         setSelectedGroups(dto.getGroups());
     }
 }

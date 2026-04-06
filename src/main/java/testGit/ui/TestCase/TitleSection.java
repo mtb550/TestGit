@@ -1,4 +1,4 @@
-package testGit.ui.createTestCase;
+package testGit.ui.TestCase;
 
 import com.intellij.ui.JBColor;
 import com.intellij.ui.SimpleTextAttributes;
@@ -93,7 +93,7 @@ public class TitleSection implements CreateTestCaseSection {
     }
 
     @Override
-    public void setupShortcut(final JComponent mainPanel, final JPanel slot, final CreateTestCaseBase base, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+    public void setupShortcut(final JComponent mainPanel, final JPanel slot, final TestCaseUIBase base, final TestCaseUIBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
         base.registerShortcut(mainPanel, KeyboardSet.CreateTestCaseTitle.getShortcut(), () -> {
             showSection(slot);
             repackAction.execute();
@@ -116,7 +116,7 @@ public class TitleSection implements CreateTestCaseSection {
     }
 
     @Override
-    public void fillData(final TestCaseDto dto, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
+    public void fillData(final TestCaseDto dto, final TestCaseUIBase.UIAction repackAction, final Set<String> uniqueStepsCache) {
         if (dto.getTitle() != null) {
             titleField.setText(dto.getTitle());
         }

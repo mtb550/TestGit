@@ -1,7 +1,6 @@
-package testGit.ui.editTestCase;
+package testGit.ui.TestCase.edit;
 
 import testGit.pojo.dto.TestCaseDto;
-import testGit.ui.GenericSelectionPopup;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -11,7 +10,7 @@ public class SingleEditMenu {
 
     public static void show(final TestCaseDto existingDto, final Consumer<TestCaseDto> onUpdate, Set<String> uniqueStepsCache) {
         UpdateField[] editableFields = Arrays.stream(UpdateField.values())
-                .filter(f -> f != UpdateField.SAVE)
+                .filter(UpdateField::isEditMenuItem)
                 .toArray(UpdateField[]::new);
 
         GenericSelectionPopup.show(
@@ -20,6 +19,6 @@ public class SingleEditMenu {
                 UpdateField::getLabel,
                 field -> field.getShortcutText().charAt(0),
                 UpdateField::getIcon,
-                selectedField -> new UpdateTestCaseUI().show(existingDto, selectedField, onUpdate, uniqueStepsCache));
+                selectedField -> new EditTestCaseUI().show(existingDto, selectedField, onUpdate, uniqueStepsCache));
     }
 }

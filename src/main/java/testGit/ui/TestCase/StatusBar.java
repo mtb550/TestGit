@@ -1,11 +1,11 @@
-package testGit.ui.createTestCase;
+package testGit.ui.TestCase;
 
 import testGit.util.statusBar.StatusBarBase;
 
 public class StatusBar extends StatusBarBase {
 
     public StatusBar() {
-        super(CreateField.values());
+        super(CreateField.TITLE.getStatusBarItems());
     }
 
 }
