@@ -34,9 +34,7 @@ public class GroupsSection implements CreateTestCaseSection {
 
         this.wrapper = new JPanel(new BorderLayout());
         this.wrapper.setOpaque(false);
-        JLabel iconLabel = new JLabel(CreateField.GROUPS.getIcon());
-        iconLabel.setBorder(JBUI.Borders.empty(0, 10, 0, 8));
-        this.wrapper.add(iconLabel, BorderLayout.WEST);
+        this.wrapper.add(createIconPanel(CreateField.GROUPS.getIcon()), BorderLayout.WEST);
         this.wrapper.add(this.groups, BorderLayout.CENTER);
         this.wrapper.setBorder(JBUI.Borders.emptyTop(8));
     }

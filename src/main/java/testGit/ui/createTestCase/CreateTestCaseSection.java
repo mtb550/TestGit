@@ -1,8 +1,10 @@
 package testGit.ui.createTestCase;
 
+import com.intellij.util.ui.JBUI;
 import testGit.pojo.dto.TestCaseDto;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.Set;
 
 public interface CreateTestCaseSection {
@@ -19,4 +21,13 @@ public interface CreateTestCaseSection {
     void setEditable(final boolean editable);
 
     void fillData(final TestCaseDto dto, final CreateTestCaseBase.UIAction repackAction, final Set<String> uniqueStepsCache);
+
+    default JPanel createIconPanel(final Icon icon) {
+        JPanel iconPanel = new JPanel(new GridBagLayout());
+        iconPanel.setOpaque(false);
+        JLabel iconLabel = new JLabel(icon);
+        iconLabel.setBorder(JBUI.Borders.empty(0, 10, 0, 8));
+        iconPanel.add(iconLabel);
+        return iconPanel;
+    }
 }

@@ -44,9 +44,7 @@ public class PrioritySection implements CreateTestCaseSection {
 
         this.wrapper = new JPanel(new BorderLayout());
         this.wrapper.setOpaque(false);
-        JLabel iconLabel = new JLabel(CreateField.PRIORITY.getIcon());
-        iconLabel.setBorder(JBUI.Borders.empty(0, 10, 0, 8));
-        this.wrapper.add(iconLabel, BorderLayout.WEST);
+        this.wrapper.add(createIconPanel(CreateField.PRIORITY.getIcon()), BorderLayout.WEST);
         this.wrapper.add(this.priority, BorderLayout.CENTER);
         this.wrapper.setBorder(JBUI.Borders.emptyTop(8));
     }

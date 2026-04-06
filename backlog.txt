@@ -180,10 +180,6 @@ JBPopupFactory.getInstance()
                 .show(RelativePoint.getCenterOf(component), Balloon.Position.above);
 
 ui enhance:
-
-enhance edit test case ui. (in progress)
 persist save and create
-allign all icons
-
-done :
-use another status bar for each edit component (enhancement). where is it ?
+make title and expected auto complete. find better way instead of get values in method attributes.
+add dictionary for title, steps, expected.

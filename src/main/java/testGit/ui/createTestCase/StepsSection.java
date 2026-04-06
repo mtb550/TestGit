@@ -38,14 +38,7 @@ public class StepsSection implements CreateTestCaseSection {
 
         this.wrapper = new JPanel(new BorderLayout());
         this.wrapper.setOpaque(false);
-
-        JLabel iconLabel = new JLabel(CreateField.STEPS.getIcon());
-        iconLabel.setBorder(JBUI.Borders.empty(6, 10, 0, 8));
-        JPanel iconPanel = new JPanel(new BorderLayout());
-        iconPanel.setOpaque(false);
-        iconPanel.add(iconLabel, BorderLayout.CENTER);
-
-        this.wrapper.add(iconPanel, BorderLayout.WEST);
+        this.wrapper.add(createIconPanel(CreateField.STEPS.getIcon()), BorderLayout.WEST);
         this.wrapper.add(this.stepsContainer, BorderLayout.CENTER);
         this.wrapper.setBorder(JBUI.Borders.emptyTop(8));
     }

@@ -1,6 +1,5 @@
 package testGit.ui.createTestCase;
 
-import com.intellij.ui.components.fields.ExtendableTextComponent;
 import com.intellij.ui.components.fields.ExtendableTextField;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
@@ -36,9 +35,9 @@ public class ExpectedSection implements CreateTestCaseSection {
                             FontMetrics fm = g2.getFontMetrics();
 
                             int x = (int) r.getX() + JBUI.scale(1);
-                            int y = (int) r.getY() + fm.getAscent();
+                            int y = (int) r.getY() + fm.getAscent() - JBUI.scale(1);
 
-                            g2.drawString(CreateField.EXPECTED.getLabel(), x, y);
+                            g2.drawString(getEmptyText().getText(), x, y);
                             g2.dispose();
                         }
                     } catch (Exception ignored) {
@@ -52,25 +51,9 @@ public class ExpectedSection implements CreateTestCaseSection {
         this.expectedField.getEmptyText().setText(CreateField.EXPECTED.getLabel());
         this.expectedField.setBorder(JBUI.Borders.empty(10));
 
-        this.expectedField.setExtensions(new ExtendableTextComponent.Extension() {
-            @Override
-            public Icon getIcon(boolean hovered) {
-                return CreateField.EXPECTED.getIcon();
-            }
-
-            @Override
-            public boolean isIconBeforeText() {
-                return true;
-            }
-
-            @Override
-            public int getIconGap() {
-                return JBUI.scale(8);
-            }
-        });
-
         this.wrapper = new JPanel(new BorderLayout());
         this.wrapper.setOpaque(false);
+        this.wrapper.add(createIconPanel(CreateField.EXPECTED.getIcon()), BorderLayout.WEST);
         this.wrapper.add(this.expectedField, BorderLayout.CENTER);
         this.wrapper.setBorder(JBUI.Borders.emptyTop(8));
     }

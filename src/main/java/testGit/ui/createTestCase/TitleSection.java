@@ -2,7 +2,6 @@ package testGit.ui.createTestCase;
 
 import com.intellij.ui.JBColor;
 import com.intellij.ui.SimpleTextAttributes;
-import com.intellij.ui.components.fields.ExtendableTextComponent;
 import com.intellij.ui.components.fields.ExtendableTextField;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
@@ -12,8 +11,6 @@ import testGit.pojo.dto.TestCaseDto;
 import testGit.util.KeyboardSet;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.Set;
@@ -41,9 +38,9 @@ public class TitleSection implements CreateTestCaseSection {
                             FontMetrics fm = g2.getFontMetrics();
 
                             int x = (int) r.getX() + JBUI.scale(1);
-                            int y = (int) r.getY() + fm.getAscent();
+                            int y = (int) r.getY() + fm.getAscent() - JBUI.scale(1);
 
-                            g2.drawString(CreateField.TITLE.getLabel(), x, y);
+                            g2.drawString(getEmptyText().getText(), x, y);
                             g2.dispose();
                         }
                     } catch (Exception ignored) {
@@ -57,46 +54,9 @@ public class TitleSection implements CreateTestCaseSection {
         this.titleField.getEmptyText().setText(CreateField.TITLE.getLabel());
         this.titleField.setBorder(JBUI.Borders.empty(10));
 
-        this.titleField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                resetError();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                resetError();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                resetError();
-            }
-
-            private void resetError() {
-                if (isError) setError(false);
-            }
-        });
-
-        this.titleField.setExtensions(new ExtendableTextComponent.Extension() {
-            @Override
-            public Icon getIcon(boolean hovered) {
-                return CreateField.TITLE.getIcon();
-            }
-
-            @Override
-            public boolean isIconBeforeText() {
-                return true;
-            }
-
-            @Override
-            public int getIconGap() {
-                return JBUI.scale(8);
-            }
-        });
-
         this.wrapper = new JPanel(new BorderLayout());
         this.wrapper.setOpaque(false);
+        this.wrapper.add(createIconPanel(CreateField.TITLE.getIcon()), BorderLayout.WEST);
         this.wrapper.add(this.titleField, BorderLayout.CENTER);
         this.wrapper.setBorder(JBUI.Borders.emptyTop(8));
     }
