@@ -53,9 +53,11 @@ public class PersistenceManager {
         if (onUpdate != null) onUpdate.run();
     }
 
-    public static void updateGroups(List<TestCaseDto> items, List<Groups> newGroups, Runnable onUpdate) {
-        for (TestCaseDto tc : items) {
-            tc.setGroups(newGroups.isEmpty() ? null : new ArrayList<>(newGroups));
+    public static void updateGroups(List<TestCaseDto> items, List<List<Groups>> newGroupsList, Runnable onUpdate) {
+        int limit = Math.min(newGroupsList.size(), items.size());
+        for (int i = 0; i < limit; i++) {
+            List<Groups> groups = newGroupsList.get(i);
+            items.get(i).setGroups(groups.isEmpty() ? null : new ArrayList<>(groups));
         }
         // TODO: save to db
         if (onUpdate != null) onUpdate.run();
