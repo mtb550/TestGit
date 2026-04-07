@@ -9,14 +9,14 @@ import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
 import testGit.editorPanel.UnifiedVirtualFile;
 import testGit.pojo.dto.TestCaseDto;
-import testGit.ui.TestCase.edit.BulkEditMenu;
-import testGit.ui.TestCase.edit.SingleEditMenu;
+import testGit.ui.TestCase.TestCaseEditMenu;
 import testGit.util.KeyboardSet;
 import testGit.viewPanel.ViewPanel;
 import testGit.viewPanel.ViewToolWindowFactory;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class EditTestCase extends DumbAwareAction {
 
@@ -44,7 +44,7 @@ public class EditTestCase extends DumbAwareAction {
         Set<String> stepCache = unifiedFile != null ? unifiedFile.getUniqueSteps() : null;
         final UnifiedVirtualFile finalUnifiedFile = unifiedFile;
 
-        Runnable onUpdate = () -> {
+        Runnable onBulkUpdate = () -> {
             list.repaint();
 
             ViewPanel detailsPanel = ViewToolWindowFactory.getViewPanel();
@@ -58,18 +58,14 @@ public class EditTestCase extends DumbAwareAction {
             }
         };
 
-        if (selectedItems.size() == 1) {
-            SingleEditMenu.show(selectedItems.getFirst(), updatedDto -> {
+        Consumer<TestCaseDto> onSingleUpdate = updatedDto -> {
+            if (updatedDto.getSteps() != null && finalUnifiedFile != null)
+                updatedDto.getSteps().forEach(finalUnifiedFile::addNewStepToCache);
 
-                if (updatedDto.getSteps() != null && finalUnifiedFile != null)
-                    updatedDto.getSteps().forEach(finalUnifiedFile::addNewStepToCache);
+            onBulkUpdate.run();
+        };
 
-                onUpdate.run();
-
-            }, stepCache);
-
-        } else
-            BulkEditMenu.show(selectedItems, onUpdate);
+        TestCaseEditMenu.show(selectedItems, onSingleUpdate, onBulkUpdate, stepCache);
     }
 
     @Override
