@@ -22,7 +22,7 @@ import java.util.List;
 
 public class PriorityBulkEditor {
 
-    public static void show(List<TestCaseDto> selectedItems, Runnable onUpdate) {
+    public void show(List<TestCaseDto> selectedItems, Runnable onUpdate) {
         Priority[] items = Priority.values();
 
         JBList<Priority> list = new JBList<>(items);

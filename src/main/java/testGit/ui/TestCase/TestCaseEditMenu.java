@@ -52,11 +52,11 @@ public class TestCaseEditMenu {
 
         showMenu(title, selectedField -> {
             switch (selectedField) {
-                case PRIORITY -> PriorityBulkEditor.show(selectedItems, onUpdate);
-                case TITLE -> TitleBulkEditor.show(selectedItems, onUpdate);
-                case EXPECTED -> ExpectedBulkEditor.show(selectedItems, onUpdate);
-                case STEPS -> StepsBulkEditor.show(selectedItems, onUpdate);
-                case GROUPS -> GroupsBulkEditor.show(selectedItems, onUpdate);
+                case PRIORITY -> new PriorityBulkEditor().show(selectedItems, onUpdate);
+                case TITLE -> new TitleBulkEditor().show(selectedItems, onUpdate);
+                case EXPECTED -> new ExpectedBulkEditor().show(selectedItems, onUpdate);
+                case STEPS -> new StepsBulkEditor().show(selectedItems, onUpdate);
+                case GROUPS -> new GroupsBulkEditor().show(selectedItems, onUpdate);
                 default -> System.out.println("Selected: " + selectedField.getLabel() + " (Not supported for bulk)");
             }
         });

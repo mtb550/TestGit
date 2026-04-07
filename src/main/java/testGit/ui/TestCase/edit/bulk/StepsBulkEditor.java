@@ -39,7 +39,7 @@ import java.util.List;
 
 public class StepsBulkEditor {
 
-    public static void show(List<TestCaseDto> selectedItems, Runnable onUpdate) {
+    public void show(List<TestCaseDto> selectedItems, Runnable onUpdate) {
         Project project = Config.getProject();
         if (project == null) return;
 
@@ -432,7 +432,7 @@ public class StepsBulkEditor {
         popup.showCenteredInCurrentWindow(project);
     }
 
-    private static void navigate(int direction, Editor editor, List<StepMarker> markers) {
+    private void navigate(int direction, Editor editor, List<StepMarker> markers) {
         editor.getCaretModel().removeSecondaryCarets();
         int offset = editor.getCaretModel().getOffset();
         int currentIndex = 0;
@@ -446,7 +446,7 @@ public class StepsBulkEditor {
         editor.getCaretModel().moveToOffset(markers.get(targetIndex).endOffset);
     }
 
-    private static int getNearestValidOffset(int offset, List<StepMarker> markers) {
+    private int getNearestValidOffset(int offset, List<StepMarker> markers) {
         int minDistance = Integer.MAX_VALUE;
         int nearestOffset = offset;
         for (StepMarker m : markers) {
@@ -463,7 +463,7 @@ public class StepsBulkEditor {
         return nearestOffset;
     }
 
-    private static void setupEditorAppearance(Editor editor, Project project) {
+    private void setupEditorAppearance(Editor editor, Project project) {
         FileType jsonFileType = FileTypeManager.getInstance().getFileTypeByExtension("json");
         com.intellij.openapi.editor.highlighter.EditorHighlighter highlighter = com.intellij.openapi.editor.highlighter.EditorHighlighterFactory.getInstance().createEditorHighlighter(project, jsonFileType);
         if (editor instanceof EditorEx) ((EditorEx) editor).setHighlighter(highlighter);
@@ -479,12 +479,12 @@ public class StepsBulkEditor {
         settings.setAdditionalLinesCount(1);
     }
 
-    private static String escapeJson(String str) {
+    private String escapeJson(String str) {
         if (str == null) return "";
         return str.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", "");
     }
 
-    private static String unescapeJson(String str) {
+    private String unescapeJson(String str) {
         if (str == null) return "";
         return str.replace("\\\"", "\"").replace("\\\\", "\\");
     }

@@ -21,7 +21,7 @@ import java.util.List;
 
 public class GroupsBulkEditor {
 
-    public static void show(List<TestCaseDto> selectedItems, Runnable onUpdate) {
+    public void show(List<TestCaseDto> selectedItems, Runnable onUpdate) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(JBUI.Borders.empty(8, 12));
