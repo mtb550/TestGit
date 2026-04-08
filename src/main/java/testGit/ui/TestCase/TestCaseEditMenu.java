@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.ui.TestCase.edit.EditTestCaseUI;
-import testGit.ui.TestCase.edit.UpdateField;
+import testGit.ui.TestCase.edit.EditField;
 import testGit.ui.TestCase.edit.bulk.*;
 
 import javax.swing.*;
@@ -54,19 +54,19 @@ public class TestCaseEditMenu {
         });
     }
 
-    private static void showMenu(String title, Consumer<UpdateField> onSelection) {
-        UpdateField[] editableFields = Arrays.stream(UpdateField.values())
-                .filter(UpdateField::isEditMenuItem)
-                .toArray(UpdateField[]::new);
+    private static void showMenu(String title, Consumer<EditField> onSelection) {
+        EditField[] editableFields = Arrays.stream(EditField.values())
+                .filter(EditField::isEditMenuItem)
+                .toArray(EditField[]::new);
 
-        JBList<UpdateField> list = new JBList<>(editableFields);
+        JBList<EditField> list = new JBList<>(editableFields);
         list.setBorder(JBUI.Borders.empty(4, 0));
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         if (editableFields.length > 0) list.setSelectedIndex(0);
 
         list.setCellRenderer(new ColoredListCellRenderer<>() {
             @Override
-            protected void customizeCellRenderer(@NotNull JList<? extends UpdateField> list, UpdateField value, int index, boolean selected, boolean hasFocus) {
+            protected void customizeCellRenderer(@NotNull JList<? extends EditField> list, EditField value, int index, boolean selected, boolean hasFocus) {
                 if (value.getIcon() != null) {
                     setIcon(value.getIcon());
                 }
@@ -96,7 +96,7 @@ public class TestCaseEditMenu {
             @Override
             public void keyTyped(KeyEvent e) {
                 char keyChar = Character.toLowerCase(e.getKeyChar());
-                for (UpdateField item : editableFields) {
+                for (EditField item : editableFields) {
                     String shortcutStr = item.getShortcutText();
                     char shortcut = shortcutStr.isEmpty() ? ' ' : shortcutStr.charAt(0);
                     if (shortcut != ' ' && Character.toLowerCase(shortcut) == keyChar) {

@@ -2,7 +2,7 @@ package testGit.ui.TestCase.edit.bulk;
 
 import testGit.pojo.Priority;
 import testGit.pojo.dto.TestCaseDto;
-import testGit.repository.PersistenceManager;
+import testGit.util.persist.PersistenceManager;
 
 import java.util.List;
 
@@ -47,7 +47,6 @@ public class PriorityBulkEditor extends JsonSplitBulkEditor {
             String val = newValues.get(i).trim();
             Priority matched = items.get(i).getPriority();
 
-            // (High == HIGH == high)
             for (Priority p : Priority.values()) {
                 if (p.name().equalsIgnoreCase(val)) {
                     matched = p;

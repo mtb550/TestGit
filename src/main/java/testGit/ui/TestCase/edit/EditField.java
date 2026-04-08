@@ -8,7 +8,7 @@ import testGit.util.statusBar.StatusBarItem;
 import javax.swing.*;
 
 @Getter
-public enum UpdateField implements StatusBarItem {
+public enum EditField implements StatusBarItem {
     SAVE(
             "Save",
             KeyboardSet.Enter,
@@ -120,7 +120,7 @@ public enum UpdateField implements StatusBarItem {
     private final StatusBarItem[] statusBarItems;
     private final boolean editMenuItem;
 
-    UpdateField(final String label, final KeyboardSet shortcut, final Icon icon, final StatusBarItem[] statusBarItems, final boolean editMenuItem) {
+    EditField(final String label, final KeyboardSet shortcut, final Icon icon, final StatusBarItem[] statusBarItems, final boolean editMenuItem) {
         this.label = label;
         this.shortcut = shortcut;
         this.customShortcutText = null;
@@ -129,7 +129,7 @@ public enum UpdateField implements StatusBarItem {
         this.editMenuItem = editMenuItem;
     }
 
-    UpdateField(final String label, final String customShortcutText, final Icon icon, final StatusBarItem[] statusBarItems, final boolean editMenuItem) {
+    EditField(final String label, final String customShortcutText, final Icon icon, final StatusBarItem[] statusBarItems, final boolean editMenuItem) {
         this.label = label;
         this.shortcut = null;
         this.customShortcutText = customShortcutText;

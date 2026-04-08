@@ -2,7 +2,7 @@ package testGit.ui.TestCase.edit.bulk;
 
 import testGit.pojo.Groups;
 import testGit.pojo.dto.TestCaseDto;
-import testGit.repository.PersistenceManager;
+import testGit.util.persist.PersistenceManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ public class GroupsBulkEditor extends JsonArraySplitBulkEditor {
 
     @Override
     protected String getArrayFieldName() {
-        return "groups"; // سيظهر كـ "groups": [...] في الـ JSON
+        return "groups";
     }
 
     @Override
@@ -46,10 +46,8 @@ public class GroupsBulkEditor extends JsonArraySplitBulkEditor {
             for (String str : stringList) {
                 String cleanStr = str.trim();
                 if (!cleanStr.isEmpty()) {
-                    // البحث عن المجموعة المناسبة وتجاهل حالة الأحرف (مثلاً smoke == Smoke)
                     for (Groups g : Groups.values()) {
                         if (g.name().equalsIgnoreCase(cleanStr)) {
-                            // منع التكرار داخل نفس الـ Test Case
                             if (!enumList.contains(g)) {
                                 enumList.add(g);
                             }
@@ -61,7 +59,6 @@ public class GroupsBulkEditor extends JsonArraySplitBulkEditor {
             newGroupsList.add(enumList);
         }
 
-        // استدعاء دالة الحفظ المخصصة في PersistenceManager
         PersistenceManager.updateGroups(items, newGroupsList, onUpdate);
     }
 }

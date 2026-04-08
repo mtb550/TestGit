@@ -1,7 +1,7 @@
 package testGit.ui.TestCase.edit.bulk;
 
 import testGit.pojo.dto.TestCaseDto;
-import testGit.repository.PersistenceManager;
+import testGit.util.persist.PersistenceManager;
 
 import java.util.List;
 

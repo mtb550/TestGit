@@ -1,7 +1,7 @@
 package testGit.ui.TestCase.edit.bulk;
 
 import testGit.pojo.dto.TestCaseDto;
-import testGit.repository.PersistenceManager;
+import testGit.util.persist.PersistenceManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,6 @@ public class StepsBulkEditor extends JsonArraySplitBulkEditor {
 
     @Override
     protected String getArrayFieldName() {
-        // هذا الاسم سيظهر كـ Key في الـ JSON المعروض
         return "steps";
     }
 
@@ -34,7 +33,6 @@ public class StepsBulkEditor extends JsonArraySplitBulkEditor {
 
     @Override
     protected void saveValues(List<TestCaseDto> items, List<List<String>> activeValues, Runnable onUpdate) {
-        // استدعاء دالة الحفظ الخاصة بالخطوات في PersistenceManager
         PersistenceManager.updateSteps(items, activeValues, onUpdate);
     }
 }

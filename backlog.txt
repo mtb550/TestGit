@@ -181,7 +181,4 @@ JBPopupFactory.getInstance()
 
 ui enhance:
 persist save and create
-make title and expected auto complete. find better way instead of get values in method attributes.
-add dictionary for title, steps, expected.
 refactor remove test case class: RemoveTestCaseDialog.java
-logic is not correct for bulk edit priority and groups. ui should show all values for test cases and can select values for each one. not use on selection for all. supose I have to put differrent value for each?

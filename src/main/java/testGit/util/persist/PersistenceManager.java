@@ -1,4 +1,4 @@
-package testGit.repository;
+package testGit.util.persist;
 
 import testGit.pojo.Groups;
 import testGit.pojo.Priority;
