@@ -28,6 +28,7 @@ public class TestCaseEditMenu {
     public void show(final List<TestCaseDto> items, final Consumer<List<TestCaseDto>> updatedItems) {
         boolean isSingle = items.size() == 1;
         String title = isSingle ? "Edit Test Case" : "Edit " + items.size() + " Test Cases";
+
         showMenu(title, field -> {
             if (isSingle)
                 new EditTestCaseUI().show(items.getFirst(), field, tc -> updatedItems.accept(items));
@@ -36,17 +37,16 @@ public class TestCaseEditMenu {
         });
     }
 
-    private void showMenu(String title, Consumer<EditField> onSelection) {
+    private void showMenu(final String title, final Consumer<EditField> onSelection) {
         EditField[] fields = Arrays.stream(EditField.values()).filter(EditField::isEditMenuItem).toArray(EditField[]::new);
         JBList<EditField> list = buildMenuList(fields);
         JBPopup popup = buildPopup(title, list);
-        registerShortcuts(list, fields, popup, onSelection);
-        registerMouseClick(list, fields, popup, onSelection);
+        registerShortcuts(list, popup, onSelection);
         popup.showCenteredInCurrentWindow(Config.getProject());
     }
 
     @NotNull
-    private JBList<EditField> buildMenuList(EditField[] fields) {
+    private JBList<EditField> buildMenuList(final EditField[] fields) {
         JBList<EditField> list = new JBList<>(fields);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setSelectedIndex(0);
@@ -67,7 +67,7 @@ public class TestCaseEditMenu {
         };
     }
 
-    private JBPopup buildPopup(String title, JBList<EditField> list) {
+    private JBPopup buildPopup(final String title, final JBList<EditField> list) {
         return JBPopupFactory.getInstance()
                 .createComponentPopupBuilder(new JBScrollPane(list), list)
                 .setTitle(title)
@@ -77,39 +77,35 @@ public class TestCaseEditMenu {
                 .createPopup();
     }
 
-    private void registerShortcuts(JBList<EditField> list, EditField[] fields, JBPopup popup, Consumer<EditField> onSelection) {
-        for (EditField f : fields) {
-            if (f.getShortcut() != null) {
-                new DumbAwareAction() {
-                    @Override
-                    public void actionPerformed(@NotNull AnActionEvent e) {
-                        onSelection.accept(f);
-                        popup.closeOk(null);
-                    }
-                }.registerCustomShortcutSet(f.getShortcut().getShortcut(), list);
+    private void registerShortcuts(final JBList<EditField> list, final JBPopup popup, final Consumer<EditField> onSelection) {
+        Runnable triggerSelection = () -> {
+            if (list.getSelectedValue() != null) {
+                onSelection.accept(list.getSelectedValue());
+                popup.closeOk(null);
             }
-        }
+        };
 
-        // Enter
+        Arrays.stream(EditField.values())
+                .filter(EditField::isEditMenuItem)
+                .forEach(f -> f.bindShortcut(list, () -> {
+                    onSelection.accept(f);
+                    popup.closeOk(null);
+                }));
+
         new DumbAwareAction() {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
-                if (list.getSelectedValue() != null) {
-                    onSelection.accept(list.getSelectedValue());
-                    popup.closeOk(null);
-                }
+                triggerSelection.run();
             }
         }.registerCustomShortcutSet(CommonShortcuts.ENTER, list);
-    }
 
-    private void registerMouseClick(JBList<EditField> list, EditField[] fields, JBPopup popup, Consumer<EditField> onSelection) {
         list.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int idx = list.locationToIndex(e.getPoint());
                 if (idx >= 0) {
-                    onSelection.accept(fields[idx]);
-                    popup.closeOk(null);
+                    list.setSelectedIndex(idx);
+                    triggerSelection.run();
                 }
             }
         });

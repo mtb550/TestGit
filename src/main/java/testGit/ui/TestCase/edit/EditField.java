@@ -1,7 +1,9 @@
 package testGit.ui.TestCase.edit;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.project.DumbAwareAction;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.ui.TestCase.edit.bulk.*;
 import testGit.util.KeyboardSet;
@@ -164,6 +166,17 @@ public enum EditField implements StatusBarItem {
             return customShortcutText;
         }
         return shortcut != null ? shortcut.getShortcutText() : "";
+    }
+
+    public void bindShortcut(final JComponent component, final Runnable onTrigger) {
+        if (this.shortcut != null) {
+            new DumbAwareAction() {
+                @Override
+                public void actionPerformed(@NotNull com.intellij.openapi.actionSystem.AnActionEvent e) {
+                    onTrigger.run();
+                }
+            }.registerCustomShortcutSet(this.shortcut.getShortcut(), component);
+        }
     }
 
     public interface BulkEditorAction {
