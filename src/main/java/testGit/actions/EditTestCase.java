@@ -2,6 +2,7 @@ package testGit.actions;
 
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.components.JBList;
 import org.jetbrains.annotations.NotNull;
@@ -10,19 +11,22 @@ import testGit.pojo.dto.TestCaseDto;
 import testGit.ui.TestCase.TestCaseEditMenu;
 import testGit.util.KeyboardSet;
 import testGit.util.cache.TestCaseCacheService;
+import testGit.util.persist.TestCasePersistService;
 import testGit.viewPanel.ViewPanel;
 import testGit.viewPanel.ViewToolWindowFactory;
 
+import java.nio.file.Path;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class EditTestCase extends DumbAwareAction {
 
     private final JBList<TestCaseDto> list;
+    private final Path path;
 
-    public EditTestCase(final JBList<TestCaseDto> list) {
+    public EditTestCase(final JBList<TestCaseDto> list, final Path path) {
         super("Edit Test Case");
         this.list = list;
+        this.path = path;
         this.registerCustomShortcutSet(KeyboardSet.UpdateTestCase.getShortcut(), list);
     }
 
@@ -33,32 +37,24 @@ public class EditTestCase extends DumbAwareAction {
         List<TestCaseDto> selectedItems = list.getSelectedValuesList();
         if (selectedItems.isEmpty()) return;
 
-        Runnable onBulkUpdate = () -> {
-            list.repaint();
+        new TestCaseEditMenu().show(selectedItems, updatedItems -> {
+            TestCaseCacheService.getInstance(Config.getProject()).addNewItems(updatedItems);
+            TestCasePersistService.getInstance(Config.getProject()).persist(path, updatedItems);
 
-            ViewPanel detailsPanel = ViewToolWindowFactory.getViewPanel();
-            if (detailsPanel != null && detailsPanel.getCurrentTestCaseDto() != null) {
+            ApplicationManager.getApplication().invokeLater(() -> {
+                list.repaint();
 
-                boolean isCurrentAffected = selectedItems.stream()
-                        .anyMatch(item -> item.getId().equals(detailsPanel.getCurrentTestCaseDto().getId()));
+                ViewPanel detailsPanel = ViewToolWindowFactory.getViewPanel();
+                if (detailsPanel != null && detailsPanel.getCurrentTestCaseDto() != null) {
+                    boolean isCurrentAffected = updatedItems.stream()
+                            .anyMatch(item -> item.getId().equals(detailsPanel.getCurrentTestCaseDto().getId()));
 
-                if (isCurrentAffected)
-                    detailsPanel.refreshCurrentView();
-            }
-        };
-
-        // update cache
-        Consumer<TestCaseDto> onSingleUpdate = updatedDto -> {
-            TestCaseCacheService cache = TestCaseCacheService.getInstance(Config.getProject());
-            cache.addTitle(updatedDto.getTitle());
-            cache.addExpected(updatedDto.getExpected());
-            if (updatedDto.getSteps() != null)
-                updatedDto.getSteps().forEach(cache::addStep);
-
-            onBulkUpdate.run();
-        };
-
-        TestCaseEditMenu.show(selectedItems, onSingleUpdate, onBulkUpdate);
+                    if (isCurrentAffected) {
+                        detailsPanel.refreshCurrentView();
+                    }
+                }
+            });
+        });
     }
 
     @Override

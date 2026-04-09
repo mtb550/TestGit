@@ -7,15 +7,12 @@ import com.intellij.openapi.components.Service.Level;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Config;
-import testGit.pojo.Groups;
-import testGit.pojo.Priority;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.util.Notifier;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service(Level.PROJECT)
@@ -24,83 +21,30 @@ public final class TestCasePersistService implements Disposable {
         return project.getService(TestCasePersistService.class);
     }
 
-    public void updateTitles(final List<TestCaseDto> items, final String[] newTitles, final Runnable onUpdate) {
-        int limit = Math.min(newTitles.length, items.size());
-        for (int i = 0; i < limit; i++) {
-            if (!newTitles[i].trim().isEmpty()) {
-                items.get(i).setTitle(newTitles[i].trim());
-            }
-        }
-        // TODO: save to db
-        if (onUpdate != null) onUpdate.run();
-    }
+    /**
+     * @param path test set path
+     * @param tcs  list of changed or created test cases
+     */
+    public void persist(final Path path, final @Nullable List<TestCaseDto> tcs) {
+        if (path == null || tcs == null || tcs.isEmpty()) return;
 
-    public void updateExpected(final List<TestCaseDto> items, final String[] newExpected, final Runnable onUpdate) {
-        int limit = Math.min(newExpected.length, items.size());
-        for (int i = 0; i < limit; i++) {
-            items.get(i).setExpected(newExpected[i].trim());
-        }
-        // TODO: save to db
-        if (onUpdate != null) onUpdate.run();
-    }
-
-    public void updatePriority(final List<TestCaseDto> items, final Priority[] newPriorities, final Runnable onUpdate) {
-        int limit = Math.min(newPriorities.length, items.size());
-        for (int i = 0; i < limit; i++) {
-            if (newPriorities[i] != null) {
-                items.get(i).setPriority(newPriorities[i]);
-            }
-        }
-        // TODO: save to db
-        if (onUpdate != null) onUpdate.run();
-    }
-
-    public void updateSteps(final List<TestCaseDto> items, final List<List<String>> newSteps, final Runnable onUpdate) {
-        int limit = Math.min(newSteps.size(), items.size());
-        for (int i = 0; i < limit; i++) {
-            List<String> cleanSteps = newSteps.get(i).stream()
-                    .filter(step -> !step.trim().isEmpty())
-                    .toList();
-
-            items.get(i).setSteps(cleanSteps);
-        }
-        // TODO: save to db
-        if (onUpdate != null) onUpdate.run();
-    }
-
-    public void updateGroups(final List<TestCaseDto> items, final List<List<Groups>> newGroupsList, final Runnable onUpdate) {
-        int limit = Math.min(newGroupsList.size(), items.size());
-        for (int i = 0; i < limit; i++) {
-            List<Groups> groups = newGroupsList.get(i);
-            items.get(i).setGroups(groups.isEmpty() ? null : new ArrayList<>(groups));
-        }
-        // TODO: save to db
-        if (onUpdate != null) onUpdate.run();
-    }
-
-    public void persistNewTestCase(final Path parentPath, final TestCaseDto newTc, final @Nullable TestCaseDto lastTc) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-
-            try {
-                File newJsonFile = parentPath.resolve(newTc.getId() + ".json").toFile();
-                Config.getMapper().writeValue(newJsonFile, newTc);
-
-                if (lastTc != null) {
-                    File lastJsonFile = parentPath.resolve(lastTc.getId() + ".json").toFile();
-                    Config.getMapper().writeValue(lastJsonFile, lastTc);
-                }
-
-                Notifier.info("Test Case Created", newTc.getTitle());
-
-            } catch (IOException e) {
-                Notifier.error("error", "Failed to create Test case: " + e.getMessage());
-            }
-
+            tcs.stream()
+                    .filter(tc -> tc != null && tc.getId() != null)
+                    .forEach(tc -> {
+                        try {
+                            File jsonFile = path.resolve(tc.getId() + ".json").toFile();
+                            Config.getMapper().writeValue(jsonFile, tc);
+                        } catch (IOException e) {
+                            Notifier.error("Save Error", "Failed to persist data: " + e.getMessage());
+                        }
+                    });
+            Notifier.info("Test Case Created", tcs.getFirst().getTitle());
         });
     }
 
     @Override
     public void dispose() {
-
+        /// to be implemented
     }
 }

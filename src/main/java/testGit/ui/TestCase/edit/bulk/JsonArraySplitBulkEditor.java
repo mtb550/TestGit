@@ -35,19 +35,18 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class JsonArraySplitBulkEditor {
+    protected abstract void applyValues(final List<TestCaseDto> items, final List<List<String>> newValues);
 
-    // الدوال المجردة التي سيقوم الأبناء بتنفيذها
     protected abstract String getPopupTitle();
 
-    protected abstract String getArrayFieldName(); // سيُرجع "steps" أو "groups"
+    protected abstract String getArrayFieldName();
 
-    protected abstract List<List<String>> extractOriginalValues(List<TestCaseDto> items);
+    protected abstract List<List<String>> extractOriginalValues(final List<TestCaseDto> items);
 
-    protected abstract void saveValues(List<TestCaseDto> items, List<List<String>> activeValues, Runnable onUpdate);
-
-    public void show(List<TestCaseDto> selectedItems, Runnable onUpdate) {
+    public void show(final List<TestCaseDto> selectedItems, final Consumer<List<TestCaseDto>> updatedItems) {
         Project project = Config.getProject();
         if (project == null) return;
 
@@ -57,7 +56,7 @@ public abstract class JsonArraySplitBulkEditor {
         List<List<String>> extracted = extractOriginalValues(selectedItems);
         for (List<String> list : extracted) {
             List<String> current = list != null ? new ArrayList<>(list) : new ArrayList<>();
-            if (current.isEmpty()) current.add(""); // حقل فارغ افتراضي لتتمكن من الكتابة فيه
+            if (current.isEmpty()) current.add("");
             originalValues.add(new ArrayList<>(current));
             activeValues.add(new ArrayList<>(current));
         }
@@ -306,7 +305,9 @@ public abstract class JsonArraySplitBulkEditor {
 
         Runnable saveLogic = () -> {
             syncStateFromEditor.run();
-            saveValues(selectedItems, activeValues, onUpdate);
+            applyValues(selectedItems, activeValues);
+            if (updatedItems != null)
+                updatedItems.accept(selectedItems);
             popup.closeOk(null);
         };
 
@@ -467,7 +468,7 @@ public abstract class JsonArraySplitBulkEditor {
         popup.showCenteredInCurrentWindow(project);
     }
 
-    private void navigate(int direction, Editor editor, List<ItemMarker> markers) {
+    private void navigate(final int direction, Editor editor, final List<ItemMarker> markers) {
         editor.getCaretModel().removeSecondaryCarets();
         int offset = editor.getCaretModel().getOffset();
         int currentIndex = 0;
@@ -481,7 +482,7 @@ public abstract class JsonArraySplitBulkEditor {
         editor.getCaretModel().moveToOffset(markers.get(targetIndex).endOffset);
     }
 
-    private int getNearestValidOffset(int offset, List<ItemMarker> markers) {
+    private int getNearestValidOffset(final int offset, final List<ItemMarker> markers) {
         int minDistance = Integer.MAX_VALUE;
         int nearestOffset = offset;
         for (ItemMarker m : markers) {
@@ -498,7 +499,7 @@ public abstract class JsonArraySplitBulkEditor {
         return nearestOffset;
     }
 
-    private void setupEditorAppearance(Editor editor, Project project) {
+    private void setupEditorAppearance(final Editor editor, final Project project) {
         FileType jsonFileType = FileTypeManager.getInstance().getFileTypeByExtension("json");
         com.intellij.openapi.editor.highlighter.EditorHighlighter highlighter = com.intellij.openapi.editor.highlighter.EditorHighlighterFactory.getInstance().createEditorHighlighter(project, jsonFileType);
         if (editor instanceof EditorEx) ((EditorEx) editor).setHighlighter(highlighter);
@@ -514,12 +515,12 @@ public abstract class JsonArraySplitBulkEditor {
         settings.setAdditionalLinesCount(1);
     }
 
-    protected String escapeJson(String str) {
+    protected String escapeJson(final String str) {
         if (str == null) return "";
         return str.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", "");
     }
 
-    protected String unescapeJson(String str) {
+    protected String unescapeJson(final String str) {
         if (str == null) return "";
         return str.replace("\\\"", "\"").replace("\\\\", "\\");
     }

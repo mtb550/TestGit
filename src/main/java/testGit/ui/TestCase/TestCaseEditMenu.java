@@ -25,36 +25,30 @@ import java.util.function.Consumer;
 
 public class TestCaseEditMenu {
 
-    public static void show(final List<TestCaseDto> selectedItems, final Consumer<TestCaseDto> onSingleUpdate, final Runnable onBulkUpdate) {
-        if (selectedItems == null || selectedItems.isEmpty())
-            return;
-        if (selectedItems.size() == 1)
-            showSingle(selectedItems.getFirst(), onSingleUpdate);
-        else
-            showBulk(selectedItems, onBulkUpdate);
-    }
+    public void show(final List<TestCaseDto> selectedItems, final Consumer<List<TestCaseDto>> updatedItems) {
+        if (selectedItems == null || selectedItems.isEmpty()) return;
 
-    private static void showSingle(final TestCaseDto existingDto, final Consumer<TestCaseDto> onUpdate) {
-        showMenu("Edit Test Case", selectedField ->
-                new EditTestCaseUI().show(existingDto, selectedField, onUpdate));
-    }
-
-    private static void showBulk(final List<TestCaseDto> selectedItems, final Runnable onUpdate) {
-        String title = "Update " + selectedItems.size() + " Test Cases";
+        boolean isSingle = selectedItems.size() == 1;
+        String title = isSingle ? "Edit Test Case" : "Update " + selectedItems.size() + " Test Cases";
 
         showMenu(title, selectedField -> {
-            switch (selectedField) {
-                case PRIORITY -> new PriorityBulkEditor().show(selectedItems, onUpdate);
-                case TITLE -> new TitleBulkEditor().show(selectedItems, onUpdate);
-                case EXPECTED -> new ExpectedBulkEditor().show(selectedItems, onUpdate);
-                case STEPS -> new StepsBulkEditor().show(selectedItems, onUpdate);
-                case GROUPS -> new GroupsBulkEditor().show(selectedItems, onUpdate);
-                default -> System.out.println("Selected: " + selectedField.getLabel() + " (Not supported for bulk)");
+            if (isSingle) {
+                new EditTestCaseUI().show(selectedItems.getFirst(), selectedField, dto -> updatedItems.accept(selectedItems));
+            } else {
+                switch (selectedField) {
+                    case PRIORITY -> new PriorityBulkEditor().show(selectedItems, updatedItems);
+                    case TITLE -> new TitleBulkEditor().show(selectedItems, updatedItems);
+                    case EXPECTED -> new ExpectedBulkEditor().show(selectedItems, updatedItems);
+                    case STEPS -> new StepsBulkEditor().show(selectedItems, updatedItems);
+                    case GROUPS -> new GroupsBulkEditor().show(selectedItems, updatedItems);
+                    default ->
+                            System.out.println("Selected: " + selectedField.getLabel() + " (Not supported for bulk)");
+                }
             }
         });
     }
 
-    private static void showMenu(String title, Consumer<EditField> onSelection) {
+    private void showMenu(String title, Consumer<EditField> onSelection) {
         EditField[] editableFields = Arrays.stream(EditField.values())
                 .filter(EditField::isEditMenuItem)
                 .toArray(EditField[]::new);
@@ -67,9 +61,7 @@ public class TestCaseEditMenu {
         list.setCellRenderer(new ColoredListCellRenderer<>() {
             @Override
             protected void customizeCellRenderer(@NotNull JList<? extends EditField> list, EditField value, int index, boolean selected, boolean hasFocus) {
-                if (value.getIcon() != null) {
-                    setIcon(value.getIcon());
-                }
+                if (value.getIcon() != null) setIcon(value.getIcon());
                 append(value.getLabel());
 
                 String shortcutStr = value.getShortcutText();

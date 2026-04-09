@@ -1,9 +1,7 @@
 package testGit.ui.TestCase.edit.bulk;
 
-import testGit.pojo.Config;
 import testGit.pojo.Groups;
 import testGit.pojo.dto.TestCaseDto;
-import testGit.util.persist.TestCasePersistService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +19,7 @@ public class GroupsBulkEditor extends JsonArraySplitBulkEditor {
     }
 
     @Override
-    protected List<List<String>> extractOriginalValues(List<TestCaseDto> items) {
+    protected List<List<String>> extractOriginalValues(final List<TestCaseDto> items) {
         List<List<String>> originalGroups = new ArrayList<>();
 
         for (TestCaseDto tc : items) {
@@ -38,28 +36,26 @@ public class GroupsBulkEditor extends JsonArraySplitBulkEditor {
     }
 
     @Override
-    protected void saveValues(List<TestCaseDto> items, List<List<String>> activeValues, Runnable onUpdate) {
-        List<List<Groups>> newGroupsList = new ArrayList<>();
-
-        for (List<String> stringList : activeValues) {
+    protected void applyValues(final List<TestCaseDto> items, final List<List<String>> newValues) {
+        for (int i = 0; i < items.size(); i++) {
             List<Groups> enumList = new ArrayList<>();
 
-            for (String str : stringList) {
+            for (String str : newValues.get(i)) {
+                if (str == null) continue;
                 String cleanStr = str.trim();
+
                 if (!cleanStr.isEmpty()) {
-                    for (Groups g : Groups.values()) {
-                        if (g.name().equalsIgnoreCase(cleanStr)) {
-                            if (!enumList.contains(g)) {
-                                enumList.add(g);
-                            }
-                            break;
+                    try {
+                        Groups g = Groups.valueOf(cleanStr.toUpperCase());
+                        if (!enumList.contains(g)) {
+                            enumList.add(g);
                         }
+                    } catch (IllegalArgumentException ignored) {
                     }
                 }
             }
-            newGroupsList.add(enumList);
-        }
 
-        TestCasePersistService.getInstance(Config.getProject()).updateGroups(items, newGroupsList, onUpdate);
+            items.get(i).setGroups(enumList.isEmpty() ? null : enumList);
+        }
     }
 }

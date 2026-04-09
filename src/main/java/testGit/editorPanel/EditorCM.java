@@ -17,10 +17,10 @@ public class EditorCM extends DefaultActionGroup {
     public EditorCM(final BaseEditorUI ui, final DirectoryDto dir, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model) {
         super("Editor Context Menu", true);
 
-        add(new CreateTestCase(ui, dir, list, model));
+        add(new CreateTestCase(ui, dir.getPath(), list, model));
         add(new ViewDetails(list, dir.getPath()));
         addSeparator();
-        add(new EditTestCase(list));
+        add(new EditTestCase(list, dir.getPath()));
         add(new CopyTestCase(list));
         add(new RemoveTestCase(dir, list, model));
         addSeparator();
@@ -32,8 +32,8 @@ public class EditorCM extends DefaultActionGroup {
     public static void registerShortcuts(final BaseEditorUI ui, final DirectoryDto dir, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model, final EditorCM editorCM) {
         new Escape(list);
         new OpenCM(list, editorCM);
-        new CreateTestCase(ui, dir, list, model);
-        new EditTestCase(list);
+        new CreateTestCase(ui, dir.getPath(), list, model);
+        new EditTestCase(list, dir.getPath());
         new RemoveTestCase(dir, list, model);
         new OpenTestCaseDetails(list, dir.getPath());
         new CloseTestCaseDetails(list);

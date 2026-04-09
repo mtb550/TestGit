@@ -35,18 +35,18 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class JsonSplitBulkEditor {
+    protected abstract void applyValues(final List<TestCaseDto> items, final List<String> newValues);
 
     protected abstract String getPopupTitle();
 
-    protected abstract String getOriginalValue(TestCaseDto tc);
+    protected abstract String getOriginalValue(final TestCaseDto tc);
 
-    protected abstract void appendJsonItem(TestCaseDto tc, int index, boolean isLast, StringBuilder leftSb, StringBuilder rightSb, List<int[]> rightEditableRanges);
+    protected abstract void appendJsonItem(final TestCaseDto tc, final int index, final boolean isLast, final StringBuilder leftSb, final StringBuilder rightSb, final List<int[]> rightEditableRanges);
 
-    protected abstract void saveValues(List<TestCaseDto> items, List<String> newValues, Runnable onUpdate);
-
-    public void show(List<TestCaseDto> selectedItems, Runnable onUpdate) {
+    public void show(final List<TestCaseDto> selectedItems, final Consumer<List<TestCaseDto>> updatedItems) {
         Project project = Config.getProject();
         if (project == null) return;
 
@@ -276,7 +276,10 @@ public abstract class JsonSplitBulkEditor {
                     newValues.add("");
                 }
             }
-            saveValues(selectedItems, newValues, onUpdate);
+
+            applyValues(selectedItems, newValues);
+            if (updatedItems != null)
+                updatedItems.accept(selectedItems);
             popup.closeOk(null);
         };
 
@@ -419,7 +422,7 @@ public abstract class JsonSplitBulkEditor {
         popup.showCenteredInCurrentWindow(project);
     }
 
-    private int getNearestValidOffset(int offset, List<RangeMarker> markers) {
+    private int getNearestValidOffset(final int offset, final List<RangeMarker> markers) {
         int minDistance = Integer.MAX_VALUE;
         int nearestOffset = offset;
         for (RangeMarker m : markers) {

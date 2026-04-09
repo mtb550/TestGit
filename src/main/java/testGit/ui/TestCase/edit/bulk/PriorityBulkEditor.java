@@ -1,9 +1,7 @@
 package testGit.ui.TestCase.edit.bulk;
 
-import testGit.pojo.Config;
 import testGit.pojo.Priority;
 import testGit.pojo.dto.TestCaseDto;
-import testGit.util.persist.TestCasePersistService;
 
 import java.util.List;
 
@@ -41,22 +39,15 @@ public class PriorityBulkEditor extends JsonSplitBulkEditor {
     }
 
     @Override
-    protected void saveValues(List<TestCaseDto> items, List<String> newValues, Runnable onUpdate) {
-        Priority[] newPriorities = new Priority[newValues.size()];
-
-        for (int i = 0; i < newValues.size(); i++) {
+    protected void applyValues(final List<TestCaseDto> items, final List<String> newValues) {
+        for (int i = 0; i < items.size(); i++) {
             String val = newValues.get(i).trim();
-            Priority matched = items.get(i).getPriority();
-
-            for (Priority p : Priority.values()) {
-                if (p.name().equalsIgnoreCase(val)) {
-                    matched = p;
-                    break;
+            if (!val.isEmpty()) {
+                try {
+                    items.get(i).setPriority(Priority.valueOf(val.toUpperCase()));
+                } catch (IllegalArgumentException ignored) {
                 }
             }
-            newPriorities[i] = matched;
         }
-
-        TestCasePersistService.getInstance(Config.getProject()).updatePriority(items, newPriorities, onUpdate);
     }
 }
