@@ -8,6 +8,7 @@ import testGit.util.Tools;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public final class HtmlGenerator {
 
@@ -18,9 +19,11 @@ public final class HtmlGenerator {
         html.append("<h2>Test Run Report: ").append(tr.getRunName().replace(".json", "")).append("</h2>");
         html.append("<p><strong>Platform:</strong> ").append(tr.getPlatform() != null ? tr.getPlatform() : "N/A").append("</p>");
         html.append("<p><strong>Status:</strong> ").append(tr.getStatus() != null ? tr.getStatus().name() : "N/A").append("</p>");
-        html.append("<table><tr><th>Test Case ID</th><th>Title</th><th>Status</th><th>Duration</th><th>Expected Result</th></tr>");
+        html.append("<table><tr><th>#</th><th>Test Case ID</th><th>Title</th><th>Status</th><th>Duration</th><th>Expected Result</th></tr>");
 
-        if (tr.getResults() != null) {
+        if (tr.getResults() != null && !tr.getResults().isEmpty()) {
+            AtomicInteger seq = new AtomicInteger(1);
+
             tr.getResults().forEach(result -> {
                 UUID id = result.getTestCaseId();
 
@@ -35,6 +38,7 @@ public final class HtmlGenerator {
                 String duration = Tools.getFormattedDuration(result.getDuration());
 
                 html.append("<tr>")
+                        .append("<td>").append(seq.getAndIncrement()).append("</td>")
                         .append("<td>").append(id != null ? id.toString() : "N/A").append("</td>")
                         .append("<td>").append(title).append("</td>")
                         .append("<td style='color:").append(colorHex).append("; font-weight:bold;'>").append(statusText).append("</td>")
@@ -43,7 +47,7 @@ public final class HtmlGenerator {
                         .append("</tr>");
             });
         } else {
-            html.append("<tr><td colspan='5' style='text-align:center;'>No test results found.</td></tr>");
+            html.append("<tr><td colspan='6' style='text-align:center;'>No test results found.</td></tr>");
         }
 
         html.append("</table></body></html>");

@@ -22,6 +22,7 @@ import testGit.util.Tools;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public final class PdfGenerator {
 
@@ -46,23 +47,24 @@ public final class PdfGenerator {
             document.add(new Paragraph("Platform: " + (tr.getPlatform() != null ? tr.getPlatform() : "N/A")));
             document.add(new Paragraph("Status: " + (tr.getStatus() != null ? tr.getStatus().name() : "N/A")).setMarginBottom(20));
 
-            Table table = new Table(UnitValue.createPercentArray(new float[]{20, 20, 15, 15, 30}))
-                    .useAllAvailableWidth();
+            Table table = new Table(UnitValue.createPercentArray(new float[]{10, 50, 20, 20})).useAllAvailableWidth();
 
-            table.addHeaderCell(createHeaderCell("Test Case ID", boldFont));
+            table.addHeaderCell(createHeaderCell("#", boldFont));
             table.addHeaderCell(createHeaderCell("Title", boldFont));
             table.addHeaderCell(createHeaderCell("Status", boldFont));
             table.addHeaderCell(createHeaderCell("Duration", boldFont));
-            table.addHeaderCell(createHeaderCell("Expected Result", boldFont));
 
-            if (tr.getResults() != null) {
+            if (tr.getResults() != null && !tr.getResults().isEmpty()) {
+                AtomicInteger seq = new AtomicInteger(1);
+
                 tr.getResults().forEach(result -> {
                     UUID id = result.getTestCaseId();
-                    table.addCell(new Cell().add(new Paragraph(id != null ? id.toString() : "N/A")));
+
+                    table.addCell(new Cell().add(new Paragraph(String.valueOf(seq.getAndIncrement())))
+                            .setTextAlignment(TextAlignment.CENTER));
 
                     TestCaseDto details = (detailsMap != null) ? detailsMap.get(id) : null;
                     String title = (details != null && details.getTitle() != null) ? details.getTitle() : "N/A";
-                    String expected = (details != null && details.getExpected() != null) ? details.getExpected() : "N/A";
 
                     table.addCell(new Cell().add(new Paragraph(title)));
 
@@ -85,11 +87,9 @@ public final class PdfGenerator {
 
                     String duration = Tools.getFormattedDuration(result.getDuration());
                     table.addCell(new Cell().add(new Paragraph(duration != null ? duration : "N/A")));
-
-                    table.addCell(new Cell().add(new Paragraph(expected)));
                 });
             } else {
-                Cell emptyCell = new Cell(1, 5).add(new Paragraph("No test results found."))
+                Cell emptyCell = new Cell(1, 4).add(new Paragraph("No test results found."))
                         .setTextAlignment(TextAlignment.CENTER);
                 table.addCell(emptyCell);
             }
