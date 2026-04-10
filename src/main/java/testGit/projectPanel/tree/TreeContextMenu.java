@@ -60,7 +60,14 @@ public class TreeContextMenu extends DefaultActionGroup {
         add(new OpenOldVersions());
         add(new ViewCommits());
         add(new TestRuns());
-        add(new GenerateReport(tree));
+        addSeparator();
+
+        add(createSubGroup("Generate Report", AllIcons.ToolbarDecorator.Export,
+                new ReportHtml(tree),
+                new ReportPdf(tree),
+                new ReportExcel(tree)
+        ));
+
     }
 
     public static void registerShortcuts(final SimpleTree tree, final TreeTransferHandler transferHandler, final TreeContextMenu treeContextMenu) {

@@ -39,14 +39,39 @@ dependencies {
         testFramework(TestFrameworkType.Platform)
     }
 
+    // Source: https://mvnrepository.com/artifact/org.projectlombok/lombok
     implementation("org.projectlombok:lombok:1.18.44")
+    compileOnly("org.projectlombok:lombok:1.18.44")
     annotationProcessor("org.projectlombok:lombok:1.18.44")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2")
-    implementation("com.jayway.jsonpath:json-path:3.0.0")
+    testCompileOnly("org.projectlombok:lombok:1.18.44")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.44")
+
+    // Source: https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.21.2")
+
+    // Source: https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.2")
+
+    // Source: https://mvnrepository.com/artifact/io.rest-assured/json-path
+    implementation("io.rest-assured:json-path:6.0.0")
+
+    // Source: https://mvnrepository.com/artifact/commons-io/commons-io
     implementation("commons-io:commons-io:2.21.0")
+
+    // Source: https://mvnrepository.com/artifact/com.codoid.products/fillo
     implementation("com.codoid.products:fillo:1.24")
+
+    // Source: https://mvnrepository.com/artifact/org.testng/testng
     testImplementation("org.testng:testng:7.12.0")
+
+    // Source: https://mvnrepository.com/artifact/com.itextpdf/kernel
+    implementation("com.itextpdf:kernel:9.6.0")
+
+    // Source: https://mvnrepository.com/artifact/com.itextpdf/layout
+    implementation("com.itextpdf:layout:9.6.0")
+
+    // Source: https://mvnrepository.com/artifact/org.dhatim/fastexcel
+    implementation("org.dhatim:fastexcel:0.20.0")
 }
 
 intellijPlatform {

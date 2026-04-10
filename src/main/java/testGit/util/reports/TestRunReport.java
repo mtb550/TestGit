@@ -1,31 +1,81 @@
 package testGit.util.reports;
 
-import org.jetbrains.annotations.NotNull;
+import com.intellij.openapi.application.ApplicationManager;
+import testGit.pojo.Config;
 import testGit.pojo.dto.TestRunDto;
+import testGit.pojo.dto.dirs.TestRunDirectoryDto;
+import testGit.util.notifications.Notifier;
+
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public final class TestRunReport {
+    private final TestRunDirectoryDto tr;
 
-    public String build(final @NotNull TestRunDto tr) {
-        StringBuilder html = new StringBuilder();
+    public TestRunReport(final TestRunDirectoryDto tr) {
+        this.tr = tr;
+    }
 
-        html.append("<html><head><style>table {width:100%; border-collapse:collapse;} th,td {border:1px solid #ddd; padding:8px;} th {background-color: #f4f4f4;}</style></head><body>");
-        html.append("<h2>Test Run Report: ").append(tr.getRunName().replace(".json", "")).append("</h2>");
-        html.append("<p><strong>Platform:</strong> ").append(tr.getPlatform() != null ? tr.getPlatform() : "N/A").append("</p>");
-        html.append("<p><strong>Status:</strong> ").append(tr.getStatus()).append("</p>");
+    public TestRunReport build() {
+        return this;
+    }
 
-        html.append("<table><tr><th>Test Case ID</th><th>Status</th><th>Duration</th></tr>");
+    public void asHtml() {
+        processAndSave("HTML", ".html");
+    }
 
-        if (tr.getResults() != null) {
-            tr.getResults().forEach(result ->
-                    html.append("<tr>")
-                            .append("<td>").append(result.getTestCaseId()).append("</td>")
-                            .append("<td>").append(result.getStatus()).append("</td>")
-                            .append("<td>").append(result.getDuration() != null ? result.getDuration() : "N/A").append("</td>")
-                            .append("</tr>"));
-        }
+    public void asPdf() {
+        processAndSave("PDF", ".pdf");
+    }
 
-        html.append("</table></body></html>");
+    public void asExcel() {
+        processAndSave("EXCEL", ".xlsx");
+    }
 
-        return html.toString();
+    private void processAndSave(String format, String extension) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try {
+                Path dirPath = tr.getPath();
+                String folderName = dirPath.getFileName().toString();
+                File jsonFile = dirPath.resolve(folderName + ".json").toFile();
+
+                if (!jsonFile.exists() || !jsonFile.isFile()) {
+                    Notifier.error("Report Error", "JSON data file not found: " + jsonFile.getAbsolutePath());
+                    return;
+                }
+
+                TestRunDto runData = Config.getMapper().readValue(jsonFile, TestRunDto.class);
+                byte[] fileBytes;
+
+                switch (format) {
+                    case "HTML" -> {
+                        String reportHtml = new HtmlGenerator().generate(runData);
+                        fileBytes = reportHtml.getBytes(StandardCharsets.UTF_8);
+                    }
+
+                    case "PDF" -> fileBytes = new PdfGenerator().generate(runData);
+
+                    case "EXCEL" -> fileBytes = new ExcelGenerator().generate(runData);
+
+                    case null, default -> throw new UnsupportedOperationException("Unknown format: " + format);
+                }
+
+                String cleanName = runData.getRunName().replace(".json", "");
+                File reportFile = dirPath.resolve(cleanName + "_Report" + extension).toFile();
+
+                Files.write(reportFile.toPath(), fileBytes);
+
+                Notifier.infoWithOpenAndCopy(
+                        format + " Report Generated",
+                        "Saved successfully: " + reportFile.getName(),
+                        reportFile
+                );
+
+            } catch (Exception e) {
+                Notifier.error("Report Error", "Failed to generate " + format + " report: " + e.getMessage());
+            }
+        });
     }
 }

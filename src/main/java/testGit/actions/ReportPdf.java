@@ -7,32 +7,30 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.dto.dirs.TestRunDirectoryDto;
-import testGit.util.reports.TestRunReportGenerator;
+import testGit.util.reports.TestRunReport;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-public class GenerateReport extends DumbAwareAction {
+public class ReportPdf extends DumbAwareAction {
     private final SimpleTree tree;
 
-    public GenerateReport(final SimpleTree tree) {
-        super("Generate Report", "Generate test run HTML report", AllIcons.ToolbarDecorator.Export);
+    public ReportPdf(final SimpleTree tree) {
+        super("As PDF", "Generate test run PDF report", AllIcons.Providers.Eclipse);
         this.tree = tree;
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-        if (selectedNode != null) {
-            new TestRunReportGenerator().generateFromNode(selectedNode);
+        if (selectedNode != null && selectedNode.getUserObject() instanceof TestRunDirectoryDto tr) {
+            new TestRunReport(tr).build().asPdf();
         }
     }
 
     @Override
     public void update(@NotNull AnActionEvent e) {
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-
-        boolean isTestRun = selectedNode != null && selectedNode.getUserObject() instanceof TestRunDirectoryDto;
-        e.getPresentation().setEnabled(isTestRun);
+        e.getPresentation().setEnabled(selectedNode != null && selectedNode.getUserObject() instanceof TestRunDirectoryDto);
     }
 
     @Override
