@@ -6,20 +6,20 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import testGit.editorPanel.BaseCard;
+import testGit.pojo.HoverAction;
+import testGit.pojo.TestStatus;
 import testGit.pojo.dto.TestCaseDto;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Set;
 
 public class RunCard extends BaseCard<RunCard> {
-
     public static final int ACTIONS_TOTAL_WIDTH = 210;
-
     private final JBPanel<?> actionPanel = new JBPanel<>();
-    private final JBLabel passedBtn = createActionLabel("PASSED");
-    private final JBLabel failedBtn = createActionLabel("FAILED");
-    private final JBLabel blockedBtn = createActionLabel("BLOCKED");
+    private final Map<TestStatus, JBLabel> statusLabels = new EnumMap<>(TestStatus.class);
 
     public RunCard() {
         super();
@@ -27,19 +27,21 @@ public class RunCard extends BaseCard<RunCard> {
         actionPanel.setOpaque(false);
         actionPanel.setPreferredSize(new Dimension(JBUI.scale(ACTIONS_TOTAL_WIDTH), 0));
 
-        actionPanel.add(passedBtn);
-        actionPanel.add(failedBtn);
-        actionPanel.add(blockedBtn);
+        for (TestStatus status : TestStatus.values()) {
+            if (status != TestStatus.PENDING) {
+                JBLabel btn = createActionLabel(status.name());
+                statusLabels.put(status, btn);
+                actionPanel.add(btn);
+            }
+        }
 
         actionPanel.setVisible(false);
         actionPanel.setBorder(JBUI.Borders.empty());
-
         this.add(actionPanel, BorderLayout.EAST);
     }
 
     public void updateData(int index, TestCaseDto tc, boolean showGroups, boolean showPriority, Set<String> activeDetails) {
         super.updateBaseData(index, tc, showPriority, showGroups, activeDetails);
-
         badgePanel.revalidate();
         badgePanel.repaint();
     }
@@ -52,28 +54,25 @@ public class RunCard extends BaseCard<RunCard> {
             actionPanel.setVisible(isSelected);
         }
 
-        passedBtn.setOpaque(false);
-        failedBtn.setOpaque(false);
-        blockedBtn.setOpaque(false);
+        for (JBLabel label : statusLabels.values()) {
+            label.setOpaque(false);
+            label.setForeground(JBColor.GRAY);
+            label.setBackground(null);
+        }
 
-        passedBtn.setForeground(JBColor.GRAY);
-        failedBtn.setForeground(JBColor.GRAY);
-        blockedBtn.setForeground(JBColor.GRAY);
+        if (hoveredAction != null) {
+            try {
+                TestStatus activeStatus = TestStatus.valueOf(hoveredAction);
+                JBLabel activeLabel = statusLabels.get(activeStatus);
 
-        if ("PASSED".equals(hoveredAction)) {
-            passedBtn.setOpaque(true);
-            passedBtn.setBackground(new JBColor(new Color(39, 174, 96, 40), new Color(46, 125, 50, 60)));
-            passedBtn.setForeground(new JBColor(new Color(39, 174, 96), new Color(129, 199, 132)));
-
-        } else if ("FAILED".equals(hoveredAction)) {
-            failedBtn.setOpaque(true);
-            failedBtn.setBackground(new JBColor(new Color(192, 57, 43, 40), new Color(183, 28, 28, 60)));
-            failedBtn.setForeground(new JBColor(new Color(192, 57, 43), new Color(229, 115, 115)));
-
-        } else if ("BLOCKED".equals(hoveredAction)) {
-            blockedBtn.setOpaque(true);
-            blockedBtn.setBackground(new JBColor(new Color(243, 156, 18, 40), new Color(237, 108, 2, 60)));
-            blockedBtn.setForeground(new JBColor(new Color(243, 156, 18), new Color(255, 183, 77)));
+                if (activeLabel != null) {
+                    HoverAction hoverStyle = activeStatus.getHoverAction();
+                    activeLabel.setOpaque(true);
+                    activeLabel.setBackground(hoverStyle.background());
+                    activeLabel.setForeground(hoverStyle.foreground());
+                }
+            } catch (IllegalArgumentException ignored) {
+            }
         }
     }
 
