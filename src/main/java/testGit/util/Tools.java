@@ -16,6 +16,7 @@ import testGit.pojo.dto.dirs.DirectoryDto;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
 import java.nio.file.Path;
+import java.time.Duration;
 
 public class Tools {
     @NotNull
@@ -130,7 +131,7 @@ public class Tools {
             }
 
             if (!javaName.isEmpty()) {
-                if (fqcn.length() > 0) fqcn.append(".");
+                if (!fqcn.isEmpty()) fqcn.append(".");
                 fqcn.append(javaName);
             }
         }
@@ -177,6 +178,11 @@ public class Tools {
                 updateChildrenPathsRecursive(childNode, oldParentPath, newParentPath);
             }
         }
+    }
+
+    public static String getFormattedDuration(final Duration duration) {
+        if (duration == null) return null;
+        return String.format("%02d:%02d:%02d", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
     }
 
 }

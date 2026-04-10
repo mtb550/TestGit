@@ -27,6 +27,7 @@ import testGit.util.TestCaseSorter;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.io.File;
 import java.nio.file.Path;
@@ -47,7 +48,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     private JBList<TestCaseDto> list;
     private CollectionListModel<TestCaseDto> model;
     private int currentPage = 1;
-    private int pageSize = 10;
+    private int pageSize = 50;
     private StatusBar statusBar;
     private ToolBar toolBar;
 
@@ -64,7 +65,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     @Setter
     private int hoveredIndex = -1;
 
-    public RunEditorUI(UnifiedVirtualFile vf) {
+    public RunEditorUI(final UnifiedVirtualFile vf) {
         this.vf = vf;
         this.metadata = vf.getMetadata();
         this.currentFile = vf;
@@ -77,7 +78,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         }
 
         List<TestCaseDto> cases = vf.getTestCaseDtos() != null ? vf.getTestCaseDtos() : Collections.emptyList();
-        this.initialTestCaseDtos = TestCaseSorter.sortTestCases(cases);
+        this.initialTestCaseDtos = TestCaseSorter.sortTestCases(cases).sortedList();
         this.initialTestCaseIds = this.initialTestCaseDtos.stream()
                 .map(TestCaseDto::getId)
                 .collect(Collectors.toSet());
@@ -133,7 +134,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     }
 
     @Override
-    public void appendNewTestCase(TestCaseDto tc) {
+    public void appendNewTestCase(final TestCaseDto tc) {
         if (this.initialTestCaseDtos != null) {
             this.initialTestCaseDtos.add(tc);
             refreshView();
@@ -272,7 +273,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         };
     }
 
-    private JButton createSaveButton(CheckedTreeNode root, Path savePath, ProjectPanel projectPanel) {
+    private JButton createSaveButton(final CheckedTreeNode root, final Path savePath, final ProjectPanel projectPanel) {
         JButton saveButton = new JButton("Save Test Run");
         saveButton.addActionListener(e -> {
             if (!metadataHeader.validate()) {
@@ -285,7 +286,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         return saveButton;
     }
 
-    private CheckedTreeNode convertToCheckedNodes(DefaultMutableTreeNode node) {
+    private CheckedTreeNode convertToCheckedNodes(final DefaultMutableTreeNode node) {
         Object userObj = node.getUserObject();
         CheckedTreeNode newNode = new CheckedTreeNode(userObj);
 
@@ -314,8 +315,20 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         run.setStatus(TestRunStatus.CREATED);
 
         List<TestRunDto.TestRunItems> items = new ArrayList<>();
-        collectCheckedItems(root, items);
+        Map<Path, List<UUID>> pathMap = new HashMap<>();
+
+        collectCheckedItems(root, items, pathMap);
+
         run.setResults(items);
+
+        List<TestRunDto.TestCase> testCasesPaths = new ArrayList<>();
+        for (Map.Entry<Path, List<UUID>> entry : pathMap.entrySet()) {
+            TestRunDto.TestCase tcPath = new TestRunDto.TestCase();
+            tcPath.setPath(entry.getKey());
+            tcPath.setUuid(entry.getValue());
+            testCasesPaths.add(tcPath);
+        }
+        run.setTestCase(testCasesPaths);
 
         try {
             Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(new File(savePath.toFile(), fileName), run);
@@ -327,7 +340,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         FileEditorManager.getInstance(Config.getProject()).closeFile(currentFile);
     }
 
-    private void collectCheckedItems(CheckedTreeNode node, List<TestRunDto.TestRunItems> items) {
+    private void collectCheckedItems(final CheckedTreeNode node, final List<TestRunDto.TestRunItems> items, final Map<Path, List<UUID>> pathMap) {
         if (node.getUserObject() instanceof TestCaseDto tc && node.isChecked()) {
             TestRunDto.TestRunItems item = new TestRunDto.TestRunItems();
             item.setTestCaseId(tc.getId());
@@ -335,13 +348,29 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
             Object rootObj = ((DefaultMutableTreeNode) node.getRoot()).getUserObject();
             item.setProject(rootObj instanceof DirectoryDto d ? d.getName() : String.valueOf(rootObj));
             items.add(item);
+
+            Path tcPath = null;
+            TreeNode parent = node.getParent();
+            while (parent != null) {
+                if (parent instanceof DefaultMutableTreeNode pNode) {
+                    if (pNode.getUserObject() instanceof DirectoryDto dir) {
+                        tcPath = dir.getPath();
+                        break;
+                    }
+                }
+                parent = parent.getParent();
+            }
+
+            if (tcPath != null) {
+                pathMap.computeIfAbsent(tcPath, k -> new ArrayList<>()).add(tc.getId());
+            }
         }
         for (int i = 0; i < node.getChildCount(); i++) {
-            collectCheckedItems((CheckedTreeNode) node.getChildAt(i), items);
+            collectCheckedItems((CheckedTreeNode) node.getChildAt(i), items, pathMap);
         }
     }
 
-    private TestRunDto.TestRunItems findResultFor(UUID testCaseId) {
+    private TestRunDto.TestRunItems findResultFor(final UUID testCaseId) {
         if (resultsMap == null) return null;
         try {
             return resultsMap.get(testCaseId);
@@ -377,7 +406,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     }
 
     @Override
-    public void selectTestCase(TestCaseDto tc) {
+    public void selectTestCase(final TestCaseDto tc) {
         if (tc == null) return;
         int index = model.getItems().indexOf(tc);
         if (index != -1) {

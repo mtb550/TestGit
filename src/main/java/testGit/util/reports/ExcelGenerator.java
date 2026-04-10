@@ -43,6 +43,7 @@ public final class ExcelGenerator {
                     String status = result.getStatus() != null ? result.getStatus() : "N/A";
                     ws.value(row, 1, status);
 
+                    ///  to be implemented, store colors in enum class to retrieve it wothout if statements
                     if ("PASSED".equalsIgnoreCase(status))
                         ws.style(row, 1).fontColor("008000").bold().set();
 
@@ -55,10 +56,8 @@ public final class ExcelGenerator {
 
                     ws.value(row, 2, result.getDuration() != null ? result.getDuration().toString() : "N/A");
 
-                    /// to be implemented add result.getStacktrace();
-                    /// String stacktrace = result.getStacktrace();
-                    /// ws.value(row, 3, stacktrace);
-                    /// ws.style(row, 3).wrapText(true).set();
+                    ws.value(row, 3, result.getStacktrace());
+                    ws.style(row, 3).wrapText(true).set();
 
                     row++;
                 }

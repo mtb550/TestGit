@@ -9,11 +9,13 @@ import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.dirs.TestSetDirectoryDto;
 import testGit.util.notifications.Notifier;
 
-import java.io.File;
-import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TestEditor {
 
@@ -30,26 +32,31 @@ public class TestEditor {
     }
 
     private static VirtualFile createVirtualFile(final TestSetDirectoryDto testSetDirectory) {
+        Path dirPath = testSetDirectory.getPath();
+        List<TestCaseDto> testCaseDtos = new ArrayList<>();
 
-        List<TestCaseDto> testCaseDtos = Optional.of(testSetDirectory.getPath().toFile())
-                .filter(f -> f.exists() && f.isDirectory())
-                .map(f -> f.listFiles((d, name) -> name.endsWith(".json")))
-                .stream()
-                .flatMap(Arrays::stream)
-                .map(TestEditor::addTestCase)
-                .filter(Objects::nonNull)
-                .toList();
+        if (Files.exists(dirPath) && Files.isDirectory(dirPath)) {
+            try (Stream<Path> paths = Files.list(dirPath)) {
+                testCaseDtos = paths
+                        .filter(Files::isRegularFile)
+                        .filter(p -> p.toString().endsWith(".json"))
+                        .parallel()
+                        .map(TestEditor::addTestCase)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+            } catch (Exception e) {
+                System.err.println("Failed to read directory: " + e.getMessage());
+            }
+        }
 
         return new UnifiedVirtualFile(testSetDirectory, testCaseDtos);
     }
 
-    private static TestCaseDto addTestCase(final File file) {
+    private static TestCaseDto addTestCase(final Path filePath) {
         try {
-
-            return Config.getMapper().readValue(file, TestCaseDto.class);
-
+            return Config.getMapper().readValue(filePath.toFile(), TestCaseDto.class);
         } catch (Exception e) {
-            Notifier.error("Read Test Case failed", file.getName() + ": " + e.getMessage());
+            Notifier.error("Read Test Case failed", filePath.getFileName() + ": " + e.getMessage());
             e.printStackTrace(System.err);
             return null;
         }

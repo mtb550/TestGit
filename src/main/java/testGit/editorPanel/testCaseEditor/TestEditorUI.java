@@ -16,6 +16,7 @@ import testGit.editorPanel.*;
 import testGit.editorPanel.listeners.*;
 import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
+import testGit.util.TestCaseSorter;
 import testGit.util.services.TestCaseCacheService;
 import testGit.viewPanel.ViewPanel;
 import testGit.viewPanel.ViewToolWindowFactory;
@@ -65,7 +66,7 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     @Setter
     private int hoveredIndex = -1;
 
-    public TestEditorUI(@NotNull UnifiedVirtualFile vf) {
+    public TestEditorUI(final @NotNull UnifiedVirtualFile vf) {
         this.vf = vf;
         this.allTestCaseDtos = new ArrayList<>(vf.getTestCaseDtos());
         sortAndIdentifyUnsorted();
@@ -138,7 +139,7 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         });
     }
 
-    public void selectTestCase(TestCaseDto tc) {
+    public void selectTestCase(final TestCaseDto tc) {
         if (tc == null) return;
 
         List<TestCaseDto> filtered = getFilteredList();
@@ -162,7 +163,7 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     }
 
     @Override
-    public void appendNewTestCase(TestCaseDto tc) {
+    public void appendNewTestCase(final TestCaseDto tc) {
         this.allTestCaseDtos.add(tc);
         updateSequenceAndSaveAll();
 
@@ -239,7 +240,7 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         statusBar.updatePaginationState(currentPage, totalPages, pageItems.size(), totalItems);
     }
 
-    public void loadData(List<TestCaseDto> loadedData) {
+    public void refresh(final List<TestCaseDto> loadedData) {
         this.allTestCaseDtos = loadedData;
         sortAndIdentifyUnsorted();
         this.currentPage = 1;
@@ -259,34 +260,18 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
                 .collect(Collectors.toList());
     }
 
-    private int getTotalPages(List<TestCaseDto> filtered) {
+    private int getTotalPages(final List<TestCaseDto> filtered) {
         return filtered.isEmpty() ? 1 : (int) Math.ceil((double) filtered.size() / pageSize);
     }
 
     public void sortAndIdentifyUnsorted() {
         if (allTestCaseDtos == null || allTestCaseDtos.isEmpty()) return;
-        Map<UUID, TestCaseDto> map = allTestCaseDtos.stream().collect(Collectors.toMap(TestCaseDto::getId, tc -> tc));
-        TestCaseDto head = allTestCaseDtos.stream().filter(tc -> Boolean.TRUE.equals(tc.getIsHead())).findFirst().orElse(null);
 
-        List<TestCaseDto> sortedList = new ArrayList<>();
-        Set<UUID> sortedIds = new HashSet<>();
-        unsortedIds.clear();
+        TestCaseSorter.SortResult result = TestCaseSorter.sortTestCases(allTestCaseDtos);
 
-        TestCaseDto current = head;
-        while (current != null && !sortedIds.contains(current.getId())) {
-            sortedList.add(current);
-            sortedIds.add(current.getId());
-            current = current.getNext() != null ? map.get(current.getNext()) : null;
-        }
-
-        for (TestCaseDto tc : allTestCaseDtos) {
-            if (!sortedIds.contains(tc.getId())) {
-                sortedList.add(tc);
-                unsortedIds.add(tc.getId());
-            }
-        }
         this.allTestCaseDtos.clear();
-        this.allTestCaseDtos.addAll(sortedList);
+        this.allTestCaseDtos.addAll(result.sortedList());
+        this.unsortedIds = result.unsortedIds();
     }
 
     @Override

@@ -20,12 +20,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class RunEditor {
 
-    public static void open(TestRunDirectoryDto tr, ProjectPanel projectPanel) {
+    public static void open(final TestRunDirectoryDto tr, final ProjectPanel projectPanel) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try {
                 Path jsonFilePath = tr.getPath().resolve(tr.getName() + ".json");
@@ -36,8 +35,8 @@ public class RunEditor {
                 }
 
                 TestRunDto metadata = Config.getMapper().readValue(jsonFilePath.toFile(), TestRunDto.class);
-                List<TestCaseDto> testCaseDtos = loadTestCasesForRun(metadata, projectPanel);
-                List<TestCaseDto> sorted = TestCaseSorter.sortTestCases(testCaseDtos);
+                List<TestCaseDto> testCaseDtos = loadTestCasesForRun(metadata);
+                List<TestCaseDto> sorted = TestCaseSorter.sortTestCases(testCaseDtos).sortedList();
 
                 UnifiedVirtualFile virtualFile = new UnifiedVirtualFile(
                         tr,
@@ -57,7 +56,7 @@ public class RunEditor {
         });
     }
 
-    public static void create(TestRunDirectoryDto tr, ProjectPanel projectPanel, TestProjectDirectoryDto tp, TestRunDto metadata) {
+    public static void create(final TestRunDirectoryDto tr, final ProjectPanel projectPanel, final TestProjectDirectoryDto tp, final TestRunDto metadata) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             Path testCasesPath = tp.getTestCasesDirectory().getPath();
 
@@ -77,45 +76,50 @@ public class RunEditor {
         });
     }
 
-    private static List<TestCaseDto> loadTestCasesForRun(TestRunDto metadata, ProjectPanel projectPanel) {
-        if (metadata.getResults() == null) return Collections.emptyList();
-
-        Set<UUID> targetIds = metadata.getResults().stream()
-                .map(TestRunDto.TestRunItems::getTestCaseId)
-                .collect(Collectors.toSet());
-
-        Path testCasesRoot = projectPanel.getTestProjectSelector().getSelectedTestProject().getItem().getTestCasesDirectory().getPath();
-
-        if (!Files.exists(testCasesRoot)) return Collections.emptyList();
+    private static List<TestCaseDto> loadTestCasesForRun(final TestRunDto metadata) {
+        if (metadata.getTestCase() == null || metadata.getTestCase().isEmpty()) {
+            return Collections.emptyList();
+        }
 
         List<TestCaseDto> cases = new ArrayList<>();
 
-        try (Stream<Path> paths = Files.walk(testCasesRoot)) {
-            paths.filter(Files::isRegularFile)
-                    .filter(p -> p.toString().endsWith(".json"))
-                    .forEach(p -> {
-                        try {
-                            TestCaseDto tc = Config.getMapper().readValue(p.toFile(), TestCaseDto.class);
-                            if (tc.getId() != null && targetIds.contains(tc.getId())) {
-                                cases.add(tc);
+        for (TestRunDto.TestCase tcPathObj : metadata.getTestCase()) {
+            Path dirPath = tcPathObj.getPath();
+            List<UUID> targetIds = tcPathObj.getUuid();
+
+            if (dirPath == null || !Files.exists(dirPath) || targetIds == null || targetIds.isEmpty()) {
+                continue;
+            }
+
+            Set<UUID> idsToFind = new HashSet<>(targetIds);
+
+            try (Stream<Path> paths = Files.list(dirPath)) {
+                paths.filter(Files::isRegularFile)
+                        .filter(p -> p.toString().endsWith(".json"))
+                        .forEach(p -> {
+                            try {
+                                TestCaseDto tc = Config.getMapper().readValue(p.toFile(), TestCaseDto.class);
+                                if (tc.getId() != null && idsToFind.contains(tc.getId())) {
+                                    cases.add(tc);
+                                }
+                            } catch (Exception ignored) {
                             }
-                        } catch (Exception ignored) {
-                        }
-                    });
-        } catch (IOException e) {
-            System.err.println("Failed to load test cases for run: " + e.getMessage());
+                        });
+            } catch (IOException e) {
+                System.err.println("Failed to load test cases from specific path " + dirPath + ": " + e.getMessage());
+            }
         }
 
         return cases;
     }
 
-    private static DefaultTreeModel buildFilteredModel(List<TestCaseDto> cases) {
+    private static DefaultTreeModel buildFilteredModel(final List<TestCaseDto> cases) {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Selected Test Cases");
         cases.forEach(tc -> root.add(new DefaultMutableTreeNode(tc)));
         return new DefaultTreeModel(root);
     }
 
-    private static DefaultMutableTreeNode buildDirectoryTree(Path folder, boolean isRoot) {
+    private static DefaultMutableTreeNode buildDirectoryTree(final Path folder, final boolean isRoot) {
         Object label = isRoot
                 ? "Test Cases (" + folder.getParent().getFileName().toString() + ")"
                 : resolveDirectoryObject(folder);
@@ -150,7 +154,7 @@ public class RunEditor {
         return node;
     }
 
-    private static Object resolveDirectoryObject(Path folder) {
+    private static Object resolveDirectoryObject(final Path folder) {
         if (Files.exists(folder.resolve(DirectoryType.TSP.getMarker())))
             return DirectoryMapper.testSetPackageNode(folder);
         if (Files.exists(folder.resolve(DirectoryType.TS.getMarker()))) return DirectoryMapper.testSetNode(folder);

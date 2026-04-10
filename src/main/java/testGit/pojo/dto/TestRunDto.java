@@ -62,12 +62,5 @@ public class TestRunDto {
 
         private String stacktrace;
 
-        public String getFormattedDuration() {
-            if (duration == null) return "N/A";
-            long hours = duration.toHours();
-            long minutes = duration.toMinutesPart();
-            long seconds = duration.toSecondsPart();
-            return String.format("%02d:%02d:%02d", hours, minutes, seconds);
-        }
     }
 }

@@ -29,7 +29,7 @@ public class UnifiedVirtualFile extends LightVirtualFile {
     private EditorType editorType;
 
     // Test Case
-    public UnifiedVirtualFile(TestSetDirectoryDto directory, List<TestCaseDto> testCaseDtos) {
+    public UnifiedVirtualFile(final TestSetDirectoryDto directory, final List<TestCaseDto> testCaseDtos) {
         super(directory.getName());
         this.directoryDto = directory;
         this.testCaseDtos = testCaseDtos;
@@ -37,7 +37,7 @@ public class UnifiedVirtualFile extends LightVirtualFile {
     }
 
     // Test Run
-    public UnifiedVirtualFile(TestRunDirectoryDto directory, DefaultTreeModel treeModel, List<TestCaseDto> testCaseDtos, EditorType editorType, ProjectPanel projectPanel) {
+    public UnifiedVirtualFile(final TestRunDirectoryDto directory, final DefaultTreeModel treeModel, final List<TestCaseDto> testCaseDtos, final EditorType editorType, final ProjectPanel projectPanel) {
         super(directory.getName());
         this.directoryDto = directory;
         this.testCaseDtos = testCaseDtos;

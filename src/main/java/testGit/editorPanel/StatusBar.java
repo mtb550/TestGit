@@ -23,7 +23,7 @@ public class StatusBar extends JBPanel<StatusBar> {
     private final JButton prevButton = new JButton("<");
     private final JBLabel currentPageLabel = new JBLabel("1:1");
     @Getter
-    private final JBTextField pageSizeField = new JBTextField("10", 3);
+    private final JBTextField pageSizeField = new JBTextField("50", 3);
     @Getter
     private final JButton nextButton = new JButton(">");
     @Getter
@@ -67,14 +67,14 @@ public class StatusBar extends JBPanel<StatusBar> {
         add(syncLabel, BorderLayout.EAST);
     }
 
-    private void makeCompact(JButton button) {
+    private void makeCompact(final JButton button) {
         button.putClientProperty("ActionToolbar.smallVariant", true);
         button.setMargin(JBUI.insets(0, 4));
         button.setFont(JBUI.Fonts.smallFont());
         button.setFocusable(false);
     }
 
-    public void updatePaginationState(int currentPage, int totalPages, int visibleCount, int totalCount) {
+    public void updatePaginationState(final int currentPage, final int totalPages, final int visibleCount, final int totalCount) {
         //statusLabel.setText(String.format("Showing %d of %d test cases", visibleCount, totalCount));
         statusLabel.setText(String.format("0 of %d test cases", totalCount));
         syncLabel.setText("Last updated: " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
@@ -86,7 +86,7 @@ public class StatusBar extends JBPanel<StatusBar> {
         lastButton.setEnabled(currentPage < totalPages);
     }
 
-    public void updateSelectionState(int[] selectedIndices, int currentPage, int pageSize, int totalCount) {
+    public void updateSelectionState(final int[] selectedIndices, final int currentPage, final int pageSize, final int totalCount) {
         int selectedCount = selectedIndices.length;
 
         if (selectedCount > 1) {
