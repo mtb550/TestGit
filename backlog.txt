@@ -195,3 +195,7 @@ test editor cards is stored in cache and not disposed. once you close editor and
 you will get the old value, that is means the editor reads from momery. to be fixed.
 
 remove sorting in test run and show the path as relationship many to many
+
+make the sorting and unsorted badge run in separate thread.
+
+add actual result to test run and use it.

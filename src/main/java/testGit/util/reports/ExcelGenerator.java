@@ -3,13 +3,18 @@ package testGit.util.reports;
 import org.dhatim.fastexcel.Workbook;
 import org.dhatim.fastexcel.Worksheet;
 import org.jetbrains.annotations.NotNull;
+import testGit.pojo.TestStatus;
+import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.TestRunDto;
+import testGit.util.Tools;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Map;
+import java.util.UUID;
 
 public final class ExcelGenerator {
 
-    public byte[] generate(final @NotNull TestRunDto tr) throws Exception {
+    public byte[] generate(final @NotNull TestRunDto tr, final Map<UUID, TestCaseDto> detailsMap) throws Exception {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 
             Workbook wb = new Workbook(os, "TestGit", "1.0");
@@ -25,49 +30,55 @@ public final class ExcelGenerator {
 
             ws.value(2, 0, "Status:");
             ws.style(2, 0).bold().set();
-            ws.value(2, 1, tr.getStatus() != null ? tr.getStatus().toString() : "N/A");
+            ws.value(2, 1, tr.getStatus() != null ? tr.getStatus().name() : "N/A");
 
             int row = 4;
             ws.value(row, 0, "Test Case ID");
-            ws.value(row, 1, "Status");
-            ws.value(row, 2, "Duration");
-            ws.value(row, 3, "Stacktrace");
+            ws.value(row, 1, "Title");
+            ws.value(row, 2, "Status");
+            ws.value(row, 3, "Duration");
+            ws.value(row, 4, "Expected Result");
+            ws.value(row, 5, "Stacktrace");
 
-            ws.range(row, 0, row, 3).style().bold().fillColor("E0E0E0").set();
+            ws.range(row, 0, row, 5).style().bold().fillColor("E0E0E0").set();
 
             row++;
             if (tr.getResults() != null) {
                 for (var result : tr.getResults()) {
-                    ws.value(row, 0, result.getTestCaseId().toString());
+                    UUID id = result.getTestCaseId();
+                    ws.value(row, 0, id != null ? id.toString() : "N/A");
 
-                    String status = result.getStatus() != null ? result.getStatus() : "N/A";
-                    ws.value(row, 1, status);
+                    TestCaseDto details = (detailsMap != null) ? detailsMap.get(id) : null;
+                    String title = (details != null && details.getTitle() != null) ? details.getTitle() : "N/A";
+                    String expected = (details != null && details.getExpected() != null) ? details.getExpected() : "N/A";
 
-                    ///  to be implemented, store colors in enum class to retrieve it wothout if statements
-                    if ("PASSED".equalsIgnoreCase(status))
-                        ws.style(row, 1).fontColor("008000").bold().set();
+                    ws.value(row, 1, title);
 
-                    else if ("FAILED".equalsIgnoreCase(status))
-                        ws.style(row, 1).fontColor("FF0000").bold().set();
+                    TestStatus statusEnum = result.getStatus();
+                    ws.value(row, 2, statusEnum.name());
+                    ws.style(row, 2).fontColor(statusEnum.getHex()).bold().set();
 
-                    else if ("BLOCKED".equalsIgnoreCase(status))
-                        ws.style(row, 1).fontColor("FFA500").bold().set();
+                    String formattedDuration = Tools.getFormattedDuration(result.getDuration());
+                    ws.value(row, 3, formattedDuration != null ? formattedDuration : "N/A");
 
+                    ws.value(row, 4, expected);
+                    ws.style(row, 4).wrapText(true).set();
 
-                    ws.value(row, 2, result.getDuration() != null ? result.getDuration().toString() : "N/A");
-
-                    ws.value(row, 3, result.getStacktrace());
-                    ws.style(row, 3).wrapText(true).set();
+                    ws.value(row, 5, result.getStacktrace());
+                    ws.style(row, 5).wrapText(true).set();
 
                     row++;
                 }
-            } else
+            } else {
                 ws.value(row, 0, "No test results found.");
+            }
 
-            ws.width(0, 40);
-            ws.width(1, 15);
-            ws.width(2, 15);
-            ws.width(3, 80);
+            ws.width(0, 40); // ID
+            ws.width(1, 30); // Title
+            ws.width(2, 15); // Status
+            ws.width(3, 15); // Duration
+            ws.width(4, 40); // Expected Result
+            ws.width(5, 60); // Stacktrace
 
             wb.finish();
 

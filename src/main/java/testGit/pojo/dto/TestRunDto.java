@@ -3,7 +3,9 @@ package testGit.pojo.dto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.jetbrains.annotations.NotNull;
 import testGit.pojo.TestRunStatus;
+import testGit.pojo.TestStatus;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -52,7 +54,10 @@ public class TestRunDto {
 
         private String project;
 
-        private String status;
+        @NotNull
+        private TestStatus status;
+
+        private String actualResult;
 
         private Duration duration;
 

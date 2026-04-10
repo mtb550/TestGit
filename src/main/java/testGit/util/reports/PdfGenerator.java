@@ -2,6 +2,7 @@ package testGit.util.reports;
 
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -13,13 +14,18 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import org.jetbrains.annotations.NotNull;
+import testGit.pojo.TestStatus;
+import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.TestRunDto;
+import testGit.util.Tools;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Map;
+import java.util.UUID;
 
 public final class PdfGenerator {
 
-    public byte[] generate(final @NotNull TestRunDto tr) throws Exception {
+    public byte[] generate(final @NotNull TestRunDto tr, final Map<UUID, TestCaseDto> detailsMap) throws Exception {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 
             PdfWriter writer = new PdfWriter(baos);
@@ -38,32 +44,52 @@ public final class PdfGenerator {
             document.add(header);
 
             document.add(new Paragraph("Platform: " + (tr.getPlatform() != null ? tr.getPlatform() : "N/A")));
-            document.add(new Paragraph("Status: " + tr.getStatus()).setMarginBottom(20));
+            document.add(new Paragraph("Status: " + (tr.getStatus() != null ? tr.getStatus().name() : "N/A")).setMarginBottom(20));
 
-            Table table = new Table(UnitValue.createPercentArray(new float[]{40, 30, 30}))
+            Table table = new Table(UnitValue.createPercentArray(new float[]{20, 20, 15, 15, 30}))
                     .useAllAvailableWidth();
 
             table.addHeaderCell(createHeaderCell("Test Case ID", boldFont));
+            table.addHeaderCell(createHeaderCell("Title", boldFont));
             table.addHeaderCell(createHeaderCell("Status", boldFont));
             table.addHeaderCell(createHeaderCell("Duration", boldFont));
+            table.addHeaderCell(createHeaderCell("Expected Result", boldFont));
 
             if (tr.getResults() != null) {
                 tr.getResults().forEach(result -> {
-                    table.addCell(new Cell().add(new Paragraph(result.getTestCaseId().toString())));
+                    UUID id = result.getTestCaseId();
+                    table.addCell(new Cell().add(new Paragraph(id != null ? id.toString() : "N/A")));
 
-                    Cell statusCell = new Cell().add(new Paragraph(result.getStatus()));
-                    if ("PASSED".equalsIgnoreCase(result.getStatus())) {
-                        statusCell.setFontColor(ColorConstants.GREEN);
-                    } else if ("FAILED".equalsIgnoreCase(result.getStatus())) {
-                        statusCell.setFontColor(ColorConstants.RED);
-                    }
+                    TestCaseDto details = (detailsMap != null) ? detailsMap.get(id) : null;
+                    String title = (details != null && details.getTitle() != null) ? details.getTitle() : "N/A";
+                    String expected = (details != null && details.getExpected() != null) ? details.getExpected() : "N/A";
+
+                    table.addCell(new Cell().add(new Paragraph(title)));
+
+                    TestStatus statusEnum = result.getStatus();
+                    String statusText = statusEnum.name();
+                    String hexColor = statusEnum.getHex();
+
+                    DeviceRgb statusColor = new DeviceRgb(
+                            Integer.valueOf(hexColor.substring(0, 2), 16),
+                            Integer.valueOf(hexColor.substring(2, 4), 16),
+                            Integer.valueOf(hexColor.substring(4, 6), 16)
+                    );
+
+                    Cell statusCell = new Cell().add(
+                            new Paragraph(statusText)
+                                    .setFont(boldFont)
+                                    .setFontColor(statusColor)
+                    );
                     table.addCell(statusCell);
 
-                    String duration = result.getDuration() != null ? result.getDuration().toString() : "N/A";
-                    table.addCell(new Cell().add(new Paragraph(duration)));
+                    String duration = Tools.getFormattedDuration(result.getDuration());
+                    table.addCell(new Cell().add(new Paragraph(duration != null ? duration : "N/A")));
+
+                    table.addCell(new Cell().add(new Paragraph(expected)));
                 });
             } else {
-                Cell emptyCell = new Cell(1, 3).add(new Paragraph("No test results found."))
+                Cell emptyCell = new Cell(1, 5).add(new Paragraph("No test results found."))
                         .setTextAlignment(TextAlignment.CENTER);
                 table.addCell(emptyCell);
             }

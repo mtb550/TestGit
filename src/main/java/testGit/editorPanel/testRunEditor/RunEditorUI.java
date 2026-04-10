@@ -18,6 +18,7 @@ import testGit.editorPanel.listeners.*;
 import testGit.pojo.Config;
 import testGit.pojo.Groups;
 import testGit.pojo.TestRunStatus;
+import testGit.pojo.TestStatus;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.TestRunDto;
 import testGit.pojo.dto.dirs.DirectoryDto;
@@ -55,7 +56,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     private CheckboxTree checklistTree;
     private TestRunDto metadata;
     private VirtualFile currentFile;
-    private Map<UUID, TestRunDto.TestRunItems> resultsMap;
+    private @NotNull Map<UUID, TestRunDto.TestRunItems> resultsMap;
     private TestRunMetadataHeader metadataHeader;
 
     @Getter
@@ -246,29 +247,11 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
                 }
             }
 
-            private void renderTestCaseNode(TestCaseDto tc) {
-                TestRunDto.TestRunItems result = findResultFor(tc.getId());
-                SimpleTextAttributes style = SimpleTextAttributes.REGULAR_ATTRIBUTES;
-                String statusText = " [Pending]";
-
-                if (result != null) {
-                    switch (result.getStatus()) {
-                        case "PASSED" -> {
-                            style = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.BLUE);
-                            statusText = " [Passed]";
-                        }
-                        case "FAILED" -> {
-                            style = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.RED);
-                            statusText = " [Failed]";
-                        }
-                        case "BLOCKED" -> {
-                            style = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.ORANGE);
-                            statusText = " [Blocked]";
-                        }
-                    }
-                }
-                getTextRenderer().append(tc.getTitle(), style);
-                getTextRenderer().append(statusText, SimpleTextAttributes.GRAYED_ATTRIBUTES);
+            private void renderTestCaseNode(final TestCaseDto tc) {
+                @NotNull TestRunDto.TestRunItems result = resultsMap.get(tc.getId());
+                TestStatus status = result.getStatus();
+                getTextRenderer().append(tc.getTitle(), status.getStyle());
+                getTextRenderer().append(status.getDisplayText(), SimpleTextAttributes.GRAYED_ATTRIBUTES);
             }
         };
     }
@@ -344,7 +327,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         if (node.getUserObject() instanceof TestCaseDto tc && node.isChecked()) {
             TestRunDto.TestRunItems item = new TestRunDto.TestRunItems();
             item.setTestCaseId(tc.getId());
-            item.setStatus("PENDING");
+            item.setStatus(TestStatus.PENDING);
             Object rootObj = ((DefaultMutableTreeNode) node.getRoot()).getUserObject();
             item.setProject(rootObj instanceof DirectoryDto d ? d.getName() : String.valueOf(rootObj));
             items.add(item);
@@ -370,20 +353,11 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         }
     }
 
-    private TestRunDto.TestRunItems findResultFor(final UUID testCaseId) {
-        if (resultsMap == null) return null;
-        try {
-            return resultsMap.get(testCaseId);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-
     @Override
     public void dispose() {
         if (initialTestCaseDtos != null) initialTestCaseDtos.clear();
         if (initialTestCaseIds != null) initialTestCaseIds.clear();
-        if (resultsMap != null) resultsMap.clear();
+        resultsMap.clear();
         if (mainPanel != null) mainPanel.removeAll();
         BaseEditorUI.super.dispose();
     }
