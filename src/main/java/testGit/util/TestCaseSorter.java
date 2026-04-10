@@ -1,7 +1,7 @@
 package testGit.util;
 
 import testGit.pojo.dto.TestCaseDto;
-import testGit.util.Notifications.Notifier;
+import testGit.util.notifications.Notifier;
 
 import java.util.*;
 

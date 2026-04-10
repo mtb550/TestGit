@@ -23,7 +23,7 @@ import testGit.pojo.Priority;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.dirs.TestSetDirectoryDto;
 import testGit.projectPanel.ProjectPanel;
-import testGit.util.Notifications.Notifier;
+import testGit.util.notifications.Notifier;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;

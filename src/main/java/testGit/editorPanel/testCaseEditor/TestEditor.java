@@ -7,7 +7,7 @@ import testGit.editorPanel.UnifiedVirtualFile;
 import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.dirs.TestSetDirectoryDto;
-import testGit.util.Notifications.Notifier;
+import testGit.util.notifications.Notifier;
 
 import java.io.File;
 import java.util.Arrays;

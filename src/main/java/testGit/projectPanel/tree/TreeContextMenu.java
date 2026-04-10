@@ -60,6 +60,7 @@ public class TreeContextMenu extends DefaultActionGroup {
         add(new OpenOldVersions());
         add(new ViewCommits());
         add(new TestRuns());
+        add(new GenerateReport(tree));
     }
 
     public static void registerShortcuts(final SimpleTree tree, final TreeTransferHandler transferHandler, final TreeContextMenu treeContextMenu) {

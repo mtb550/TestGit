@@ -7,9 +7,9 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.dto.dirs.TestSetDirectoryDto;
-import testGit.util.Notifications.Notifier;
 import testGit.util.Runner.TestNGRunnerByClass;
 import testGit.util.Tools;
+import testGit.util.notifications.Notifier;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -52,7 +52,7 @@ public class RunTestSet extends DumbAwareAction {
             String fqcn = Tools.fileToFqcn(ts.getPath().toFile());
             System.out.println(this.getClass() + "fqcn path: " + fqcn);
 
-            if (fqcn != null && !fqcn.trim().isEmpty()) {
+            if (!fqcn.trim().isEmpty()) {
                 System.out.println("fqcn: " + fqcn);
                 TestNGRunnerByClass.runTestClass(fqcn);
             } else {

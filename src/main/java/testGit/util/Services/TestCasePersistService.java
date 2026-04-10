@@ -8,7 +8,7 @@ import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
-import testGit.util.Notifications.Notifier;
+import testGit.util.notifications.Notifier;
 
 import java.io.File;
 import java.io.IOException;
