@@ -89,6 +89,7 @@ public class TestSessionCache {
 
     public interface CacheListener {
         void onItemsLoaded(final List<TestCaseDto> items);
+
         void onLoadComplete(final List<TestCaseDto> allItems);
     }
 }

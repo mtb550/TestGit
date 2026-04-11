@@ -14,8 +14,13 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import testGit.editorPanel.*;
+import testGit.editorPanel.BaseEditorUI;
+import testGit.editorPanel.EditorCM;
+import testGit.editorPanel.StatusBar;
+import testGit.editorPanel.UnifiedVirtualFile;
 import testGit.editorPanel.listeners.*;
+import testGit.editorPanel.toolBar.ToolBar;
+import testGit.editorPanel.toolBar.ToolBarCallback;
 import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.util.TestCaseSorter;
@@ -31,7 +36,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI {
+public class TestEditorUI implements Disposable, ToolBarCallback, BaseEditorUI {
 
     private final JBPanel<?> mainPanel;
     private final JBList<TestCaseDto> list;
@@ -260,15 +265,15 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     }
 
     public boolean isShowGroups() {
-        return toolBar.isShowGroups();
+        return toolBar.getSettings().isShowGroups();
     }
 
     public boolean isShowPriority() {
-        return toolBar.isShowPriority();
+        return toolBar.getSettings().isShowPriority();
     }
 
     public Set<String> getSelectedDetails() {
-        return toolBar.getSelectedDetails();
+        return toolBar.getSettings().getSelectedDetails();
     }
 
     public void applyFilters() {
@@ -303,8 +308,8 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
                     .filter(tc -> {
                         boolean matchesSearch = query.isEmpty() ||
                                 (tc.getTitle() != null && tc.getTitle().toLowerCase().contains(query));
-                        boolean matchesGroup = toolBar.getSelectedGroups().isEmpty() ||
-                                (tc.getGroups() != null && tc.getGroups().stream().anyMatch(toolBar.getSelectedGroups()::contains));
+                        boolean matchesGroup = toolBar.getSettings().getSelectedGroups().isEmpty() ||
+                                (tc.getGroups() != null && tc.getGroups().stream().anyMatch(toolBar.getSettings().getSelectedGroups()::contains));
                         return matchesSearch && matchesGroup;
                     })
                     .collect(Collectors.toList());

@@ -14,8 +14,13 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import testGit.editorPanel.*;
+import testGit.editorPanel.BaseEditorUI;
+import testGit.editorPanel.EditorCM;
+import testGit.editorPanel.StatusBar;
+import testGit.editorPanel.UnifiedVirtualFile;
 import testGit.editorPanel.listeners.*;
+import testGit.editorPanel.toolBar.ToolBar;
+import testGit.editorPanel.toolBar.ToolBarCallback;
 import testGit.pojo.*;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.TestRunDto;
@@ -38,7 +43,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
-public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI {
+public class RunEditorUI implements Disposable, ToolBarCallback, BaseEditorUI {
 
     private final UnifiedVirtualFile vf;
     private final List<TestCaseDto> initialTestCaseDtos = new ArrayList<>();
@@ -344,15 +349,15 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     }
 
     public boolean isShowGroups() {
-        return toolBar != null && toolBar.isShowGroups();
+        return toolBar != null && toolBar.getSettings().isShowGroups();
     }
 
     public boolean isShowPriority() {
-        return toolBar != null && toolBar.isShowPriority();
+        return toolBar != null && toolBar.getSettings().isShowPriority();
     }
 
     public Set<String> getSelectedDetails() {
-        return toolBar != null ? toolBar.getSelectedDetails() : Collections.emptySet();
+        return toolBar != null ? toolBar.getSettings().getSelectedDetails() : Collections.emptySet();
     }
 
     @Override
@@ -388,7 +393,7 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
 
     private List<TestCaseDto> getFilteredList() {
         String query = toolBar != null ? toolBar.getSearchQuery() : "";
-        Set<Groups> groups = toolBar != null ? toolBar.getSelectedGroups() : Collections.emptySet();
+        Set<Groups> groups = toolBar != null ? toolBar.getSettings().getSelectedGroups() : Collections.emptySet();
 
         return initialTestCaseDtos.stream()
                 .filter(tc -> {
