@@ -199,3 +199,5 @@ remove sorting in test run and show the path as relationship many to many
 make the sorting and unsorted badge run in separate thread.
 
 add actual result to test run and use it.
+
+let us continue, why do you need t retieve all list as I use paging ? why dont use the paging value to get the first x list, once go next page, load the next x list.

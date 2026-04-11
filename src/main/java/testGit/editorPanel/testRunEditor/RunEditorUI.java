@@ -1,6 +1,7 @@
 package testGit.editorPanel.testRunEditor;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.*;
@@ -15,10 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.editorPanel.*;
 import testGit.editorPanel.listeners.*;
-import testGit.pojo.Config;
-import testGit.pojo.Groups;
-import testGit.pojo.TestRunStatus;
-import testGit.pojo.TestStatus;
+import testGit.pojo.*;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.TestRunDto;
 import testGit.pojo.dto.dirs.DirectoryDto;
@@ -42,8 +40,9 @@ import java.util.stream.Collectors;
 public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI {
 
     private final UnifiedVirtualFile vf;
-    private final List<TestCaseDto> initialTestCaseDtos;
-    private final Set<UUID> initialTestCaseIds;
+    private final List<TestCaseDto> initialTestCaseDtos = new ArrayList<>();
+    private final Set<UUID> initialTestCaseIds = new HashSet<>();
+
     private JBPanel<?> mainPanel = new JBPanel<>(new BorderLayout());
 
     private JBList<TestCaseDto> list;
@@ -78,13 +77,34 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
             this.resultsMap = new HashMap<>();
         }
 
-        List<TestCaseDto> cases = vf.getTestCaseDtos() != null ? vf.getTestCaseDtos() : Collections.emptyList();
-        this.initialTestCaseDtos = TestCaseSorter.sortTestCases(cases).sortedList();
-        this.initialTestCaseIds = this.initialTestCaseDtos.stream()
-                .map(TestCaseDto::getId)
-                .collect(Collectors.toSet());
-
         createEditorPanel();
+
+        if (vf.getEditorType() == EditorType.TEST_RUN_OPENING) {
+            loadDataAsync();
+        }
+    }
+
+    private void loadDataAsync() {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            List<TestCaseDto> loadedCases = RunEditor.loadTestCasesForRun(metadata);
+
+            List<TestCaseDto> sorted = TestCaseSorter.sortTestCases(loadedCases).sortedList();
+
+            ApplicationManager.getApplication().invokeLater(() -> {
+                this.initialTestCaseDtos.clear();
+                this.initialTestCaseDtos.addAll(sorted);
+
+                this.initialTestCaseIds.clear();
+                this.initialTestCaseIds.addAll(sorted.stream().map(TestCaseDto::getId).collect(Collectors.toSet()));
+
+                if (this.list != null) {
+                    this.list.setPaintBusy(false);
+                    this.list.getEmptyText().setText("No test cases found in this run.");
+                }
+
+                refreshView();
+            });
+        });
     }
 
     public void createEditorPanel() {
@@ -96,57 +116,15 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         }
     }
 
-    @Override
-    public void onFilterChanged() {
-        currentPage = 1;
-        refreshView();
-    }
-
-    @Override
-    public void onDetailsChanged() {
-        if (list != null) {
-            list.setFixedCellHeight(-1);
-            list.setCellRenderer(new RunListRenderer(this));
-            list.revalidate();
-            list.repaint();
-        }
-    }
-
-    public boolean isShowGroups() {
-        return toolBar != null && toolBar.isShowGroups();
-    }
-
-    public boolean isShowPriority() {
-        return toolBar != null && toolBar.isShowPriority();
-    }
-
-    public Set<String> getSelectedDetails() {
-        return toolBar != null ? toolBar.getSelectedDetails() : Collections.emptySet();
-    }
-
-    @Override
-    public int getTotalPageCount() {
-        return Math.max(1, (int) Math.ceil((double) getFilteredList().size() / pageSize));
-    }
-
-    @Override
-    public int getTotalItemsCount() {
-        return initialTestCaseDtos != null ? initialTestCaseDtos.size() : 0;
-    }
-
-    @Override
-    public void appendNewTestCase(final TestCaseDto tc) {
-        if (this.initialTestCaseDtos != null) {
-            this.initialTestCaseDtos.add(tc);
-            refreshView();
-        }
-    }
-
     private void buildOpeningPanel() {
         toolBar = new ToolBar(this);
 
         model = new CollectionListModel<>();
         list = new JBList<>(model);
+
+        list.setPaintBusy(true);
+        list.getEmptyText().setText("Loading..");
+
         list.setOpaque(true);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setCellRenderer(new RunListRenderer(this));
@@ -181,36 +159,6 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         mainPanel.add(statusBar, BorderLayout.SOUTH);
 
         refreshView();
-    }
-
-    public void refreshView() {
-        List<TestCaseDto> filtered = getFilteredList();
-        int total = filtered.size();
-        int totalPages = getTotalPageCount();
-        currentPage = Math.max(1, Math.min(currentPage, totalPages));
-
-        int fromIndex = (currentPage - 1) * pageSize;
-        int toIndex = Math.min(fromIndex + pageSize, total);
-        List<TestCaseDto> pageItems = filtered.subList(fromIndex, toIndex);
-
-        model.replaceAll(pageItems);
-
-        statusBar.updatePaginationState(currentPage, totalPages, pageItems.size(), total);
-    }
-
-    private List<TestCaseDto> getFilteredList() {
-        String query = toolBar != null ? toolBar.getSearchQuery() : "";
-        Set<Groups> groups = toolBar != null ? toolBar.getSelectedGroups() : Collections.emptySet();
-
-        return initialTestCaseDtos.stream()
-                .filter(tc -> {
-                    boolean matchesSearch = query.isEmpty() ||
-                            (tc.getTitle() != null && tc.getTitle().toLowerCase().contains(query));
-                    boolean matchesGroup = groups.isEmpty() ||
-                            (tc.getGroups() != null && tc.getGroups().stream().anyMatch(groups::contains));
-                    return matchesSearch && matchesGroup;
-                })
-                .collect(Collectors.toList());
     }
 
     private void buildCreationPanel(final DefaultTreeModel testCaseModel, final Path savePath, final ProjectPanel projectPanel) {
@@ -263,23 +211,13 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
                 JOptionPane.showMessageDialog(mainPanel, "Build number is required.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            saveButton.setEnabled(false);
+            saveButton.setText("Saving...");
+
             metadataHeader.applyToMetadata(this.metadata);
             saveSelectedToJSON(root, savePath, projectPanel);
         });
         return saveButton;
-    }
-
-    private CheckedTreeNode convertToCheckedNodes(final DefaultMutableTreeNode node) {
-        Object userObj = node.getUserObject();
-        CheckedTreeNode newNode = new CheckedTreeNode(userObj);
-
-        if (userObj instanceof TestCaseDto tc && initialTestCaseIds.contains(tc.getId())) {
-            newNode.setChecked(true);
-        }
-        for (int i = 0; i < node.getChildCount(); i++) {
-            newNode.add(convertToCheckedNodes((DefaultMutableTreeNode) node.getChildAt(i)));
-        }
-        return newNode;
     }
 
     private void saveSelectedToJSON(final CheckedTreeNode root, final Path savePath, final ProjectPanel projectPanel) {
@@ -313,14 +251,18 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         }
         run.setTestCase(testCasesPaths);
 
-        try {
-            Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(new File(savePath.toFile(), fileName), run);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-        }
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try {
+                Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(new File(savePath.toFile(), fileName), run);
 
-        projectPanel.getTestRunTreeBuilder().buildTree(projectPanel.getTestProjectSelector().getSelectedTestProject().getItem());
-        FileEditorManager.getInstance(Config.getProject()).closeFile(currentFile);
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    projectPanel.getTestRunTreeBuilder().buildTree(projectPanel.getTestProjectSelector().getSelectedTestProject().getItem());
+                    FileEditorManager.getInstance(Config.getProject()).closeFile(currentFile);
+                });
+            } catch (Exception e) {
+                e.printStackTrace(System.err);
+            }
+        });
     }
 
     private void collectCheckedItems(final CheckedTreeNode node, final List<TestRunDto.TestRunItems> items, final Map<Path, List<UUID>> pathMap) {
@@ -353,10 +295,97 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
         }
     }
 
+    private CheckedTreeNode convertToCheckedNodes(final DefaultMutableTreeNode node) {
+        Object userObj = node.getUserObject();
+        CheckedTreeNode newNode = new CheckedTreeNode(userObj);
+
+        if (userObj instanceof TestCaseDto tc && initialTestCaseIds.contains(tc.getId())) {
+            newNode.setChecked(true);
+        }
+        for (int i = 0; i < node.getChildCount(); i++) {
+            newNode.add(convertToCheckedNodes((DefaultMutableTreeNode) node.getChildAt(i)));
+        }
+        return newNode;
+    }
+
+    @Override
+    public void onFilterChanged() {
+        currentPage = 1;
+        refreshView();
+    }
+
+    @Override
+    public void onDetailsChanged() {
+        if (list != null) {
+            list.setFixedCellHeight(-1);
+            list.setCellRenderer(new RunListRenderer(this));
+            list.revalidate();
+            list.repaint();
+        }
+    }
+
+    public boolean isShowGroups() {
+        return toolBar != null && toolBar.isShowGroups();
+    }
+
+    public boolean isShowPriority() {
+        return toolBar != null && toolBar.isShowPriority();
+    }
+
+    public Set<String> getSelectedDetails() {
+        return toolBar != null ? toolBar.getSelectedDetails() : Collections.emptySet();
+    }
+
+    @Override
+    public int getTotalPageCount() {
+        return Math.max(1, (int) Math.ceil((double) getFilteredList().size() / pageSize));
+    }
+
+    @Override
+    public int getTotalItemsCount() {
+        return initialTestCaseDtos.size();
+    }
+
+    @Override
+    public void appendNewTestCase(final TestCaseDto tc) {
+        this.initialTestCaseDtos.add(tc);
+        refreshView();
+    }
+
+    public void refreshView() {
+        List<TestCaseDto> filtered = getFilteredList();
+        int total = filtered.size();
+        int totalPages = getTotalPageCount();
+        currentPage = Math.max(1, Math.min(currentPage, totalPages));
+
+        int fromIndex = (currentPage - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, total);
+        List<TestCaseDto> pageItems = filtered.subList(fromIndex, toIndex);
+
+        model.replaceAll(pageItems);
+
+        statusBar.updatePaginationState(currentPage, totalPages, pageItems.size(), total);
+    }
+
+    private List<TestCaseDto> getFilteredList() {
+        String query = toolBar != null ? toolBar.getSearchQuery() : "";
+        Set<Groups> groups = toolBar != null ? toolBar.getSelectedGroups() : Collections.emptySet();
+
+        return initialTestCaseDtos.stream()
+                .filter(tc -> {
+                    boolean matchesSearch = query.isEmpty() ||
+                            (tc.getTitle() != null && tc.getTitle().toLowerCase().contains(query));
+                    boolean matchesGroup = groups.isEmpty() ||
+                            (tc.getGroups() != null && tc.getGroups().stream().anyMatch(groups::contains));
+                    return matchesSearch && matchesGroup;
+                })
+                .collect(Collectors.toList());
+    }
+
     @Override
     public void dispose() {
-        if (initialTestCaseDtos != null) initialTestCaseDtos.clear();
-        if (initialTestCaseIds != null) initialTestCaseIds.clear();
+        initialTestCaseDtos.clear();
+        initialTestCaseIds.clear();
         resultsMap.clear();
         if (mainPanel != null) mainPanel.removeAll();
         BaseEditorUI.super.dispose();

@@ -2,7 +2,6 @@ package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.vfs.VirtualFile;
 import testGit.editorPanel.UnifiedVirtualFile;
 import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
@@ -20,36 +19,31 @@ import java.util.stream.Stream;
 public class TestEditor {
 
     public static void open(final TestSetDirectoryDto ts) {
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+        UnifiedVirtualFile newVirtualFile = new UnifiedVirtualFile(ts, new ArrayList<>());
 
-            VirtualFile newVirtualFile = createVirtualFile(ts);
-
-            ApplicationManager.getApplication().invokeLater(() -> {
-                FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
-                editorManager.openFile(newVirtualFile, true);
-            });
+        ApplicationManager.getApplication().invokeLater(() -> {
+            FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
+            editorManager.openFile(newVirtualFile, true);
         });
     }
 
-    private static VirtualFile createVirtualFile(final TestSetDirectoryDto testSetDirectory) {
-        Path dirPath = testSetDirectory.getPath();
-        List<TestCaseDto> testCaseDtos = new ArrayList<>();
-
-        if (Files.exists(dirPath) && Files.isDirectory(dirPath)) {
-            try (Stream<Path> paths = Files.list(dirPath)) {
-                testCaseDtos = paths
-                        .filter(Files::isRegularFile)
-                        .filter(p -> p.toString().endsWith(".json"))
-                        .parallel()
-                        .map(TestEditor::addTestCase)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
-            } catch (Exception e) {
-                System.err.println("Failed to read directory: " + e.getMessage());
-            }
+    public static List<TestCaseDto> loadTestCasesFromDirectory(final Path dirPath) {
+        if (dirPath == null || !Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
+            return new ArrayList<>();
         }
 
-        return new UnifiedVirtualFile(testSetDirectory, testCaseDtos);
+        try (Stream<Path> paths = Files.list(dirPath)) {
+            return paths
+                    .filter(Files::isRegularFile)
+                    .filter(p -> p.toString().endsWith(".json"))
+                    .parallel()
+                    .map(TestEditor::addTestCase)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Failed to read directory: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     private static TestCaseDto addTestCase(final Path filePath) {

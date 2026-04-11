@@ -1,48 +1,69 @@
 package testGit.editorPanel.listeners;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.components.JBList;
 import testGit.editorPanel.testCaseEditor.TestEditorUI;
 import testGit.pojo.dto.TestCaseDto;
+import testGit.util.KeyboardSet;
 
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Collectors;
 
-///  implement this to set all shortcust keys like delete key, eescape key ..etc
-/// add new shortcut, if click CTRL+C, then copy the test case title to the clipboard.
 public class KeyListener extends KeyAdapter {
 
     private final JBList<TestCaseDto> list;
     private final TestEditorUI ui;
 
-    public KeyListener(JBList<TestCaseDto> list, TestEditorUI ui) {
+    public KeyListener(final JBList<TestCaseDto> list, final TestEditorUI ui) {
         this.list = list;
         this.ui = ui;
     }
 
     @Override
-    public void keyPressed(KeyEvent e) {
-        // نتحقق مما إذا كان الزر المضغوط هو Delete أو Backspace
-        //if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+    public void keyPressed(final KeyEvent e) {
 
-        // جلب كل الاختبارات المحددة (يدعم الحذف المتعدد Multiple Selection)
-        //List<TestCaseDto> selectedCases = list.getSelectedValuesList();
+        if (KeyboardSet.CopyTestCaseTitle.matches(e)) {
+            List<TestCaseDto> selectedCases = list.getSelectedValuesList();
+            if (selectedCases != null && !selectedCases.isEmpty()) {
+                String titles = selectedCases.stream()
+                        .map(TestCaseDto::getTitle)
+                        .collect(Collectors.joining("\n"));
 
-        //if (selectedCases != null && !selectedCases.isEmpty()) {
+                StringSelection selection = new StringSelection(titles);
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(selection, selection);
+            }
+            return;
+        }
 
-        // 1. حذف الاختبارات من القائمة الشاملة في الذاكرة
-        //ui.getAllTestCaseDtos().removeAll(selectedCases);
+        if (e.getKeyCode() == KeyboardSet.DeletePackage.getKeyCode()) {
+            List<TestCaseDto> selectedCases = list.getSelectedValuesList();
 
-        // 2. 🌟 تحذير هام: الحذف من الواجهة فقط لا يكفي! 🌟
-        // هنا يجب أن تستدعي الكود الخاص بك الذي يحذف ملفات الـ JSON من الهارد ديسك فعلياً.
-        // مثلاً:
-        // for(TestCaseDto tc : selectedCases) {
-        //     deleteFileFromDisk(tc);
-        // }
+            if (selectedCases != null && !selectedCases.isEmpty()) {
+                ui.getAllTestCaseDtos().removeAll(selectedCases);
+                ui.refreshView();
 
-        // 3. إعادة حساب ترتيب السلسلة (لإزالة الشارة الحمراء إذا لزم الأمر)
-        // وإعادة رسم الواجهة والصفحات
-        //ui.loadData(ui.getAllTestCaseDtos());
-        //}
-        //}
+                ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                    Path dirPath = ui.getVf().getTestSet().getPath();
+
+                    for (TestCaseDto tc : selectedCases) {
+                        try {
+                            Files.deleteIfExists(dirPath.resolve(tc.getId() + ".json"));
+                        } catch (Exception ex) {
+                            System.err.println("Failed to delete test case JSON: " + tc.getId());
+                        }
+                    }
+
+                    ApplicationManager.getApplication().invokeLater(ui::updateSequenceAndSaveAll);
+                });
+            }
+        }
     }
 }

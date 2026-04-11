@@ -2,12 +2,14 @@ package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.util.ui.UIUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +26,7 @@ import testGit.viewPanel.ViewToolWindowFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +39,7 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     private final ModelSyncListener syncListener;
     private final ToolBar toolBar;
 
-    //private final TestFocusListener focusListener;
+    ///private final TestFocusListener focusListener;
 
     @Getter
     private final UnifiedVirtualFile vf;
@@ -48,7 +51,7 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     private List<TestCaseDto> allTestCaseDtos;
 
     @Getter
-    private Set<UUID> unsortedIds = new HashSet<>();
+    private Set<UUID> unsortedIds;
 
     @Getter
     @Setter
@@ -56,7 +59,7 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
 
     @Getter
     @Setter
-    private int pageSize = 50;
+    private int pageSize;
 
     @Getter
     @Setter
@@ -67,28 +70,39 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     private int hoveredIndex = -1;
 
     public TestEditorUI(final @NotNull UnifiedVirtualFile vf) {
+
         this.vf = vf;
-        this.allTestCaseDtos = new ArrayList<>(vf.getTestCaseDtos());
-        sortAndIdentifyUnsorted();
-        TestCaseCacheService.getInstance(Config.getProject()).load(this.allTestCaseDtos);
+        this.allTestCaseDtos = new ArrayList<>();
+        this.unsortedIds = new HashSet<>();
 
         this.mainPanel = new JBPanel<>(new BorderLayout());
+        this.mainPanel.setBackground(UIUtil.getPanelBackground());
+        this.mainPanel.setOpaque(true);
+
+        this.model = new CollectionListModel<>(new ArrayList<>());
+
+        this.list = new JBList<>(model);
+        list.setBackground(UIUtil.getPanelBackground());
+        list.setOpaque(true);
+        list.setPaintBusy(true);
+        list.getEmptyText().setText("Loading..");
+        list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        list.setDragEnabled(true);
+        list.setDropMode(DropMode.INSERT);
+
+        JBScrollPane scrollPane = new JBScrollPane(list);
+        scrollPane.setOpaque(true);
+        scrollPane.setBackground(UIUtil.getPanelBackground());
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+
         this.pageSize = PropertiesComponent.getInstance().getInt("testGit.pageSize", 50);
 
         this.toolBar = new ToolBar(this);
         mainPanel.add(toolBar, BorderLayout.NORTH);
 
-        this.model = new CollectionListModel<>(new ArrayList<>());
         this.syncListener = new ModelSyncListener(this, model);
         this.syncListener.setOnUpdateCallback(this::onDataSynced);
         this.model.addListDataListener(syncListener);
-
-        this.list = new JBList<>(model);
-        list.getEmptyText().setText("No test cases found").appendLine("Press Ctrl+M to add");
-        list.setOpaque(true);
-        list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        list.setDragEnabled(true);
-        list.setDropMode(DropMode.INSERT);
 
         EditorCM editorCM = new EditorCM(this, vf.getTestSet(), list, model);
         TestMouseListener testMouseListener = new TestMouseListener(this, list, model, vf.getTestSet(), editorCM);
@@ -98,21 +112,39 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         list.setCellRenderer(new TestListRenderer(this));
 
         EditorCM.registerShortcuts(this, vf.getTestSet(), list, model, editorCM);
-        mainPanel.add(new JBScrollPane(list), BorderLayout.CENTER);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
 
         this.statusBar = new StatusBar();
         mainPanel.add(statusBar, BorderLayout.SOUTH);
         StatusBarListener.attach(this);
         list.addListSelectionListener(new SelectionListener(list, this, vf.getTestSet().getPath()));
 
-        refreshView();
-
-        //this.focusListener = new TestFocusListener(this.list, vf);
-        //this.focusListener.register();
-
         HoverListener hoverListener = new HoverListener(list, this);
         list.addMouseListener(hoverListener);
         list.addMouseMotionListener(hoverListener);
+
+        list.addKeyListener(new KeyListener(list, this));
+
+        loadDataAsync();
+    }
+
+    private void loadDataAsync() {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            List<TestCaseDto> loadedCases = TestEditor.loadTestCasesFromDirectory(vf.getTestSet().getPath());
+            TestCaseSorter.SortResult result = TestCaseSorter.sortTestCases(loadedCases);
+
+            TestCaseCacheService.getInstance(Config.getProject()).load(result.sortedList());
+
+            ApplicationManager.getApplication().invokeLater(() -> {
+                this.allTestCaseDtos = new ArrayList<>(result.sortedList());
+                this.unsortedIds = result.unsortedIds();
+
+                this.list.setPaintBusy(false);
+                this.list.getEmptyText().setText("No test cases found").appendLine("Press Ctrl+M to add");
+
+                refreshView();
+            });
+        });
     }
 
     private void onDataSynced() {
@@ -122,9 +154,9 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
 
     public void updateSequenceAndSaveAll() {
         List<TestCaseDto> snapshot = new ArrayList<>(this.allTestCaseDtos);
-        java.nio.file.Path dirPath = vf.getTestSet().getPath();
+        Path dirPath = vf.getTestSet().getPath();
 
-        SwingUtilities.invokeLater(() -> {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
             for (int i = 0; i < snapshot.size(); i++) {
                 TestCaseDto current = snapshot.get(i);
                 current.setIsHead(i == 0);
@@ -240,13 +272,6 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         statusBar.updatePaginationState(currentPage, totalPages, pageItems.size(), totalItems);
     }
 
-    public void refresh(final List<TestCaseDto> loadedData) {
-        this.allTestCaseDtos = loadedData;
-        sortAndIdentifyUnsorted();
-        this.currentPage = 1;
-        refreshView();
-    }
-
     private List<TestCaseDto> getFilteredList() {
         String query = toolBar.getSearchQuery();
         return allTestCaseDtos.stream()
@@ -276,9 +301,9 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
 
     @Override
     public void dispose() {
-        //if (focusListener != null) {
-        //focusListener.disconnect();
-        //}
+        ///if (focusListener != null) {
+        ///focusListener.disconnect();
+        ///}
 
         TestCaseDto selectedInThisFile = list.getSelectedValue();
 

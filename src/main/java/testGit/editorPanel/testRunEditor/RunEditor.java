@@ -12,7 +12,6 @@ import testGit.pojo.dto.TestRunDto;
 import testGit.pojo.dto.dirs.TestProjectDirectoryDto;
 import testGit.pojo.dto.dirs.TestRunDirectoryDto;
 import testGit.projectPanel.ProjectPanel;
-import testGit.util.TestCaseSorter;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -35,13 +34,11 @@ public class RunEditor {
                 }
 
                 TestRunDto metadata = Config.getMapper().readValue(jsonFilePath.toFile(), TestRunDto.class);
-                List<TestCaseDto> testCaseDtos = loadTestCasesForRun(metadata);
-                List<TestCaseDto> sorted = TestCaseSorter.sortTestCases(testCaseDtos).sortedList();
 
                 UnifiedVirtualFile virtualFile = new UnifiedVirtualFile(
                         tr,
-                        buildFilteredModel(sorted),
-                        sorted,
+                        new DefaultTreeModel(new DefaultMutableTreeNode("Loading...")),
+                        new ArrayList<>(),
                         EditorType.TEST_RUN_OPENING,
                         projectPanel
                 );
@@ -76,12 +73,12 @@ public class RunEditor {
         });
     }
 
-    private static List<TestCaseDto> loadTestCasesForRun(final TestRunDto metadata) {
+    public static List<TestCaseDto> loadTestCasesForRun(final TestRunDto metadata) {
         if (metadata.getTestCase() == null || metadata.getTestCase().isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<TestCaseDto> cases = new ArrayList<>();
+        List<TestCaseDto> cases = Collections.synchronizedList(new ArrayList<>());
 
         for (TestRunDto.TestCase tcPathObj : metadata.getTestCase()) {
             Path dirPath = tcPathObj.getPath();
@@ -96,6 +93,7 @@ public class RunEditor {
             try (Stream<Path> paths = Files.list(dirPath)) {
                 paths.filter(Files::isRegularFile)
                         .filter(p -> p.toString().endsWith(".json"))
+                        .parallel()
                         .forEach(p -> {
                             try {
                                 TestCaseDto tc = Config.getMapper().readValue(p.toFile(), TestCaseDto.class);
@@ -111,12 +109,6 @@ public class RunEditor {
         }
 
         return cases;
-    }
-
-    private static DefaultTreeModel buildFilteredModel(final List<TestCaseDto> cases) {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Selected Test Cases");
-        cases.forEach(tc -> root.add(new DefaultMutableTreeNode(tc)));
-        return new DefaultTreeModel(root);
     }
 
     private static DefaultMutableTreeNode buildDirectoryTree(final Path folder, final boolean isRoot) {
