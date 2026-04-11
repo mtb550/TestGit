@@ -39,8 +39,6 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     private final ModelSyncListener syncListener;
     private final ToolBar toolBar;
 
-    ///private final TestFocusListener focusListener;
-
     @Getter
     private final UnifiedVirtualFile vf;
 
@@ -48,7 +46,7 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     private final StatusBar statusBar;
 
     @Getter
-    private List<TestCaseDto> allTestCaseDtos;
+    private final List<TestCaseDto> allTestCaseDtos;
 
     @Getter
     private Set<UUID> unsortedIds;
@@ -72,8 +70,8 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     public TestEditorUI(final @NotNull UnifiedVirtualFile vf) {
 
         this.vf = vf;
-        this.allTestCaseDtos = new ArrayList<>();
-        this.unsortedIds = new HashSet<>();
+        this.allTestCaseDtos = Collections.synchronizedList(new ArrayList<>());
+        this.unsortedIds = Collections.synchronizedSet(new HashSet<>());
 
         this.mainPanel = new JBPanel<>(new BorderLayout());
         this.mainPanel.setBackground(UIUtil.getPanelBackground());
@@ -85,7 +83,7 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
         list.setBackground(UIUtil.getPanelBackground());
         list.setOpaque(true);
         list.setPaintBusy(true);
-        list.getEmptyText().setText("Loading..");
+        list.getEmptyText().setText("Loading...");
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         list.setDragEnabled(true);
         list.setDropMode(DropMode.INSERT);
@@ -129,24 +127,42 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     }
 
     private void loadDataAsync() {
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            List<TestCaseDto> loadedCases = TestEditor.loadTestCasesFromDirectory(vf.getTestSet().getPath());
-            TestCaseSorter.SortResult result = TestCaseSorter.sortTestCases(loadedCases);
+        TestSessionCache sessionCache = new TestSessionCache(vf.getTestSet().getPath());
 
-            TestCaseCacheService.getInstance(Config.getProject()).load(result.sortedList());
+        sessionCache.setListener(new TestSessionCache.CacheListener() {
 
-            ApplicationManager.getApplication().invokeLater(() -> {
-                this.allTestCaseDtos = new ArrayList<>(result.sortedList());
-                this.unsortedIds = result.unsortedIds();
-
-                this.list.setPaintBusy(false);
-                this.list.getEmptyText().setText("No test cases found").appendLine("Press Ctrl+M to add");
-
+            @Override
+            public void onItemsLoaded(List<TestCaseDto> items) {
+                allTestCaseDtos.addAll(items);
+                items.forEach(item -> unsortedIds.add(item.getId()));
                 refreshView();
-            });
-        });
-    }
+            }
 
+            @Override
+            public void onLoadComplete(List<TestCaseDto> allItems) {
+                ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                    TestCaseSorter.SortResult result = TestCaseSorter.sortTestCases(allItems);
+                    TestCaseCacheService.getInstance(Config.getProject()).load(result.sortedList());
+
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        allTestCaseDtos.clear();
+                        allTestCaseDtos.addAll(result.sortedList());
+                        unsortedIds.clear();
+                        unsortedIds.addAll(result.unsortedIds());
+
+                        list.setPaintBusy(false);
+                        if (allTestCaseDtos.isEmpty()) {
+                            list.getEmptyText().setText("No test cases found").appendLine("Press Ctrl+M to add");
+                        }
+
+                        refreshView();
+                    });
+                });
+            }
+        });
+
+        sessionCache.startLoadingAsync();
+    }
     private void onDataSynced() {
         sortAndIdentifyUnsorted();
         refreshView();
@@ -274,15 +290,18 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
 
     private List<TestCaseDto> getFilteredList() {
         String query = toolBar.getSearchQuery();
-        return allTestCaseDtos.stream()
-                .filter(tc -> {
-                    boolean matchesSearch = query.isEmpty() ||
-                            (tc.getTitle() != null && tc.getTitle().toLowerCase().contains(query));
-                    boolean matchesGroup = toolBar.getSelectedGroups().isEmpty() ||
-                            (tc.getGroups() != null && tc.getGroups().stream().anyMatch(toolBar.getSelectedGroups()::contains));
-                    return matchesSearch && matchesGroup;
-                })
-                .collect(Collectors.toList());
+
+        synchronized (allTestCaseDtos) {
+            return allTestCaseDtos.stream()
+                    .filter(tc -> {
+                        boolean matchesSearch = query.isEmpty() ||
+                                (tc.getTitle() != null && tc.getTitle().toLowerCase().contains(query));
+                        boolean matchesGroup = toolBar.getSelectedGroups().isEmpty() ||
+                                (tc.getGroups() != null && tc.getGroups().stream().anyMatch(toolBar.getSelectedGroups()::contains));
+                        return matchesSearch && matchesGroup;
+                    })
+                    .collect(Collectors.toList());
+        }
     }
 
     private int getTotalPages(final List<TestCaseDto> filtered) {
@@ -292,11 +311,15 @@ public class TestEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI
     public void sortAndIdentifyUnsorted() {
         if (allTestCaseDtos == null || allTestCaseDtos.isEmpty()) return;
 
-        TestCaseSorter.SortResult result = TestCaseSorter.sortTestCases(allTestCaseDtos);
+        TestCaseSorter.SortResult result;
+        synchronized (allTestCaseDtos) {
+            result = TestCaseSorter.sortTestCases(new ArrayList<>(allTestCaseDtos));
+        }
 
         this.allTestCaseDtos.clear();
         this.allTestCaseDtos.addAll(result.sortedList());
-        this.unsortedIds = result.unsortedIds();
+        this.unsortedIds.clear();
+        this.unsortedIds.addAll(result.unsortedIds());
     }
 
     @Override

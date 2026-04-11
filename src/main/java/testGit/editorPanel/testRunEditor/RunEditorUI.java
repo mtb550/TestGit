@@ -22,6 +22,7 @@ import testGit.pojo.dto.TestRunDto;
 import testGit.pojo.dto.dirs.DirectoryDto;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.TestCaseSorter;
+import testGit.util.services.TestCaseCacheService;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -85,26 +86,43 @@ public class RunEditorUI implements Disposable, ToolBar.Callbacks, BaseEditorUI 
     }
 
     private void loadDataAsync() {
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            List<TestCaseDto> loadedCases = RunEditor.loadTestCasesForRun(metadata);
+        RunSessionCache sessionCache = new RunSessionCache(metadata);
 
-            List<TestCaseDto> sorted = TestCaseSorter.sortTestCases(loadedCases).sortedList();
-
-            ApplicationManager.getApplication().invokeLater(() -> {
-                this.initialTestCaseDtos.clear();
-                this.initialTestCaseDtos.addAll(sorted);
-
-                this.initialTestCaseIds.clear();
-                this.initialTestCaseIds.addAll(sorted.stream().map(TestCaseDto::getId).collect(Collectors.toSet()));
-
-                if (this.list != null) {
-                    this.list.setPaintBusy(false);
-                    this.list.getEmptyText().setText("No test cases found in this run.");
-                }
-
+        sessionCache.setListener(new RunSessionCache.CacheListener() {
+            @Override
+            public void onItemsLoaded(List<TestCaseDto> items) {
+                initialTestCaseDtos.addAll(items);
+                items.forEach(item -> initialTestCaseIds.add(item.getId()));
                 refreshView();
-            });
+            }
+
+            @Override
+            public void onLoadComplete(List<TestCaseDto> allItems) {
+                ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                    List<TestCaseDto> sorted = TestCaseSorter.sortTestCases(allItems).sortedList();
+                    TestCaseCacheService.getInstance(Config.getProject()).load(sorted);
+
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        initialTestCaseDtos.clear();
+                        initialTestCaseDtos.addAll(sorted);
+
+                        initialTestCaseIds.clear();
+                        initialTestCaseIds.addAll(sorted.stream().map(TestCaseDto::getId).collect(Collectors.toSet()));
+
+                        if (list != null) {
+                            list.setPaintBusy(false);
+                            if (initialTestCaseDtos.isEmpty()) {
+                                list.getEmptyText().setText("No test cases found in this run.");
+                            }
+                        }
+
+                        refreshView();
+                    });
+                });
+            }
         });
+
+        sessionCache.startLoadingAsync();
     }
 
     public void createEditorPanel() {
