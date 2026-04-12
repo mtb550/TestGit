@@ -235,5 +235,3 @@ optional of nullable not recommended inside loop as it create temp objects in ra
 
 istead of passing attributes between methods, use consumer or callback interface.
 
-editor toolbar must read from map, whatever in the map, show it. one map all use it, editor tool bar, edit tc popup, view panel, create tc. start oe by one
-
