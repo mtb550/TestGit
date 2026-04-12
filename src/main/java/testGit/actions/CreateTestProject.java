@@ -27,7 +27,11 @@ public class CreateTestProject extends DumbAwareAction {
         this.projectPanel = projectPanel;
     }
 
-    @Override
+    @Override       /// TODO:: use execute method instad of direct use here to resolve intellij issues
+    /// issues in CreateTestProject & Refresh. execute is used before in other some of actions.
+    /*Override-only methods usage violations (2)
+CreateTestProject.actionPerformed(AnActionEvent)
+(1)Refresh.actionPerformed(AnActionEvent) (1)*/
     public void actionPerformed(@Nullable AnActionEvent e) {
         String name = CreateTestProjectDialog.show();
 
