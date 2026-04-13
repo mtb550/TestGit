@@ -16,20 +16,20 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+///  TODO: use interface that implement any tool bar button.
 public class ToolBar extends JBPanel<ToolBar> {
-    final JButton refreshBtn;
-    ///  TODO: use interface that implement any tool bar button.
-
+    private final JButton refreshBtn;
+    private final JButton detailsBtn;
+    private final JButton filterBtn;
+    @Getter
+    private final SearchTextField searchField = new SearchTextField();
+    private final ToolBarCallback callbacks;
     @Getter
     private final ToolBarSettings settings;
 
-    @Getter
-    private final SearchTextField searchField = new SearchTextField();
-    private final JButton detailsBtn;
-    private final JButton filterBtn;
-
     public ToolBar(final ToolBarCallback callbacks) {
         super(new GridBagLayout());
+        this.callbacks = callbacks;
         this.settings = new ToolBarSettings();
 
         setBackground(JBUI.CurrentTheme.EditorTabs.background());
@@ -47,7 +47,7 @@ public class ToolBar extends JBPanel<ToolBar> {
         gbc.gridx++;
 
         detailsBtn = createToolbarButton("Details", AllIcons.Actions.PreviewDetailsVertically);
-        detailsBtn.addActionListener(e -> FilterPopupBuilder.showDetailsPopup(detailsBtn, settings.getSelectedDetails(), v -> {
+        detailsBtn.addActionListener(e -> FilterPopupBuilder.detailsPopup(detailsBtn, settings.getSelectedDetails(), v -> {
             settings.save();
             callbacks.onDetailsChanged();
         }));
@@ -56,10 +56,11 @@ public class ToolBar extends JBPanel<ToolBar> {
         gbc.gridx++;
 
         filterBtn = createToolbarButton("Filter", AllIcons.General.Filter);
-        filterBtn.addActionListener(e -> FilterPopupBuilder.showFilterPopup(filterBtn, settings.getSelectedPriorities(), settings.getSelectedGroups(), v -> {
-            updateFilterBtnState();
-            callbacks.onFilterChanged();
-        }));
+        filterBtn.addActionListener(e -> FilterPopupBuilder.filterPopup(filterBtn, settings.getSelectedPriorities(), settings.getSelectedGroups(), this::resetFilters, v -> {
+                    updateFilterBtnState();
+                    callbacks.onFilterChanged();
+                }
+        ));
         add(filterBtn, gbc);
 
         gbc.gridx++;
@@ -102,6 +103,7 @@ public class ToolBar extends JBPanel<ToolBar> {
         settings.resetFilters();
         searchField.setText(null);
         updateFilterBtnState();
+        callbacks.onFilterChanged();
     }
 
     private JButton createToolbarButton(final String tooltip, final Icon icon) {

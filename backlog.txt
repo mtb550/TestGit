@@ -248,3 +248,4 @@ put filter btn to tool par
 unify the filteredlist method that in test editor ui and run editor ui (getFilteredList)
 put and use @NotNull in test case dto and clear all related and update create test case to put empty not null. (major)
 implement tool bar button interface and enum that allow to add new buton later easely.
+sorting number should be fixed in editor once search and list the results. (major)
