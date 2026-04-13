@@ -17,6 +17,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class ToolBar extends JBPanel<ToolBar> {
+    final JButton refreshBtn;
     ///  TODO: use interface that implement any tool bar button.
 
     @Getter
@@ -28,48 +29,64 @@ public class ToolBar extends JBPanel<ToolBar> {
     private final JButton filterBtn;
 
     public ToolBar(final ToolBarCallback callbacks) {
-        super(new FlowLayout(FlowLayout.LEFT, JBUI.scale(5), JBUI.scale(2)));
+        super(new GridBagLayout());
         this.settings = new ToolBarSettings();
 
-        setBorder(JBUI.Borders.customLine(JBColor.border(), 0, 0, 1, 0));
         setBackground(JBUI.CurrentTheme.EditorTabs.background());
 
-        final JButton refreshButton = createToolbarButton("Refresh", AllIcons.Actions.Refresh);
-        refreshButton.addActionListener(e -> callbacks.onRefresh());
-        add(refreshButton);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
+
+        refreshBtn = createToolbarButton("Refresh", AllIcons.Actions.Refresh);
+        refreshBtn.addActionListener(e -> callbacks.onRefresh());
+        add(refreshBtn, gbc);
+
+        gbc.gridx++;
 
         detailsBtn = createToolbarButton("Details", AllIcons.Actions.PreviewDetailsVertically);
         detailsBtn.addActionListener(e -> FilterPopupBuilder.showDetailsPopup(detailsBtn, settings.getSelectedDetails(), v -> {
             settings.save();
             callbacks.onDetailsChanged();
         }));
-        add(detailsBtn);
+        add(detailsBtn, gbc);
+
+        gbc.gridx++;
 
         filterBtn = createToolbarButton("Filter", AllIcons.General.Filter);
         filterBtn.addActionListener(e -> FilterPopupBuilder.showFilterPopup(filterBtn, settings.getSelectedPriorities(), settings.getSelectedGroups(), v -> {
-            updateFilterButtonState();
+            updateFilterBtnState();
             callbacks.onFilterChanged();
         }));
-        add(filterBtn);
+        add(filterBtn, gbc);
 
-        searchField.getTextEditor().setColumns(30);
+        gbc.gridx++;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        searchField.setOpaque(false);
+        searchField.getTextEditor().setOpaque(false);
+        searchField.getTextEditor().setBackground(JBUI.CurrentTheme.EditorTabs.background());
         searchField.addDocumentListener(new DocumentAdapter() {
             @Override
             protected void textChanged(final @NotNull DocumentEvent e) {
                 callbacks.onFilterChanged();
             }
         });
-        add(searchField);
+        add(searchField, gbc);
 
-        updateFilterButtonState();
+        updateFilterBtnState();
     }
 
-    private void updateFilterButtonState() {
+    private void updateFilterBtnState() {
         final int activeFiltersCount = settings.getSelectedPriorities().size() + settings.getSelectedGroups().size();
         if (activeFiltersCount == 0) {
             filterBtn.setText(null);
             filterBtn.setToolTipText("Filter");
             filterBtn.setForeground(JBColor.foreground());
+
         } else {
             filterBtn.setText("(" + activeFiltersCount + ")");
             filterBtn.setToolTipText("Filter [" + activeFiltersCount + " active]");
@@ -83,8 +100,8 @@ public class ToolBar extends JBPanel<ToolBar> {
 
     public void resetFilters() {
         settings.resetFilters();
-        searchField.setText("");
-        updateFilterButtonState();
+        searchField.setText(null);
+        updateFilterBtnState();
     }
 
     private JButton createToolbarButton(final String tooltip, final Icon icon) {
@@ -95,11 +112,8 @@ public class ToolBar extends JBPanel<ToolBar> {
         btn.setContentAreaFilled(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        btn.setMargin(JBUI.insets(4));
         final Icon zoomedIcon = IconManager.zoomStandardIcon(icon, btn);
-
         btn.addMouseListener(new MouseAdapter() {
-
             @Override
             public void mouseEntered(final MouseEvent e) {
                 btn.setContentAreaFilled(true);

@@ -310,7 +310,10 @@ public class TestEditorUI implements Disposable, ToolBarCallback, BaseEditorUI {
             return allTestCaseDtos.stream()
                     .filter(tc -> {
                         final boolean matchesSearch = query.isEmpty() ||
-                                (tc.getTitle() != null && tc.getTitle().toLowerCase().contains(query));
+                                tc.getTitle() != null && tc.getTitle().toLowerCase().contains(query) ||
+                                tc.getId().toString().toLowerCase().contains(query) ||
+                                tc.getExpected() != null && tc.getExpected().toLowerCase().contains(query) ||
+                                tc.getSteps() != null && tc.getSteps().stream().anyMatch(step -> step != null && step.toLowerCase().contains(query));
 
                         final boolean matchesGroup = groups.isEmpty() ||
                                 (tc.getGroups() != null && tc.getGroups().stream().anyMatch(groups::contains));

@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Groups;
 import testGit.pojo.Priority;
 
@@ -20,26 +22,36 @@ import java.util.UUID;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TestCaseDto {
+    @Nullable
     private UUID next;
 
+    @Nullable
     private Boolean isHead;
 
+    @NotNull
     private UUID id;
 
     ///  change to name or description to match the testng
+    /// TODO: @NotNull
     private String title;
 
+    /// TODO: @NotNull
     private String expected;
 
+    /// TODO: @NotNull
     private List<String> steps;
 
+    /// TODO: @NotNull
     private Priority priority;
 
     /// change this to PATH FCQN
+    /// TODO: @NotNull
     private String autoRef;
 
+    /// TODO: @NotNull
     private String busiRef;
 
+    /// TODO: @NotNull
     private List<Groups> groups;
 
     private String createBy;

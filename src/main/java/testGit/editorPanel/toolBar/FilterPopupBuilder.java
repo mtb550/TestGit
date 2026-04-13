@@ -67,7 +67,7 @@ public class FilterPopupBuilder {
                 }));
         filterGroup.add(priorityMenu);
 
-        DefaultActionGroup groupsMenu = new DefaultActionGroup(TestCaseAttributes.GROUPS.getDisplayName(), true);
+        final DefaultActionGroup groupsMenu = new DefaultActionGroup(TestCaseAttributes.GROUPS.getDisplayName(), true);
         Arrays.stream(Groups.values()).forEach(g ->
                 groupsMenu.add(new ToggleAction(g.getName()) {
                     @Override

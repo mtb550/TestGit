@@ -242,3 +242,9 @@ add the buttons: reset to filter button on tool bar editor, default to details b
 make tool bar search on the right.
 remove tool bar texts(details, filter, refresh) and just put the icons.
 reset filter on tob of filter list toolbar.(Reset)
+
+pending today 31.04.2026
+put filter btn to tool par
+unify the filteredlist method that in test editor ui and run editor ui (getFilteredList)
+put and use @NotNull in test case dto and clear all related and update create test case to put empty not null. (major)
+implement tool bar button interface and enum that allow to add new buton later easely.
