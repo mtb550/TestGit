@@ -27,7 +27,7 @@ public class Steps extends BaseDetails {
 
         final List<String> steps = dto.getSteps();
 
-        if (steps == null || steps.isEmpty()) {
+        if (steps.isEmpty()) {
             stepsContainer.add(createStepComponent(EMPTY_PLACEHOLDER, 0));
         } else {
             for (int i = 0; i < steps.size(); i++) {
@@ -37,7 +37,7 @@ public class Steps extends BaseDetails {
             }
         }
 
-        final int currentCount = (steps == null || steps.isEmpty()) ? 1 : steps.size();
+        final int currentCount = steps.isEmpty() ? 1 : steps.size();
         if (currentCount < MINIMUM_VISIBLE_STEPS) {
             final int missingSteps = MINIMUM_VISIBLE_STEPS - currentCount;
             stepsContainer.add(Box.createVerticalStrut(JBUI.scale(missingSteps * ESTIMATED_STEP_HEIGHT)));

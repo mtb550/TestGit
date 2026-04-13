@@ -12,7 +12,7 @@ public class UpdateAt extends BaseDetails {
 
     @Override
     public int render(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final TestCaseDto dto, final int currentRow) {
-        final String date = (dto.getUpdateAt() != null) ? dto.getUpdateAt().toString() : "-";
+        final String date = dto.getUpdateAt().toString();
         return addRow(panel, gbc, LABEL_TEXT, date, currentRow);
     }
 }

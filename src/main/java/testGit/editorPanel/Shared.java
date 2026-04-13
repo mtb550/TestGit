@@ -18,7 +18,7 @@ public class Shared {
     private static final int BADGE_RADIUS = 20;
 
     public static JBLabel createPriorityBadge(final TestCaseDto tc) {
-        return Optional.ofNullable(tc.getPriority())
+        return Optional.of(tc.getPriority())
                 .map(p -> new RoundedBadge(p.getName(), p.getColor()))
                 .orElseGet(() -> new RoundedBadge("Unknown", JBColor.GRAY));
     }

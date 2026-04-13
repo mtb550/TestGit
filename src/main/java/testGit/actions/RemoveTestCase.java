@@ -50,8 +50,8 @@ public class RemoveTestCase extends DumbAwareAction {
     }
 
     private void performDeletion(List<TestCaseDto> selectedItems) throws IOException {
-        int firstIdx = model.getElementIndex(selectedItems.get(0));
-        int lastIdx = model.getElementIndex(selectedItems.get(selectedItems.size() - 1));
+        int firstIdx = model.getElementIndex(selectedItems.getFirst());
+        int lastIdx = model.getElementIndex(selectedItems.getLast());
 
         TestCaseDto successor = (model.getSize() > lastIdx + 1) ? model.getElementAt(lastIdx + 1) : null;
 

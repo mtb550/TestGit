@@ -22,11 +22,7 @@ public class StepsBulkSection extends JsonArraySplitBulkSection {
         List<List<String>> originalSteps = new ArrayList<>();
 
         for (TestCaseDto tc : items) {
-            if (tc.getSteps() != null) {
-                originalSteps.add(new ArrayList<>(tc.getSteps()));
-            } else {
-                originalSteps.add(new ArrayList<>());
-            }
+            originalSteps.add(new ArrayList<>(tc.getSteps()));
         }
 
         return originalSteps;
@@ -46,7 +42,7 @@ public class StepsBulkSection extends JsonArraySplitBulkSection {
                 }
             }
 
-            items.get(i).setSteps(cleanSteps.isEmpty() ? null : cleanSteps);
+            items.get(i).setSteps(cleanSteps);
         }
     }
 }

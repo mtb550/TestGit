@@ -23,7 +23,7 @@ public class CopyTestCaseTitle extends DumbAwareAction {
     @Override
     public void actionPerformed(final @NotNull AnActionEvent e) {
         TestCaseDto selected = list.getSelectedValue();
-        if (selected != null && selected.getTitle() != null) {
+        if (selected != null) {
             CopyPasteManager.getInstance().setContents(new StringSelection(selected.getTitle()));
         }
     }

@@ -15,6 +15,7 @@ import testGit.util.KeyboardSet;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class PrioritySection implements CreateTestCaseSection {
     private final ComboBox<Priority> priority;
@@ -68,9 +69,7 @@ public class PrioritySection implements CreateTestCaseSection {
     @Override
     public void applyTo(TestCaseDto dto) {
         if (wrapper.getParent() != null) {
-            dto.setPriority((Priority) priority.getSelectedItem());
-        } else if (dto.getPriority() == null) {
-            dto.setPriority(Priority.LOW);
+            dto.setPriority((Priority) Objects.requireNonNull(priority.getSelectedItem()));
         }
     }
 
@@ -94,8 +93,6 @@ public class PrioritySection implements CreateTestCaseSection {
 
     @Override
     public void fillData(final TestCaseDto dto, final TestCaseUIBase.UIAction repackAction) {
-        if (dto.getPriority() != null) {
-            priority.setSelectedItem(dto.getPriority());
-        }
+        priority.setSelectedItem(dto.getPriority());
     }
 }

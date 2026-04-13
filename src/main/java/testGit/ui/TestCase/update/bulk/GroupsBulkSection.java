@@ -24,10 +24,8 @@ public class GroupsBulkSection extends JsonArraySplitBulkSection {
 
         for (TestCaseDto tc : items) {
             List<String> groupStrings = new ArrayList<>();
-            if (tc.getGroups() != null) {
-                for (Groups g : tc.getGroups()) {
-                    groupStrings.add(g.name());
-                }
+            for (Groups g : tc.getGroups()) {
+                groupStrings.add(g.name());
             }
             originalGroups.add(groupStrings);
         }
@@ -55,7 +53,7 @@ public class GroupsBulkSection extends JsonArraySplitBulkSection {
                 }
             }
 
-            items.get(i).setGroups(enumList.isEmpty() ? null : enumList);
+            items.get(i).setGroups(enumList);
         }
     }
 }

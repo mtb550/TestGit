@@ -82,8 +82,6 @@ public class TitleSection implements CreateTestCaseSection {
 
     @Override
     public void fillData(final TestCaseDto dto, final TestCaseUIBase.UIAction repackAction) {
-        if (dto.getTitle() != null) {
-            titleField.setText(dto.getTitle());
-        }
+        titleField.setText(dto.getTitle());
     }
 }

@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 @Service(Level.PROJECT)
 public final class TestCasePersistService implements Disposable {
@@ -30,7 +31,7 @@ public final class TestCasePersistService implements Disposable {
 
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             tcs.stream()
-                    .filter(tc -> tc != null && tc.getId() != null)
+                    .filter(Objects::nonNull)
                     .forEach(tc -> {
                         try {
                             File jsonFile = path.resolve(tc.getId() + ".json").toFile();

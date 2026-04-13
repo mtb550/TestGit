@@ -20,7 +20,6 @@ import testGit.util.services.TestCasePersistService;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 public class CreateTestCase extends DumbAwareAction {
@@ -39,7 +38,9 @@ public class CreateTestCase extends DumbAwareAction {
     @Override
     public void actionPerformed(final @NotNull AnActionEvent e) {
         new CreateTestCaseUI().show(newTc -> {
-            newTc.setId(UUID.randomUUID());
+            /// TODO: created by default, no need to be removed
+            @Deprecated
+            //newTc.setId(UUID.randomUUID());
 
             boolean isEmpty = model.isEmpty();
             newTc.setIsHead(isEmpty);

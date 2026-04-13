@@ -28,8 +28,8 @@ public final class HtmlGenerator {
                 UUID id = result.getTestCaseId();
 
                 TestCaseDto details = (detailsMap != null) ? detailsMap.get(id) : null;
-                String title = (details != null && details.getTitle() != null) ? details.getTitle() : "N/A";
-                String expected = (details != null && details.getExpected() != null) ? details.getExpected() : "N/A";
+                String title = details != null ? details.getTitle() : "N/A";
+                String expected = details != null ? details.getExpected() : "N/A";
 
                 TestStatus statusEnum = result.getStatus();
                 String statusText = statusEnum.name();

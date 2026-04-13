@@ -74,6 +74,7 @@ public class StatusBar extends JBPanel<StatusBar> {
         button.setFocusable(false);
     }
 
+    /// TODO: remove visibleCount if not used later
     public void updatePaginationState(final int currentPage, final int totalPages, final int visibleCount, final int totalCount) {
         ///statusLabel.setText(String.format("Showing %d of %d test cases", visibleCount, totalCount));
         statusLabel.setText(String.format("0 of %d test cases", totalCount));

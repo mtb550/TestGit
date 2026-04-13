@@ -53,7 +53,7 @@ public final class TestCaseCacheService implements Disposable {
                 testCases.forEach(tc -> {
                     addTitle(tc.getTitle());
                     addExpected(tc.getExpected());
-                    Optional.ofNullable(tc.getSteps()).ifPresent(stepList -> stepList.forEach(this::addStep));
+                    Optional.of(tc.getSteps()).ifPresent(stepList -> stepList.forEach(this::addStep));
                 }));
     }
 
@@ -63,7 +63,7 @@ public final class TestCaseCacheService implements Disposable {
                 tcs.forEach(tc -> {
                     this.addTitle(tc.getTitle());
                     this.addExpected(tc.getExpected());
-                    if (tc.getSteps() != null) tc.getSteps().forEach(this::addStep);
+                    tc.getSteps().forEach(this::addStep);
                 })
         );
     }

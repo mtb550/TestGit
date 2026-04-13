@@ -53,9 +53,5 @@ public class DirectoryOptions {
             return DirectoryOptions.this;
         }
 
-        public DirectoryOptions setStatus(boolean status) {
-            activeStates.put(currentType, status);
-            return DirectoryOptions.this;
-        }
     }
 }

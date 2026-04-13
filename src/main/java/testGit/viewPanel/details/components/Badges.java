@@ -24,17 +24,12 @@ public class Badges extends BaseDetails {
         JPanel badgesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, JBUI.scale(FLOW_GAP), 0));
         badgesPanel.setOpaque(false);
 
-        boolean hasContent = false;
-        if (dto.getPriority() != null) {
-            badgesPanel.add(Shared.createPriorityBadge(dto));
-            hasContent = true;
-        }
+        badgesPanel.add(Shared.createPriorityBadge(dto));
 
-        if (dto.getGroups() != null && !dto.getGroups().isEmpty()) {
+        if (!dto.getGroups().isEmpty()) {
             for (Groups groups : dto.getGroups()) {
                 if (groups != null) {
                     badgesPanel.add(Shared.createGroupBadge(groups));
-                    hasContent = true;
                 }
             }
         }
@@ -44,10 +39,6 @@ public class Badges extends BaseDetails {
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.WEST;
-
-        if (!hasContent) {
-            badgesPanel.add(Box.createVerticalStrut(JBUI.scale(EMPTY_STRUT_HEIGHT)));
-        }
 
         gbc.insets = JBUI.insets(INSETS_TOP, INSETS_LEFT, INSETS_BOTTOM, INSETS_RIGHT);
         panel.add(badgesPanel, gbc);

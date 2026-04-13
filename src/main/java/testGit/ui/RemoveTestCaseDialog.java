@@ -16,7 +16,7 @@ public class RemoveTestCaseDialog {
         String message;
 
         if (selected.size() == 1) {
-            message = "Are you sure you want to delete\n'" + selected.get(0).getTitle() + "'?";
+            message = "Are you sure you want to delete\n'" + selected.getFirst().getTitle() + "'?";
         } else {
             String displayedTitles = selected.stream()
                     .map(tc -> "• " + tc.getTitle())

@@ -60,7 +60,7 @@ public class UpdateTestCaseUI extends TestCaseUIBase {
             }
 
             boolean showAlways = section instanceof TitleSection;
-            boolean showIfNotEmpty = section instanceof ExpectedSection && existingDto.getExpected() != null && !existingDto.getExpected().isEmpty();
+            boolean showIfNotEmpty = section instanceof ExpectedSection && !existingDto.getExpected().isEmpty();
 
             if (showAlways || showIfNotEmpty || isTarget) {
                 section.showSection(slot);

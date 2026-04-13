@@ -68,7 +68,7 @@ public class GroupsSection implements CreateTestCaseSection {
                     selectedGroups.add(Groups.valueOf(cb.getText()));
                 }
             }
-            dto.setGroups(selectedGroups.isEmpty() ? null : selectedGroups);
+            dto.setGroups(selectedGroups);
         }
     }
 

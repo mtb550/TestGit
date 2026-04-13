@@ -111,7 +111,7 @@ public final class TestRunReport {
                         .forEach(p -> {
                             try {
                                 TestCaseDto tc = Config.getMapper().readValue(p.toFile(), TestCaseDto.class);
-                                if (tc.getId() != null && idsToFind.contains(tc.getId())) {
+                                if (idsToFind.contains(tc.getId())) {
                                     detailsMap.put(tc.getId(), tc);
                                 }
                             } catch (Exception ignored) {

@@ -113,7 +113,7 @@ public abstract class TestCaseUIBase {
             getAllSections().forEach(section -> section.applyTo(dto));
 
             String title = dto.getTitle();
-            if (titleSection.getWrapper().getParent() == null || (title != null && !title.trim().isEmpty())) {
+            if (titleSection.getWrapper().getParent() == null || !title.trim().isEmpty()) {
                 onSave.accept(dto);
                 if (popupWrapper[0] != null) popupWrapper[0].closeOk(null);
 

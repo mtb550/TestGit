@@ -71,11 +71,11 @@ public interface BaseEditorUI extends Disposable {
         synchronized (allItems) {
             return allItems.stream()
                     .filter(tc -> {
-                        final boolean matchesSearch = query.isEmpty() || tc.getTitle() != null && tc.getTitle().toLowerCase().contains(query) || tc.getId().toString().toLowerCase().contains(query) || tc.getExpected() != null && tc.getExpected().toLowerCase().contains(query) || tc.getSteps() != null && tc.getSteps().stream().anyMatch(step -> step != null && step.toLowerCase().contains(query));
+                        final boolean matchesSearch = query.isEmpty() || tc.getTitle().toLowerCase().contains(query) || tc.getId().toString().toLowerCase().contains(query) || tc.getExpected().toLowerCase().contains(query) || tc.getSteps().stream().anyMatch(step -> step != null && step.toLowerCase().contains(query));
 
-                        final boolean matchesGroup = groups.isEmpty() || (tc.getGroups() != null && tc.getGroups().stream().anyMatch(groups::contains));
+                        final boolean matchesGroup = groups.isEmpty() || tc.getGroups().stream().anyMatch(groups::contains);
 
-                        final boolean matchesPriority = priorityFilters.isEmpty() || tc.getPriority() != null && priorityFilters.contains(tc.getPriority());
+                        final boolean matchesPriority = priorityFilters.isEmpty() || priorityFilters.contains(tc.getPriority());
 
                         return matchesSearch && matchesGroup && matchesPriority;
                     })

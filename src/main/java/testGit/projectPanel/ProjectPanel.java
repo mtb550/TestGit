@@ -109,9 +109,8 @@ public class ProjectPanel implements Disposable {
         emptyText.appendLine("");
         emptyText.appendLine("");
         emptyText.appendLine(AllIcons.General.Add, "", SimpleTextAttributes.LINK_ATTRIBUTES, null);
-        emptyText.appendLine("Create your first new test project", SimpleTextAttributes.LINK_ATTRIBUTES, e -> {
-            new CreateTestProject(this).actionPerformed(null);
-        });
+        emptyText.appendLine("Create your first new test project", SimpleTextAttributes.LINK_ATTRIBUTES, e ->
+                new CreateTestProject(this).actionPerformed(null));
         panel.revalidate();
         panel.repaint();
     }

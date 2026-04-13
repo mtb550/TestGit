@@ -49,8 +49,8 @@ public final class ExcelGenerator {
                     ws.value(row, 0, id != null ? id.toString() : "N/A");
 
                     TestCaseDto details = (detailsMap != null) ? detailsMap.get(id) : null;
-                    String title = (details != null && details.getTitle() != null) ? details.getTitle() : "N/A";
-                    String expected = (details != null && details.getExpected() != null) ? details.getExpected() : "N/A";
+                    String title = details != null ? details.getTitle() : "N/A";
+                    String expected = details != null ? details.getExpected() : "N/A";
 
                     ws.value(row, 1, title);
 

@@ -149,7 +149,7 @@ public class StepsSection implements CreateTestCaseSection {
                     finalSteps.add(sf.getText().trim());
                 }
             }
-            dto.setSteps(finalSteps.isEmpty() ? null : finalSteps);
+            dto.setSteps(finalSteps);
         }
     }
 

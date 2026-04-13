@@ -14,14 +14,14 @@ public class PriorityBulkSection extends JsonSplitBulkSection {
 
     @Override
     protected String getOriginalValue(TestCaseDto tc) {
-        return tc.getPriority() != null ? tc.getPriority().name() : "";
+        return tc.getPriority().name();
     }
 
     @Override
     protected void appendJsonItem(TestCaseDto tc, int index, boolean isLast, StringBuilder leftSb, StringBuilder rightSb, List<int[]> rightEditableRanges) {
         String id = "Item-" + (index + 1);
         String escapedTitle = escapeJson(tc.getTitle());
-        String priorityStr = tc.getPriority() != null ? tc.getPriority().name() : "";
+        String priorityStr = tc.getPriority().name();
         String escapedPriority = escapeJson(priorityStr);
 
         String prefix = "  {\n    \"id\": \"" + id + "\",\n    \"title\": \"" + escapedTitle + "\",\n    \"priority\": \"";

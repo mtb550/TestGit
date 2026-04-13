@@ -64,7 +64,7 @@ public class RunSessionCache {
 
                                 try {
                                     final TestCaseDto tc = Config.getMapper().readValue(filePath.toFile(), TestCaseDto.class);
-                                    if (tc != null && tc.getId() != null && idsToFind.contains(tc.getId())) {
+                                    if (tc != null && idsToFind.contains(tc.getId())) {
                                         loadedItems.add(tc);
                                         batch.add(tc);
 

@@ -72,8 +72,6 @@ public class ExpectedSection implements CreateTestCaseSection {
 
     @Override
     public void fillData(final TestCaseDto dto, final TestCaseUIBase.UIAction repackAction) {
-        if (dto.getExpected() != null) {
-            expectedField.setText(dto.getExpected());
-        }
+        expectedField.setText(dto.getExpected());
     }
 }

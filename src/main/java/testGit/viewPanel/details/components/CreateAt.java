@@ -12,7 +12,7 @@ public class CreateAt extends BaseDetails {
 
     @Override
     public int render(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final TestCaseDto dto, final int currentRow) {
-        final String date = (dto.getCreateAt() != null) ? dto.getCreateAt().toString() : "-";
+        final String date = dto.getCreateAt().toString();
         return addRow(panel, gbc, LABEL_TEXT, date, currentRow);
     }
 }

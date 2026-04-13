@@ -3,16 +3,15 @@ package testGit.pojo.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Groups;
 import testGit.pojo.Priority;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +19,8 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TestCaseDto {
     @Nullable
@@ -29,47 +30,69 @@ public class TestCaseDto {
     private Boolean isHead;
 
     @NotNull
-    private UUID id;
+    @Builder.Default
+    private UUID id = UUID.randomUUID();
 
-    ///  change to name or description to match the testng
-    /// TODO: @NotNull
-    private String title;
+    /// TODO: change to name or description to match the testng
+    @NotNull
+    @Builder.Default
+    private String title = "";
 
-    /// TODO: @NotNull
-    private String expected;
+    @NotNull
+    @Builder.Default
+    private String expected = "";
 
-    /// TODO: @NotNull
-    private List<String> steps;
+    @NotNull
+    @Builder.Default
+    private List<String> steps = new ArrayList<>();
 
-    /// TODO: @NotNull
-    private Priority priority;
+    @NotNull
+    @Builder.Default
+    private Priority priority = Priority.LOW;
 
-    /// change this to PATH FCQN
-    /// TODO: @NotNull
-    private String autoRef;
+    /// TODO: change this to PATH FCQN
+    @NotNull
+    @Builder.Default
+    private String autoRef = "";
 
-    /// TODO: @NotNull
-    private String busiRef;
+    @NotNull
+    @Builder.Default
+    private String busiRef = "";
 
-    /// TODO: @NotNull
-    private List<Groups> groups;
+    @NotNull
+    @Builder.Default
+    private List<Groups> groups = new ArrayList<>();
 
-    private String createBy;
+    @NotNull
+    @Builder.Default
+    private String createBy = "";
 
-    private String updateBy;
+    @NotNull
+    @Builder.Default
+    private String updateBy = "";
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createAt;
+    @NotNull
+    @Builder.Default
+    private LocalDateTime createAt = LocalDateTime.now();
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateAt;
+    @NotNull
+    @Builder.Default
+    private LocalDateTime updateAt = LocalDateTime.now();
 
-    private String module;
+    @NotNull
+    @Builder.Default
+    private String module = "";
 
     @JsonIgnore
-    private String tempStatus;
+    @NotNull
+    @Builder.Default
+    private String tempStatus = "";
 
     @JsonIgnore
-    private String tempError;
+    @NotNull
+    @Builder.Default
+    private String tempError = "";
 
 }

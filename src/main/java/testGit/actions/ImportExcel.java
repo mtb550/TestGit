@@ -22,7 +22,6 @@ import testGit.pojo.Config;
 import testGit.pojo.Priority;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.dirs.TestSetDirectoryDto;
-import testGit.projectPanel.ProjectPanel;
 import testGit.util.notifications.Notifier;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -32,17 +31,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ImportExcel extends DumbAwareAction {
 
     private final SimpleTree tree;
 
-    public ImportExcel(ProjectPanel projectPanel, SimpleTree tree) {
+    public ImportExcel(SimpleTree tree) {
         super("From Excel", "Import test cases from excel", AllIcons.Providers.Microsoft);
         this.tree = tree;
     }
@@ -127,15 +123,15 @@ public class ImportExcel extends DumbAwareAction {
 
                 testCaseDto.setId(generatedUuid);
                 testCaseDto.setTitle(title);
-                testCaseDto.setExpected(getFieldSafe(recordset, "expected"));
+                testCaseDto.setExpected(Objects.requireNonNull(getFieldSafe(recordset, "expected")));
                 testCaseDto.setSteps(parseStepsSafe(getFieldSafe(recordset, "steps")));
 
-                testCaseDto.setPriority(parsePrioritySafe(getFieldSafe(recordset, "priority")));
+                testCaseDto.setPriority(Objects.requireNonNull(parsePrioritySafe(getFieldSafe(recordset, "priority"))));
 
                 testCaseDto.setGroups(new ArrayList<>());
-                testCaseDto.setCreateBy(getFieldSafe(recordset, "createBy"));
+                testCaseDto.setCreateBy(Objects.requireNonNull(getFieldSafe(recordset, "createBy")));
 
-                testCaseDto.setCreateAt(parseDateSafe(getFieldSafe(recordset, "createAt")));
+                testCaseDto.setCreateAt(Objects.requireNonNull(parseDateSafe(getFieldSafe(recordset, "createAt"))));
 
                 String jsonContent = gson.toJson(testCaseDto);
                 String fileName = generatedUuid + ".json";

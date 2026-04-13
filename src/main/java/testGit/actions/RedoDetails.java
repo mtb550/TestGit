@@ -15,6 +15,6 @@ public class RedoDetails extends DumbAwareAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        ///  TO BE IMPLEMENTED
+        ///TODO: TO BE IMPLEMENTED
     }
 }

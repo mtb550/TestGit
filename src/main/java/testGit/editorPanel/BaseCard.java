@@ -106,7 +106,7 @@ public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
         }
 
         if (activeDetails.contains(TestCaseAttributes.GROUPS.name())) {
-            Optional.ofNullable(tc.getGroups())
+            Optional.of(tc.getGroups())
                     .ifPresent(groups -> groups.forEach(groupName -> badgePanel.add(Shared.createGroupBadge(groupName))));
         }
     }

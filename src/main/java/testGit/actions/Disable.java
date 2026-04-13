@@ -16,7 +16,7 @@ public class Disable extends DumbAwareAction {
     private final SimpleTree tree;
 
     public Disable(final SimpleTree tree) {
-        super("✏️ Rename");
+        super("Rename");
         this.tree = tree;
     }
 
