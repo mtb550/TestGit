@@ -1,21 +1,21 @@
 package testGit.ui.TestCase.update.bulk;
 
-import testGit.pojo.Groups;
+import testGit.pojo.Group;
 import testGit.pojo.dto.TestCaseDto;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GroupsBulkSection extends JsonArraySplitBulkSection {
+public class GroupBulkSection extends JsonArraySplitBulkSection {
 
     @Override
     protected String getPopupTitle() {
-        return "Bulk Edit Groups";
+        return "Bulk Edit Group";
     }
 
     @Override
     protected String getArrayFieldName() {
-        return "groups";
+        return "Group";
     }
 
     @Override
@@ -24,7 +24,7 @@ public class GroupsBulkSection extends JsonArraySplitBulkSection {
 
         for (TestCaseDto tc : items) {
             List<String> groupStrings = new ArrayList<>();
-            for (Groups g : tc.getGroups()) {
+            for (Group g : tc.getGroup()) {
                 groupStrings.add(g.name());
             }
             originalGroups.add(groupStrings);
@@ -36,7 +36,7 @@ public class GroupsBulkSection extends JsonArraySplitBulkSection {
     @Override
     protected void applyValues(final List<TestCaseDto> items, final List<List<String>> newValues) {
         for (int i = 0; i < items.size(); i++) {
-            List<Groups> enumList = new ArrayList<>();
+            List<Group> enumList = new ArrayList<>();
 
             for (String str : newValues.get(i)) {
                 if (str == null) continue;
@@ -44,7 +44,7 @@ public class GroupsBulkSection extends JsonArraySplitBulkSection {
 
                 if (!cleanStr.isEmpty()) {
                     try {
-                        Groups g = Groups.valueOf(cleanStr.toUpperCase());
+                        Group g = Group.valueOf(cleanStr.toUpperCase());
                         if (!enumList.contains(g)) {
                             enumList.add(g);
                         }
@@ -53,7 +53,7 @@ public class GroupsBulkSection extends JsonArraySplitBulkSection {
                 }
             }
 
-            items.get(i).setGroups(enumList);
+            items.get(i).setGroup(enumList);
         }
     }
 }

@@ -23,7 +23,7 @@ public final class TestCaseCacheService implements Disposable {
         return project.getService(TestCaseCacheService.class);
     }
 
-    public Set<String> getTitles() {
+    public Set<String> getDescription() {
         return Collections.unmodifiableSet(titles);
     }
 
@@ -35,11 +35,11 @@ public final class TestCaseCacheService implements Disposable {
         return Collections.unmodifiableSet(steps);
     }
 
-    public void addTitle(final String t) {
+    public void addDescription(final String t) {
         if (t != null && !t.trim().isEmpty()) titles.add(t.trim());
     }
 
-    public void addExpected(final String e) {
+    public void addExpectedResult(final String e) {
         if (e != null && !e.trim().isEmpty()) expectedResults.add(e.trim());
     }
 
@@ -51,8 +51,8 @@ public final class TestCaseCacheService implements Disposable {
         if (testCases == null || testCases.isEmpty()) return;
         ApplicationManager.getApplication().executeOnPooledThread(() ->
                 testCases.forEach(tc -> {
-                    addTitle(tc.getTitle());
-                    addExpected(tc.getExpected());
+                    addDescription(tc.getDescription());
+                    addExpectedResult(tc.getExpectedResult());
                     Optional.of(tc.getSteps()).ifPresent(stepList -> stepList.forEach(this::addStep));
                 }));
     }
@@ -61,8 +61,8 @@ public final class TestCaseCacheService implements Disposable {
         if (tcs == null || tcs.isEmpty()) return;
         ApplicationManager.getApplication().executeOnPooledThread(() ->
                 tcs.forEach(tc -> {
-                    this.addTitle(tc.getTitle());
-                    this.addExpected(tc.getExpected());
+                    this.addDescription(tc.getDescription());
+                    this.addExpectedResult(tc.getExpectedResult());
                     tc.getSteps().forEach(this::addStep);
                 })
         );

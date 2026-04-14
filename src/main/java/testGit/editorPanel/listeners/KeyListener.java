@@ -33,7 +33,7 @@ public class KeyListener extends KeyAdapter {
             final List<TestCaseDto> selectedCases = list.getSelectedValuesList();
             if (selectedCases != null && !selectedCases.isEmpty()) {
                 final String titles = selectedCases.stream()
-                        .map(TestCaseDto::getTitle)
+                        .map(TestCaseDto::getDescription)
                         .collect(Collectors.joining("\n"));
 
                 final StringSelection selection = new StringSelection(titles);

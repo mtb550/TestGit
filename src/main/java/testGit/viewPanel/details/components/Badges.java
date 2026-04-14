@@ -4,7 +4,7 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 import testGit.editorPanel.Shared;
-import testGit.pojo.Groups;
+import testGit.pojo.Group;
 import testGit.pojo.dto.TestCaseDto;
 
 import javax.swing.*;
@@ -26,10 +26,10 @@ public class Badges extends BaseDetails {
 
         badgesPanel.add(Shared.createPriorityBadge(dto));
 
-        if (!dto.getGroups().isEmpty()) {
-            for (Groups groups : dto.getGroups()) {
-                if (groups != null) {
-                    badgesPanel.add(Shared.createGroupBadge(groups));
+        if (!dto.getGroup().isEmpty()) {
+            for (Group group : dto.getGroup()) {
+                if (group != null) {
+                    badgesPanel.add(Shared.createGroupBadge(group));
                 }
             }
         }

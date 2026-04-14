@@ -12,24 +12,23 @@ import testGit.util.services.TestCaseCacheService;
 import javax.swing.*;
 import java.awt.*;
 
-public class ExpectedSection implements CreateTestCaseSection {
+public class ExpectedResultSection implements CreateTestCaseSection {
     @Getter
-    private final TextFieldWithAutoCompletion<String> expectedField;
+    private final TextFieldWithAutoCompletion<String> expectedResultField;
     private final JPanel wrapper;
     Font fieldFont = JBFont.regular().deriveFont(JBUI.Fonts.label().getSize2D() + 4f);
 
-    public ExpectedSection() {
-        this.expectedField = new TextFieldWithAutoCompletion<>(Config.getProject(), new TextFieldWithAutoCompletion.StringsCompletionProvider(TestCaseCacheService.getInstance(Config.getProject()).getExpectedResults(), CreateTestCaseFields.EXPECTED.getIcon()), false, "");
-
-        this.expectedField.setFont(fieldFont);
-        this.expectedField.setPlaceholder(CreateTestCaseFields.EXPECTED.getLabel());
-        this.expectedField.setShowPlaceholderWhenFocused(true);
-        this.expectedField.setBorder(JBUI.Borders.empty(10));
+    public ExpectedResultSection() {
+        this.expectedResultField = new TextFieldWithAutoCompletion<>(Config.getProject(), new TextFieldWithAutoCompletion.StringsCompletionProvider(TestCaseCacheService.getInstance(Config.getProject()).getExpectedResults(), CreateTestCaseFields.EXPECTED_RESULT.getIcon()), false, "");
+        this.expectedResultField.setFont(fieldFont);
+        this.expectedResultField.setPlaceholder(CreateTestCaseFields.EXPECTED_RESULT.getName());
+        this.expectedResultField.setShowPlaceholderWhenFocused(true);
+        this.expectedResultField.setBorder(JBUI.Borders.empty(10));
 
         this.wrapper = new JPanel(new BorderLayout());
         this.wrapper.setOpaque(false);
-        this.wrapper.add(createIconPanel(CreateTestCaseFields.EXPECTED.getIcon()), BorderLayout.WEST);
-        this.wrapper.add(this.expectedField, BorderLayout.CENTER);
+        this.wrapper.add(createIconPanel(CreateTestCaseFields.EXPECTED_RESULT.getIcon()), BorderLayout.WEST);
+        this.wrapper.add(this.expectedResultField, BorderLayout.CENTER);
         this.wrapper.setBorder(JBUI.Borders.emptyTop(8));
     }
 
@@ -42,13 +41,13 @@ public class ExpectedSection implements CreateTestCaseSection {
     public void showSection(JPanel contentPanel) {
         if (wrapper.getParent() == null)
             contentPanel.add(wrapper);
-        expectedField.requestFocus();
+        expectedResultField.requestFocus();
     }
 
     @Override
     public void applyTo(TestCaseDto dto) {
         if (wrapper.getParent() != null) {
-            dto.setExpected(expectedField.getText().trim());
+            dto.setExpectedResult(expectedResultField.getText().trim());
         }
     }
 
@@ -62,16 +61,16 @@ public class ExpectedSection implements CreateTestCaseSection {
 
     @Override
     public JComponent getFocusComponent() {
-        return expectedField;
+        return expectedResultField;
     }
 
     @Override
     public void setEditable(final boolean editable) {
-        expectedField.setEnabled(editable);
+        expectedResultField.setEnabled(editable);
     }
 
     @Override
     public void fillData(final TestCaseDto dto, final TestCaseUIBase.UIAction repackAction) {
-        expectedField.setText(dto.getExpected());
+        expectedResultField.setText(dto.getExpectedResult());
     }
 }

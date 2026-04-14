@@ -34,7 +34,7 @@ public class HoverListener extends MouseAdapter {
         if (yInCell <= JBUI.scale(45)) {
             final TestCaseDto tc = list.getModel().getElementAt(index);
             final int globalIndex = ((ui.getCurrentPage() - 1) * ui.getPageSize()) + index;
-            final String titleText = String.format("%d. %s", globalIndex + 1, tc.getTitle());
+            final String titleText = String.format("%d. %s", globalIndex + 1, tc.getDescription());
 
             final Font titleFont = JBFont.label().deriveFont(Font.BOLD, UIUtil.getLabelFont().getSize() + 10.0f);
             final FontMetrics fm = list.getFontMetrics(titleFont);
@@ -82,7 +82,7 @@ public class HoverListener extends MouseAdapter {
             } else if (action == CardHoverAction.RUN) {
                 RunTestCase.execute(tc);
             } else {
-                System.out.println("Test Case [" + tc.getTitle() + "] updated to: " + action.name());
+                System.out.println("Test Case [" + tc.getDescription() + "] updated to: " + action.name());
             }
             e.consume();
         }

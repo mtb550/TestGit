@@ -77,13 +77,13 @@ public class DetailsTab {
         row = new Badges().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
         row = new ExpectedResult().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
         row = new Steps().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
-        row = new AutomationReferrence().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
-        row = new BusinessReferrence().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new Fqcn().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new Referrence().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
         row = new Module().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
-        row = new CreateBy().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
-        row = new UpdateBy().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
-        row = new CreateAt().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
-        row = new UpdateAt().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new CreatedBy().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new UpdatedBy().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new CreatedAt().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        row = new UpdatedAt().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
 
         return row;
     }

@@ -75,7 +75,7 @@ public enum UpdateTestCaseFields implements StatusBarItem {
             new StatusBarItem[]{SAVE},
             true,
             (items, updatedItems) -> new TitleBulkSection().show(items, updatedItems),
-            TestCaseUIBase::getTitleSection
+            TestCaseUIBase::getDescriptionSection
     ),
 
     EXPECTED(
@@ -85,7 +85,7 @@ public enum UpdateTestCaseFields implements StatusBarItem {
             new StatusBarItem[]{SAVE},
             true,
             (items, updatedItems) -> new ExpectedBulkSection().show(items, updatedItems),
-            TestCaseUIBase::getExpectedSection
+            TestCaseUIBase::getExpectedResultSection
     ),
 
     AUTO_COMPLETE(
@@ -138,17 +138,17 @@ public enum UpdateTestCaseFields implements StatusBarItem {
             null
     ),
 
-    GROUPS(
-            "Groups",
-            KeyboardSet.UpdateTestCaseGroups,
+    GROUP(
+            "Group",
+            KeyboardSet.UpdateTestCaseGroup,
             AllIcons.Nodes.Tag,
             new StatusBarItem[]{SAVE, NAVIGATE_TAB, SELECT_GROUP},
             true,
-            (items, updatedItems) -> new GroupsBulkSection().show(items, updatedItems),
-            TestCaseUIBase::getGroupsSection
+            (items, updatedItems) -> new GroupBulkSection().show(items, updatedItems),
+            TestCaseUIBase::getGroupSection
     );
 
-    private final String label;
+    private final String name;
     private final KeyboardSet shortcut;
     private final String customShortcutText;
     private final Icon icon;
@@ -157,8 +157,8 @@ public enum UpdateTestCaseFields implements StatusBarItem {
     private final BulkEditorAction bulkAction;
     private final Function<TestCaseUIBase, CreateTestCaseSection> sectionExtractor;
 
-    UpdateTestCaseFields(final String label, final KeyboardSet shortcut, final Icon icon, final StatusBarItem[] statusBarItems, final boolean editMenuItem, final BulkEditorAction bulkAction, final Function<TestCaseUIBase, CreateTestCaseSection> sectionExtractor) {
-        this.label = label;
+    UpdateTestCaseFields(final String name, final KeyboardSet shortcut, final Icon icon, final StatusBarItem[] statusBarItems, final boolean editMenuItem, final BulkEditorAction bulkAction, final Function<TestCaseUIBase, CreateTestCaseSection> sectionExtractor) {
+        this.name = name;
         this.shortcut = shortcut;
         this.customShortcutText = null;
         this.icon = icon;
@@ -168,8 +168,8 @@ public enum UpdateTestCaseFields implements StatusBarItem {
         this.sectionExtractor = sectionExtractor;
     }
 
-    UpdateTestCaseFields(final String label, final String customShortcutText, final Icon icon, final StatusBarItem[] statusBarItems, final boolean editMenuItem, final BulkEditorAction bulkAction, final Function<TestCaseUIBase, CreateTestCaseSection> sectionExtractor) {
-        this.label = label;
+    UpdateTestCaseFields(final String name, final String customShortcutText, final Icon icon, final StatusBarItem[] statusBarItems, final boolean editMenuItem, final BulkEditorAction bulkAction, final Function<TestCaseUIBase, CreateTestCaseSection> sectionExtractor) {
+        this.name = name;
         this.shortcut = null;
         this.customShortcutText = customShortcutText;
         this.icon = icon;

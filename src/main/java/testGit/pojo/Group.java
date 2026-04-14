@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 @Getter
-public enum Groups {
+public enum Group {
     REGRESSION(
             "Regression",
             true
@@ -42,9 +42,9 @@ public enum Groups {
 
     private final String name;
     private final boolean active;
-    private final BiConsumer<Set<Groups>, Boolean> action;
+    private final BiConsumer<Set<Group>, Boolean> action;
 
-    Groups(final String name, final boolean active) {
+    Group(final String name, final boolean active) {
         this.name = name;
         this.active = active;
 
@@ -54,7 +54,7 @@ public enum Groups {
         };
     }
 
-    public void onChange(final Set<Groups> set, final boolean state) {
+    public void onChange(final Set<Group> set, final boolean state) {
         action.accept(set, state);
     }
 }

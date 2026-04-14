@@ -60,7 +60,7 @@ public class TestCaseUpdateMenu {
             @Override
             protected void customizeCellRenderer(@NotNull JList<? extends UpdateTestCaseFields> l, UpdateTestCaseFields val, int i, boolean sel, boolean focus) {
                 setIcon(val.getIcon());
-                append(val.getLabel());
+                append(val.getName());
                 append("   " + val.getShortcutText(), SimpleTextAttributes.GRAYED_ATTRIBUTES);
                 setBorder(JBUI.Borders.empty(6, 12));
             }

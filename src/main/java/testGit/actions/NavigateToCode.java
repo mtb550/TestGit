@@ -20,9 +20,9 @@ public class NavigateToCode extends DumbAwareAction {
 
     public static void execute(final TestCaseDto tc) {
         if (tc == null) return;
-        System.out.println("[TRACE] Navigating to: " + tc.getTitle());
-        System.out.println("[TRACE] AutoRef: " + tc.getAutoRef());
-        CodeNavigator.toCode(tc.getAutoRef(), tc.getTitle());
+        System.out.println("[TRACE] Navigating to: " + tc.getDescription());
+        System.out.println("[TRACE] AutoRef: " + tc.getFqcn());
+        CodeNavigator.toCode(tc.getFqcn(), tc.getDescription());
     }
 
     @Override

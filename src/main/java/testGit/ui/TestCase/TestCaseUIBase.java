@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
 
 @Getter
 public abstract class TestCaseUIBase {
-    protected final TitleSection titleSection;
-    protected final ExpectedSection expectedSection;
+    protected final TitleSection DescriptionSection;
+    protected final ExpectedResultSection expectedResultSection;
     protected final PrioritySection prioritySection;
-    protected final GroupsSection groupsSection;
+    protected final GroupSection groupSection;
     protected final StepsSection stepsSection;
     protected final StatusBarSection statusBarSection;
     private final List<CreateTestCaseSection> cachedSections;
@@ -33,11 +33,11 @@ public abstract class TestCaseUIBase {
     private PropertyChangeListener focusListener;
 
     public TestCaseUIBase() {
-        this.titleSection = new TitleSection();
-        this.expectedSection = new ExpectedSection();
+        this.DescriptionSection = new TitleSection();
+        this.expectedResultSection = new ExpectedResultSection();
         this.stepsSection = new StepsSection();
         this.prioritySection = new PrioritySection();
-        this.groupsSection = new GroupsSection();
+        this.groupSection = new GroupSection();
         this.statusBarSection = new StatusBarSection();
 
         this.cachedSections = Arrays.stream(CreateTestCaseFields.values())
@@ -59,7 +59,7 @@ public abstract class TestCaseUIBase {
             if (focusOwner != null && SwingUtilities.isDescendingFrom(focusOwner, parentPanel)) {
                 for (CreateTestCaseSection section : getAllSections()) {
                     if (SwingUtilities.isDescendingFrom(focusOwner, section.getWrapper())) {
-                        StatusBarItem[] items = statusBarMapping.getOrDefault(section, statusBarMapping.get(titleSection));
+                        StatusBarItem[] items = statusBarMapping.getOrDefault(section, statusBarMapping.get(DescriptionSection));
                         if (items != null) statusBarSection.updateItems(items);
                         return;
                     }
@@ -112,13 +112,13 @@ public abstract class TestCaseUIBase {
         return () -> {
             getAllSections().forEach(section -> section.applyTo(dto));
 
-            String title = dto.getTitle();
-            if (titleSection.getWrapper().getParent() == null || !title.trim().isEmpty()) {
+            String title = dto.getDescription();
+            if (DescriptionSection.getWrapper().getParent() == null || !title.trim().isEmpty()) {
                 onSave.accept(dto);
                 if (popupWrapper[0] != null) popupWrapper[0].closeOk(null);
 
             } else
-                titleSection.setError(true);
+                DescriptionSection.setError(true);
         };
     }
 

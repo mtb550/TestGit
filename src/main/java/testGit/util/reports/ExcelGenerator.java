@@ -34,7 +34,7 @@ public final class ExcelGenerator {
 
             int row = 4;
             ws.value(row, 0, "Test Case ID");
-            ws.value(row, 1, "Title");
+            ws.value(row, 1, "Description");
             ws.value(row, 2, "Status");
             ws.value(row, 3, "Duration");
             ws.value(row, 4, "Expected Result");
@@ -49,8 +49,8 @@ public final class ExcelGenerator {
                     ws.value(row, 0, id != null ? id.toString() : "N/A");
 
                     TestCaseDto details = (detailsMap != null) ? detailsMap.get(id) : null;
-                    String title = details != null ? details.getTitle() : "N/A";
-                    String expected = details != null ? details.getExpected() : "N/A";
+                    String title = details != null ? details.getDescription() : "N/A";
+                    String expectedResult = details != null ? details.getExpectedResult() : "N/A";
 
                     ws.value(row, 1, title);
 
@@ -61,7 +61,7 @@ public final class ExcelGenerator {
                     String formattedDuration = Tools.getFormattedDuration(result.getDuration());
                     ws.value(row, 3, formattedDuration != null ? formattedDuration : "N/A");
 
-                    ws.value(row, 4, expected);
+                    ws.value(row, 4, expectedResult);
                     ws.style(row, 4).wrapText(true).set();
 
                     ws.value(row, 5, result.getStacktrace());

@@ -13,13 +13,13 @@ public class TitleBulkSection extends JsonSplitBulkSection {
 
     @Override
     protected String getOriginalValue(TestCaseDto tc) {
-        return tc.getTitle();
+        return tc.getDescription();
     }
 
     @Override
     protected void appendJsonItem(TestCaseDto tc, int index, boolean isLast, StringBuilder leftSb, StringBuilder rightSb, List<int[]> rightEditableRanges) {
         String id = "Item-" + (index + 1);
-        String escapedTitle = escapeJson(tc.getTitle());
+        String escapedTitle = escapeJson(tc.getDescription());
 
         String prefix = "  {\n    \"id\": \"" + id + "\",\n    \"title\": \"";
         String suffix = "\"\n  }";
@@ -39,7 +39,7 @@ public class TitleBulkSection extends JsonSplitBulkSection {
     protected void applyValues(final List<TestCaseDto> items, final List<String> newValues) {
         for (int i = 0; i < items.size(); i++) {
             if (newValues.get(i) != null && !newValues.get(i).trim().isEmpty()) {
-                items.get(i).setTitle(newValues.get(i).trim());
+                items.get(i).setDescription(newValues.get(i).trim());
             }
         }
     }

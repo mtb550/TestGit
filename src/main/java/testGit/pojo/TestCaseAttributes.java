@@ -22,46 +22,47 @@ public enum TestCaseAttributes {
             tc -> String.valueOf(tc.getId())
     ),
 
-    TITLE("Title",      /// TODO:: added to tool bar details, to be shown but disabled
+    /// TODO:: added to tool bar details, to be shown but disabled
+    DESCRIPTION("Description",
             false,
             false,
-            TestCaseDto::getTitle
+            TestCaseDto::getDescription
     ),
 
     EXPECTED_RESULT("Expected Result",
             true,
             true,
-            TestCaseDto::getExpected
+            TestCaseDto::getExpectedResult
     ),
 
     STEPS("Steps",
             true,
             true,
-            tc -> Optional.ofNullable(tc.getSteps()).map(Object::toString).orElse("")
+            tc -> Optional.of(tc.getSteps()).map(Object::toString).orElse("")
     ),
 
     PRIORITY("Priority",
             true,
             true,
-            tc -> Optional.ofNullable(tc.getPriority()).map(Priority::getName).orElse("")
+            tc -> Optional.of(tc.getPriority()).map(Priority::getName).orElse("")
     ),
 
-    AUTO_REF("Automation Referrence",
+    FCQN("FCQN",
             true,
             false,
-            TestCaseDto::getAutoRef
+            TestCaseDto::getFqcn
     ),
 
-    BUSI_REF("Business Referrence",
+    REFERRENCE("Referrence",
             true,
             false,
-            TestCaseDto::getBusiRef
+            TestCaseDto::getReference
     ),
 
-    GROUPS("Groups",
+    GROUP("Group",
             true,
             true,
-            tc -> Optional.ofNullable(tc.getGroups()).map(groups -> groups.stream().map(Groups::getName).collect(Collectors.joining(", "))).orElse("")
+            tc -> Optional.of(tc.getGroup()).map(groups -> groups.stream().map(Group::getName).collect(Collectors.joining(", "))).orElse("")
     ),
 
     ///  TODO:: ORDER to be added to show or hide sequence numbers in editors
@@ -96,14 +97,14 @@ public enum TestCaseAttributes {
             TestCaseDto::getModule
     ),
 
-    APPROVAL_STATUS(
-            "Approval Status",
+    STATUS(
+            "Status",
             true,
             false,
             tc -> null
     );
 
-    private final String displayName;
+    private final String name;
     private final boolean standardToolBarOption;
     private final boolean defaultToolBarSelected;
     private final Function<TestCaseDto, String> valueExtractor;

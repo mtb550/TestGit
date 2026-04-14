@@ -226,7 +226,7 @@ public class RunEditorUI implements Disposable, ToolBarCallback, BaseEditorUI {
             private void renderTestCaseNode(final TestCaseDto tc) {
                 final @NotNull TestRunDto.TestRunItems result = resultsMap.get(tc.getId());
                 final TestStatus status = result.getStatus();
-                getTextRenderer().append(tc.getTitle(), status.getStyle());
+                getTextRenderer().append(tc.getDescription(), status.getStyle());
                 getTextRenderer().append(status.getDisplayText(), SimpleTextAttributes.GRAYED_ATTRIBUTES);
             }
         };

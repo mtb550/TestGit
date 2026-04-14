@@ -100,11 +100,12 @@ public class CreateTestCaseUI extends TestCaseUIBase {
 
         // Popup
         popupWrapper[0] = JBPopupFactory.getInstance()
-                .createComponentPopupBuilder(mainPanel, titleSection.getFocusComponent())
+                .createComponentPopupBuilder(mainPanel, DescriptionSection.getFocusComponent())
                 .setTitle("Create Test Case")
                 //.setTitleIcon()
                 .setRequestFocus(true)
-                .setCancelOnClickOutside(true)
+                .setCancelOnWindowDeactivation(false)
+                .setCancelOnClickOutside(false)
                 .setMovable(true)
                 .setResizable(true)
                 .addListener(new JBPopupListener() {

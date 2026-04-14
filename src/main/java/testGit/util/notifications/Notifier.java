@@ -8,9 +8,14 @@ import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ide.CopyPasteManager;
+import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.ui.popup.Balloon;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.ui.awt.RelativePoint;
 import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
 
+import javax.swing.*;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
 
@@ -62,5 +67,16 @@ public class Notifier {
         notification.addAction(copyAction);
 
         notification.notify(Config.getProject());
+    }
+
+    // TODO: try it
+    public static void showFloatingHint(JComponent targetComponent, String message, MessageType type) {
+        JBPopupFactory.getInstance()
+                //.createBalloonBuilder()
+                //.createDialogBalloonBuilder()
+                .createHtmlTextBalloonBuilder(message, type, null)
+                .setFadeoutTime(3000) // Disappears after 3 seconds
+                .createBalloon()
+                .show(RelativePoint.getCenterOf(targetComponent), Balloon.Position.above);
     }
 }

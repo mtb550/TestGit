@@ -53,7 +53,7 @@ public class ViewPanel {
             public void onStatusChanged(@NotNull final String testName, @NotNull final String status, final String error) {
                 final TestCaseDto currentDto = getCurrentTestCaseDto();
 
-                if (currentDto != null && testName.contains(currentDto.getTitle())) {
+                if (currentDto != null && testName.contains(currentDto.getDescription())) {
                     currentDto.setTempStatus(status);
                     currentDto.setTempError(error);
                     refreshCurrentView();

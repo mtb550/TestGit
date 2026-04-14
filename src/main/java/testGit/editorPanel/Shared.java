@@ -7,7 +7,7 @@ import com.intellij.util.IconUtil;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import testGit.pojo.CardHoverAction;
-import testGit.pojo.Groups;
+import testGit.pojo.Group;
 import testGit.pojo.dto.TestCaseDto;
 
 import javax.swing.*;
@@ -23,8 +23,8 @@ public class Shared {
                 .orElseGet(() -> new RoundedBadge("Unknown", JBColor.GRAY));
     }
 
-    public static JBLabel createGroupBadge(final Groups groupName) {
-        return new RoundedBadge(groupName.getName(), JBColor.darkGray);
+    public static JBLabel createGroupBadge(final Group group) {
+        return new RoundedBadge(group.getName(), JBColor.darkGray);
     }
 
     public static void drawTitleActionIcons(final Component c, final Graphics g, final int titleWidth, final int y, final String hoveredAction) {

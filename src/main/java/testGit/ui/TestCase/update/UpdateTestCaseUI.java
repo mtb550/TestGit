@@ -60,7 +60,7 @@ public class UpdateTestCaseUI extends TestCaseUIBase {
             }
 
             boolean showAlways = section instanceof TitleSection;
-            boolean showIfNotEmpty = section instanceof ExpectedSection && !existingDto.getExpected().isEmpty();
+            boolean showIfNotEmpty = section instanceof ExpectedResultSection && !existingDto.getExpectedResult().isEmpty();
 
             if (showAlways || showIfNotEmpty || isTarget) {
                 section.showSection(slot);
@@ -95,7 +95,7 @@ public class UpdateTestCaseUI extends TestCaseUIBase {
         // Use the focus component from the dynamically identified target section
         popupWrapper[0] = JBPopupFactory.getInstance()
                 .createComponentPopupBuilder(mainPanel, targetSection.getFocusComponent())
-                .setTitle("Edit " + target.getLabel())
+                .setTitle("Edit " + target.getName())
                 .setRequestFocus(true)
                 .setCancelOnClickOutside(true)
                 .setMovable(true)

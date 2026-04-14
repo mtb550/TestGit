@@ -28,8 +28,8 @@ public final class HtmlGenerator {
                 UUID id = result.getTestCaseId();
 
                 TestCaseDto details = (detailsMap != null) ? detailsMap.get(id) : null;
-                String title = details != null ? details.getTitle() : "N/A";
-                String expected = details != null ? details.getExpected() : "N/A";
+                String title = details != null ? details.getDescription() : "N/A";
+                String expectedResult = details != null ? details.getExpectedResult() : "N/A";
 
                 TestStatus statusEnum = result.getStatus();
                 String statusText = statusEnum.name();
@@ -43,7 +43,7 @@ public final class HtmlGenerator {
                         .append("<td>").append(title).append("</td>")
                         .append("<td style='color:").append(colorHex).append("; font-weight:bold;'>").append(statusText).append("</td>")
                         .append("<td>").append(duration != null ? duration : "N/A").append("</td>")
-                        .append("<td>").append(expected).append("</td>")
+                        .append("<td>").append(expectedResult).append("</td>")
                         .append("</tr>");
             });
         } else {

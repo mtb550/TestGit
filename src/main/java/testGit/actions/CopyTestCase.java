@@ -21,7 +21,7 @@ public class CopyTestCase extends DumbAwareAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         TestCaseDto tc = list.getSelectedValue();
-        String text = "Title: " + tc.getTitle() + "\nSteps: " + tc.getSteps() + "\nExpected: " + tc.getExpected();
+        String text = "Description: " + tc.getDescription() + "\nSteps: " + tc.getSteps() + "\nExpected result: " + tc.getExpectedResult();
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
     }
 }

@@ -21,16 +21,16 @@ public class TitleSection implements CreateTestCaseSection {
     Font fieldFont = JBFont.regular().deriveFont(JBUI.Fonts.label().getSize2D() + 6f);
 
     public TitleSection() {
-        this.titleField = new TextFieldWithAutoCompletion<>(Config.getProject(), new TextFieldWithAutoCompletion.StringsCompletionProvider(TestCaseCacheService.getInstance(Config.getProject()).getTitles(), CreateTestCaseFields.TITLE.getIcon()), false, "");
+        this.titleField = new TextFieldWithAutoCompletion<>(Config.getProject(), new TextFieldWithAutoCompletion.StringsCompletionProvider(TestCaseCacheService.getInstance(Config.getProject()).getDescription(), CreateTestCaseFields.DESCRIPTION.getIcon()), false, "");
 
         this.titleField.setFont(fieldFont);
-        this.titleField.setPlaceholder(CreateTestCaseFields.TITLE.getLabel());
+        this.titleField.setPlaceholder(CreateTestCaseFields.DESCRIPTION.getName());
         this.titleField.setShowPlaceholderWhenFocused(true);
         this.titleField.setBorder(JBUI.Borders.empty(10));
 
         this.wrapper = new JPanel(new BorderLayout());
         this.wrapper.setOpaque(false);
-        this.wrapper.add(createIconPanel(CreateTestCaseFields.TITLE.getIcon()), BorderLayout.WEST);
+        this.wrapper.add(createIconPanel(CreateTestCaseFields.DESCRIPTION.getIcon()), BorderLayout.WEST);
         this.wrapper.add(this.titleField, BorderLayout.CENTER);
         this.wrapper.setBorder(JBUI.Borders.emptyTop(8));
     }
@@ -59,7 +59,7 @@ public class TitleSection implements CreateTestCaseSection {
     @Override
     public void applyTo(final TestCaseDto dto) {
         if (wrapper.getParent() != null && titleField.isEnabled())
-            dto.setTitle(titleField.getText().trim());
+            dto.setDescription(titleField.getText().trim());
     }
 
     @Override
@@ -82,6 +82,6 @@ public class TitleSection implements CreateTestCaseSection {
 
     @Override
     public void fillData(final TestCaseDto dto, final TestCaseUIBase.UIAction repackAction) {
-        titleField.setText(dto.getTitle());
+        titleField.setText(dto.getDescription());
     }
 }

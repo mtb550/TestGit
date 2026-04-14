@@ -2,7 +2,7 @@ package testGit.editorPanel.toolBar;
 
 import com.intellij.ide.util.PropertiesComponent;
 import lombok.Getter;
-import testGit.pojo.Groups;
+import testGit.pojo.Group;
 import testGit.pojo.Priority;
 import testGit.pojo.TestCaseAttributes;
 
@@ -20,8 +20,8 @@ public class ToolBarSettings {
             .map(Enum::name)
             .collect(Collectors.joining(","));
 
-    private final Set<Groups> selectedGroups = new HashSet<>();
-    private final Set<Priority> selectedPriorities = new HashSet<>();
+    private final Set<Group> selectedGroup = new HashSet<>();
+    private final Set<Priority> selectedPriority = new HashSet<>();
     private final Set<String> selectedDetails = new HashSet<>();
 
     public ToolBarSettings() {
@@ -37,7 +37,7 @@ public class ToolBarSettings {
     }
 
     public void resetFilters() {
-        selectedGroups.clear();
-        selectedPriorities.clear();
+        selectedGroup.clear();
+        selectedPriority.clear();
     }
 }

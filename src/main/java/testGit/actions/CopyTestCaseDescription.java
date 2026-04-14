@@ -11,10 +11,10 @@ import testGit.util.KeyboardSet;
 
 import java.awt.datatransfer.StringSelection;
 
-public class CopyTestCaseTitle extends DumbAwareAction {
+public class CopyTestCaseDescription extends DumbAwareAction {
     private final JBList<TestCaseDto> list;
 
-    public CopyTestCaseTitle(final JBList<TestCaseDto> list) {
+    public CopyTestCaseDescription(final JBList<TestCaseDto> list) {
         super("Copy Test Case Title");
         this.list = list;
         registerCustomShortcutSet(KeyboardSet.CopyTestCaseTitle.getShortcut(), list);
@@ -24,7 +24,7 @@ public class CopyTestCaseTitle extends DumbAwareAction {
     public void actionPerformed(final @NotNull AnActionEvent e) {
         TestCaseDto selected = list.getSelectedValue();
         if (selected != null) {
-            CopyPasteManager.getInstance().setContents(new StringSelection(selected.getTitle()));
+            CopyPasteManager.getInstance().setContents(new StringSelection(selected.getDescription()));
         }
     }
 

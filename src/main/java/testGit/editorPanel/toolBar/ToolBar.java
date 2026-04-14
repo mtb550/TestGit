@@ -56,7 +56,7 @@ public class ToolBar extends JBPanel<ToolBar> {
         gbc.gridx++;
 
         filterBtn = createToolbarButton("Filter", AllIcons.General.Filter);
-        filterBtn.addActionListener(e -> FilterPopupBuilder.filterPopup(filterBtn, settings.getSelectedPriorities(), settings.getSelectedGroups(), this::resetFilters, v -> {
+        filterBtn.addActionListener(e -> FilterPopupBuilder.filterPopup(filterBtn, settings.getSelectedPriority(), settings.getSelectedGroup(), this::resetFilters, v -> {
                     updateFilterBtnState();
                     callbacks.onFilterChanged();
                 }
@@ -82,7 +82,7 @@ public class ToolBar extends JBPanel<ToolBar> {
     }
 
     private void updateFilterBtnState() {
-        final int activeFiltersCount = settings.getSelectedPriorities().size() + settings.getSelectedGroups().size();
+        final int activeFiltersCount = settings.getSelectedPriority().size() + settings.getSelectedGroup().size();
         if (activeFiltersCount == 0) {
             filterBtn.setText(null);
             filterBtn.setToolTipText("Filter");

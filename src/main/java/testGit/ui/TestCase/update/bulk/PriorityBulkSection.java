@@ -20,7 +20,7 @@ public class PriorityBulkSection extends JsonSplitBulkSection {
     @Override
     protected void appendJsonItem(TestCaseDto tc, int index, boolean isLast, StringBuilder leftSb, StringBuilder rightSb, List<int[]> rightEditableRanges) {
         String id = "Item-" + (index + 1);
-        String escapedTitle = escapeJson(tc.getTitle());
+        String escapedTitle = escapeJson(tc.getDescription());
         String priorityStr = tc.getPriority().name();
         String escapedPriority = escapeJson(priorityStr);
 

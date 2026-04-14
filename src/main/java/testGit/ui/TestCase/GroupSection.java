@@ -3,7 +3,7 @@ package testGit.ui.TestCase;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
-import testGit.pojo.Groups;
+import testGit.pojo.Group;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.util.KeyboardSet;
 
@@ -13,28 +13,28 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class GroupsSection implements CreateTestCaseSection {
-    private final JPanel groups;
+public class GroupSection implements CreateTestCaseSection {
+    private final JPanel group;
     private final JPanel wrapper;
     Font fieldFont = JBFont.regular().deriveFont(JBUI.Fonts.label().getSize2D() + 1f);
 
-    public GroupsSection() {
-        this.groups = new JPanel(new FlowLayout(FlowLayout.LEFT, JBUI.scale(4), JBUI.scale(4)));
-        this.groups.setOpaque(false);
+    public GroupSection() {
+        this.group = new JPanel(new FlowLayout(FlowLayout.LEFT, JBUI.scale(4), JBUI.scale(4)));
+        this.group.setOpaque(false);
 
-        Arrays.stream(Groups.values())
-                .filter(Groups::isActive)
+        Arrays.stream(Group.values())
+                .filter(Group::isActive)
                 .map(group -> {
                     JBCheckBox checkBox = new JBCheckBox(group.name());
                     checkBox.setFont(fieldFont);
                     return checkBox;
                 })
-                .forEach(this.groups::add);
+                .forEach(this.group::add);
 
         this.wrapper = new JPanel(new BorderLayout());
         this.wrapper.setOpaque(false);
-        this.wrapper.add(createIconPanel(CreateTestCaseFields.GROUPS.getIcon()), BorderLayout.WEST);
-        this.wrapper.add(this.groups, BorderLayout.CENTER);
+        this.wrapper.add(createIconPanel(CreateTestCaseFields.GROUP.getIcon()), BorderLayout.WEST);
+        this.wrapper.add(this.group, BorderLayout.CENTER);
         this.wrapper.setBorder(JBUI.Borders.emptyTop(8));
     }
 
@@ -51,7 +51,7 @@ public class GroupsSection implements CreateTestCaseSection {
     }
 
     private void focusFirstCheckbox() {
-        for (Component c : groups.getComponents()) {
+        for (Component c : group.getComponents()) {
             if (c instanceof JBCheckBox cb) {
                 SwingUtilities.invokeLater(cb::requestFocusInWindow);
                 return;
@@ -62,19 +62,19 @@ public class GroupsSection implements CreateTestCaseSection {
     @Override
     public void applyTo(TestCaseDto dto) {
         if (wrapper.getParent() != null) {
-            ArrayList<Groups> selectedGroups = new ArrayList<>();
-            for (Component c : groups.getComponents()) {
+            ArrayList<Group> selectedGroups = new ArrayList<>();
+            for (Component c : group.getComponents()) {
                 if (c instanceof JBCheckBox cb && cb.isSelected()) {
-                    selectedGroups.add(Groups.valueOf(cb.getText()));
+                    selectedGroups.add(Group.valueOf(cb.getText()));
                 }
             }
-            dto.setGroups(selectedGroups);
+            dto.setGroup(selectedGroups);
         }
     }
 
     @Override
     public void setupShortcut(final JComponent mainPanel, final JPanel slot, final TestCaseUIBase base, final TestCaseUIBase.UIAction repackAction) {
-        base.registerShortcut(mainPanel, KeyboardSet.CreateTestCaseGroups.getShortcut(), () -> {
+        base.registerShortcut(mainPanel, KeyboardSet.CreateTestCaseGroup.getShortcut(), () -> {
             showSection(slot);
             repackAction.execute();
         });
@@ -82,29 +82,29 @@ public class GroupsSection implements CreateTestCaseSection {
 
     @Override
     public JComponent getFocusComponent() {
-        for (Component c : groups.getComponents()) {
+        for (Component c : group.getComponents()) {
             if (c instanceof JBCheckBox) {
                 return (JComponent) c;
             }
         }
-        return groups;
+        return group;
     }
 
     @Override
     public void setEditable(final boolean editable) {
-        for (Component c : groups.getComponents()) {
+        for (Component c : group.getComponents()) {
             if (c instanceof JBCheckBox cb) {
                 cb.setEnabled(editable);
             }
         }
     }
 
-    public void setSelectedGroups(final List<Groups> selectedList) {
+    public void setSelectedGroup(final List<Group> selectedList) {
         if (selectedList == null) return;
-        for (Component c : groups.getComponents()) {
+        for (Component c : group.getComponents()) {
             if (c instanceof JBCheckBox cb) {
                 try {
-                    Groups group = Groups.valueOf(cb.getText());
+                    Group group = Group.valueOf(cb.getText());
                     cb.setSelected(selectedList.contains(group));
                 } catch (Exception ignored) {
                     System.out.println("setSelectedGroups ignored");
@@ -115,6 +115,6 @@ public class GroupsSection implements CreateTestCaseSection {
 
     @Override
     public void fillData(final TestCaseDto dto, final TestCaseUIBase.UIAction repackAction) {
-        setSelectedGroups(dto.getGroups());
+        setSelectedGroup(dto.getGroup());
     }
 }

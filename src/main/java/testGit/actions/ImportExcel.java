@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -122,16 +123,17 @@ public class ImportExcel extends DumbAwareAction {
                 UUID generatedUuid = UUID.randomUUID();
 
                 testCaseDto.setId(generatedUuid);
-                testCaseDto.setTitle(title);
-                testCaseDto.setExpected(Objects.requireNonNull(getFieldSafe(recordset, "expected")));
+                testCaseDto.setDescription(title);
+                testCaseDto.setExpectedResult(Objects.requireNonNull(getFieldSafe(recordset, "expected result")));
                 testCaseDto.setSteps(parseStepsSafe(getFieldSafe(recordset, "steps")));
 
                 testCaseDto.setPriority(Objects.requireNonNull(parsePrioritySafe(getFieldSafe(recordset, "priority"))));
 
-                testCaseDto.setGroups(new ArrayList<>());
-                testCaseDto.setCreateBy(Objects.requireNonNull(getFieldSafe(recordset, "createBy")));
+                testCaseDto.setGroup(new ArrayList<>());
+                testCaseDto.setCreatedBy(Objects.requireNonNull(getFieldSafe(recordset, "created by")));
 
-                testCaseDto.setCreateAt(Objects.requireNonNull(parseDateSafe(getFieldSafe(recordset, "createAt"))));
+                ///  TODO: no need for requireNonNull as the time is setted by dto by default
+                testCaseDto.setCreatedAt(ZonedDateTime.from(Objects.requireNonNull(parseDateSafe(getFieldSafe(recordset, "created at")))));
 
                 String jsonContent = gson.toJson(testCaseDto);
                 String fileName = generatedUuid + ".json";

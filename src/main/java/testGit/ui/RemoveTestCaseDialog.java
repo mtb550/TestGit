@@ -12,17 +12,17 @@ public class RemoveTestCaseDialog {
     public static boolean confirmDeleteAction(List<TestCaseDto> selected) {
         if (selected == null || selected.isEmpty()) return false;
 
-        String title = selected.size() == 1 ? "Delete Test Case" : "Delete Test Cases";
+        final String title = selected.size() == 1 ? "Delete Test Case" : "Delete Test Cases";
         String message;
 
         if (selected.size() == 1) {
-            message = "Are you sure you want to delete\n'" + selected.getFirst().getTitle() + "'?";
+            message = "Are you sure you want to delete\n'" + selected.getFirst().getDescription() + "'?";
         } else {
-            String displayedTitles = selected.stream()
-                    .map(tc -> "• " + tc.getTitle())
+            String displayedDescription = selected.stream()
+                    .map(tc -> ". " + tc.getDescription())
                     .collect(Collectors.joining("\n"));
 
-            message = "Are you sure you want to delete these " + selected.size() + " test cases?\n\n" + displayedTitles;
+            message = "Are you sure you want to delete these " + selected.size() + " test cases?\n\n" + displayedDescription;
         }
 
         return MessageDialogBuilder.yesNo(title, message)

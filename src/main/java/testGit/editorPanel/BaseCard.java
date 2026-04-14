@@ -60,7 +60,7 @@ public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
         for (TestCaseAttributes attr : TestCaseAttributes.values()) {
             /// TODO: if statement here to be removed as all will title will shown and use preferrences that store others shown attributes.
             /// backlog: put title in tool bar details options and make checked and enabled.
-            if (attr == TestCaseAttributes.TITLE || attr == TestCaseAttributes.PRIORITY || attr == TestCaseAttributes.GROUPS) {
+            if (attr == TestCaseAttributes.DESCRIPTION || attr == TestCaseAttributes.PRIORITY || attr == TestCaseAttributes.GROUP) {
                 continue;
             }
             final JBLabel label = createDetailLabel();
@@ -75,7 +75,7 @@ public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
     }
 
     protected void updateBaseData(final int index, final TestCaseDto tc, final Set<String> activeDetails) {
-        titleLabel.setText(String.format("%d. %s", index + 1, tc.getTitle()));
+        titleLabel.setText(String.format("%d. %s", index + 1, tc.getDescription()));
 
         /// TODO: put backgroound color for odd and even in Config and use it in all project to unify the UI.
         final Color currentRowColor = index % 2 == 0 ? new JBColor(Gray._245, Gray._60) : new JBColor(Gray._230, Gray._45);
@@ -83,7 +83,7 @@ public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
         setBorder(JBUI.Borders.customLine(JBColor.border(), 1, 0, 1, 0));
 
         for (TestCaseAttributes attr : TestCaseAttributes.values()) {
-            if (attr == TestCaseAttributes.TITLE || attr == TestCaseAttributes.PRIORITY || attr == TestCaseAttributes.GROUPS) {
+            if (attr == TestCaseAttributes.DESCRIPTION || attr == TestCaseAttributes.PRIORITY || attr == TestCaseAttributes.GROUP) {
                 continue;
             }
 
@@ -94,7 +94,7 @@ public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
 
                 if (isVisible) {
                     final String value = attr.getValue(tc);
-                    lbl.setText(attr.getDisplayName() + ": " + (value != null ? value : ""));
+                    lbl.setText(attr.getName() + ": " + (value != null ? value : ""));
                 }
             }
         }
@@ -105,9 +105,9 @@ public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
             badgePanel.add(Shared.createPriorityBadge(tc));
         }
 
-        if (activeDetails.contains(TestCaseAttributes.GROUPS.name())) {
-            Optional.of(tc.getGroups())
-                    .ifPresent(groups -> groups.forEach(groupName -> badgePanel.add(Shared.createGroupBadge(groupName))));
+        if (activeDetails.contains(TestCaseAttributes.GROUP.name())) {
+            Optional.of(tc.getGroup())
+                    .ifPresent(group -> group.forEach(groupName -> badgePanel.add(Shared.createGroupBadge(groupName))));
         }
     }
 

@@ -6,13 +6,12 @@ import testGit.pojo.dto.TestCaseDto;
 
 import java.awt.*;
 
-public class CreateAt extends BaseDetails {
+public class Fqcn extends BaseDetails {
 
-    private static final String LABEL_TEXT = "Created At:";
+    private static final String LABEL_TEXT = "FQCN:";
 
     @Override
     public int render(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final TestCaseDto dto, final int currentRow) {
-        final String date = dto.getCreateAt().toString();
-        return addRow(panel, gbc, LABEL_TEXT, date, currentRow);
+        return addRow(panel, gbc, LABEL_TEXT, dto.getFqcn(), currentRow);
     }
 }

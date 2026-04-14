@@ -40,7 +40,7 @@ public final class TestCasePersistService implements Disposable {
                             Notifier.error("Save Error", "Failed to persist data: " + e.getMessage());
                         }
                     });
-            Notifier.info("Test Case Created", tcs.getFirst().getTitle());
+            Notifier.info("Test Case Created", tcs.getFirst().getDescription());
         });
     }
 

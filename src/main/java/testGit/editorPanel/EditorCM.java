@@ -37,7 +37,7 @@ public class EditorCM extends DefaultActionGroup {
         new RemoveTestCase(dir, list, model);
         new OpenTestCaseDetails(list, dir.getPath());
         new CloseTestCaseDetails(list);
-        new CopyTestCaseTitle(list);
+        new CopyTestCaseDescription(list);
     }
 
     private DefaultActionGroup createSubGroup(final String title, final Icon icon, final AnAction... actions) {

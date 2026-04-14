@@ -6,12 +6,12 @@ import testGit.pojo.dto.TestCaseDto;
 
 import java.awt.*;
 
-public class UpdateBy extends BaseDetails {
+public class UpdatedBy extends BaseDetails {
 
     private static final String LABEL_TEXT = "Updated By:";
 
     @Override
     public int render(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final TestCaseDto dto, final int currentRow) {
-        return addRow(panel, gbc, LABEL_TEXT, dto.getUpdateBy(), currentRow);
+        return addRow(panel, gbc, LABEL_TEXT, dto.getUpdatedBy(), currentRow);
     }
 }

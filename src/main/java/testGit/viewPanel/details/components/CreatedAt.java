@@ -6,12 +6,12 @@ import testGit.pojo.dto.TestCaseDto;
 
 import java.awt.*;
 
-public class AutomationReferrence extends BaseDetails {
+public class CreatedAt extends BaseDetails {
 
-    private static final String LABEL_TEXT = "Automation Reference:";
+    private static final String LABEL_TEXT = "Created At:";
 
     @Override
     public int render(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final TestCaseDto dto, final int currentRow) {
-        return addRow(panel, gbc, LABEL_TEXT, dto.getAutoRef(), currentRow);
+        return addRow(panel, gbc, LABEL_TEXT, dto.getFormattedCreatedAt(), currentRow);
     }
 }

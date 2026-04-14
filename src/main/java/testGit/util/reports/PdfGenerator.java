@@ -64,7 +64,7 @@ public final class PdfGenerator {
                             .setTextAlignment(TextAlignment.CENTER));
 
                     TestCaseDto details = (detailsMap != null) ? detailsMap.get(id) : null;
-                    String title = details != null ? details.getTitle() : "N/A";
+                    String title = details != null ? details.getDescription() : "N/A";
 
                     table.addCell(new Cell().add(new Paragraph(title)));
 

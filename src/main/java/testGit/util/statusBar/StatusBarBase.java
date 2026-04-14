@@ -42,7 +42,7 @@ public abstract class StatusBarBase {
             StatusBarItem item = items[i];
             contentPanel.add(createShortcut(item.getShortcutText()));
             contentPanel.add(createDot());
-            contentPanel.add(createLabel(item.getLabel()));
+            contentPanel.add(createLabel(item.getName()));
 
             if (i < items.length - 1) {
                 contentPanel.add(createseparator());

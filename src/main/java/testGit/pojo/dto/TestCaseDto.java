@@ -3,16 +3,19 @@ package testGit.pojo.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import testGit.pojo.Groups;
+import testGit.pojo.Group;
 import testGit.pojo.Priority;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Setter
@@ -33,14 +36,13 @@ public class TestCaseDto {
     @Builder.Default
     private UUID id = UUID.randomUUID();
 
-    /// TODO: change to name or description to match the testng
     @NotNull
     @Builder.Default
-    private String title = "";
+    private String description = "";
 
     @NotNull
     @Builder.Default
-    private String expected = "";
+    private String expectedResult = "";
 
     @NotNull
     @Builder.Default
@@ -50,36 +52,37 @@ public class TestCaseDto {
     @Builder.Default
     private Priority priority = Priority.LOW;
 
-    /// TODO: change this to PATH FCQN
     @NotNull
     @Builder.Default
-    private String autoRef = "";
+    private String fqcn = "";
 
     @NotNull
     @Builder.Default
-    private String busiRef = "";
+    private String reference = "";
 
     @NotNull
     @Builder.Default
-    private List<Groups> groups = new ArrayList<>();
+    private List<Group> group = new ArrayList<>();
 
     @NotNull
     @Builder.Default
-    private String createBy = "";
+    private String createdBy = "";
 
     @NotNull
     @Builder.Default
-    private String updateBy = "";
+    private String updatedBy = "";
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @NotNull
     @Builder.Default
-    private LocalDateTime createAt = LocalDateTime.now();
+    @Getter(AccessLevel.PRIVATE)
+    @JsonFormat(pattern = "EEEE hh:mm a dd.MM.yyyy (z)", locale = "en_US")
+    private ZonedDateTime createdAt = ZonedDateTime.now();
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @NotNull
     @Builder.Default
-    private LocalDateTime updateAt = LocalDateTime.now();
+    @Getter(AccessLevel.PRIVATE)
+    @JsonFormat(pattern = "EEEE hh:mm a dd.MM.yyyy (z)", locale = "en_US")
+    private ZonedDateTime updatedAt = ZonedDateTime.now();
 
     @NotNull
     @Builder.Default
@@ -94,5 +97,32 @@ public class TestCaseDto {
     @NotNull
     @Builder.Default
     private String tempError = "";
+
+    @JsonIgnore
+    @JsonProperty("createAt")
+    public String getFormattedCreatedAt() {
+        return formatTime(this.createdAt);
+    }
+
+    @JsonIgnore
+    @JsonProperty("updateAt")
+    public String getFormattedUpdatedAt() {
+        return formatTime(this.updatedAt);
+    }
+
+    private String formatTime(final ZonedDateTime time) {
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE hh:mm a dd.MM.yyyy (z)", Locale.US);
+        return time.format(formatter);
+    }
+
+    @JsonProperty("createAt")
+    private ZonedDateTime getCreateAtForJson() {
+        return this.createdAt;
+    }
+
+    @JsonProperty("updateAt")
+    private ZonedDateTime getUpdateAtForJson() {
+        return this.updatedAt;
+    }
 
 }

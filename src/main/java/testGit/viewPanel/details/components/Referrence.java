@@ -6,13 +6,12 @@ import testGit.pojo.dto.TestCaseDto;
 
 import java.awt.*;
 
-public class UpdateAt extends BaseDetails {
+public class Referrence extends BaseDetails {
 
-    private static final String LABEL_TEXT = "Updated At:";
+    private static final String LABEL_TEXT = "Reference:";
 
     @Override
     public int render(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final TestCaseDto dto, final int currentRow) {
-        final String date = dto.getUpdateAt().toString();
-        return addRow(panel, gbc, LABEL_TEXT, date, currentRow);
+        return addRow(panel, gbc, LABEL_TEXT, dto.getReference(), currentRow);
     }
 }

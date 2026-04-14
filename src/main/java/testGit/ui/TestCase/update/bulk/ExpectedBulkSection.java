@@ -13,14 +13,14 @@ public class ExpectedBulkSection extends JsonSplitBulkSection {
 
     @Override
     protected String getOriginalValue(TestCaseDto tc) {
-        return tc.getExpected();
+        return tc.getExpectedResult();
     }
 
     @Override
     protected void appendJsonItem(TestCaseDto tc, int index, boolean isLast, StringBuilder leftSb, StringBuilder rightSb, List<int[]> rightEditableRanges) {
         String id = "Item-" + (index + 1);
-        String escapedTitle = escapeJson(tc.getTitle());
-        String escapedExpected = escapeJson(tc.getExpected());
+        String escapedTitle = escapeJson(tc.getDescription());
+        String escapedExpected = escapeJson(tc.getExpectedResult());
 
         String prefix = "  {\n    \"id\": \"" + id + "\",\n    \"title\": \"" + escapedTitle + "\",\n    \"expected\": \"";
         String suffix = "\"\n  }";
@@ -40,7 +40,7 @@ public class ExpectedBulkSection extends JsonSplitBulkSection {
     protected void applyValues(final List<TestCaseDto> items, final List<String> newValues) {
         for (int i = 0; i < items.size(); i++) {
             if (newValues.get(i) != null) {
-                items.get(i).setExpected(newValues.get(i).trim());
+                items.get(i).setExpectedResult(newValues.get(i).trim());
             }
         }
     }

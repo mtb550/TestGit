@@ -22,6 +22,6 @@ public class GenerateTestCase extends DumbAwareAction {
         TestCaseDto tc = list.getSelectedValue();
 
         /// TODO: to be implemented
-        System.out.println(tc.getTitle());
+        System.out.println(tc.getDescription());
     }
 }

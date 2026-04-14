@@ -73,22 +73,22 @@ public enum CreateTestCaseFields implements StatusBarItem {
             null
     ),
 
-    TITLE(
-            "Title",
+    DESCRIPTION(
+            "Description",
             KeyboardSet.CreateTestCaseTitle,
             AllIcons.Actions.Edit,
             new StatusBarItem[]{SAVE, NAVIGATE_TAB},
             true,
-            TestCaseUIBase::getTitleSection
+            TestCaseUIBase::getDescriptionSection
     ),
 
-    EXPECTED(
+    EXPECTED_RESULT(
             "Expected Results",
             KeyboardSet.CreateTestCaseExpected,
             AllIcons.General.InspectionsOK,
             new StatusBarItem[]{SAVE, NAVIGATE_TAB},
             true,
-            TestCaseUIBase::getExpectedSection
+            TestCaseUIBase::getExpectedResultSection
     ),
 
     STEPS(
@@ -118,16 +118,16 @@ public enum CreateTestCaseFields implements StatusBarItem {
             null
     ),
 
-    GROUPS(
-            "Groups",
-            KeyboardSet.CreateTestCaseGroups,
+    GROUP(
+            "Group",
+            KeyboardSet.CreateTestCaseGroup,
             AllIcons.Nodes.Tag,
             new StatusBarItem[]{SAVE, NAVIGATE_TAB, SELECT_GROUP},
             true,
-            TestCaseUIBase::getGroupsSection
+            TestCaseUIBase::getGroupSection
     );
 
-    private final String label;
+    private final String name;
     private final KeyboardSet shortcut;
     private final String customShortcutText;
     private final Icon icon;
@@ -135,8 +135,8 @@ public enum CreateTestCaseFields implements StatusBarItem {
     private final boolean createMenuItem;
     private final Function<TestCaseUIBase, CreateTestCaseSection> sectionExtractor;
 
-    CreateTestCaseFields(final String label, final KeyboardSet shortcut, final Icon icon, final StatusBarItem[] statusBarItems, final boolean createMenuItem, final Function<TestCaseUIBase, CreateTestCaseSection> sectionExtractor) {
-        this.label = label;
+    CreateTestCaseFields(final String name, final KeyboardSet shortcut, final Icon icon, final StatusBarItem[] statusBarItems, final boolean createMenuItem, final Function<TestCaseUIBase, CreateTestCaseSection> sectionExtractor) {
+        this.name = name;
         this.shortcut = shortcut;
         this.customShortcutText = null;
         this.icon = icon;
@@ -145,8 +145,8 @@ public enum CreateTestCaseFields implements StatusBarItem {
         this.sectionExtractor = sectionExtractor;
     }
 
-    CreateTestCaseFields(final String label, final String customShortcutText, final Icon icon, final StatusBarItem[] statusBarItems, final boolean createMenuItem, final Function<TestCaseUIBase, CreateTestCaseSection> sectionExtractor) {
-        this.label = label;
+    CreateTestCaseFields(final String name, final String customShortcutText, final Icon icon, final StatusBarItem[] statusBarItems, final boolean createMenuItem, final Function<TestCaseUIBase, CreateTestCaseSection> sectionExtractor) {
+        this.name = name;
         this.shortcut = null;
         this.customShortcutText = customShortcutText;
         this.icon = icon;
