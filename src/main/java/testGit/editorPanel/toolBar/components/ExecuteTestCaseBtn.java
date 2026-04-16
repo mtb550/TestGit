@@ -2,10 +2,10 @@ package testGit.editorPanel.toolBar.components;
 
 import com.intellij.icons.AllIcons;
 
-public class ExecuteTestCaseBtn extends ToolbarActionButton {
+public class ExecuteTestCaseBtn extends AbstractButton {
 
     public ExecuteTestCaseBtn(Runnable onClickAction) {
-        super("Execute Run", AllIcons.Nodes.Services);
+        super("Start", AllIcons.Nodes.Services);
         addActionListener(e -> onClickAction.run());
     }
 }

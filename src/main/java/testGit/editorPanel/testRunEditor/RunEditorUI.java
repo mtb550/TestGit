@@ -14,14 +14,14 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import testGit.editorPanel.IEditor;
 import testGit.editorPanel.EditorCM;
+import testGit.editorPanel.IEditorUI;
 import testGit.editorPanel.StatusBar;
 import testGit.editorPanel.UnifiedVirtualFile;
 import testGit.editorPanel.listeners.*;
-import testGit.editorPanel.toolBar.ActionToolbarPanel;
-import testGit.editorPanel.toolBar.RunToolBar;
+import testGit.editorPanel.toolBar.AbstractToolbarPanel;
 import testGit.editorPanel.toolBar.IToolBar;
+import testGit.editorPanel.toolBar.RunToolBar;
 import testGit.pojo.Config;
 import testGit.pojo.EditorType;
 import testGit.pojo.TestRunStatus;
@@ -45,7 +45,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RunEditorUI implements Disposable, IToolBar, IEditor {
+public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
 
     private final UnifiedVirtualFile vf;
     private final List<TestCaseDto> initialTestCaseDtos = new ArrayList<>();
@@ -67,7 +67,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditor {
     @Getter
     private StatusBar statusBar;
     @Getter
-    private ActionToolbarPanel toolBar;
+    private AbstractToolbarPanel toolBar;
     private TestRunMetadataHeader metadataHeader;
 
     @Getter
@@ -146,7 +146,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditor {
     }
 
     private void buildOpeningPanel() {
-        toolBar = new RunToolBar(this,this);
+        toolBar = new RunToolBar(this, this);
 
         model = new CollectionListModel<>();
         list = new JBList<>(model);
@@ -403,7 +403,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditor {
         resultsMap.clear();
         if (model != null) model.removeAll();
         if (mainPanel != null) mainPanel.removeAll();
-        IEditor.super.dispose();
+        IEditorUI.super.dispose();
     }
 
     public @Nullable JComponent getPreferredFocusedComponent() {

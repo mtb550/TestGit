@@ -1,7 +1,7 @@
 package testGit.editorPanel.listeners;
 
 import org.jetbrains.annotations.NotNull;
-import testGit.editorPanel.IEditor;
+import testGit.editorPanel.IEditorUI;
 import testGit.pojo.dto.TestCaseDto;
 
 import javax.swing.*;
@@ -13,10 +13,10 @@ import java.util.List;
 
 public class TransferListener extends TransferHandler {
     private static final DataFlavor FLAVOR = new DataFlavor(List.class, "List of TestCase");
-    private final IEditor ui;
+    private final IEditorUI ui;
     private int[] draggedIndices;
 
-    public TransferListener(final IEditor ui) {
+    public TransferListener(final IEditorUI ui) {
         this.ui = ui;
     }
 

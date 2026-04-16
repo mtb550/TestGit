@@ -273,3 +273,9 @@ searchDebounceTimer.restart();
 question: intellij Task.Backgroundable vs ApplicationManager.getApplication().executeOnPooledThread
 
 change all interfaces to starts with I
+parent if abstract to starts with Abstract, otherwise start with Base.
+
+fix change viow panel to show selected test case if change editor.
+
+add test run duration
+continue enhance editor tool bar

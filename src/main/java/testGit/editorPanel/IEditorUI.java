@@ -3,7 +3,7 @@ package testGit.editorPanel;
 import com.intellij.openapi.Disposable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import testGit.editorPanel.toolBar.ActionToolbarPanel;
+import testGit.editorPanel.toolBar.AbstractToolbarPanel;
 import testGit.pojo.Group;
 import testGit.pojo.Priority;
 import testGit.pojo.dto.TestCaseDto;
@@ -14,10 +14,10 @@ import javax.swing.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public interface IEditor extends Disposable {
+public interface IEditorUI extends Disposable {
     StatusBar getStatusBar();
 
-    ActionToolbarPanel getToolBar();
+    AbstractToolbarPanel getToolBar();
 
     int getCurrentPage();
 
@@ -58,7 +58,7 @@ public interface IEditor extends Disposable {
     void setHoveredIndex(final int index);
 
     default List<TestCaseDto> getFilteredList() {
-        final ActionToolbarPanel baseToolBar = getToolBar();
+        final AbstractToolbarPanel baseToolBar = getToolBar();
         final String query = baseToolBar != null ? baseToolBar.getSearchField().getSearchQuery() : "";
         final Set<Group> groupFilter = baseToolBar != null ? baseToolBar.getSettings().getSelectedGroup() : Collections.emptySet();
         final Set<Priority> priorityFilter = baseToolBar != null ? baseToolBar.getSettings().getSelectedPriority() : Collections.emptySet();

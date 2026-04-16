@@ -7,10 +7,10 @@ import testGit.editorPanel.toolBar.components.GenerateReportBtn;
 import javax.swing.*;
 import java.util.List;
 
-public class RunToolBar extends ActionToolbarPanel {
+public class RunToolBar extends AbstractToolbarPanel {
 
     public RunToolBar(final Disposable pDisposable, final IToolBar callbacks) {
-        super(pDisposable,callbacks);
+        super(pDisposable, callbacks);
     }
 
     @Override

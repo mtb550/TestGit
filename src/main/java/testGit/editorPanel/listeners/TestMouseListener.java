@@ -6,8 +6,8 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.components.JBList;
 import testGit.actions.CreateTestCase;
-import testGit.editorPanel.IEditor;
 import testGit.editorPanel.EditorCM;
+import testGit.editorPanel.IEditorUI;
 import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.dirs.DirectoryDto;
@@ -27,7 +27,7 @@ public class TestMouseListener extends MouseAdapter {
     private final DefaultActionGroup emptyMenu;
     private final Path path;
 
-    public TestMouseListener(final IEditor ui, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model, final DirectoryDto dir, final EditorCM editorCM) {
+    public TestMouseListener(final IEditorUI ui, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model, final DirectoryDto dir, final EditorCM editorCM) {
         this.list = list;
         this.path = dir.getPath();
         this.model = model;

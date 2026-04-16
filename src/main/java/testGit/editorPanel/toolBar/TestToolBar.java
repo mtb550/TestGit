@@ -6,7 +6,7 @@ import testGit.editorPanel.toolBar.components.CreateTestCaseBtn;
 import javax.swing.*;
 import java.util.List;
 
-public class TestToolBar extends ActionToolbarPanel {
+public class TestToolBar extends AbstractToolbarPanel {
 
     public TestToolBar(final Disposable pDisposable, final IToolBar callbacks) {
         super(pDisposable, callbacks);

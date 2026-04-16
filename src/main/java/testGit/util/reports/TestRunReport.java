@@ -123,4 +123,13 @@ public final class TestRunReport {
         }
         return detailsMap;
     }
+
+    public void asJson() {
+        // TODO: to be implemented
+    }
+
+    public void asXml() {
+        // TODO: to be implemented
+    }
+
 }

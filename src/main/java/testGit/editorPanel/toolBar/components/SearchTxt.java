@@ -9,11 +9,11 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 
-public class SearchInputTxt extends SearchTextField implements Disposable {
+public class SearchTxt extends SearchTextField implements Disposable {
     private final Timer searchDebounceTimer;
 
     // TODO: CHANGE RUNNABLE TO BE CONSUMER OR BYCONSUMER
-    public SearchInputTxt(Runnable onSearchChanged) {
+    public SearchTxt(Runnable onSearchChanged) {
         super();
 
         setOpaque(false);

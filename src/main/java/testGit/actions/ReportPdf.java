@@ -11,6 +11,7 @@ import testGit.util.reports.TestRunReport;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+// TODO: implement save as to allow tester to specify save place
 public class ReportPdf extends DumbAwareAction {
     private final SimpleTree tree;
 

@@ -9,9 +9,9 @@ import testGit.pojo.TestCaseAttributes;
 import java.util.Arrays;
 import java.util.Set;
 
-public class DetailsBtn extends ToolbarActionButton {
+public class DetailsPopup extends AbstractButton {
 
-    public DetailsBtn(ToolBarSettings settings, Runnable onDetailsChanged) {
+    public DetailsPopup(ToolBarSettings settings, Runnable onDetailsChanged) {
         super("Details", AllIcons.Actions.PreviewDetailsVertically);
         addActionListener(e -> showDetailsPopup(settings, onDetailsChanged));
     }

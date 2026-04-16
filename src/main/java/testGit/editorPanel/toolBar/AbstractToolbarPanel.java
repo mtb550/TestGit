@@ -5,25 +5,28 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.JBUI;
 import lombok.Getter;
-import testGit.editorPanel.toolBar.components.*;
+import testGit.editorPanel.toolBar.components.DetailsPopup;
+import testGit.editorPanel.toolBar.components.FilterPopup;
+import testGit.editorPanel.toolBar.components.RefreshBtn;
+import testGit.editorPanel.toolBar.components.SearchTxt;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class ActionToolbarPanel extends JBPanel<ActionToolbarPanel> implements Disposable {
+public abstract class AbstractToolbarPanel extends JBPanel<AbstractToolbarPanel> implements Disposable {
 
     private final IToolBar callbacks;
     @Getter
     private final ToolBarSettings settings;
 
     private final RefreshBtn refreshBtn;
-    private final DetailsBtn detailsBtn;
-    private final FilterButton filterBtn;
+    private final DetailsPopup detailsPopup;
+    private final FilterPopup filterPopup;
     @Getter
-    private final SearchInputTxt searchField;
+    private final SearchTxt searchField;
 
-    public ActionToolbarPanel(final Disposable pDisposable, final IToolBar callbacks) {
+    public AbstractToolbarPanel(final Disposable pDisposable, final IToolBar callbacks) {
         super(new GridBagLayout());
         this.callbacks = callbacks;
         this.settings = new ToolBarSettings();
@@ -31,9 +34,9 @@ public class ActionToolbarPanel extends JBPanel<ActionToolbarPanel> implements D
         setBackground(JBUI.CurrentTheme.EditorTabs.background());
 
         this.refreshBtn = new RefreshBtn(callbacks::onRefreshing);
-        this.detailsBtn = new DetailsBtn(settings, callbacks::onDetailsChanged);
-        this.filterBtn = new FilterButton(settings, this::resetFilters, callbacks::onFilterChanged);
-        this.searchField = new SearchInputTxt(callbacks::onFilterChanged);
+        this.detailsPopup = new DetailsPopup(settings, callbacks::onDetailsChanged);
+        this.filterPopup = new FilterPopup(settings, this::resetFilters, callbacks::onFilterChanged);
+        this.searchField = new SearchTxt(callbacks::onFilterChanged);
 
         layoutComponents();
 
@@ -51,10 +54,10 @@ public class ActionToolbarPanel extends JBPanel<ActionToolbarPanel> implements D
         add(refreshBtn, gbc);
         gbc.gridx++;
 
-        add(detailsBtn, gbc);
+        add(detailsPopup, gbc);
         gbc.gridx++;
 
-        add(filterBtn, gbc);
+        add(filterPopup, gbc);
         gbc.gridx++;
 
         for (JComponent customComponent : getCustomComponents()) {
@@ -70,7 +73,7 @@ public class ActionToolbarPanel extends JBPanel<ActionToolbarPanel> implements D
     public void resetFilters() {
         settings.resetFilters();
         searchField.resetSearch();
-        filterBtn.updateState();
+        filterPopup.updateState();
         callbacks.onFilterChanged();
     }
 

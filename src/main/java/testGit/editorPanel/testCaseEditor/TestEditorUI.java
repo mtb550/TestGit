@@ -14,14 +14,14 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import testGit.editorPanel.IEditor;
 import testGit.editorPanel.EditorCM;
+import testGit.editorPanel.IEditorUI;
 import testGit.editorPanel.StatusBar;
 import testGit.editorPanel.UnifiedVirtualFile;
 import testGit.editorPanel.listeners.*;
-import testGit.editorPanel.toolBar.ActionToolbarPanel;
-import testGit.editorPanel.toolBar.TestToolBar;
+import testGit.editorPanel.toolBar.AbstractToolbarPanel;
 import testGit.editorPanel.toolBar.IToolBar;
+import testGit.editorPanel.toolBar.TestToolBar;
 import testGit.pojo.Config;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.util.TestCaseSorter;
@@ -36,7 +36,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 
-public class TestEditorUI implements Disposable, IToolBar, IEditor {
+public class TestEditorUI implements Disposable, IToolBar, IEditorUI {
 
     private final JBPanel<?> mainPanel;
     private final JBList<TestCaseDto> list;
@@ -44,7 +44,7 @@ public class TestEditorUI implements Disposable, IToolBar, IEditor {
     private final ModelSyncListener syncListener;
 
     @Getter
-    private final ActionToolbarPanel toolBar;
+    private final AbstractToolbarPanel toolBar;
 
     @Getter
     private final UnifiedVirtualFile vf;
@@ -104,7 +104,7 @@ public class TestEditorUI implements Disposable, IToolBar, IEditor {
 
         this.pageSize = PropertiesComponent.getInstance().getInt("testGit.pageSize", 50);
 
-        this.toolBar = new TestToolBar(this,this);
+        this.toolBar = new TestToolBar(this, this);
         mainPanel.add(toolBar, BorderLayout.NORTH);
 
         this.syncListener = new ModelSyncListener(this, model);
@@ -341,7 +341,7 @@ public class TestEditorUI implements Disposable, IToolBar, IEditor {
         }
         if (mainPanel != null) mainPanel.removeAll();
 
-        IEditor.super.dispose();
+        IEditorUI.super.dispose();
     }
 
     @Override
