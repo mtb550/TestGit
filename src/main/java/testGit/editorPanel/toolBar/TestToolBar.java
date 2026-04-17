@@ -16,7 +16,7 @@ public class TestToolBar extends AbstractToolbarPanel {
     @Override
     protected void updateFilterPopupState() {
         if (filter != null) {
-            filter.updateState();
+            filter.updateToolBarFilterState();
         }
     }
 

@@ -33,7 +33,7 @@ public class DetailsPopup extends AbstractButton implements IToolbarItem {
                     selectedDetails.remove(item.name());
                 }
             }
-            settings.save();
+            settings.saveProps();
             if (onToolBarDetailsSelectedChanged != null) {
                 onToolBarDetailsSelectedChanged.run();
             }

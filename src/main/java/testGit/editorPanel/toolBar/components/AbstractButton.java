@@ -8,9 +8,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-// TODO: (extends JButton) is not required in @testGit.editorPanel.toolBar.components.FilterBtn
 public abstract class AbstractButton extends JButton {
-    public AbstractButton(String tooltip, Icon icon) {
+    public AbstractButton(final String tooltip, final Icon icon) {
         super(null, icon);
         setToolTipText(tooltip);
         setFocusable(false);

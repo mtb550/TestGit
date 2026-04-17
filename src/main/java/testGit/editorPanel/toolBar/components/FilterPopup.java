@@ -23,17 +23,16 @@ import java.util.Set;
 public class FilterPopup extends AbstractButton implements IToolbarItem {
     private final ToolBarSettings settings;
 
-    // TODO: change both to consumer
     public FilterPopup(final ToolBarSettings settings, final Runnable onReset, final Runnable onFilterChanged) {
         super("Filter", AllIcons.General.Filter);
         this.settings = settings;
 
         addActionListener(e -> showFilterPopup(onReset, onFilterChanged));
 
-        updateState();
+        updateToolBarFilterState();
     }
 
-    public void updateState() {
+    public void updateToolBarFilterState() {
         int activeFiltersCount = settings.getSelectedPriority().size() + settings.getSelectedGroup().size();
         if (activeFiltersCount == 0) {
             setText(null);
@@ -87,7 +86,7 @@ public class FilterPopup extends AbstractButton implements IToolbarItem {
                     @Override
                     public void setSelected(@NotNull AnActionEvent e, boolean state) {
                         p.onChange(selectedPriorities, state);
-                        updateState();
+                        updateToolBarFilterState();
                         if (onToolBarFilterSelectedChanged != null) {
                             onToolBarFilterSelectedChanged.run();
                         }
@@ -112,7 +111,7 @@ public class FilterPopup extends AbstractButton implements IToolbarItem {
                     @Override
                     public void setSelected(@NotNull AnActionEvent e, boolean state) {
                         g.onChange(selectedGroups, state);
-                        updateState();
+                        updateToolBarFilterState();
                         if (onToolBarFilterSelectedChanged != null) {
                             onToolBarFilterSelectedChanged.run();
                         }

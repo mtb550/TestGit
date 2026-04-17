@@ -17,7 +17,7 @@ public class RunToolBar extends AbstractToolbarPanel {
     @Override
     protected void updateFilterPopupState() {
         if (filterPopup != null) {
-            filterPopup.updateState();
+            filterPopup.updateToolBarFilterState();
         }
     }
 
@@ -30,7 +30,7 @@ public class RunToolBar extends AbstractToolbarPanel {
                 new RefreshBtn(callbacks::onToolBarRefreshClicked),
                 new DetailsPopup(settings, callbacks::onToolBarDetailsSelectedChanged),
                 filterPopup,
-                new ExecuteTestCaseBtn(),
+                new StartExecutionBtn(),
                 new GenerateReportBtn()
         );
     }

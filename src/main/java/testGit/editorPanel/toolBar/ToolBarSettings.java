@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Getter
 public class ToolBarSettings {
     private static final String KEY_DETAILS = "testGit.selectedDetails.v2";
-    /// TODO: remove default selected as will depend on preferrences, otherwise show all.
+
     private static final String DEFAULT_DETAILS = Arrays.stream(TestCaseAttributes.values())
             .filter(TestCaseAttributes::isDefaultToolBarSelected)
             .map(Enum::name)
@@ -31,7 +31,7 @@ public class ToolBarSettings {
         Arrays.stream(saved.split(",")).filter(s -> !s.isEmpty()).forEach(selectedDetails::add);
     }
 
-    public void save() {
+    public void saveProps() {
         final PropertiesComponent props = PropertiesComponent.getInstance();
         props.setValue(KEY_DETAILS, String.join(",", selectedDetails));
     }
