@@ -113,6 +113,9 @@ public class TestRunDto {
     @Builder
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class TestRunItems {
+        @JsonIgnore
+        @Nullable
+        private TestCaseDto testCaseDetails;
 
         @Nullable
         private UUID testCaseId;

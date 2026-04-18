@@ -5,6 +5,7 @@ import com.intellij.util.ui.JBUI;
 import testGit.editorPanel.testRunEditor.RunCard;
 import testGit.editorPanel.testRunEditor.RunEditorUI;
 import testGit.pojo.dto.TestCaseDto;
+import testGit.pojo.dto.TestRunDto;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +22,10 @@ public class RunListRenderer implements ListCellRenderer<TestCaseDto> {
     public Component getListCellRendererComponent(final JList<? extends TestCaseDto> list, final TestCaseDto tc, final int index, final boolean isSelected, final boolean cellHasFocus) {
         final int globalIndex = ((ui.getCurrentPage() - 1) * ui.getPageSize()) + index;
 
-        rendererCard.updateData(globalIndex, tc, ui.getSelectedDetails());
+        TestRunDto.TestRunItems runItem;
+        runItem = ui.getResultsMap().get(tc.getId());
+
+        rendererCard.updateData(globalIndex, tc, ui.getSelectedDetails(), runItem);
 
         final boolean isRowHovered = (index == ui.getHoveredIndex());
         final String hover = isRowHovered ? ui.getHoveredIconAction() : null;

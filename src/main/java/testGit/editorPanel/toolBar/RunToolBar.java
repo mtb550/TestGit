@@ -17,7 +17,7 @@ public class RunToolBar extends AbstractToolbarPanel {
                 new StartExecutionBtn(),
                 new GenerateReportBtn(),
                 new RefreshBtn(callbacks::onToolBarRefreshButtonClicked),
-                new DetailsPopup(callbacks::onToolBarDetailsSelectionChanged),
+                new RunDetailsPopup(callbacks::onToolBarDetailsSelectionChanged),
                 new FilterPopup(callbacks::onToolBarFilterResetButtonClicked, callbacks::onToolBarFilterSelectionChanged)
         );
     }

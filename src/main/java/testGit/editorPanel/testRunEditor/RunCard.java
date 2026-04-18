@@ -7,11 +7,14 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import testGit.editorPanel.BaseCard;
 import testGit.pojo.CardHoverAction;
+import testGit.pojo.RunEditorAttributes;
 import testGit.pojo.TestStatus;
 import testGit.pojo.dto.TestCaseDto;
+import testGit.pojo.dto.TestRunDto;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +25,8 @@ public class RunCard extends BaseCard<RunCard> {
     private final Map<TestStatus, JBLabel> statusLabels = new EnumMap<>(TestStatus.class);
 
     public RunCard() {
-        super();
+        super(Arrays.stream(RunEditorAttributes.values()).map(Enum::name).toArray(String[]::new));
+
         actionPanel.setLayout(new GridLayout(1, 3, 0, 0));
         actionPanel.setOpaque(false);
         actionPanel.setPreferredSize(new Dimension(JBUI.scale(ACTIONS_TOTAL_WIDTH), 0));
@@ -40,8 +44,28 @@ public class RunCard extends BaseCard<RunCard> {
         this.add(actionPanel, BorderLayout.EAST);
     }
 
-    public void updateData(final int index, final TestCaseDto tc, final Set<String> activeDetails) {
+    public void updateData(final int index, final TestCaseDto tc, final Set<String> activeDetails, final TestRunDto.TestRunItems runItem) {
         super.updateBaseData(index, tc, activeDetails);
+
+        if (runItem != null) {
+            for (RunEditorAttributes attr : RunEditorAttributes.values()) {
+                if (attr == RunEditorAttributes.DESCRIPTION || attr == RunEditorAttributes.PRIORITY || attr == RunEditorAttributes.GROUP) {
+                    continue;
+                }
+
+                final JBLabel lbl = attributeLabels.get(attr.name());
+                if (lbl != null) {
+                    final boolean isVisible = activeDetails.contains(attr.name());
+                    lbl.setVisible(isVisible);
+
+                    if (isVisible) {
+                        final String value = attr.getValue(runItem);
+                        lbl.setText(attr.getName() + ": " + (value != null ? value : ""));
+                    }
+                }
+            }
+        }
+
         badgePanel.revalidate();
         badgePanel.repaint();
     }

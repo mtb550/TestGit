@@ -9,15 +9,13 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.components.BorderLayoutPanel;
+import testGit.pojo.RunEditorAttributes;
 import testGit.pojo.TestEditorAttributes;
 import testGit.pojo.dto.TestCaseDto;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
     protected static final int CARD_HEIGHT = 130;
@@ -25,7 +23,7 @@ public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
     protected final JBLabel titleLabel = new JBLabel();
     protected final JBPanel<?> badgePanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(10), 0));
 
-    protected final Map<TestEditorAttributes, JBLabel> attributeLabels = new EnumMap<>(TestEditorAttributes.class);
+    protected final Map<String, JBLabel> attributeLabels = new HashMap<>();
 
     protected final JBPanel<?> content = new JBPanel<>(new VerticalLayout(JBUI.scale(4)));
     protected final BorderLayoutPanel wrapper = new BorderLayoutPanel();
@@ -35,6 +33,10 @@ public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
     protected String hoveredAction;
 
     public BaseCard() {
+        this(Arrays.stream(TestEditorAttributes.values()).map(Enum::name).toArray(String[]::new));
+    }
+
+    public BaseCard(final String[] attributeNames) {
         setLayout(new BorderLayout());
         setOpaque(true);
         setMaximumSize(new Dimension(Integer.MAX_VALUE, JBUI.scale(CARD_HEIGHT)));
@@ -57,10 +59,10 @@ public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
         content.add(titleLine);
         content.add(badgePanel);
 
-        for (TestEditorAttributes attr : TestEditorAttributes.values()) {
+        for (final String attr : attributeNames) {
             /// TODO: if statement here to be removed as all will title will shown and use preferrences that store others shown attributes.
             /// backlog: put title in tool bar details options and make checked and enabled.
-            if (attr == TestEditorAttributes.DESCRIPTION || attr == TestEditorAttributes.PRIORITY || attr == TestEditorAttributes.GROUP) {
+            if (RunEditorAttributes.DESCRIPTION.name().equals(attr) || RunEditorAttributes.PRIORITY.name().equals(attr) || RunEditorAttributes.GROUP.name().equals(attr)) {
                 continue;
             }
             final JBLabel label = createDetailLabel();
@@ -82,12 +84,12 @@ public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
         setBackground(currentRowColor);
         setBorder(JBUI.Borders.customLine(JBColor.border(), 1, 0, 1, 0));
 
-        for (TestEditorAttributes attr : TestEditorAttributes.values()) {
+        for (final TestEditorAttributes attr : TestEditorAttributes.values()) {
             if (attr == TestEditorAttributes.DESCRIPTION || attr == TestEditorAttributes.PRIORITY || attr == TestEditorAttributes.GROUP) {
                 continue;
             }
 
-            final JBLabel lbl = attributeLabels.get(attr);
+            final JBLabel lbl = attributeLabels.get(attr.name());
             if (lbl != null) {
                 final boolean isVisible = activeDetails.contains(attr.name());
                 lbl.setVisible(isVisible);

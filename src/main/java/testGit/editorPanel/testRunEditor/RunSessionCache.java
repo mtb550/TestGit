@@ -35,7 +35,7 @@ public class RunSessionCache {
     }
 
     public void startLoadingAsync() {
-        if (metadata == null || metadata.getTestCase() == null || metadata.getTestCase().isEmpty()) {
+        if (metadata == null || metadata.getTestCase().isEmpty()) {
             notifyLoadComplete(Collections.emptyList());
             return;
         }
@@ -50,7 +50,7 @@ public class RunSessionCache {
                 final Path dirPath = tcPathObj.getPath();
                 final List<UUID> targetIds = tcPathObj.getUuid();
 
-                if (dirPath == null || !Files.exists(dirPath) || targetIds == null || targetIds.isEmpty()) {
+                if (dirPath == null || !Files.exists(dirPath) || targetIds.isEmpty()) {
                     continue;
                 }
 

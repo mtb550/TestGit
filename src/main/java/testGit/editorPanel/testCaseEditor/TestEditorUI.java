@@ -23,9 +23,9 @@ import testGit.editorPanel.listeners.*;
 import testGit.editorPanel.toolBar.AbstractToolbarPanel;
 import testGit.editorPanel.toolBar.IToolBar;
 import testGit.editorPanel.toolBar.TestToolBar;
-import testGit.editorPanel.toolBar.components.DetailsPopup;
 import testGit.editorPanel.toolBar.components.FilterPopup;
 import testGit.editorPanel.toolBar.components.SearchTxt;
+import testGit.editorPanel.toolBar.components.TestDetailsPopup;
 import testGit.pojo.Config;
 import testGit.pojo.Group;
 import testGit.pojo.Priority;
@@ -350,7 +350,7 @@ public class TestEditorUI implements Disposable, IToolBar, IEditorUI {
     public Set<String> getSelectedDetails() {
         AbstractToolbarPanel baseToolBar = getToolBar();
         if (baseToolBar != null) {
-            DetailsPopup popup = baseToolBar.getToolbarItem(DetailsPopup.class);
+            TestDetailsPopup popup = baseToolBar.getToolbarItem(TestDetailsPopup.class);
             if (popup != null) {
                 return popup.getSelectedDetails();
             }

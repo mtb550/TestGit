@@ -284,3 +284,5 @@ make search bar logic in separate thread in initiate in test editor ui & test ru
 remove edit test case in test run
 remove getFilteredList() in IEditorUI.
 customize run tool bar to add duration and other items to details. pending
+refactor base card class, test card, run card.
+selcet on test case after create it.

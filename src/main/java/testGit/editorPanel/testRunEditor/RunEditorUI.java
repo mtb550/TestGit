@@ -22,8 +22,8 @@ import testGit.editorPanel.listeners.*;
 import testGit.editorPanel.toolBar.AbstractToolbarPanel;
 import testGit.editorPanel.toolBar.IToolBar;
 import testGit.editorPanel.toolBar.RunToolBar;
-import testGit.editorPanel.toolBar.components.DetailsPopup;
 import testGit.editorPanel.toolBar.components.FilterPopup;
+import testGit.editorPanel.toolBar.components.RunDetailsPopup;
 import testGit.editorPanel.toolBar.components.SearchTxt;
 import testGit.pojo.*;
 import testGit.pojo.dto.TestCaseDto;
@@ -59,6 +59,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
 
     private final VirtualFile currentFile;
 
+    @Getter
     private final @NotNull Map<UUID, TestRunDto.TestRunItems> resultsMap;
 
     CheckboxTree checklistTree;
@@ -106,7 +107,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
         this.metadata = vf.getMetadata();
         this.currentFile = vf;
 
-        if (this.metadata != null && this.metadata.getResults() != null) {
+        if (this.metadata != null) {
             this.resultsMap = this.metadata.getResults().stream()
                     .collect(Collectors.toMap(TestRunDto.TestRunItems::getTestCaseId, item -> item));
         } else {
@@ -128,7 +129,12 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
             public void onItemsLoaded(final List<TestCaseDto> items) {
                 allTestCaseDtos.addAll(items);
                 currentTestCaseDtos.addAll(items);
-                items.forEach(item -> initialTestCaseIds.add(item.getId()));
+                items.forEach(item -> {
+                    initialTestCaseIds.add(item.getId());
+                    final TestRunDto.TestRunItems runItem = resultsMap.get(item.getId());
+                    if (runItem != null)
+                        runItem.setTestCaseDetails(item);
+                });
                 refreshView();
             }
 
@@ -439,7 +445,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
     public Set<String> getSelectedDetails() {
         AbstractToolbarPanel baseToolBar = getToolBar();
         if (baseToolBar != null) {
-            DetailsPopup popup = baseToolBar.getToolbarItem(DetailsPopup.class);
+            RunDetailsPopup popup = baseToolBar.getToolbarItem(RunDetailsPopup.class);
             if (popup != null) {
                 return popup.getSelectedDetails();
             }

@@ -17,7 +17,7 @@ public class TestToolBar extends AbstractToolbarPanel {
         return List.of(
                 new CreateTestCaseBtn(callbacks::onToolBarCreateTestCaseClicked),
                 new RefreshBtn(callbacks::onToolBarRefreshButtonClicked),
-                new DetailsPopup(callbacks::onToolBarDetailsSelectionChanged),
+                new TestDetailsPopup(callbacks::onToolBarDetailsSelectionChanged),
                 new FilterPopup(callbacks::onToolBarFilterResetButtonClicked, callbacks::onToolBarFilterSelectionChanged)
         );
     }
