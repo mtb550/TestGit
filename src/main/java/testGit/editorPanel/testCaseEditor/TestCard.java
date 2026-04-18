@@ -1,33 +1,49 @@
 package testGit.editorPanel.testCaseEditor;
 
 import com.intellij.ui.JBColor;
-import com.intellij.ui.components.JBLabel;
-import com.intellij.util.ui.JBUI;
 import testGit.editorPanel.BaseCard;
+import testGit.editorPanel.Shared;
+import testGit.pojo.TestEditorAttributes;
 import testGit.pojo.dto.TestCaseDto;
 
+import javax.swing.*;
 import java.awt.*;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
 
-public class TestCard extends BaseCard<TestCard> {
+public class TestCard extends BaseCard {
 
     public TestCard() {
         super();
     }
 
+    //todo: move it to test renerer ?
     public void updateData(final int index, final TestCaseDto tc, final Set<String> activeDetails, final boolean isUnsorted) {
-        super.updateBaseData(index, tc, activeDetails);
+        final List<JComponent> badges = new ArrayList<>();
+        final Map<String, String> details = new LinkedHashMap<>();
+
+        String title = TestEditorAttributes.DESCRIPTION.getValue(tc);
+        if (title == null) title = "Unknown Title";
+
+        Arrays.stream(TestEditorAttributes.values())
+                .filter(attr -> attr != TestEditorAttributes.DESCRIPTION)
+                .filter(attr -> activeDetails.contains(attr.name()))
+                .forEach(attr -> {
+
+                    if (attr.getBadgeExtractor() != null) {
+                        badges.addAll(attr.getBadgeExtractor().apply(tc));
+
+                    } else {
+                        String value = attr.getValue(tc);
+                        details.put(attr.getName(), value != null ? value : "");
+                    }
+
+                });
 
         if (isUnsorted) {
-            final JBLabel unsortedBadge = new JBLabel("Unsorted");
-            unsortedBadge.setOpaque(true);
-            unsortedBadge.setBackground(new JBColor(new Color(255, 200, 200), new Color(130, 50, 50)));
-            unsortedBadge.setForeground(JBColor.RED);
-            unsortedBadge.setFont(JBUI.Fonts.smallFont().asBold());
-            badgePanel.add(unsortedBadge);
+            badges.add(new Shared.RoundedBadge("Unsorted", new JBColor(new Color(255, 100, 100), new Color(130, 50, 50))));
         }
 
-        badgePanel.revalidate();
-        badgePanel.repaint();
+        updateUI(index, title, badges, details);
     }
 }

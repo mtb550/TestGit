@@ -14,18 +14,16 @@ import testGit.pojo.dto.TestRunDto;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
 
-public class RunCard extends BaseCard<RunCard> {
+public class RunCard extends BaseCard {
     public static final int ACTIONS_TOTAL_WIDTH = 210;
     private final JBPanel<?> actionPanel = new JBPanel<>();
     private final Map<TestStatus, JBLabel> statusLabels = new EnumMap<>(TestStatus.class);
 
     public RunCard() {
-        super(Arrays.stream(RunEditorAttributes.values()).map(Enum::name).toArray(String[]::new));
+        super();
 
         actionPanel.setLayout(new GridLayout(1, 3, 0, 0));
         actionPanel.setOpaque(false);
@@ -45,29 +43,30 @@ public class RunCard extends BaseCard<RunCard> {
     }
 
     public void updateData(final int index, final TestCaseDto tc, final Set<String> activeDetails, final TestRunDto.TestRunItems runItem) {
-        super.updateBaseData(index, tc, activeDetails);
+        final List<JComponent> badges = new ArrayList<>();
+        final Map<String, String> details = new LinkedHashMap<>();
 
-        if (runItem != null) {
-            for (RunEditorAttributes attr : RunEditorAttributes.values()) {
-                if (attr == RunEditorAttributes.DESCRIPTION || attr == RunEditorAttributes.PRIORITY || attr == RunEditorAttributes.GROUP) {
-                    continue;
-                }
-
-                final JBLabel lbl = attributeLabels.get(attr.name());
-                if (lbl != null) {
-                    final boolean isVisible = activeDetails.contains(attr.name());
-                    lbl.setVisible(isVisible);
-
-                    if (isVisible) {
-                        final String value = attr.getValue(runItem);
-                        lbl.setText(attr.getName() + ": " + (value != null ? value : ""));
-                    }
-                }
-            }
+        //todo, no need to customize, it is empty by default if no value
+        String title = RunEditorAttributes.DESCRIPTION.getValue(runItem);
+        if (title == null || title.isEmpty() || title.equals("Unknown")) {
+            title = tc != null ? tc.getDescription() : "Unknown Title";
         }
 
-        badgePanel.revalidate();
-        badgePanel.repaint();
+        Arrays.stream(RunEditorAttributes.values())
+                .filter(attr -> attr != RunEditorAttributes.DESCRIPTION) //todo, remove
+                .filter(attr -> activeDetails.contains(attr.name()))
+                .forEach(attr -> {
+
+                    if (attr.getBadgeExtractor() != null) {
+                        badges.addAll(attr.getBadgeExtractor().apply(tc));
+
+                    } else if (runItem != null) {
+                        String value = attr.getValue(runItem);
+                        details.put(attr.getName(), value != null ? value : "");
+                    }
+                });
+
+        updateUI(index, title, badges, details);
     }
 
     @Override

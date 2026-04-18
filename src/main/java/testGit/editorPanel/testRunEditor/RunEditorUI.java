@@ -38,6 +38,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import java.awt.*;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -401,11 +402,8 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
 
     @Override
     public void onToolBarDetailsSelectionChanged() {
-        if (list != null) {
-            list.setFixedCellHeight(-1);
-            list.setCellRenderer(new RunListRenderer(this));
-            list.revalidate();
-            list.repaint();
+        if (list != null && model != null) {
+            model.allContentsChanged();
         }
     }
 
@@ -428,7 +426,12 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
         this.allTestCaseDtos.clear();
         this.currentTestCaseDtos.clear();
         this.initialTestCaseIds.clear();
+
         this.resultsMap.clear();
+        if (this.metadata != null) {
+            this.resultsMap.putAll(this.metadata.getResults().stream()
+                    .collect(Collectors.toMap(TestRunDto.TestRunItems::getTestCaseId, item -> item)));
+        }
 
         if (this.model != null) {
             this.model.removeAll();
@@ -518,6 +521,10 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
 
     @Override
     public void dispose() {
+        if (list != null)
+            for (MouseListener listener : list.getMouseListeners())
+                list.removeMouseListener(listener);
+
         if (sessionCache != null) {
             sessionCache.dispose();
         }

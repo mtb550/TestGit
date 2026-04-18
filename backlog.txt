@@ -286,3 +286,10 @@ remove getFilteredList() in IEditorUI.
 customize run tool bar to add duration and other items to details. pending
 refactor base card class, test card, run card.
 selcet on test case after create it.
+fix test editor drag and drop to be same as before.
+put the description in details and apply controll to hide or show it.
+
+move updateUi from test card and run card to its rederer.
+/// TODO: if statement here to be removed as all will title will shown and use preferrences that store others shown attributes.
+/// backlog: put title in tool bar details options and make checked and enabled.
+add test case path to run card.

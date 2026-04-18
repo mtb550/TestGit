@@ -37,6 +37,7 @@ import testGit.viewPanel.ViewToolWindowFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
@@ -315,10 +316,9 @@ public class TestEditorUI implements Disposable, IToolBar, IEditorUI {
 
     @Override
     public void onToolBarDetailsSelectionChanged() {
-        list.setFixedCellHeight(-1);
-        list.setCellRenderer(new TestListRenderer(this));
-        list.revalidate();
-        list.repaint();
+        if (list != null && model != null) {
+            model.allContentsChanged();
+        }
     }
 
     @Override
@@ -426,17 +426,22 @@ public class TestEditorUI implements Disposable, IToolBar, IEditorUI {
 
     @Override
     public void dispose() {
+        if (list != null)
+            for (MouseListener listener : list.getMouseListeners())
+                list.removeMouseListener(listener);
+
         if (sessionCache != null) {
             sessionCache.dispose();
         }
 
-        final TestCaseDto selectedInThisFile = list.getSelectedValue();
+        if (list != null) {
+            TestCaseDto selectedInThisFile = list.getSelectedValue();
 
-        final ViewPanel viewer = ViewToolWindowFactory.getViewPanel();
-        if (viewer != null) {
-            viewer.hide(selectedInThisFile);
+            final ViewPanel viewer = ViewToolWindowFactory.getViewPanel();
+            if (viewer != null) {
+                viewer.hide(selectedInThisFile);
+            }
         }
-
         allTestCaseDtos.clear();
         currentTestCaseDtos.clear();
         unsortedIds.clear();

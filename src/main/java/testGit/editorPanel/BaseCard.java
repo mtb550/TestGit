@@ -9,20 +9,18 @@ import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.components.BorderLayoutPanel;
-import testGit.pojo.RunEditorAttributes;
-import testGit.pojo.TestEditorAttributes;
-import testGit.pojo.dto.TestCaseDto;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
+public abstract class BaseCard extends JBPanel<BaseCard> {
     protected static final int CARD_HEIGHT = 130;
 
     protected final JBLabel titleLabel = new JBLabel();
     protected final JBPanel<?> badgePanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, JBUI.scale(10), 0));
-
     protected final Map<String, JBLabel> attributeLabels = new HashMap<>();
 
     protected final JBPanel<?> content = new JBPanel<>(new VerticalLayout(JBUI.scale(4)));
@@ -33,17 +31,15 @@ public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
     protected String hoveredAction;
 
     public BaseCard() {
-        this(Arrays.stream(TestEditorAttributes.values()).map(Enum::name).toArray(String[]::new));
-    }
-
-    public BaseCard(final String[] attributeNames) {
         setLayout(new BorderLayout());
         setOpaque(true);
         setMaximumSize(new Dimension(Integer.MAX_VALUE, JBUI.scale(CARD_HEIGHT)));
 
         titleLabel.setFont(JBFont.label().deriveFont(Font.BOLD, UIUtil.getLabelFont().getSize() + 10.0f));
         titleLabel.setForeground(UIUtil.getLabelForeground());
+
         badgePanel.setOpaque(false);
+        badgePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         final JBPanel<?> titleLine = new JBPanel<>();
         titleLine.setLayout(new BoxLayout(titleLine, BoxLayout.X_AXIS));
@@ -51,66 +47,42 @@ public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
         titleLine.setAlignmentX(Component.LEFT_ALIGNMENT);
         titleLine.add(titleLabel);
 
-        badgePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
         content.setOpaque(false);
         content.setAlignmentX(Component.LEFT_ALIGNMENT);
-
         content.add(titleLine);
         content.add(badgePanel);
-
-        for (final String attr : attributeNames) {
-            /// TODO: if statement here to be removed as all will title will shown and use preferrences that store others shown attributes.
-            /// backlog: put title in tool bar details options and make checked and enabled.
-            if (RunEditorAttributes.DESCRIPTION.name().equals(attr) || RunEditorAttributes.PRIORITY.name().equals(attr) || RunEditorAttributes.GROUP.name().equals(attr)) {
-                continue;
-            }
-            final JBLabel label = createDetailLabel();
-            attributeLabels.put(attr, label);
-            content.add(label);
-        }
 
         wrapper.setOpaque(false);
         wrapper.setBorder(JBUI.Borders.empty(12, 16));
         wrapper.addToCenter(content);
+
         add(wrapper, BorderLayout.CENTER);
     }
 
-    protected void updateBaseData(final int index, final TestCaseDto tc, final Set<String> activeDetails) {
-        titleLabel.setText(String.format("%d. %s", index + 1, tc.getDescription()));
+    protected void updateUI(final int index, final String title, final List<JComponent> badges, final Map<String, String> details) {
+        titleLabel.setText(String.format("%d. %s", index + 1, title));
 
-        /// TODO: put backgroound color for odd and even in Config and use it in all project to unify the UI.
         final Color currentRowColor = index % 2 == 0 ? new JBColor(Gray._245, Gray._60) : new JBColor(Gray._230, Gray._45);
         setBackground(currentRowColor);
         setBorder(JBUI.Borders.customLine(JBColor.border(), 1, 0, 1, 0));
 
-        for (final TestEditorAttributes attr : TestEditorAttributes.values()) {
-            if (attr == TestEditorAttributes.DESCRIPTION || attr == TestEditorAttributes.PRIORITY || attr == TestEditorAttributes.GROUP) {
-                continue;
-            }
-
-            final JBLabel lbl = attributeLabels.get(attr.name());
-            if (lbl != null) {
-                final boolean isVisible = activeDetails.contains(attr.name());
-                lbl.setVisible(isVisible);
-
-                if (isVisible) {
-                    final String value = attr.getValue(tc);
-                    lbl.setText(attr.getName() + ": " + (value != null ? value : ""));
-                }
-            }
-        }
-
         badgePanel.removeAll();
+        badges.forEach(badgePanel::add);
 
-        if (activeDetails.contains(TestEditorAttributes.PRIORITY.name())) {
-            badgePanel.add(Shared.createPriorityBadge(tc));
-        }
+        attributeLabels.values().forEach(lbl -> lbl.setVisible(false));
 
-        if (activeDetails.contains(TestEditorAttributes.GROUP.name())) {
-            Optional.of(tc.getGroup())
-                    .ifPresent(group -> group.forEach(groupName -> badgePanel.add(Shared.createGroupBadge(groupName))));
-        }
+        details.forEach((key, value) -> {
+            JBLabel lbl = attributeLabels.computeIfAbsent(key, k -> {
+                JBLabel newLbl = createDetailLabel();
+                content.add(newLbl);
+                return newLbl;
+            });
+            lbl.setText(key + ": " + value);
+            lbl.setVisible(true);
+        });
+
+        badgePanel.revalidate();
+        badgePanel.repaint();
     }
 
     public void setActionsState(final boolean isSelected, final boolean isRowHovered, final String hoveredAction) {
@@ -129,7 +101,7 @@ public abstract class BaseCard<T extends JBPanel<T>> extends JBPanel<T> {
         }
     }
 
-    protected JBLabel createDetailLabel() {
+    private JBLabel createDetailLabel() {
         final JBLabel label = new JBLabel();
         label.setFont(UIUtil.getLabelFont(UIUtil.FontSize.NORMAL));
         label.setForeground(UIUtil.getContextHelpForeground());
