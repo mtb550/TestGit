@@ -87,8 +87,14 @@ intellijPlatform {
         }
 
         ideaVersion {
-            sinceBuild.set("253")
-            untilBuild.set("253.*")
+            sinceBuild.set("251")
+            untilBuild.set(null as String?)
+        }
+    }
+
+    pluginVerification {
+        ides {
+            recommended()
         }
     }
 

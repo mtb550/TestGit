@@ -39,7 +39,7 @@ public interface IEditorUI extends Disposable {
 
     @Nullable JComponent getPreferredFocusedComponent();
 
-    Set<String> getSelectedDetails();
+    Set<?> getSelectedDetails();
 
     List<TestCaseDto> getAllTestCaseDtos();
 

@@ -293,3 +293,5 @@ move updateUi from test card and run card to its rederer.
 /// TODO: if statement here to be removed as all will title will shown and use preferrences that store others shown attributes.
 /// backlog: put title in tool bar details options and make checked and enabled.
 add test case path to run card.
+add new object: commit id to RunEditorAttributes, it is required in each test run.
+in tool bar, add filtering by empty group or not setted group.

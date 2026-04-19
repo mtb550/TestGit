@@ -22,7 +22,7 @@ public class RunDetailsPopup extends AbstractButton implements IToolbarItem {
             .collect(Collectors.joining(","));
 
     @Getter
-    private final Set<String> selectedDetails = new HashSet<>();
+    private final Set<RunEditorAttributes> selectedDetails = new HashSet<>();
 
     public RunDetailsPopup(final Runnable onToolBarDetailsSelectedChanged) {
         super("Details", AllIcons.Actions.PreviewDetailsVertically);
@@ -30,14 +30,27 @@ public class RunDetailsPopup extends AbstractButton implements IToolbarItem {
         final PropertiesComponent props = PropertiesComponent.getInstance();
         final String saved = props.getValue(KEY_DETAILS, DEFAULT_DETAILS);
 
-        Arrays.stream(saved.split(",")).filter(s -> !s.isEmpty()).forEach(selectedDetails::add);
+        Arrays.stream(saved.split(","))
+                .filter(s -> !s.isEmpty())
+                .forEach(s -> {
+                    try {
+                        selectedDetails.add(RunEditorAttributes.valueOf(s));
+                    } catch (IllegalArgumentException ignored) {
+                        System.err.println("Invalid run editor attributes: " + s);
+                    }
+                });
 
         addActionListener(e -> showDetailsPopup(onToolBarDetailsSelectedChanged));
     }
 
     private void saveProps() {
         final PropertiesComponent props = PropertiesComponent.getInstance();
-        props.setValue(KEY_DETAILS, String.join(",", selectedDetails));
+
+        String joinedNames = selectedDetails.stream()
+                .map(RunEditorAttributes::name)
+                .collect(Collectors.joining(","));
+
+        props.setValue(KEY_DETAILS, joinedNames);
     }
 
     private void showDetailsPopup(final Runnable onToolBarDetailsSelectedChanged) {
@@ -45,15 +58,15 @@ public class RunDetailsPopup extends AbstractButton implements IToolbarItem {
 
         Arrays.stream(RunEditorAttributes.values())
                 .filter(RunEditorAttributes::isStandardToolBarOption)
-                .forEach(attr -> detailsList.addItem(attr, attr.getName(), selectedDetails.contains(attr.name())));
+                .forEach(attr -> detailsList.addItem(attr, attr.getName(), selectedDetails.contains(attr)));
 
         detailsList.setCheckBoxListListener((index, state) -> {
             RunEditorAttributes item = detailsList.getItemAt(index);
             if (item != null) {
                 if (state) {
-                    selectedDetails.add(item.name());
+                    selectedDetails.add(item);
                 } else {
-                    selectedDetails.remove(item.name());
+                    selectedDetails.remove(item);
                 }
             }
 

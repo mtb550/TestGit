@@ -21,10 +21,16 @@ public class RunCard extends BaseCard {
     public static final int ACTIONS_TOTAL_WIDTH = 210;
     private final JBPanel<?> actionPanel = new JBPanel<>();
     private final Map<TestStatus, JBLabel> statusLabels = new EnumMap<>(TestStatus.class);
+    private final List<JComponent> badges = new ArrayList<>();
+    private final Map<String, String> details = new LinkedHashMap<>();
 
     public RunCard() {
         super();
 
+        // specific layout for buttons: PASSED, FAILED, BLOCKED
+        // todo, to be refactored later
+        // todo, i think it can be removed and replaced with menu with shortcuts, like edit menu,
+        // this approach is easier and maintainable than the implemented code.
         actionPanel.setLayout(new GridLayout(1, 3, 0, 0));
         actionPanel.setOpaque(false);
         actionPanel.setPreferredSize(new Dimension(JBUI.scale(ACTIONS_TOTAL_WIDTH), 0));
@@ -37,39 +43,26 @@ public class RunCard extends BaseCard {
             }
         }
 
+        // specific layout for buttons: PASSED, FAILED, BLOCKED
+        // todo, to be refactored later
         actionPanel.setVisible(false);
         actionPanel.setBorder(JBUI.Borders.empty());
         this.add(actionPanel, BorderLayout.EAST);
     }
 
-    public void updateData(final int index, final TestCaseDto tc, final Set<String> activeDetails, final TestRunDto.TestRunItems runItem) {
-        final List<JComponent> badges = new ArrayList<>();
-        final Map<String, String> details = new LinkedHashMap<>();
-
-        //todo, no need to customize, it is empty by default if no value
-        String title = RunEditorAttributes.DESCRIPTION.getValue(runItem);
-        if (title == null || title.isEmpty() || title.equals("Unknown")) {
-            title = tc != null ? tc.getDescription() : "Unknown Title";
-        }
+    public void updateData(final int index, final TestCaseDto tc, final Set<?> activeDetails, final TestRunDto.TestRunItems runItem) {
+        badges.clear();
+        details.clear();
 
         Arrays.stream(RunEditorAttributes.values())
-                .filter(attr -> attr != RunEditorAttributes.DESCRIPTION) //todo, remove
-                .filter(attr -> activeDetails.contains(attr.name()))
-                .forEach(attr -> {
+                .filter(activeDetails::contains)
+                .forEach(attr -> attr.applyToUI(runItem, badges, details));
 
-                    if (attr.getBadgeExtractor() != null) {
-                        badges.addAll(attr.getBadgeExtractor().apply(tc));
-
-                    } else if (runItem != null) {
-                        String value = attr.getValue(runItem);
-                        details.put(attr.getName(), value != null ? value : "");
-                    }
-                });
-
-        updateUI(index, title, badges, details);
+        updateUI(index, RunEditorAttributes.DESCRIPTION.getValueExtractor().apply(runItem), badges, details);
     }
 
     @Override
+    // todo, why it is used by test renderer?
     public void setActionsState(final boolean isSelected, final boolean isRowHovered, final String hoveredAction) {
         super.setActionsState(isSelected, isRowHovered, hoveredAction);
 
@@ -100,6 +93,7 @@ public class RunCard extends BaseCard {
     }
 
     private JBLabel createActionLabel(final String text) {
+        // method to create PASSED, FAILED, BLOCKED
         final JBLabel lbl = new JBLabel(text, SwingConstants.CENTER);
         lbl.setOpaque(false);
         lbl.setFont(JBFont.regular().asBold());

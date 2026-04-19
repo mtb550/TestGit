@@ -29,6 +29,7 @@ import testGit.editorPanel.toolBar.components.TestDetailsPopup;
 import testGit.pojo.Config;
 import testGit.pojo.Group;
 import testGit.pojo.Priority;
+import testGit.pojo.TestEditorAttributes;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.util.TestCaseSorter;
 import testGit.util.services.TestCaseCacheService;
@@ -347,7 +348,8 @@ public class TestEditorUI implements Disposable, IToolBar, IEditorUI {
         loadDataAsync();
     }
 
-    public Set<String> getSelectedDetails() {
+    @Override
+    public Set<TestEditorAttributes> getSelectedDetails() {
         AbstractToolbarPanel baseToolBar = getToolBar();
         if (baseToolBar != null) {
             TestDetailsPopup popup = baseToolBar.getToolbarItem(TestDetailsPopup.class);

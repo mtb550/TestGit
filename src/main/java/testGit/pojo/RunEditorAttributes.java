@@ -3,13 +3,11 @@ package testGit.pojo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import testGit.editorPanel.Shared;
-import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.TestRunDto;
 
 import javax.swing.*;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,74 +15,47 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public enum RunEditorAttributes {
 
-    DESCRIPTION("Description",
-            true,
-            true,
-            item -> Optional.ofNullable(item).map(TestRunDto.TestRunItems::getTestCaseDetails).map(TestCaseDto::getDescription).orElse(""),
+    DESCRIPTION("Description", true, true,
+            item -> item.getTestCaseDetails().getDescription(),
             null
     ),
 
-    EXPECTED_RESULT("Expected Result",
-            true,
-            true,
-            item -> Optional.ofNullable(item).map(TestRunDto.TestRunItems::getTestCaseDetails).map(TestCaseDto::getExpectedResult).orElse(""),
+    EXPECTED_RESULT("Expected Result", true, true,
+            item -> item.getTestCaseDetails().getExpectedResult(),
             null
     ),
 
-    STEPS("Steps",
-            true,
-            true,
-            item -> Optional.ofNullable(item).map(TestRunDto.TestRunItems::getTestCaseDetails)
-                    .map(TestCaseDto::getSteps)
-                    .map(steps -> String.join(", ", steps))
-                    .orElse(""),
+    STEPS("Steps", true, true,
+            item -> String.join(", ", item.getTestCaseDetails().getSteps()),
             null
     ),
 
-    PRIORITY("Priority",
-            true,
-            true,
-            item -> Optional.ofNullable(item).map(TestRunDto.TestRunItems::getTestCaseDetails)
-                    .map(TestCaseDto::getPriority)
-                    .map(Priority::getName)
-                    .orElse(""),
-            tc -> Optional.ofNullable(tc).map(TestCaseDto::getPriority)
-                    .map(p -> List.<JComponent>of(Shared.createPriorityBadge(tc)))
-                    .orElse(Collections.emptyList())
+    PRIORITY("Priority", true, true,
+            item -> item.getTestCaseDetails().getPriority().getName(),
+            item -> List.of(Shared.createPriorityBadge(item.getTestCaseDetails()))
     ),
 
-    GROUP("Group",
-            true,
-            true,
-            item -> Optional.ofNullable(item).map(TestRunDto.TestRunItems::getTestCaseDetails)
-                    .map(TestCaseDto::getGroup)
-                    .map(groups -> groups.stream().map(Group::getName).collect(Collectors.joining(", ")))
-                    .orElse(""),
-            tc -> Optional.ofNullable(tc).map(TestCaseDto::getGroup)
-                    .map(groups -> groups.stream()
-                            .map(Shared::createGroupBadge)
-                            .collect(Collectors.<JComponent>toList()))
-                    .orElse(Collections.emptyList())
+    GROUP("Group", true, true,
+            item -> item.getTestCaseDetails().getGroup().stream()
+                    .map(Group::getName)
+                    .collect(Collectors.joining(", ")),
+            item -> item.getTestCaseDetails().getGroup().stream()
+                    .map(Shared::createGroupBadge)
+                    .collect(Collectors.<JComponent>toList())
     ),
 
-    ACTUAL_RESULT("Actual Result",
-            true,
-            true,
-            item -> Optional.ofNullable(item).map(TestRunDto.TestRunItems::getActualResult).orElse(""),
+    ACTUAL_RESULT("Actual Result", true, true,
+            TestRunDto.TestRunItems::getActualResult,
             null
     ),
 
-    RUN_STATUS("Run Status",
-            true,
-            true,
-            item -> Optional.ofNullable(item).map(TestRunDto.TestRunItems::getStatus).map(Enum::name).orElse(""),
+    RUN_STATUS("Run Status", true, true,
+            item -> item.getStatus().name(),
             null
     ),
 
-    DURATION("Duration",
-            true,
-            true,
-            item -> Optional.ofNullable(item).map(TestRunDto.TestRunItems::getDuration).map(Object::toString).orElse(""),
+    DURATION("Duration", true, true,
+            item -> item.getDuration().toString(),
             null
     );
 
@@ -92,13 +63,12 @@ public enum RunEditorAttributes {
     private final boolean standardToolBarOption;
     private final boolean defaultToolBarSelected;
     private final Function<TestRunDto.TestRunItems, String> valueExtractor;
-    private final Function<TestCaseDto, List<JComponent>> badgeExtractor;
+    private final Function<TestRunDto.TestRunItems, List<JComponent>> drawItem;
 
-    public String getValue(final TestRunDto.TestRunItems runItem) {
-        try {
-            return valueExtractor.apply(runItem);
-        } catch (Exception e) {
-            return "Unknown";
-        }
+    public void applyToUI(final TestRunDto.TestRunItems runItem, final List<JComponent> badges, final Map<String, String> details) {
+        if (drawItem != null)
+            badges.addAll(drawItem.apply(runItem));
+        else
+            details.put(name, valueExtractor.apply(runItem));
     }
 }

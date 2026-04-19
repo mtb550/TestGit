@@ -11,11 +11,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+// TODO: add order, then add it toolbar details (select by the order number) & add it to edit menu.
+// TODO: add all to edit menu: auto ref, business ref..etc
+// TODO: also, map all to view panel dynamically.
+// TODO: may you need to unify enum map to map all with one source of truth
 @Getter
-/// TODO: add order, then add it toolbar details (select by the order number) & add it to edit menu.
-/// TODO: add all to edit menu: auto ref, business ref..etc
-///  TODO: also, map all to view panel dynamically.
-/// TODO: may you need to unify enum map to map all with one source of truth
 @AllArgsConstructor
 public enum TestEditorAttributes {
 
@@ -88,7 +88,7 @@ public enum TestEditorAttributes {
     UPDATE_BY("Updated By",
             true,
             false,
-            TestCaseDto::getUpdatedBy, 
+            TestCaseDto::getUpdatedBy,
             null
     ),
 
@@ -102,7 +102,7 @@ public enum TestEditorAttributes {
     UPDATE_AT("Updated At",
             true,
             false,
-            TestCaseDto::getFormattedUpdatedAt, 
+            TestCaseDto::getFormattedUpdatedAt,
             null
     ),
 
@@ -127,20 +127,10 @@ public enum TestEditorAttributes {
     private final Function<TestCaseDto, String> valueExtractor;
     private final Function<TestCaseDto, List<JComponent>> drawItem;
 
-    public String getValue(final TestCaseDto tc) {
-        try {
-            return valueExtractor.apply(tc);
-        } catch (Exception e) {
-            return "Unknown";
-        }
-    }
-
-    //todo, to be removed, use runnable
     public void applyToUI(final TestCaseDto tc, final List<JComponent> badges, final Map<String, String> details) {
-        if (drawItem != null) {
+        if (drawItem != null)
             badges.addAll(drawItem.apply(tc));
-        } else {
-            details.put(name, getValue(tc));
-        }
+        else
+            details.put(name, valueExtractor.apply(tc));
     }
 }

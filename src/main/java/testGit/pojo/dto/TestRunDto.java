@@ -114,7 +114,7 @@ public class TestRunDto {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class TestRunItems {
         @JsonIgnore
-        @Nullable
+        @NotNull
         private TestCaseDto testCaseDetails;
 
         @Nullable
