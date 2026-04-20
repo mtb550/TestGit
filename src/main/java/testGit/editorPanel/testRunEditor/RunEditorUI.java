@@ -29,6 +29,7 @@ import testGit.pojo.*;
 import testGit.pojo.dto.TestCaseDto;
 import testGit.pojo.dto.TestRunDto;
 import testGit.pojo.dto.dirs.DirectoryDto;
+import testGit.pojo.dto.dirs.TestRunDirectoryDto;
 import testGit.projectPanel.ProjectPanel;
 import testGit.util.TestCaseSorter;
 import testGit.util.services.TestCaseCacheService;
@@ -330,8 +331,13 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
                 Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(new File(savePath.toFile(), fileName), run);
 
                 ApplicationManager.getApplication().invokeLater(() -> {
+                    // todo, just update tree, no need to build tree again
                     projectPanel.getTestRunTreeBuilder().buildTree(projectPanel.getTestProjectSelector().getSelectedTestProject().getItem());
                     FileEditorManager.getInstance(Config.getProject()).closeFile(currentFile);
+
+                    if (vf.getDirectoryDto() instanceof TestRunDirectoryDto trDto) // todo, remve if statement. no need
+                        // todo, Tools.Tools.isEditorOpen(). add new method, openEditor. and use it in all project, with invoke later.
+                        RunEditor.open(trDto, projectPanel);
                 });
             } catch (final Exception e) {
                 e.printStackTrace(System.err);
