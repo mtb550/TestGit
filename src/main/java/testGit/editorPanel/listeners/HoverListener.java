@@ -72,6 +72,9 @@ public class HoverListener extends MouseAdapter {
         if (index == -1) return;
 
         final Rectangle bounds = list.getCellBounds(index, index);
+
+        if (!bounds.contains(e.getPoint())) return;
+
         final CardHoverAction action = getActionAtPoint(index, e.getX() - bounds.x, e.getY() - bounds.y, bounds);
 
         if (action != null) {
@@ -95,7 +98,9 @@ public class HoverListener extends MouseAdapter {
 
         if (index != -1) {
             final Rectangle bounds = list.getCellBounds(index, index);
-            currentAction = getActionAtPoint(index, e.getX() - bounds.x, e.getY() - bounds.y, bounds);
+
+            if (bounds.contains(e.getPoint()))
+                currentAction = getActionAtPoint(index, e.getX() - bounds.x, e.getY() - bounds.y, bounds);
         }
 
         list.setCursor(Cursor.getPredefinedCursor(currentAction != null ? Cursor.HAND_CURSOR : Cursor.DEFAULT_CURSOR));
@@ -126,6 +131,7 @@ public class HoverListener extends MouseAdapter {
         if (ui.getHoveredIndex() != -1 || ui.getHoveredIconAction() != null) {
             ui.setHoveredIndex(-1);
             ui.setHoveredIconAction(null);
+            list.setToolTipText(null);
             list.repaint();
         }
     }

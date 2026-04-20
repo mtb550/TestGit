@@ -17,7 +17,7 @@ public class StartExecution extends DumbAwareAction {
     }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public void actionPerformed(final @NotNull AnActionEvent e) {
         callbacks.onStartExecutionClicked();
     }
 

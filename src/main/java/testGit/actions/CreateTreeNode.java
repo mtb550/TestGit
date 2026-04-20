@@ -27,7 +27,7 @@ public class CreateTreeNode extends DumbAwareAction {
     private final SimpleTree tree;
     private final DirectoryOptions option;
 
-    public CreateTreeNode(ProjectPanel projectPanel, SimpleTree tree) {
+    public CreateTreeNode(final ProjectPanel projectPanel, final SimpleTree tree) {
         super("Create", "Create new node", AllIcons.General.Add);
         this.projectPanel = projectPanel;
         this.tree = tree;
@@ -36,7 +36,7 @@ public class CreateTreeNode extends DumbAwareAction {
     }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public void actionPerformed(final @NotNull AnActionEvent e) {
         TreePath path = tree.getSelectionPath();
         if (path == null) return;
 
@@ -92,7 +92,7 @@ public class CreateTreeNode extends DumbAwareAction {
         );
     }
 
-    private void createTestSet(String name, DefaultMutableTreeNode parentNode, DirectoryDto parentDir, Path newDirPath) {
+    private void createTestSet(final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath) {
         TestSetDirectoryDto newTestSetDirectory = new TestSetDirectoryDto()
                 .setName(name)
                 .setPath(parentDir.getPath().resolve(name));
@@ -103,7 +103,7 @@ public class CreateTreeNode extends DumbAwareAction {
         TestEditor.open(newTestSetDirectory);
     }
 
-    private void createTestSetPackage(String name, DefaultMutableTreeNode parentNode, DirectoryDto parentDir, Path newDirPath) {
+    private void createTestSetPackage(final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath) {
         TestSetPackageDirectoryDto newTestSetPackageDirectory = new TestSetPackageDirectoryDto()
                 .setName(name)
                 .setPath(parentDir.getPath().resolve(name));
@@ -113,7 +113,7 @@ public class CreateTreeNode extends DumbAwareAction {
         TreeUtilImpl.createDataVf(this, newDirPath, DirectoryType.TSP.getMarker());
     }
 
-    private void createTestRunPackage(String name, DefaultMutableTreeNode parentNode, DirectoryDto parentDir, Path newDirPath) {
+    private void createTestRunPackage(final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath) {
         TestRunPackageDirectoryDto newTestRunPackageDirectory = new TestRunPackageDirectoryDto()
                 .setName(name)
                 .setPath(parentDir.getPath().resolve(name));
@@ -124,7 +124,7 @@ public class CreateTreeNode extends DumbAwareAction {
     }
 
     @Override
-    public void update(@NotNull AnActionEvent e) {
+    public void update(final @NotNull AnActionEvent e) {
         TreePath path = tree.getSelectionPath();
 
         if (path == null) return;
