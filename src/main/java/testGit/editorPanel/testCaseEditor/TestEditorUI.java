@@ -70,7 +70,7 @@ public class TestEditorUI implements Disposable, IToolBar, IEditorUI {
     private final Set<UUID> unsortedIds;
 
     @Getter
-    private List<TestCaseDto> currentTestCaseDtos;
+    private final List<TestCaseDto> currentTestCaseDtos;
 
     private TestSessionCache sessionCache;
 

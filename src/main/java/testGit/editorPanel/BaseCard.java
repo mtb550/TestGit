@@ -14,6 +14,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public abstract class BaseCard extends JBPanel<BaseCard> {
@@ -60,7 +61,7 @@ public abstract class BaseCard extends JBPanel<BaseCard> {
     }
 
     protected void updateUI(final int index, final String title, final List<JComponent> badges, final Map<String, String> details) {
-        titleLabel.setText(String.format("%d. %s", index + 1, title));
+        titleLabel.setText(String.format(Locale.ENGLISH, "%d. %s", index + 1, title));
 
         final Color currentRowColor = index % 2 == 0 ? new JBColor(Gray._245, Gray._60) : new JBColor(Gray._230, Gray._45);
         setBackground(currentRowColor);

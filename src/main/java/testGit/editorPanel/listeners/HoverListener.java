@@ -14,6 +14,7 @@ import testGit.pojo.dto.TestCaseDto;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Locale;
 import java.util.Optional;
 
 import static testGit.editorPanel.testRunEditor.RunCard.ACTIONS_TOTAL_WIDTH;
@@ -34,7 +35,7 @@ public class HoverListener extends MouseAdapter {
         if (yInCell <= JBUI.scale(45)) {
             final TestCaseDto tc = list.getModel().getElementAt(index);
             final int globalIndex = ((ui.getCurrentPage() - 1) * ui.getPageSize()) + index;
-            final String titleText = String.format("%d. %s", globalIndex + 1, tc.getDescription());
+            final String titleText = String.format(Locale.ENGLISH, "%d. %s", globalIndex + 1, tc.getDescription());
 
             final Font titleFont = JBFont.label().deriveFont(Font.BOLD, UIUtil.getLabelFont().getSize() + 10.0f);
             final FontMetrics fm = list.getFontMetrics(titleFont);

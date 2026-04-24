@@ -324,3 +324,7 @@ how to make timer is accurate
 --------------
 
 add new item in create test case ui: query or pre-condition.
+
+compatability with bycharm, use option of plugin that make same release matched with bycharm and intellij.
+install robot framework and try gutter and navigate to code.
+

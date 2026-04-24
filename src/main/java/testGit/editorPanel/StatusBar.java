@@ -14,6 +14,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class StatusBar extends JBPanel<StatusBar> {
     private final JBLabel statusLabel = new JBLabel();
@@ -101,8 +102,8 @@ public class StatusBar extends JBPanel<StatusBar> {
 
     /// TODO: remove visibleCount if not used later
     public void updatePaginationState(final int currentPage, final int totalPages, final int visibleCount, final int totalCount) {
-        ///statusLabel.setText(String.format("Showing %d of %d test cases", visibleCount, totalCount));
-        statusLabel.setText(String.format("0 of %d test cases", totalCount));
+        ///statusLabel.setText(String.format(Locale.ENGLISH,"Showing %d of %d test cases", visibleCount, totalCount));
+        statusLabel.setText(String.format(Locale.ENGLISH, "0 of %d test cases", totalCount));
 
         currentPageLabel.setText(currentPage + " of " + Math.max(1, totalPages));
 
@@ -119,14 +120,14 @@ public class StatusBar extends JBPanel<StatusBar> {
         final int selectedCount = selectedIndices.length;
 
         if (selectedCount > 1) {
-            statusLabel.setText(String.format("%d selected of %d test cases", selectedCount, totalCount));
+            statusLabel.setText(String.format(Locale.ENGLISH, "%d selected of %d test cases", selectedCount, totalCount));
 
         } else if (selectedCount == 1) {
             final int globalIndex = ((currentPage - 1) * pageSize) + selectedIndices[0];
-            statusLabel.setText(String.format("%d of %d test cases", globalIndex + 1, totalCount));
+            statusLabel.setText(String.format(Locale.ENGLISH, "%d of %d test cases", globalIndex + 1, totalCount));
 
         } else {
-            statusLabel.setText(String.format("0 of %d test cases", totalCount));
+            statusLabel.setText(String.format(Locale.ENGLISH, "0 of %d test cases", totalCount));
         }
     }
 
