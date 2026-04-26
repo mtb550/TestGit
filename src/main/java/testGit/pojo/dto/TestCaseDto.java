@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import testGit.pojo.Group;
 import testGit.pojo.Priority;
 
+import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -31,6 +32,10 @@ public class TestCaseDto {
 
     @Nullable
     private Boolean isHead;
+
+    @NotNull
+    @JsonIgnore
+    private Path path;
 
     @NotNull
     @Builder.Default

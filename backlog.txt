@@ -6,13 +6,13 @@ implement class debugger
 
 implement method debugger
 
-persist session for test case explorer and test plan explorer. once open intellij,
+persist session for test case explorer and test plan explorer. once open IntelliJ,
 explorer should show last opened hierarchy with focus in module.
 plan & implement delegation between leaders to leaders or leaders to members.
 
 fixes:
 add message that the loading tree in panel
-show buttons in test caseeditor tab like test run (run) and (view code)
+show buttons in test case editor tab like test run (run) and (view code)
 
 create action: RemoveTestProject in testGit setting
 
@@ -39,18 +39,18 @@ add final @NotNull for all methods in project
 
 create the new ui same creation for delete tree node
 
-project activity status to be removed from folder name and use separate xml that has rules
+project activity status to be removed from folder name and use separate XML that has rules
 
-implement details in marker file like created time date by modified, number of test cases , open bugss
+implement details in marker file like created time date by modified, number of test cases , open bugs
 
-add icons to the test case card in the buttom right corner once one click the test case card:
-run test method icone, navigate to code icon, ask ai icon
+add icons to the test case card in the bottom right corner once one click the test case card:
+run test method icon, navigate to code icon, ask AI icon
 
 view method code in details panel.
 
 update create new test case ui
 
-try to read the current root node for controller, no need to seach again in test run.
+try to read the current root node for controller, no need to search again in test run.
 you need just a move to check box object
 
 build changes page to do the commit and push.
@@ -61,17 +61,17 @@ enhance the test run editor panel
 
 enhance view panel. easy thing you can do it next step.
 
-make automation referrence automatic & create class and packages in project root automatic
+make automation reference automatic & create class and packages in project root automatic
 
 change test case and test run editor size by mouse wheel. or make the font control in testGit setting
 
-cusomize test packages to: module, epic, feature
+customize test packages to: module, epic, feature
 
-fix disappear expected, id..etc once drag and drop. and make sure tool bar checks are saved once colse then open again
+fix disappear expected, id.etc. once drag and drop. and make sure toolbar checks are saved once close then open again
 
-add badge (un-sorted) if the test case not linked to to the before one
+add badge (un-sorted) if the test case not linked to the before one
 
-faild create test runs, error in path
+failed create test runs, error in path
 
 move editor ui classes to the util, ui package
 
@@ -82,7 +82,7 @@ MouseAdapter (ClickCount==2): Used for Double-Click to open.
 ** PopupHandler: Replaces manual right-click math for context menus.
 ** Dynamic Tooltips: Quick peeks at data without clicking.
 
-change structure of test run to be same test set, folder and inside it will be the jsons
+change structure of test run to be same test set, folder and inside it will be the JSONs
 
 bug, after add new test case, it is not linked to the sorting.
 
@@ -90,11 +90,11 @@ add shortcut, if click CTRL+C on the selected test case on editor, then copy tes
 
 add popup menu in test case editor, group for copy, copy -> title, expected, steps, priority ...etc
 
-how to add offecial listener for status bar
+how to add official listener for status bar
 
 make mouse released after update paging value the click enter
 
-return the code for bgcolor for navigate, run
+return the code for bg color for navigate, run
 
 in code, build icon to move you to open the test case in view panel
 
@@ -108,13 +108,13 @@ add toolbar item, show (passed, failed, blocked)
 
 add dictionary to correct test cases titles
 
-add pre condition test case attribute (or query or test data)
+add pre-condition test case attribute (or query or test data)
 
 generate reports. (in progress)
 
 drag and drop for test runs, multi
 
-add dasboards and result in charts for each test run. right click details the show in view panel.
+add dashboards and result in charts for each test run. right click details the show in view panel.
 
 auto complete steps. (in progress)
 
@@ -122,17 +122,17 @@ grid view editor.
 
 add new filter for test execution status. shown only in run editor (show: passed, failed, blocked, untested) and not shown in test editor. I will put it to the backlog.
 
-open the bug on our onprem github once test case failed within execution of test run
+open the bug on our open GitHub once test case failed within execution of test run
 
 I think the method runner can run the class. no need for class runner. to be checked.
 
-extend intellij disposer to save tree state and open editors once close to re-open after run intellij again
-// use activity intellij class to open the editors once run directly
+extend IntelliJ disposer to save tree state and open editors once close to re-open after run IntelliJ again
+// use activity IntelliJ class to open the editors once run directly
 //public class TestGitStartupActivity implements ProjectActivity {}
 
 add sorting attribute to view panel in test case details so can update the sort value.
 
-make automation referrence auto added once create the test case.
+make automation reference auto added once create the test case.
 
 make created by auto added once create the test case.
 
@@ -152,25 +152,25 @@ generate test run report.
 
 make test case dto configurable.
 
-listener between editors correpted, not show the selected in view panel once change editor.
+listener between editors corrected, not show the selected in view panel once change editor.
 
 زر النسخ كتقرير خطأ (Copy Bug Report)
 
 persist save action.
 
-make step in the first line. make dot and capitalaize first letter automatic > steps
+make step in the first line. make dot and capitalize first letter automatic > steps
 make capitalize and dot in test case card and run card. move format method to Tools.
 
 implement progress icon in all 3 components. tree, editor, view
 
 all ui to be updated to the new ui, frameless and buttonless. remove and add and all ui (important)
 
-fix step issues: 1- remove use CTRL+D, 2- add new array item for all cursors not for the last only, 3-remove use cotation in step value, 4- step class not use the splitter class. it is too long
+fix step issues: 1- remove use CTRL+D, 2- add new array item for all cursors not for the last only, 3-remove use quotation in step value, 4- step class not use the splitter class. it is too long
 
-view panel enhancments:
+view panel enhancements:
 merge created by at and updated by at.
 
-try it. intellij hint.
+try it. IntelliJ hint.
 JBPopupFactory.getInstance()
                 .createHtmlTextBalloonBuilder(SUCCESS_MESSAGE, MessageType.INFO, null)
                 .setFadeoutTime(HINT_FADEOUT_MS)
@@ -180,17 +180,17 @@ JBPopupFactory.getInstance()
 ui enhance:
 1-
 persist edit. (pending). remove save method in section classes,
-instead use persistance manages in action consumer.
+instead use persistence manages in action consumer.
 
 2-
 refactor remove test case class: RemoveTestCaseDialog.java
 
 3-
-implement broadcating to update project tree.
+implement broadcasting to update project tree.
 Config.getProject().getMessageBus().syncPublisher(TestCaseEventListener.TEST_CASE_ADDED_TOPIC).onTestCaseAdded(newTc);});
 
-test editor cards is stored in cache and not disposed. once you close editor and update one of ots test case manually from json then re open the editor,
-you will get the old value, that is means the editor reads from momery. to be fixed.
+test editor cards is stored in cache and not disposed. once you close editor and update one of ots test case manually from JSON then re-open the editor,
+you will get the old value, that is means the editor reads from memory. to be fixed.
 
 remove sorting in test run and show the path as relationship many to many
 
@@ -198,13 +198,13 @@ make the sorting and unsorted badge run in separate thread.
 
 add actual result to test run and use it.
 
-let us continue, why do you need t retieve all list as I use paging ? why dont use the paging value to get the first x list, once go next page, load the next x list.
+let us continue, why do you need t retrieve all list as I use paging ? why don't use the paging value to get the first x list, once go next page, load the next x list.
 
-@ToolBar put title in tool bar details options and make checked and enabled.
+@ToolBar put title in toolbar details options and make checked and enabled.
 
-@BaseCard, put backgroound color for odd and even in Config and use it in all project to unify the UI.
+@BaseCard, put background color for odd and even in Config and use it in all project to unify the UI.
 
-@all classes, how to remove null checks or reduce it ? use empty strings in json files.
+@all classes, how to remove null checks or reduce it ? use empty strings in JSON files.
 another solution, here new code:
         Optional.ofNullable(ViewToolWindowFactory.getViewPanel()).ifPresent(ViewPanel::reset);
 old code:
@@ -214,16 +214,16 @@ ViewPanel viewer = ViewToolWindowFactory.getViewPanel();
         }
 also, will reduce @Nullable and put @NotNull
 
-remove most of static in project.
+remove most static in project.
 
 remove metadata and put make its logic inside run editor.
 
 refactor sorting logic, unsorted are the remain in the list, no need for the loop again.
 
-move all hash maps from: (to bypass re-hashing & over size reserving)
+move all hash maps from: (to bypass re-hashing & oversize reserving)
 Map<UUID, TestCaseDto> idMap = new HashMap<>();
 to:
-Maps.newHashMapWithExpectedSize(unsortedList.size()); (for key-value) --no equivelant exists in jdk17 but exist in jdk21
+Maps.newHashMapWithExpectedSize(unsortedList.size()); (for key-value) --no equivalent exists in jdk17 but exist in jdk21
 or new ArrayList<>(unsortedList.size()); (for numbers, names)
 so also, you need to refactor the ArrayList in project.
 
@@ -231,27 +231,27 @@ TestEditorUI (review pending) refactor sorting logic
 
 optional of nullable not recommended inside loop as it create temp objects in ram within process.
 
-istead of passing attributes between methods, use consumer or callback interface.
+instead of passing attributes between methods, use consumer or callback interface.
 
-editor toolbar must read from map, whatever in the map, show it. one map all use it, editor tool bar, edit tc popup, view panel, create tc. start oe by one.
+editor toolbar must read from map, whatever in the map, show it. one map all use it, editor toolbar, edit tc popup, view panel, create tc. start oe by one.
 
-add the buttons: reset to filter button on tool bar editor, default to details button.
+add the buttons: reset to filter button on toolbar editor, default to details button.
 
-make tool bar search on the right.
-remove tool bar texts(details, filter, refresh) and just put the icons.
+make toolbar search on the right.
+remove toolbar texts(details, filter, refresh) and just put the icons.
 reset filter on tob of filter list toolbar.(Reset)
 
 pending today 31.04.2026
 put filter btn to tool par
-unify the filteredlist method that in test editor ui and run editor ui (getFilteredList)
+unify the filtered list method that in test editor ui and run editor ui (getFilteredList)
 put and use @NotNull in test case dto and clear all related and update create test case to put empty not null. (major)
-implement tool bar button interface and enum that allow to add new buton later easely.
+implement toolbar button interface and enum that allow to add new button later easily.
 sorting number should be fixed in editor once search and list the results. (major)
 
-add shortcut CTRL+F to make focus on tool bar search filed
-add shortcut ESCAPE to remove focus in tool bar search filed
+add shortcut CTRL+F to make focus on toolbar search filed
+add shortcut ESCAPE to remove focus in toolbar search filed
 
-apply searchDebounceTimer in BaseToolBar for more stabability:
+apply searchDebounceTimer in BaseToolBar for more stability:
 searchDebounceTimer = new Timer(300, e -> callbacks.onFilterChanged());
 searchDebounceTimer.setRepeats(false);
 @Override
@@ -260,7 +260,7 @@ searchDebounceTimer.restart();
 }
 
 
-question: intellij Task.Backgroundable vs ApplicationManager.getApplication().executeOnPooledThread
+question: IntelliJ Task.Backgroundable vs ApplicationManager.getApplication().executeOnPooledThread
 
 parent if abstract to starts with Abstract, otherwise start with Base.
 
@@ -270,12 +270,12 @@ can add option to search in all test cases, get the test runs that test case add
 
 remove getFilteredList() in IEditorUI.
 
-customize run tool bar to add duration and other items to details. pending
+customize run toolbar to add duration and other items to details. pending
 
-put the description in details and apply controll to hide or show it.
+put the description in details and apply control to hide or show it.
 
-/// TODO: if statement here to be removed as all will title will shown and use preferrences that store others shown attributes.
-/// backlog: put title in tool bar details options and make checked and enabled.
+/// TODO: if statement here to be removed as all will title will show and use preferences that store others shown attributes.
+/// backlog: put title in toolbar details options and make checked and enabled.
 
 add test case path to run card.
 
@@ -283,7 +283,7 @@ open test run directly after save.
 
 build commit
 
-build edit menu for test run to edit actual result, statuses, put screenshots.. also you need to build create login, need to study business first.
+build edit menu for test run to edit actual result, statuses, put screenshots. also you need to build create login, need to study business first.
 
 how to isolate sort in card so you can show or hide.
 
@@ -292,17 +292,17 @@ persist save test run inputs.
 disable start execution if test run status is completed.
 
 add new object: commit id to RunEditorAttributes, it is required in each test run.
-work on test run properties, to show the test run configs like commit id and platform and status and language, add right click context menu and tool bar button
-on test properties, add charts for conclution of run, diagrams and by chart, and put it to the reports.
+work on test run properties, to show the test run configs like commit id and platform and status and language, add right click context menu and toolbar button
+on test properties, add charts for conclusion of run, diagrams and by chart, and put it to the report.
 in properties, show startedAt, endedAt, total duration.
 
-how to build light wait dialog for executing test cases that can be alwayse on top, show imprtant info,
-separate from intellij so i can minimize intellij and it will keep on top.
-show important info and i can click button to select what i can see,
+how to build light wait dialog for executing test cases that can be always on top, show important info,
+separate from IntelliJ so I can minimize IntelliJ, and it will keep on top.
+show important info and I can click button to select what I can see,
 accept CTRL+V to add base64 screenshots or exceptions,
 show pass/fail/blocked in proper and big ui.
 render to next test case if set the run status.
-may be pop up can help, mostly if can be alwayse on top.
+may be pop up can help, mostly if you can be always on top.
 
 ------------------------------------
 timer:===============
@@ -310,14 +310,14 @@ add to dto: startedAt, EndedAt, total duration, path.
 add path to run attributes.
 update status bar to show the total duration once start the first test case until the last.
 once start, change execute icon to stop icon, use white and black icon.
-build the logic if stop, stop status bar duration, stop current test case duration.
+build the logic if stopped, stop status bar duration, stop current test case duration.
 if start run, fill started at.
 if finish fill ended at.
 if stop fill dto duration for test run and current test case.
 implement disposer.
 
-update edit menu to show the actual result (with base64 screenshot or textearea exception), test case run status,
-or use current edit menu be make it not visible if current editor is test to not make tester confuse.
+update edit menu to show the actual result (with base64 screenshot or textarea exception), test case run status,
+or use current edit menu be make it not visible if current editor is the test editor to not make tester confuse.
 make shortcut to set actual result, screenshot or exception (evidence, find another word), test case run status.
 
 how to make timer is accurate
@@ -325,6 +325,8 @@ how to make timer is accurate
 
 add new item in create test case ui: query or pre-condition.
 
-compatability with bycharm, use option of plugin that make same release matched with bycharm and intellij.
+compatability with by charm, use option of plugin that make same release matched with by charm and IntelliJ.
 install robot framework and try gutter and navigate to code.
 
+amazing feature: select multi test set then open together it in the editor.
+drag and drop for project panel to editor panel

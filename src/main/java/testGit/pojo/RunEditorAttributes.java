@@ -50,7 +50,9 @@ public enum RunEditorAttributes {
             null
     ),
 
-    RUN_STATUS("Run Status", true, true,
+    RUN_STATUS("Run Status",
+            true,
+            true,
             item -> item.getStatus().name(),
             null
     ),
@@ -62,6 +64,14 @@ public enum RunEditorAttributes {
                 long s = item.getDuration().getSeconds();
                 return String.format(Locale.ENGLISH,"%02d:%02d", (s % 3600) / 60, (s % 60));
             },
+            null
+    ),
+
+    PATH(
+            "Path",
+            true,
+            true,
+            item -> item.getTestCaseDetails().getPath().toString(),
             null
     );
 

@@ -8,6 +8,14 @@ pluginManagement {
 
 plugins {
     id("org.jetbrains.intellij.platform.settings") version "2.13.1"
+    id("com.gradle.develocity") version "3.17.2"
 }
 
 rootProject.name = "TestGit"
+
+develocity {
+    buildScan {
+        termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
+        termsOfUseAgree = "yes"
+    }
+}

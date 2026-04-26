@@ -42,27 +42,24 @@ public class CreateTestCase extends DumbAwareAction {
         performCreation(ui, path, list, model);
     }
 
-    private static void performCreation(final IEditorUI ui, final Path path, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model) {
+    private static void performCreation(final @NotNull IEditorUI ui, final @NotNull Path path, final @NotNull JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model) {
         new CreateTestCaseUI().show(newTc -> {
             boolean isEmpty = model.isEmpty();
-            newTc.setIsHead(isEmpty);
+            newTc.setIsHead(isEmpty).setPath(path);
+
             TestCaseDto lastTc = isEmpty ? null : model.getElementAt(model.getSize() - 1);
             if (lastTc != null) lastTc.setNext(newTc.getId());
 
-            if (ui != null) ui.appendNewTestCase(newTc);
-            else model.add(newTc);
+            ui.appendNewTestCase(newTc);
 
             Project project = Config.getProject();
             List<TestCaseDto> affectedNodes = Stream.of(newTc, lastTc).filter(Objects::nonNull).toList();
             TestCaseCacheService.getInstance(project).addNewItems(affectedNodes);
             TestCasePersistService.getInstance(project).persist(path, affectedNodes);
 
-            SwingUtilities.invokeLater(() -> {
-                if (ui != null) ui.selectTestCase(newTc);
-                else if (list != null) list.setSelectedValue(newTc, true);
-            });
+            SwingUtilities.invokeLater(() -> ui.selectTestCase(newTc));
 
-            // todo,to be implemented by use brodcasting
+            // todo,to be implemented by use broadcasting
             /*
             Config.getProject().getMessageBus()
                   .syncPublisher(TestCaseEventListener.TEST_CASE_ADDED_TOPIC)

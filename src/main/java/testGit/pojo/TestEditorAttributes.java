@@ -62,7 +62,7 @@ public enum TestEditorAttributes {
             null
     ),
 
-    REFERRENCE("Referrence",
+    REFERENCE("Reference",
             true,
             false,
             TestCaseDto::getReference,
@@ -74,6 +74,14 @@ public enum TestEditorAttributes {
             true,
             tc -> tc.getGroup().stream().map(Group::getName).collect(Collectors.joining(", ")), // تم إزالة Optional
             tc -> tc.getGroup().stream().map(Shared::createGroupBadge).collect(Collectors.<JComponent>toList())
+    ),
+
+    PATH(
+            "Path",
+            true,
+            false,
+            tc -> tc.getPath().toString(),
+            null
     ),
 
     ///  TODO:: ORDER to be added to show or hide sequence numbers in editors

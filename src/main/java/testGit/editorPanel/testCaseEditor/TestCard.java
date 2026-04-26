@@ -23,9 +23,9 @@ public class TestCard extends BaseCard {
         badges.clear();
         details.clear();
 
-        System.out.println("render: " + tc.getDescription());
-        System.out.println("activeDetails: " + activeDetails);
-        System.out.println("----------\n\n");
+        //System.out.println("render: " + tc.getDescription());
+        //System.out.println("activeDetails: " + activeDetails);
+        //System.out.println("----------\n\n");
 
         Arrays.stream(TestEditorAttributes.values())
                 .filter(activeDetails::contains)
