@@ -4,6 +4,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import testGit.editorPanel.testCaseEditor.TestEditor;
@@ -16,6 +17,7 @@ import testGit.projectPanel.ProjectPanel;
 import testGit.ui.CreateNodesDialog;
 import testGit.ui.DirectoryOptions;
 import testGit.util.KeyboardSet;
+import testGit.util.Tools;
 import testGit.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -53,13 +55,13 @@ public class CreateTreeNode extends DumbAwareAction {
 
             switch (selectedClass) {
                 case Class<?> c when c == TestSetPackageDirectoryDto.class ->
-                        createTestSetPackage(enteredName, parentNode, parentDir, newDirPath);
+                        createTestSetPackage(e.getProject(), enteredName, parentNode, parentDir, newDirPath);
 
                 case Class<?> c when c == TestRunPackageDirectoryDto.class ->
                         createTestRunPackage(enteredName, parentNode, parentDir, newDirPath);
 
                 case Class<?> c when c == TestSetDirectoryDto.class ->
-                        createTestSet(enteredName, parentNode, parentDir, newDirPath);
+                        createTestSet(e.getProject(), enteredName, parentNode, parentDir, newDirPath);
 
                 case Class<?> c when c == TestRunDirectoryDto.class ->
                         createTestRun(enteredName, parentDir, newDirPath);
@@ -92,7 +94,7 @@ public class CreateTreeNode extends DumbAwareAction {
         );
     }
 
-    private void createTestSet(final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath) {
+    private void createTestSet(final Project project, final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath) {
         TestSetDirectoryDto newTestSetDirectory = new TestSetDirectoryDto()
                 .setName(name)
                 .setPath(parentDir.getPath().resolve(name));
@@ -100,10 +102,13 @@ public class CreateTreeNode extends DumbAwareAction {
         TreeUtilImpl.createVf(this, parentDir.getPath(), newTestSetDirectory.getName());
         TreeUtilImpl.createDataVf(this, newDirPath, DirectoryType.TS.getMarker());
         TreeUtilImpl.createNode(tree, parentNode, newTestSetDirectory);
+
+        Tools.createJavaClassInTestRoot(project, parentDir.getName(), name);
+
         TestEditor.open(newTestSetDirectory);
     }
 
-    private void createTestSetPackage(final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath) {
+    private void createTestSetPackage(final Project project, final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath) {
         TestSetPackageDirectoryDto newTestSetPackageDirectory = new TestSetPackageDirectoryDto()
                 .setName(name)
                 .setPath(parentDir.getPath().resolve(name));
@@ -111,6 +116,8 @@ public class CreateTreeNode extends DumbAwareAction {
         TreeUtilImpl.createVf(this, parentDir.getPath(), name);
         TreeUtilImpl.createNode(tree, parentNode, newTestSetPackageDirectory);
         TreeUtilImpl.createDataVf(this, newDirPath, DirectoryType.TSP.getMarker());
+
+        Tools.createJavaPackageInTestRoot(project, name);
     }
 
     private void createTestRunPackage(final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath) {

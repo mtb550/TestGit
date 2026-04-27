@@ -88,7 +88,7 @@ public enum TestEditorAttributes {
             "Path",
             true,
             false,
-            tc -> String.join(".", tc.getPath()),
+            tc -> String.join(" > ", tc.getPath()),
             null
     ),
 

@@ -51,7 +51,11 @@ public class CreateTestCase extends DumbAwareAction {
             TestCaseDto lastTc = isEmpty ? null : model.getElementAt(model.getSize() - 1);
             if (lastTc != null) lastTc.setNext(newTc.getId());
 
-            newTc.setPath(Tools.pathToFqcn(path));
+            List<String> logicalPath = Tools.extractLogicalPath(path);
+            newTc.setPath(logicalPath);
+
+            List<String> generatedFqcn = Tools.generateFqcn(logicalPath);
+            newTc.setFqcn(generatedFqcn);
 
             ui.appendNewTestCase(newTc);
 
@@ -59,6 +63,8 @@ public class CreateTestCase extends DumbAwareAction {
             List<TestCaseDto> affectedNodes = Stream.of(newTc, lastTc).filter(Objects::nonNull).toList();
             TestCaseCacheService.getInstance(project).addNewItems(affectedNodes);
             TestCasePersistService.getInstance(project).persist(path, affectedNodes);
+
+            Tools.createJavaMethodInClass(project, newTc.getFqcn(), newTc.getDescription());
 
             SwingUtilities.invokeLater(() -> ui.selectTestCase(newTc));
 
