@@ -42,18 +42,18 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- File editors -->
         <fileEditorProvider
-                implementation="testGit.editorPanel.UnifiedEditorProvider"
+                implementation="org.testin.editorPanel.UnifiedEditorProvider"
         />
 
         <!-- Services -->
         <applicationService
-                serviceImplementation="testGit.settings.AppSettingsState"
+                serviceImplementation="org.testin.settings.AppSettingsState"
         />
 
         <!-- Tool windows -->
         <toolWindow
                 id="TestGitTreePanel"
-                factoryClass="testGit.projectPanel.Main"
+                factoryClass="org.testin.projectPanel.Main"
                 anchor="left"
                 icon="/icons/pluginIcon.svg"
                 secondary="false"
@@ -62,7 +62,7 @@
 
         <toolWindow
                 id="TestGitViewPanel"
-                factoryClass="testGit.viewPanel.ViewToolWindowFactory"
+                factoryClass="org.testin.viewPanel.ViewToolWindowFactory"
                 anchor="bottom"
                 icon="/icons/pluginIcon.svg"
                 secondary="false"
@@ -84,8 +84,8 @@
 
         <!-- Settings -->
         <applicationConfigurable
-                instance="testGit.settings.AppSettingsConfigurable"
-                id="testGit.settings.AppSettingsConfigurable"
+                instance="org.testin.settings.AppSettingsConfigurable"
+                id="org.testin.settings.AppSettingsConfigurable"
                 key="settings.display.name.testgit"
                 bundle="messages.bundle"
                 groupId="tools"
@@ -94,7 +94,7 @@
         <!-- gutter -->
         <codeInsight.lineMarkerProvider
                 language="JAVA"
-                implementationClass="testGit.util.gutter.TestMethodGutter"
+                implementationClass="org.testin.util.gutter.TestMethodGutter"
         />
 
     </extensions>
