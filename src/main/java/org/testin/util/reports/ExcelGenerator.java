@@ -17,7 +17,7 @@ public final class ExcelGenerator {
     public byte[] generate(final @NotNull TestRunDto tr, final Map<UUID, TestCaseDto> detailsMap) throws Exception {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 
-            Workbook wb = new Workbook(os, "TestGit", "1.0");
+            Workbook wb = new Workbook(os, "testin", "1.0");
             Worksheet ws = wb.newWorksheet("Test Run Report");
 
             ws.value(0, 0, "Test Run Report:");
@@ -26,11 +26,11 @@ public final class ExcelGenerator {
 
             ws.value(1, 0, "Platform:");
             ws.style(1, 0).bold().set();
-            ws.value(1, 1, tr.getPlatform() != null ? tr.getPlatform() : "N/A");
+            ws.value(1, 1, tr.getPlatform());
 
             ws.value(2, 0, "Status:");
             ws.style(2, 0).bold().set();
-            ws.value(2, 1, tr.getStatus() != null ? tr.getStatus().name() : "N/A");
+            ws.value(2, 1, tr.getStatus().name());
 
             int row = 4;
             ws.value(row, 0, "Test Case ID");
@@ -43,34 +43,30 @@ public final class ExcelGenerator {
             ws.range(row, 0, row, 5).style().bold().fillColor("E0E0E0").set();
 
             row++;
-            if (tr.getResults() != null) {
-                for (var result : tr.getResults()) {
-                    UUID id = result.getTestCaseId();
-                    ws.value(row, 0, id != null ? id.toString() : "N/A");
+            for (var result : tr.getResults()) {
+                UUID id = result.getTestCaseId();
+                ws.value(row, 0, id != null ? id.toString() : "N/A");
 
-                    TestCaseDto details = (detailsMap != null) ? detailsMap.get(id) : null;
-                    String title = details != null ? details.getDescription() : "N/A";
-                    String expectedResult = details != null ? details.getExpectedResult() : "N/A";
+                TestCaseDto details = (detailsMap != null) ? detailsMap.get(id) : null;
+                String title = details != null ? details.getDescription() : "N/A";
+                String expectedResult = details != null ? details.getExpectedResult() : "N/A";
 
-                    ws.value(row, 1, title);
+                ws.value(row, 1, title);
 
-                    TestStatus statusEnum = result.getStatus();
-                    ws.value(row, 2, statusEnum.name());
-                    ws.style(row, 2).fontColor(statusEnum.getHex()).bold().set();
+                TestStatus statusEnum = result.getStatus();
+                ws.value(row, 2, statusEnum.name());
+                ws.style(row, 2).fontColor(statusEnum.getHex()).bold().set();
 
-                    String formattedDuration = Tools.getFormattedDuration(result.getDuration());
-                    ws.value(row, 3, formattedDuration != null ? formattedDuration : "N/A");
+                String formattedDuration = Tools.getFormattedDuration(result.getDuration());
+                ws.value(row, 3, formattedDuration);
 
-                    ws.value(row, 4, expectedResult);
-                    ws.style(row, 4).wrapText(true).set();
+                ws.value(row, 4, expectedResult);
+                ws.style(row, 4).wrapText(true).set();
 
-                    ws.value(row, 5, result.getStacktrace());
-                    ws.style(row, 5).wrapText(true).set();
+                ws.value(row, 5, result.getStacktrace());
+                ws.style(row, 5).wrapText(true).set();
 
-                    row++;
-                }
-            } else {
-                ws.value(row, 0, "No test results found.");
+                row++;
             }
 
             ws.width(0, 40); // ID

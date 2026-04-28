@@ -14,7 +14,7 @@ public class Config {
 
     @Setter
     @Getter
-    private static Path testGitPath;
+    private static Path testinPath;
 
     @Setter
     @Getter

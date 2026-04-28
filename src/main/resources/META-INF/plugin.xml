@@ -52,7 +52,7 @@
 
         <!-- Tool windows -->
         <toolWindow
-                id="TestGitTreePanel"
+                id="testinTreePanel"
                 factoryClass="org.testin.projectPanel.Main"
                 anchor="left"
                 icon="/icons/pluginIcon.svg"
@@ -61,7 +61,7 @@
         />
 
         <toolWindow
-                id="TestGitViewPanel"
+                id="testinViewPanel"
                 factoryClass="org.testin.viewPanel.ViewToolWindowFactory"
                 anchor="bottom"
                 icon="/icons/pluginIcon.svg"
@@ -70,15 +70,15 @@
         />
 
         <!-- Notifications -->
-        <notificationGroup id="TestGit Notifications"
+        <notificationGroup id="testin Notifications"
                            displayType="BALLOON"
                            isLogByDefault="true"
-                           key="notification.group.testgit"
+                           key="notification.group.testin"
         />
 
-        <notificationGroup id="TestGit ToolWindow Notifications"
+        <notificationGroup id="testin ToolWindow Notifications"
                            displayType="TOOL_WINDOW"
-                           toolWindowId="TestGitViewPanel"
+                           toolWindowId="testinViewPanel"
                            isLogByDefault="true"
         />
 
@@ -86,7 +86,7 @@
         <applicationConfigurable
                 instance="org.testin.settings.AppSettingsConfigurable"
                 id="org.testin.settings.AppSettingsConfigurable"
-                key="settings.display.name.testgit"
+                key="settings.display.name.testin"
                 bundle="messages.bundle"
                 groupId="tools"
         />

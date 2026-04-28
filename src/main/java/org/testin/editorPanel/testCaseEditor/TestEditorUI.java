@@ -118,7 +118,7 @@ public class TestEditorUI implements Disposable, IToolBar, IEditorUI {
         scrollPane.setBackground(UIUtil.getPanelBackground());
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        this.pageSize = PropertiesComponent.getInstance().getInt("testGit.pageSize", 50);
+        this.pageSize = PropertiesComponent.getInstance().getInt("testin.pageSize", 50);
 
         this.toolBar = new TestToolBar(this, this);
         mainPanel.add(toolBar, BorderLayout.NORTH);

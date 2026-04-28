@@ -1,4 +1,4 @@
-//package testGit.ui.TestCase.edit.bulk;
+//package testin.ui.TestCase.edit.bulk;
 //
 //import com.intellij.openapi.ui.popup.JBPopup;
 //import com.intellij.openapi.ui.popup.JBPopupFactory;
@@ -6,10 +6,10 @@
 //import com.intellij.ui.components.JBScrollPane;
 //import com.intellij.util.ui.JBFont;
 //import com.intellij.util.ui.JBUI;
-//import testGit.pojo.Config;
-//import testGit.pojo.Groups;
-//import testGit.pojo.dto.TestCaseDto;
-//import testGit.repository.PersistenceManager;
+//import testin.pojo.Config;
+//import testin.pojo.Groups;
+//import testin.pojo.dto.TestCaseDto;
+//import testin.repository.PersistenceManager;
 //
 //import javax.swing.*;
 //import java.awt.*;

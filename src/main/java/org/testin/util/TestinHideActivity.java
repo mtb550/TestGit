@@ -9,15 +9,15 @@ import kotlin.coroutines.Continuation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TestGitHideActivity implements ProjectActivity {
+public class TestinHideActivity implements ProjectActivity {
     @Nullable
     @Override
     public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
         ChangeListManager manager = ChangeListManager.getInstance(project);
 
-        LocalChangeList list = manager.findChangeList("TestGit Automation");
+        LocalChangeList list = manager.findChangeList("testin Automation");
         if (list == null) {
-            manager.addChangeList("TestGit Automation", "Files managed by automation - do not commit");
+            manager.addChangeList("testin Automation", "Files managed by automation - do not commit");
         }
         return Unit.INSTANCE;
     }

@@ -23,8 +23,8 @@ import java.awt.datatransfer.StringSelection;
 import java.io.File;
 
 public class Notifier {
-    private static final String GROUP_ID = "TestGit Notifications";
-    private static final String TOOL_WINDOW_GROUP = "TestGit ToolWindow Notifications";
+    private static final String GROUP_ID = "testin Notifications";
+    private static final String TOOL_WINDOW_GROUP = "testin ToolWindow Notifications";
 
     public static void showCustomBottomRightBalloon(String title, String message) {
         if (Config.getProject() == null) return;

@@ -14,7 +14,7 @@ fixes:
 add message that the loading tree in panel
 show buttons in test case editor tab like test run (run) and (view code)
 
-create action: RemoveTestProject in testGit setting
+create action: RemoveTestProject in testin setting
 
 zoom in, out by mouse and scroll. to allow user to control the size. in editor only.
 
@@ -63,7 +63,7 @@ enhance view panel. easy thing you can do it next step.
 
 make automation reference automatic & create class and packages in project root automatic
 
-change test case and test run editor size by mouse wheel. or make the font control in testGit setting
+change test case and test run editor size by mouse wheel. or make the font control in testin setting
 
 customize test packages to: module, epic, feature
 
@@ -128,7 +128,7 @@ I think the method runner can run the class. no need for class runner. to be che
 
 extend IntelliJ disposer to save tree state and open editors once close to re-open after run IntelliJ again
 // use activity IntelliJ class to open the editors once run directly
-//public class TestGitStartupActivity implements ProjectActivity {}
+//public class testinStartupActivity implements ProjectActivity {}
 
 add sorting attribute to view panel in test case details so can update the sort value.
 

@@ -37,7 +37,7 @@ public class CreateTestProject extends DumbAwareAction {
         //String folderName = String.format("%s_%s", newTestProjectDirectory.getName(), newTestProjectDirectory.getProjectStatus());
         String folderName = newTestProjectDirectory.getName();
 
-        Path projectPath = Config.getTestGitPath().resolve(folderName);
+        Path projectPath = Config.getTestinPath().resolve(folderName);
 
         newTestProjectDirectory.setPathName(folderName)
                 .setPath(projectPath);
@@ -53,7 +53,7 @@ public class CreateTestProject extends DumbAwareAction {
                                 .setName("Test Runs")
                 );
 
-        TreeUtilImpl.executeVfsAction(Config.getTestGitPath(), "IO Error", vf -> {
+        TreeUtilImpl.executeVfsAction(Config.getTestinPath(), "IO Error", vf -> {
             VirtualFile projectDir = vf.createChildDirectory(this, folderName);
             projectDir.createChildData(this, ".pr");
 

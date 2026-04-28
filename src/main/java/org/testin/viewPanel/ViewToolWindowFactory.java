@@ -25,7 +25,7 @@ public class ViewToolWindowFactory implements ToolWindowFactory, DumbAware {
 
     public static ToolWindow getToolWindow(final Project project) {
         if (project == null) return null;
-        return ToolWindowManager.getInstance(project).getToolWindow("TestGitViewPanel");
+        return ToolWindowManager.getInstance(project).getToolWindow("testinViewPanel");
     }
 
     public static ToolWindow getToolWindow() {

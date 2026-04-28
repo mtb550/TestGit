@@ -14,11 +14,11 @@ public class StartupActivity {
 
         AppSettingsState settings = AppSettingsState.getInstance();
 
-        Path testGitPath;
-        if (settings.rootTestGitPath != null && !settings.rootTestGitPath.isEmpty()) {
-            testGitPath = Path.of(settings.rootTestGitPath);
+        Path testinPath;
+        if (settings.rootTestinPath != null && !settings.rootTestinPath.isEmpty()) {
+            testinPath = Path.of(settings.rootTestinPath);
         } else {
-            testGitPath = Optional.ofNullable(project.getBasePath())
+            testinPath = Optional.ofNullable(project.getBasePath())
                     .map(Path::of)
                     .map(p -> p.resolve("org/testin"))
                     .orElse(null);
@@ -34,10 +34,10 @@ public class StartupActivity {
                     .orElse(null);
         }
 
-        System.out.println("testGit Path: " + testGitPath);
+        System.out.println("testin Path: " + testinPath);
         System.out.println("automation Path: " + automationPath);
 
-        Config.setTestGitPath(testGitPath);
+        Config.setTestinPath(testinPath);
         Config.setAutomationPath(automationPath);
 
         /// to be removed

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class RunDetailsPopup extends AbstractButton implements IToolbarItem {
 
-    private static final String KEY_DETAILS = "testGit.selectedDetails.run.v3";
+    private static final String KEY_DETAILS = "testin.selectedDetails.run.v3";
 
     private static final String DEFAULT_DETAILS = Arrays.stream(RunEditorAttributes.values())
             .filter(RunEditorAttributes::isStandardToolBarOption)

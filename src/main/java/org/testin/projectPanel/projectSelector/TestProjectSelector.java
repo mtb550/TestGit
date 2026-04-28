@@ -46,7 +46,7 @@ public class TestProjectSelector {
 
         testProjectList.removeAllElements();
 
-        Path root = Config.getTestGitPath();
+        Path root = Config.getTestinPath();
 
         if (Files.exists(root) && Files.isDirectory(root)) {
 

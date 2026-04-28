@@ -9,7 +9,7 @@ import java.awt.*;
 
 public class GenerateOrUpdateCodeCheckBox extends JBCheckBox {
 
-    public static final String PROP_KEY = "TestGit.CreateTestCase.GenerateCode";
+    public static final String PROP_KEY = "testin.CreateTestCase.GenerateCode";
 
     public GenerateOrUpdateCodeCheckBox(final TestCaseUIBase ui) {
         if (ui instanceof UpdateTestCaseUI) setToolTipText("Update automated test case");

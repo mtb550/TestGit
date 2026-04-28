@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 
 public class AppSettingsConfigurable implements Configurable {
 
-    private final TextFieldWithBrowseButton rootTestGitPathField = new TextFieldWithBrowseButton();
+    private final TextFieldWithBrowseButton rootTestinPathField = new TextFieldWithBrowseButton();
     private final JBTextField rootAutomationPathField = new JBTextField();
 
     private final DefaultComboBoxModel<TestProjectDirectoryDto> testProjectList = new DefaultComboBoxModel<>();
@@ -49,13 +49,13 @@ public class AppSettingsConfigurable implements Configurable {
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public String getDisplayName() {
-        return "TestGit Settings";
+        return "testin Settings";
     }
 
     @Nullable
     @Override
     public JComponent createComponent() {
-        rootTestGitPathField.addBrowseFolderListener(
+        rootTestinPathField.addBrowseFolderListener(
                 null,
                 FileChooserDescriptorFactory.createSingleFolderDescriptor()
                         .withTitle("Select Root Folder")
@@ -85,7 +85,7 @@ public class AppSettingsConfigurable implements Configurable {
         buttonPanel.add(renameBtn);
 
         return FormBuilder.createFormBuilder()
-                .addLabeledComponent(new JBLabel("Root TestGit folder: "), rootTestGitPathField, 1, false)
+                .addLabeledComponent(new JBLabel("Root testin folder: "), rootTestinPathField, 1, false)
                 .addLabeledComponent(new JBLabel("Root Automation folder: "), rootAutomationPathField, 1, false)
                 .addVerticalGap(10)
                 .addComponent(new TitledSeparator("Project Management"))
@@ -134,7 +134,7 @@ public class AppSettingsConfigurable implements Configurable {
     private void refreshProjectList() {
         testProjectList.removeAllElements();
 
-        Path rootPath = Path.of(rootTestGitPathField.getText());
+        Path rootPath = Path.of(rootTestinPathField.getText());
 
         if (Files.exists(rootPath) && Files.isDirectory(rootPath)) {
 
@@ -155,7 +155,7 @@ public class AppSettingsConfigurable implements Configurable {
     @Override
     public boolean isModified() {
         AppSettingsState settings = AppSettingsState.getInstance();
-        boolean modified = !rootTestGitPathField.getText().equals(settings.rootTestGitPath);
+        boolean modified = !rootTestinPathField.getText().equals(settings.rootTestinPath);
         modified |= !rootAutomationPathField.getText().equals(settings.rootAutomationPath);
         modified |= readModeCheckBox.isSelected() != settings.readMode;
         return modified;
@@ -164,7 +164,7 @@ public class AppSettingsConfigurable implements Configurable {
     @Override
     public void apply() {
         AppSettingsState settings = AppSettingsState.getInstance();
-        settings.rootTestGitPath = rootTestGitPathField.getText();
+        settings.rootTestinPath = rootTestinPathField.getText();
         settings.rootAutomationPath = rootAutomationPathField.getText();
 
         settings.readMode = readModeCheckBox.isSelected();
@@ -173,7 +173,7 @@ public class AppSettingsConfigurable implements Configurable {
     @Override
     public void reset() {
         AppSettingsState settings = AppSettingsState.getInstance();
-        rootTestGitPathField.setText(settings.rootTestGitPath != null ? settings.rootTestGitPath : "");
+        rootTestinPathField.setText(settings.rootTestinPath != null ? settings.rootTestinPath : "");
         rootAutomationPathField.setText(settings.rootAutomationPath != null ? settings.rootAutomationPath : "");
         readModeCheckBox.setSelected(settings.readMode);
         refreshProjectList();
