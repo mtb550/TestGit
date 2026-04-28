@@ -15,7 +15,7 @@ import java.util.List;
 
 public class CodeNavigator {
 
-    public static void toCode(final @NotNull List<String> fqcn, final @NotNull String testCaseName) {
+    public void toCode(final @NotNull List<String> fqcn, final @NotNull String testCaseName) {
         if (fqcn.isEmpty()) {
             Messages.showWarningDialog("This test case has no automation reference.", "Missing Reference");
             return;

@@ -81,13 +81,10 @@ public class HoverListener extends MouseAdapter {
         if (action != null) {
             final TestCaseDto tc = list.getModel().getElementAt(index);
 
-            if (action == CardHoverAction.NAVIGATE) {
-                NavigateToCode.execute(tc);
-            } else if (action == CardHoverAction.RUN) {
-                RunTestCase.execute(tc);
-            } else {
-                System.out.println("Test Case [" + tc.getDescription() + "] updated to: " + action.name());
-            }
+            if (action == CardHoverAction.NAVIGATE) new NavigateToCode(list).execute(tc);
+            else if (action == CardHoverAction.RUN) new RunTestCase(list).execute(tc);
+            else System.out.println("Test Case [" + tc.getDescription() + "] updated to: " + action.name());
+
             e.consume();
         }
     }

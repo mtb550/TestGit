@@ -20,11 +20,11 @@ public class NavigateToCode extends DumbAwareAction {
         this.registerCustomShortcutSet(KeyboardSet.NavigateToCode.getCustomShortcut(), list);
     }
 
-    public static void execute(final TestCaseDto tc) {
+    public void execute(final TestCaseDto tc) {
         if (tc == null) return;
         System.out.println("[TRACE] Navigating to: " + tc.getDescription());
         System.out.println("[TRACE] AutoRef: " + tc.getFqcn());
-        CodeNavigator.toCode(tc.getFqcn(), tc.getDescription());
+        new CodeNavigator().toCode(tc.getFqcn(), tc.getDescription());
     }
 
     @Override

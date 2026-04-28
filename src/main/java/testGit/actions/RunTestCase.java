@@ -12,26 +12,36 @@ import testGit.util.Tools;
 import testGit.util.notifications.Notifier;
 import testGit.util.runner.TestNGRunnerByMethod;
 
+import java.util.List;
+
 public class RunTestCase extends DumbAwareAction {
     private final JBList<TestCaseDto> list;
 
     public RunTestCase(final JBList<TestCaseDto> list) {
-        super("Run Test", "", AllIcons.RunConfigurations.TestState.Run);
+        super("Run Test", "Run selected test cases", AllIcons.RunConfigurations.TestState.Run);
         this.list = list;
         this.registerCustomShortcutSet(KeyboardSet.RunTestCase.getCustomShortcut(), list);
     }
 
-    public static void execute(final TestCaseDto tc) {
-        if (tc == null) return;
-        if ("RUNNING".equals(tc.getTempStatus())) return;
+    public void execute(final @NotNull List<TestCaseDto> testCases) {
+        if (testCases.isEmpty()) return;
 
-        TestNGRunnerByMethod.runTestMethod(tc.getFqcn(), Tools.toCamelCase(tc.getDescription()));
-        Notifier.info("Running Test Case: ", tc.getDescription());
+        for (TestCaseDto tc : testCases) {
+            if (tc == null || "RUNNING".equals(tc.getTempStatus())) continue;
+
+            Notifier.showCustomBottomRightBalloon("Running Test Case: ", tc.getDescription());
+            TestNGRunnerByMethod.runTestMethod(tc.getFqcn(), Tools.toCamelCase(tc.getDescription()));
+        }
+    }
+
+    public void execute(final @NotNull TestCaseDto tc) {
+        execute(List.of(tc));
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        execute(list.getSelectedValue());
+        List<TestCaseDto> selectedValues = list.getSelectedValuesList();
+        execute(selectedValues);
     }
 
     @Override

@@ -75,6 +75,12 @@
                            key="notification.group.testgit"
         />
 
+        <notificationGroup id="TestGit ToolWindow Notifications"
+                           displayType="TOOL_WINDOW"
+                           toolWindowId="TestGitViewPanel"
+                           isLogByDefault="true"
+        />
+
         <!-- Settings -->
         <applicationConfigurable
                 instance="testGit.settings.AppSettingsConfigurable"

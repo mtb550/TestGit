@@ -1,13 +1,14 @@
 package testGit.pojo;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.ui.components.JBList;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import testGit.actions.RunTestCase;
 import testGit.pojo.dto.TestCaseDto;
 
 import javax.swing.*;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 @Getter
 @AllArgsConstructor
@@ -16,34 +17,34 @@ public enum RunStatus {
             "IDLE",
             AllIcons.RunConfigurations.TestState.Run,
             "Run Test Case",
-            RunTestCase::execute
+            (tc, list) -> new RunTestCase(list).execute(tc)
     ),
 
     PASSED(
             "PASSED",
             AllIcons.RunConfigurations.TestPassed,
             "Run Test Case",
-            RunTestCase::execute
+            (tc, list) -> new RunTestCase(list).execute(tc)
     ),
 
     FAILED("FAILED",
             AllIcons.RunConfigurations.TestFailed,
             "Run Test Case",
-            RunTestCase::execute
+            (tc, list) -> new RunTestCase(list).execute(tc)
     ),
 
     RUNNING(
             "RUNNING",
             AllIcons.Actions.Suspend,
             "Test case is Running...",
-            dto -> {
+            (tc, list) -> {
             }
     );
 
     private final String statusName;
     private final Icon icon;
     private final String tooltip;
-    private final Consumer<TestCaseDto> action;
+    private final BiConsumer<TestCaseDto, JBList<TestCaseDto>> action;
 
     public static RunStatus fromString(final String status) {
         if (status == null || status.trim().isEmpty()) {
@@ -57,9 +58,9 @@ public enum RunStatus {
         return IDLE;
     }
 
-    public void executeAction(final TestCaseDto dto) {
+    public void executeAction(final TestCaseDto dto, final JBList<TestCaseDto> list) {
         if (action != null) {
-            action.accept(dto);
+            action.accept(dto, list);
         }
     }
 }

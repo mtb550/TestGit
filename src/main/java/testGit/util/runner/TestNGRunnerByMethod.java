@@ -4,9 +4,6 @@ import com.intellij.execution.ProgramRunnerUtil;
 import com.intellij.execution.RunManager;
 import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.execution.executors.DefaultRunExecutor;
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
@@ -17,13 +14,14 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.theoryinpractice.testng.configuration.TestNGConfiguration;
 import com.theoryinpractice.testng.configuration.TestNGConfigurationType;
 import com.theoryinpractice.testng.model.TestType;
+import org.jetbrains.annotations.NotNull;
 import testGit.pojo.Config;
 
 import java.util.List;
 
 public class TestNGRunnerByMethod {
 
-    public static void runTestMethod(List<String> fqcn, String methodName) {
+    public static void runTestMethod(final @NotNull List<String> fqcn, final @NotNull String methodName) {
         final Project project = Config.getProject();
 
         ApplicationManager.getApplication().executeOnPooledThread(() ->
@@ -60,26 +58,16 @@ public class TestNGRunnerByMethod {
                             configuration.getPersistantData().MAIN_CLASS_NAME = fqcnString;
                             configuration.getPersistantData().METHOD_NAME = methodName;
                             configuration.getPersistantData().getPatterns().clear();
+                            configuration.setAllowRunningInParallel(true);
 
-                            if (finalModule != null) {
+                            if (finalModule != null)
                                 configuration.setModule(finalModule);
-                            }
 
                             runManager.addConfiguration(settings);
-
                             runManager.setTemporaryConfiguration(settings);
                         }
 
                         runManager.setSelectedConfiguration(settings);
-
-                        Notification notification = new Notification(
-                                "Print",
-                                "Starting automated test",
-                                "Running: " + configName,
-                                NotificationType.INFORMATION
-                        );
-                        Notifications.Bus.notify(notification, project);
-
                         ProgramRunnerUtil.executeConfiguration(settings, DefaultRunExecutor.getRunExecutorInstance());
                     });
                 }));
