@@ -186,8 +186,7 @@ public class ImportExcel extends DumbAwareAction {
         }
 
         return Arrays.stream(text.split("\n"))
-                .map(line -> line.replaceFirst("^\\d+[-.]\\s*", "").trim()) // إزالة الأرقام اليدوية القديمة
-                .filter(line -> !line.isEmpty())
+                .map(line -> line.replaceFirst("^\\d+[-.]\\s*", "").trim()).filter(line -> !line.isEmpty())
                 .collect(Collectors.toList());
     }
 

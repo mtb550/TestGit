@@ -429,7 +429,6 @@ public abstract class JsonArraySplitBulkSection {
             }
         }.registerCustomShortcutSet(new CustomShortcutSet(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, KeyEvent.SHIFT_DOWN_MASK)), rightEditor.getContentComponent());
 
-        // 🌟 الاختصار الجديد: Select All Carets (CTRL+SHIFT+A)
         new DumbAwareAction() {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {

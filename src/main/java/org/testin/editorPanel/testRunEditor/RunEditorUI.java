@@ -188,7 +188,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
     }
 
     private void buildOpeningPanel() {
-        toolBar = new RunToolBar(this, this);
+        toolBar = new RunToolBar(this);
 
         model = new CollectionListModel<>();
         list = new JBList<>(model);
@@ -547,6 +547,10 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
             sessionCache.dispose();
         }
 
+        if (toolBar != null) {
+            toolBar.dispose();
+        }
+
         allTestCaseDtos.clear();
         initialTestCaseIds.clear();
         resultsMap.clear();
@@ -604,24 +608,20 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
 
         if (runItem == null) return;
 
-        // تصفير الوقت عند البدء الجديد
         runItem.setDuration(Duration.ZERO);
         currentTestStartTime = System.currentTimeMillis();
 
         if (executionTimer != null) executionTimer.stop();
 
         executionTimer = new Timer(1000, e -> {
-            // حساب الوقت المنقضي وتحديث الـ DTO مباشرة
             long seconds = (System.currentTimeMillis() - currentTestStartTime) / 1000;
             runItem.setDuration(Duration.ofSeconds(seconds));
 
-            // إعادة رسم القائمة لتحديث قيمة الـ Duration الظاهرة في البطاقة
             list.repaint();
         });
         executionTimer.start();
     }
 
-    // استدعاء هذه الدالة عند النقر على (PASS/FAIL)
     public void updateStatusAndNext(TestStatus status) {
         if (currentlyExecutingIndex == -1) return;
 
@@ -631,7 +631,6 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
         if (item != null) {
             item.setStatus(status);
             item.setExecutedAt(LocalDateTime.now());
-            // الـ duration تم تحديثه بالفعل بواسطة الـ timer
         }
 
         startTimerForIndex(currentlyExecutingIndex + 1);
@@ -642,15 +641,12 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
             executionTimer.stop();
         }
         currentlyExecutingIndex = -1;
-        // يمكن إضافة تنبيه للمستخدم أو تحديث حالة الـ Toolbar
     }
 
     @Override
     public void onStartExecutionClicked() {
-        // البدء من أول عنصر محدد، أو من البداية إذا لم يكن هناك تحديد
         int startIndex = list.getSelectedIndex() != -1 ? list.getSelectedIndex() : 0;
 
-        // استدعاء الدالة التي قمنا ببرمجتها سابقاً
         startTimerForIndex(startIndex);
     }
 }

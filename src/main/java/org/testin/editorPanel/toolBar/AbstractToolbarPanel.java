@@ -23,16 +23,13 @@ public abstract class AbstractToolbarPanel extends JBPanel<AbstractToolbarPanel>
     @Getter
     private final Map<Class<? extends IToolbarItem>, IToolbarItem> toolbarItems = new HashMap<>();
 
-    public AbstractToolbarPanel(final Disposable pDisposable, final IToolBar callbacks) {
+    public AbstractToolbarPanel(final IToolBar callbacks) {
         super(new GridBagLayout());
         this.callbacks = callbacks;
 
         setBackground(JBUI.CurrentTheme.EditorTabs.background());
 
         this.searchTxt = new SearchTxt(callbacks::onToolBarSearchValueChanged);
-
-        Disposer.register(pDisposable, this);
-        Disposer.register(this, this.searchTxt);
     }
 
     public <T extends IToolbarItem> T getToolbarItem(Class<T> itemClass) {
@@ -67,5 +64,8 @@ public abstract class AbstractToolbarPanel extends JBPanel<AbstractToolbarPanel>
     public void dispose() {
         this.removeAll();
         this.toolbarItems.clear();
+        if (this.searchTxt != null) {
+            Disposer.dispose(this.searchTxt);
+        }
     }
 }

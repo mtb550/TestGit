@@ -69,15 +69,12 @@ public class TestMouseListener extends MouseAdapter {
         }
     }
 
-    // ابحث عن الجزء الذي يعالج النقر في TestMouseListener
     public void mousePressed(MouseEvent e) {
-        // ... كود تحديد العنصر الحالي
 
         if (ui instanceof RunEditorUI runUI) {
             String hoveredAction = runUI.getHoveredIconAction();
             if (hoveredAction != null) {
                 try {
-                    // تحويل النص (مثل "PASSED") إلى Enum واستدعاء المحرك
                     TestStatus status = TestStatus.valueOf(hoveredAction);
                     runUI.updateStatusAndNext(status);
                 } catch (IllegalArgumentException ignored) {

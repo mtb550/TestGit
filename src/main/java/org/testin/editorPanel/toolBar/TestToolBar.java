@@ -1,14 +1,13 @@
 package org.testin.editorPanel.toolBar;
 
-import com.intellij.openapi.Disposable;
 import org.testin.editorPanel.toolBar.components.*;
 
 import java.util.List;
 
 public class TestToolBar extends AbstractToolbarPanel {
 
-    public TestToolBar(final Disposable pDisposable, final IToolBar callbacks) {
-        super(pDisposable, callbacks);
+    public TestToolBar(final IToolBar callbacks) {
+        super(callbacks);
         layoutComponents();
     }
 

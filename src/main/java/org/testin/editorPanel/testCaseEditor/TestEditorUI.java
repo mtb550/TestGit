@@ -120,7 +120,7 @@ public class TestEditorUI implements Disposable, IToolBar, IEditorUI {
 
         this.pageSize = PropertiesComponent.getInstance().getInt("testin.pageSize", 50);
 
-        this.toolBar = new TestToolBar(this, this);
+        this.toolBar = new TestToolBar(this);
         mainPanel.add(toolBar, BorderLayout.NORTH);
 
         this.syncListener = new ModelSyncListener(this, model);
@@ -437,6 +437,10 @@ public class TestEditorUI implements Disposable, IToolBar, IEditorUI {
 
         if (sessionCache != null) {
             sessionCache.dispose();
+        }
+
+        if (toolBar != null) {
+            toolBar.dispose();
         }
 
         if (list != null) {

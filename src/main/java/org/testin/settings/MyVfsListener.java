@@ -9,15 +9,15 @@ import java.util.List;
 public class MyVfsListener implements BulkFileListener {
     @Override
     public void after(@NotNull List<? extends @NotNull VFileEvent> events) {
-//        for (VFileEvent event : events) {
-//            VirtualFile file = event.getFile();
-//            if (file != null && file.isValid()) {
-//                if (event.getPath().contains("testin")) {
-//                    Config.setRootFolder();
-//                    break;
-//                }
-//            }
-//        }
+/*        for (VFileEvent event : events) {
+            VirtualFile file = event.getFile();
+            if (file != null && file.isValid()) {
+                if (event.getPath().contains("testin")) {
+                    Config.setRootFolder();
+                    break;
+                }
+            }
+        }*/
     }
 
 }
