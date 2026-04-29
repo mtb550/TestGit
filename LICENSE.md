@@ -1,5 +1,7 @@
 ### Developer End User License Agreement (EULA)
 
+**Last Updated: April 30, 2026**
+
 This Developer End User License Agreement (“EULA”) is concluded between You and the Developer with respect to the Plugin. You acknowledge and agree that the Developer is the sole licensor of the Plugin and that JetBrains is not a party to this EULA or any contractual relationship established by it.
 
 **1. Definitions**
