@@ -1,15 +1,15 @@
 package org.testin.pojo;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.project.Project;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.testin.actions.*;
+import org.testin.actions.CreateTestRun;
+import org.testin.actions.CreateTestRunPackage;
+import org.testin.actions.CreateTestSet;
+import org.testin.actions.CreateTestSetPackage;
 import org.testin.pojo.dto.dirs.*;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import java.nio.file.Path;
 
 @Getter
 @AllArgsConstructor
@@ -90,10 +90,5 @@ public enum DirectoryType {
     private final Icon icon;
     private final Class<? extends DirectoryDto> clazz;
     private final String marker;
-    private final NodeCreator creator;
-
-    @FunctionalInterface
-    public interface NodeCreator {
-        void execute(final CreateTestNode action, final Project project, final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath);
-    }
+    private final NodeCreator action;
 }

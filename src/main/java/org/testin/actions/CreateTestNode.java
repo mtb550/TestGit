@@ -47,8 +47,8 @@ public class CreateTestNode extends DumbAwareAction {
 
             Path newDirPath = parentDir.getPath().resolve(enteredName);
 
-            if (selectedType != null && selectedType.getCreator() != null)
-                selectedType.getCreator().execute(this, e.getProject(), enteredName, parentNode, parentDir, newDirPath);
+            if (selectedType != null && selectedType.getAction() != null)
+                selectedType.getAction().execute(this, e.getProject(), enteredName, parentNode, parentDir, newDirPath);
             else
                 System.out.println("No creation logic defined for type: " + selectedType);
 

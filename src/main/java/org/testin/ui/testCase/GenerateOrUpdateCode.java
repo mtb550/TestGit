@@ -21,6 +21,7 @@ public class GenerateOrUpdateCode extends JBCheckBox {
         setBorder(JBUI.Borders.emptyRight(8));
 
         setSelected(PropertiesComponent.getInstance().getBoolean(PROP_KEY, true));
+
         addItemListener(e -> PropertiesComponent.getInstance().setValue(PROP_KEY, isSelected(), true));
     }
 }
