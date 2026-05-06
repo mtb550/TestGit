@@ -40,6 +40,9 @@
     <!-- Extensions                                                           -->
     <!-- ================================================================== -->
     <extensions defaultExtensionNs="com.intellij">
+        <!-- First run activity -->
+        <postStartupActivity implementation="org.testin.settings.StartupActivity"/>
+
         <!-- File editors -->
         <fileEditorProvider
                 implementation="org.testin.editorPanel.UnifiedEditorProvider"

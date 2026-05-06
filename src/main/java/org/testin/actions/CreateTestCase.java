@@ -66,7 +66,7 @@ public class CreateTestCase extends DumbAwareAction {
             TestCasePersistService.getInstance(project).persist(path, affectedNodes);
 
             if (codeGenerator != null && codeGenerator.isSelected())
-                new CreateJavaMethodInClass().execute(project, newTc.getFqcn(), newTc.getDescription());
+                new CreateJavaMethodInClass().execute(project, newTc.getFqcn(), newTc);
 
             SwingUtilities.invokeLater(() -> ui.selectTestCase(newTc));
 

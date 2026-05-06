@@ -8,10 +8,7 @@ import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import com.intellij.psi.search.FilenameIndex;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
@@ -20,17 +17,18 @@ import org.testin.util.notifications.Notifier;
 import org.testin.viewPanel.ViewToolWindowFactory;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class TestMethodGutter extends RelatedItemLineMarkerProvider implements DumbAware {
 
     @Override
     protected void collectNavigationMarkers(@NotNull PsiElement element, @NotNull Collection<? super RelatedItemLineMarkerInfo<?>> result) {
-        if (!(element instanceof PsiJavaToken token) ||
-                token.getTokenType() != JavaTokenType.STRING_LITERAL) {
+        if (!(element instanceof PsiJavaToken token) || token.getTokenType() != JavaTokenType.STRING_LITERAL) {
             return;
         }
 
@@ -38,7 +36,7 @@ public class TestMethodGutter extends RelatedItemLineMarkerProvider implements D
         if (literal == null) return;
 
         PsiNameValuePair nameValuePair = PsiTreeUtil.getParentOfType(literal, PsiNameValuePair.class);
-        if (nameValuePair == null || !"description".equals(nameValuePair.getName())) return;
+        if (nameValuePair == null || !"testName".equals(nameValuePair.getName())) return;
 
         PsiAnnotation annotation = PsiTreeUtil.getParentOfType(nameValuePair, PsiAnnotation.class);
         if (annotation == null || !annotation.getText().contains("@Test")) return;
@@ -60,34 +58,46 @@ public class TestMethodGutter extends RelatedItemLineMarkerProvider implements D
     }
 
     private void openViewPanel(Project project, String targetId) {
+        Path rootPath = Config.getTestinPath();
+        if (rootPath == null) {
+            Notifier.error("Config Error", "Testin path is not configured.");
+            return;
+        }
+
+        System.out.println("[GUTTER TRACE] Root path: " + rootPath);
+        System.out.println("[GUTTER TRACE] Searching for UUID: " + targetId);
+
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            final VirtualFile[] fileRef = new VirtualFile[1];
-
-            ApplicationManager.getApplication().runReadAction(() -> {
-                Collection<VirtualFile> files = FilenameIndex.getVirtualFilesByName(
-                        targetId + ".json",
-                        GlobalSearchScope.projectScope(project)
-                );
-                if (!files.isEmpty()) fileRef[0] = files.iterator().next();
-            });
-
-            if (fileRef[0] == null) {
-                ApplicationManager.getApplication().invokeLater(() ->
-                        Notifier.warn("Not Mapped", "No JSON file mapped for description: " + targetId)
-                );
-                return;
-            }
-
             try {
-                File file = new File(fileRef[0].getPath());
-                TestCaseDto dto = Config.getMapper().readValue(file, TestCaseDto.class);
-                Path path = file.getParentFile().toPath();
+                File foundFile;
+                try (Stream<Path> stream = Files.walk(rootPath)) {
+                    foundFile = stream
+                            .filter(p -> p.getFileName().toString().equals(targetId + ".json"))
+                            .map(Path::toFile)
+                            .findFirst()
+                            .orElse(null);
+                }
 
-                ApplicationManager.getApplication().invokeLater(() -> ViewToolWindowFactory.showPanel(project, List.of(dto), path));
+                if (foundFile == null) {
+                    System.err.println("[GUTTER TRACE] File not found in external path: " + targetId + ".json");
+                    ApplicationManager.getApplication().invokeLater(() ->
+                            Notifier.warn("Not Found", "No JSON file found in external path for ID: " + targetId)
+                    );
+                    return;
+                }
+
+                System.out.println("[GUTTER TRACE] Found file: " + foundFile.getAbsolutePath());
+
+                TestCaseDto dto = Config.getMapper().readValue(foundFile, TestCaseDto.class);
+                Path parentPath = foundFile.getParentFile().toPath();
+
+                ApplicationManager.getApplication().invokeLater(() ->
+                        ViewToolWindowFactory.showPanel(project, List.of(dto), parentPath));
 
             } catch (Exception ex) {
+                System.err.println("[GUTTER TRACE] IO Error: " + ex.getMessage());
                 ApplicationManager.getApplication().invokeLater(() ->
-                        Notifier.error("Error", "Could not read JSON file.")
+                        Notifier.error("Error", "Could not read JSON file: " + ex.getMessage())
                 );
             }
         });

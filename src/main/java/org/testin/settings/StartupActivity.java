@@ -2,7 +2,10 @@ package org.testin.settings;
 
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.startup.ProjectActivity;
+import kotlin.coroutines.Continuation;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.testin.pojo.Config;
 import org.testin.util.notifications.Notifier;
 import org.testin.util.runner.TestCaseExecutionTracker;
@@ -10,7 +13,8 @@ import org.testin.util.runner.TestCaseExecutionTracker;
 import java.nio.file.Path;
 import java.util.Optional;
 
-public class StartupActivity {
+public class StartupActivity implements ProjectActivity {
+
     public static void execute(@NotNull Project project) {
         System.out.println("StartupActivity.execute()");
 
@@ -49,5 +53,12 @@ public class StartupActivity {
         System.out.println("automation Path: " + automationPath);
 
         TestCaseExecutionTracker.initGlobalListener(Config.getProject());
+    }
+
+    @Override
+    public @Nullable Object execute(@NotNull Project project, @NotNull Continuation<? super kotlin.Unit> continuation) {
+
+        execute(project);
+        return kotlin.Unit.INSTANCE;
     }
 }

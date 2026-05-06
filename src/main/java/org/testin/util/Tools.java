@@ -371,7 +371,7 @@ public class Tools {
 
         for (Module module : modules) {
             List<VirtualFile> sourceRoots = ModuleRootManager.getInstance(module)
-                    .getSourceRoots(JavaSourceRootType.SOURCE);
+                    .getSourceRoots(JavaSourceRootType.TEST_SOURCE);
 
             if (!sourceRoots.isEmpty()) {
                 return sourceRoots.getFirst();

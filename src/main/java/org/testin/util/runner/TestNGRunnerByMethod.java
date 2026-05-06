@@ -16,19 +16,36 @@ import com.theoryinpractice.testng.configuration.TestNGConfigurationType;
 import com.theoryinpractice.testng.model.TestType;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
+import org.testin.util.Tools;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TestNGRunnerByMethod {
 
-    public static void runTestMethod(final @NotNull List<String> fqcn, final @NotNull String methodName) {
+    public static void runTestMethod(final @NotNull List<String> rawFqcn, final @NotNull String methodName) {
         final Project project = Config.getProject();
 
         ApplicationManager.getApplication().executeOnPooledThread(() ->
                 ApplicationManager.getApplication().runReadAction(() -> {
 
-                    String fqcnString = String.join(".", fqcn);
-                    System.out.println("fqcn: " + fqcnString);
+                    List<String> cleanedFqcn = sanitizeFqcn(rawFqcn);
+                    if (cleanedFqcn.isEmpty()) return;
+
+                    List<String> packageList = new ArrayList<>(cleanedFqcn);
+                    String baseClassName = packageList.removeLast();
+                    String expectedClassName = Tools.toPascalCase(baseClassName);
+
+                    if (expectedClassName.toLowerCase().endsWith("test")) {
+                        if (expectedClassName.endsWith("test")) {
+                            expectedClassName = expectedClassName.substring(0, expectedClassName.length() - 4) + "Test";
+                        }
+                    } else {
+                        expectedClassName += "Test";
+                    }
+
+                    String fqcnString = String.join(".", packageList).toLowerCase() + "." + expectedClassName;
+                    System.out.println("[RUNNER] Running Test with Cleaned FQCN: " + fqcnString);
 
                     PsiClass targetClass = JavaPsiFacade.getInstance(project)
                             .findClass(fqcnString, GlobalSearchScope.projectScope(project));
@@ -39,14 +56,14 @@ public class TestNGRunnerByMethod {
                     }
 
                     final Module finalModule = module;
+                    final String finalFqcn = fqcnString;
 
+                    String finalExpectedClassName = expectedClassName;
                     ApplicationManager.getApplication().invokeLater(() -> {
-
                         RunManager runManager = RunManager.getInstance(project);
                         TestNGConfigurationType configType = TestNGConfigurationType.getInstance();
 
-                        String simpleClassName = fqcnString.substring(fqcn.lastIndexOf('.') + 1);
-                        String configName = simpleClassName + "." + methodName;
+                        String configName = finalExpectedClassName + "." + methodName;
 
                         RunnerAndConfigurationSettings settings = runManager.findConfigurationByName(configName);
 
@@ -55,7 +72,7 @@ public class TestNGRunnerByMethod {
                             TestNGConfiguration configuration = (TestNGConfiguration) settings.getConfiguration();
 
                             configuration.getPersistantData().TEST_OBJECT = TestType.METHOD.getType();
-                            configuration.getPersistantData().MAIN_CLASS_NAME = fqcnString;
+                            configuration.getPersistantData().MAIN_CLASS_NAME = finalFqcn; // الاسم النظيف (azzam.az2.Ts1Test)
                             configuration.getPersistantData().METHOD_NAME = methodName;
                             configuration.getPersistantData().getPatterns().clear();
                             configuration.setAllowRunningInParallel(true);
@@ -64,12 +81,26 @@ public class TestNGRunnerByMethod {
                                 configuration.setModule(finalModule);
 
                             runManager.addConfiguration(settings);
-                            runManager.setTemporaryConfiguration(settings);
                         }
 
+                        runManager.setTemporaryConfiguration(settings);
                         runManager.setSelectedConfiguration(settings);
                         ProgramRunnerUtil.executeConfiguration(settings, DefaultRunExecutor.getRunExecutorInstance());
                     });
                 }));
+    }
+
+    private static List<String> sanitizeFqcn(List<String> rawFqcn) {
+        List<String> sanitized = new ArrayList<>();
+        boolean startAdding = false;
+        for (String part : rawFqcn) {
+            if (startAdding) {
+                if (!part.equalsIgnoreCase("testCases")) {
+                    sanitized.add(part.replace(" ", "").toLowerCase());
+                }
+            }
+            if (part.equalsIgnoreCase("testin")) startAdding = true;
+        }
+        return sanitized;
     }
 }

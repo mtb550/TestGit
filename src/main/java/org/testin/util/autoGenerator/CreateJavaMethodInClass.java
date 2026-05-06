@@ -9,6 +9,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
+import org.testin.pojo.dto.TestCaseDto;
 import org.testin.util.Tools;
 
 import java.util.ArrayList;
@@ -16,21 +17,16 @@ import java.util.List;
 
 public class CreateJavaMethodInClass {
 
-    public void execute(@NotNull final Project project, @NotNull final List<String> rawFqcn, @NotNull final String testCaseName) {
-        if (rawFqcn.isEmpty() || testCaseName.isEmpty()) return;
+    public void execute(@NotNull final Project project, @NotNull final List<String> rawFqcn, @NotNull final TestCaseDto tc) {
+        if (rawFqcn.isEmpty() || tc.getDescription().isEmpty()) return;
 
         ApplicationManager.getApplication().invokeLater(() -> WriteCommandAction.runWriteCommandAction(project, "Create Test Method", null, () -> {
             try {
                 List<String> cleanedFqcn = sanitizeFqcn(rawFqcn);
-
-                if (cleanedFqcn.isEmpty()) {
-                    System.err.println("Failed to sanitize FQCN. Path might be outside testin directory.");
-                    return;
-                }
+                if (cleanedFqcn.isEmpty()) return;
 
                 List<String> packageList = new ArrayList<>(cleanedFqcn);
                 String baseClassName = packageList.removeLast();
-
                 String expectedClassName = Tools.toPascalCase(baseClassName);
 
                 if (expectedClassName.toLowerCase().endsWith("test")) {
@@ -43,9 +39,7 @@ public class CreateJavaMethodInClass {
 
                 String packageName = String.join(".", packageList).toLowerCase();
                 String fqcnString = packageName + "." + expectedClassName;
-                String methodName = Tools.toCamelCase(testCaseName);
-
-                System.out.println("[DEBUG] Corrected FQCN: " + fqcnString);
+                String methodName = Tools.toCamelCase(tc.getDescription());
 
                 JavaPsiFacade psiFacade = JavaPsiFacade.getInstance(project);
                 GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
@@ -65,11 +59,9 @@ public class CreateJavaMethodInClass {
                             if (javaFile == null) {
                                 javaFile = packageDir.createChildData(this, fileName);
                                 String basePackage = String.join(".", packageList);
-                                String fileContent = "package " + basePackage + ";\n\n" +
-                                        "public class " + expectedClassName + " {\n" +
-                                        "    \n" +
-                                        "}\n";
+                                String fileContent = "package " + basePackage + ";\n\npublic class " + expectedClassName + " {\n\n}\n";
                                 VfsUtil.saveText(javaFile, fileContent);
+                                javaFile.refresh(false, false);
                             }
                         }
                     }
@@ -79,9 +71,9 @@ public class CreateJavaMethodInClass {
                 }
 
                 if (targetClass != null) {
-                    injectMethod(project, targetClass, methodName, testCaseName);
+                    injectMethod(project, targetClass, methodName, tc);
                 } else {
-                    System.err.println("Critical Error: Class still not found for FQCN: " + fqcnString);
+                    retryInjectPhysically(project, packageList, expectedClassName, methodName, tc);
                 }
 
             } catch (Exception ex) {
@@ -90,47 +82,67 @@ public class CreateJavaMethodInClass {
         }));
     }
 
+    private void retryInjectPhysically(Project project, List<String> packageList, String className, String methodName, TestCaseDto tc) {
+        VirtualFile sourceRoot = Tools.getMainSourceRoot(project);
+        if (sourceRoot == null) return;
+
+        String relativePath = String.join("/", packageList) + "/" + className + ".java";
+        VirtualFile javaFile = sourceRoot.findFileByRelativePath(relativePath);
+
+        if (javaFile != null) {
+            PsiFile psiFile = PsiManager.getInstance(project).findFile(javaFile);
+            if (psiFile instanceof PsiJavaFile javaPsiFile) {
+                PsiClass[] classes = javaPsiFile.getClasses();
+                if (classes.length > 0) {
+                    injectMethod(project, classes[0], methodName, tc);
+                }
+            }
+        }
+    }
+
     private List<String> sanitizeFqcn(List<String> rawFqcn) {
         List<String> sanitized = new ArrayList<>();
         boolean startAdding = false;
-
         for (String part : rawFqcn) {
             if (startAdding) {
                 if (!part.equalsIgnoreCase("testCases")) {
                     sanitized.add(part.replace(" ", "").toLowerCase());
                 }
             }
-
-            if (part.equalsIgnoreCase("testin")) {
-                startAdding = true;
-            }
+            if (part.equalsIgnoreCase("testin")) startAdding = true;
         }
         return sanitized;
     }
 
-    private void injectMethod(Project project, PsiClass targetClass, String methodName, String testCaseName) {
-        PsiMethod[] existingMethods = targetClass.findMethodsByName(methodName, false);
-        if (existingMethods.length == 0) {
-            PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
+    private void injectMethod(Project project, PsiClass targetClass, String methodName, TestCaseDto tc) {
+        PsiMethod[] existingMethods = targetClass.getMethods();
+        PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
+        PsiFile file = targetClass.getContainingFile();
 
-            PsiFile file = targetClass.getContainingFile();
-            if (file instanceof PsiJavaFile javaFile) {
-                PsiImportList importList = javaFile.getImportList();
-                if (importList != null && importList.findSingleClassImportStatement("org.testng.annotations.Test") == null) {
-                    PsiClass testClass = JavaPsiFacade.getInstance(project).findClass("org.testng.annotations.Test", GlobalSearchScope.allScope(project));
-                    if (testClass != null) importList.add(factory.createImportStatement(testClass));
+        if (file instanceof PsiJavaFile javaFile) {
+            PsiImportList importList = javaFile.getImportList();
+            if (importList != null && importList.findSingleClassImportStatement("org.testng.annotations.Test") == null) {
+                PsiClass testClass = JavaPsiFacade.getInstance(project).findClass("org.testng.annotations.Test", GlobalSearchScope.allScope(project));
+                if (testClass != null) {
+                    importList.add(factory.createImportStatement(testClass));
                 }
             }
+        }
 
-            String methodText = "@Test\n" +
-                    "public void " + methodName + "() {\n" +
-                    "    // TODO: Auto-generated test steps for " + testCaseName + "\n" +
-                    "}";
+        boolean methodExists = false;
+        for (PsiMethod m : existingMethods) {
+            if (m.getName().equals(methodName)) {
+                methodExists = true;
+                break;
+            }
+        }
 
+        if (!methodExists) {
+            String methodText = String.format("@Test(description = \"%s\", testName = \"%s\")", tc.getDescription(), tc.getId()) +
+                    "\npublic void " + methodName + "() {\n    // TODO: Auto-generated\n}";
             PsiMethod newMethod = factory.createMethodFromText(methodText, targetClass);
             PsiElement addedElement = targetClass.add(newMethod);
             CodeStyleManager.getInstance(project).reformat(addedElement);
-            System.out.println("Method " + methodName + " injected successfully.");
         }
     }
 }

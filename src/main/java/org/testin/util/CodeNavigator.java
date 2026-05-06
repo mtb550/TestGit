@@ -11,12 +11,13 @@ import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CodeNavigator {
 
-    public void toCode(final @NotNull List<String> fqcn, final @NotNull String testCaseName) {
-        if (fqcn.isEmpty()) {
+    public void toCode(final @NotNull List<String> rawFqcn, final @NotNull String testCaseName) {
+        if (rawFqcn.isEmpty()) {
             Messages.showWarningDialog("This test case has no automation reference.", "Missing Reference");
             return;
         }
@@ -27,15 +28,35 @@ public class CodeNavigator {
         ApplicationManager.getApplication().executeOnPooledThread(() ->
                 ApplicationManager.getApplication().runReadAction(() -> {
 
-                    String fqcnString = String.join(".", fqcn);
-                    System.out.println("fqcn: " + fqcnString);
+                    List<String> cleanedFqcn = sanitizeFqcn(rawFqcn);
+
+                    if (cleanedFqcn.isEmpty()) {
+                        ApplicationManager.getApplication().invokeLater(() ->
+                                Messages.showErrorDialog("Invalid FQCN path format.", "Navigation Error")
+                        );
+                        return;
+                    }
+
+                    List<String> packageList = new ArrayList<>(cleanedFqcn);
+                    String baseClassName = packageList.removeLast();
+                    String expectedClassName = Tools.toPascalCase(baseClassName);
+
+                    if (expectedClassName.toLowerCase().endsWith("test")) {
+                        if (expectedClassName.endsWith("test")) {
+                            expectedClassName = expectedClassName.substring(0, expectedClassName.length() - 4) + "Test";
+                        }
+                    } else {
+                        expectedClassName += "Test";
+                    }
+
+                    String fqcnString = String.join(".", packageList).toLowerCase() + "." + expectedClassName;
+                    System.out.println("[NAVIGATOR] Searching for cleaned FQCN: " + fqcnString);
 
                     PsiClass targetClass = JavaPsiFacade.getInstance(project)
                             .findClass(fqcnString, GlobalSearchScope.projectScope(project));
 
                     if (targetClass != null) {
                         Navigatable targetElement = targetClass;
-
                         PsiMethod[] exactMethods = targetClass.findMethodsByName(methodName, false);
 
                         if (exactMethods.length > 0) {
@@ -58,10 +79,24 @@ public class CodeNavigator {
 
                     } else {
                         ApplicationManager.getApplication().invokeLater(() ->
-                                Messages.showErrorDialog("Could not find class in project:\n" + fqcn, "Class Not Found")
+                                Messages.showErrorDialog("Could not find class: " + fqcnString, "Class Not Found")
                         );
                     }
                 })
         );
+    }
+
+    private List<String> sanitizeFqcn(List<String> rawFqcn) {
+        List<String> sanitized = new ArrayList<>();
+        boolean startAdding = false;
+        for (String part : rawFqcn) {
+            if (startAdding) {
+                if (!part.equalsIgnoreCase("testCases")) {
+                    sanitized.add(part.replace(" ", "").toLowerCase());
+                }
+            }
+            if (part.equalsIgnoreCase("testin")) startAdding = true;
+        }
+        return sanitized;
     }
 }
