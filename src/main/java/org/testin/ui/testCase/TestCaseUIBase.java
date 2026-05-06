@@ -112,13 +112,13 @@ public abstract class TestCaseUIBase {
         }.registerCustomShortcutSet(shortcutSet, component);
     }
 
-    public Runnable save(final TestCaseDto dto, final BiConsumer<TestCaseDto, Boolean> onSave, final JBPopup[] popupWrapper) {
+    public Runnable save(final TestCaseDto dto, final BiConsumer<TestCaseDto, CodeGenerator> onSave, final JBPopup[] popupWrapper) {
         return () -> {
             getAllSections().forEach(section -> section.applyTo(dto));
 
             String title = dto.getDescription();
             if (DescriptionSection.getWrapper().getParent() == null || !title.trim().isEmpty()) {
-                onSave.accept(dto, codeGenerator.isSelected());
+                onSave.accept(dto, codeGenerator);
 
                 if (popupWrapper[0] != null)
                     popupWrapper[0].closeOk(null);

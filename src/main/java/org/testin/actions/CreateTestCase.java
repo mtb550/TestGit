@@ -15,6 +15,7 @@ import org.testin.pojo.dto.TestCaseDto;
 import org.testin.ui.testCase.CreateTestCaseUI;
 import org.testin.util.KeyboardSet;
 import org.testin.util.Tools;
+import org.testin.util.autoGenerator.CreateJavaMethodInClass;
 import org.testin.util.services.TestCaseCacheService;
 import org.testin.util.services.TestCasePersistService;
 
@@ -44,7 +45,7 @@ public class CreateTestCase extends DumbAwareAction {
     }
 
     private static void performCreation(final @NotNull IEditorUI ui, final @NotNull Path path, final @NotNull JBList<TestCaseDto> list, final @NotNull CollectionListModel<TestCaseDto> model) {
-        new CreateTestCaseUI((newTc, shouldGenerateOrUpdateCode) -> {
+        new CreateTestCaseUI((newTc, codeGenerator) -> {
             boolean isEmpty = model.isEmpty();
             newTc.setIsHead(isEmpty);
 
@@ -64,9 +65,8 @@ public class CreateTestCase extends DumbAwareAction {
             TestCaseCacheService.getInstance(project).addNewItems(affectedNodes);
             TestCasePersistService.getInstance(project).persist(path, affectedNodes);
 
-            if (shouldGenerateOrUpdateCode)
-                // todo, to be moved to separate class under automationGenerator
-                Tools.createJavaMethodInClass(project, newTc.getFqcn(), newTc.getDescription());
+            if (codeGenerator != null && codeGenerator.isSelected())
+                new CreateJavaMethodInClass().execute(project, newTc.getFqcn(), newTc.getDescription());
 
             SwingUtilities.invokeLater(() -> ui.selectTestCase(newTc));
 

@@ -11,6 +11,7 @@ import org.testin.pojo.Config;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.ui.testCase.*;
 import org.testin.util.KeyboardSet;
+import org.testin.util.autoGenerator.CodeGenerator;
 import org.testin.util.autoGenerator.GeneratorType;
 
 import javax.swing.*;
@@ -21,7 +22,7 @@ public class UpdateTestCaseUI extends TestCaseUIBase {
 
     private JBPopup popup;
 
-    public UpdateTestCaseUI(final TestCaseDto existingDto, final UpdateTestCaseFields targetField, final BiConsumer<TestCaseDto, Boolean> onSave) {
+    public UpdateTestCaseUI(final TestCaseDto existingDto, final UpdateTestCaseFields targetField, final BiConsumer<TestCaseDto, CodeGenerator> onSave) {
         super(GeneratorType.UPDATE_TEST_CASE);
 
         IUIAction repackPopup = () -> {

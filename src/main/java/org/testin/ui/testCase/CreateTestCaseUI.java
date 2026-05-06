@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.util.KeyboardSet;
+import org.testin.util.autoGenerator.CodeGenerator;
 import org.testin.util.autoGenerator.GeneratorType;
 
 import javax.swing.*;
@@ -20,7 +21,7 @@ public class CreateTestCaseUI extends TestCaseUIBase {
 
     private JBPopup popup;
 
-    public CreateTestCaseUI(final BiConsumer<TestCaseDto, Boolean> onSave) {
+    public CreateTestCaseUI(final BiConsumer<TestCaseDto, CodeGenerator> onSave) {
         super(GeneratorType.CREATE_TEST_CASE);
 
         final TestCaseDto dto = new TestCaseDto();

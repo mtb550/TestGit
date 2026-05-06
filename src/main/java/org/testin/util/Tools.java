@@ -1,7 +1,6 @@
 package org.testin.util;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
@@ -13,9 +12,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.*;
-import com.intellij.psi.codeStyle.CodeStyleManager;
-import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jps.model.java.JavaSourceRootType;
@@ -370,51 +366,6 @@ public class Tools {
         return content.toString();
     }
 
-    // todo, to be moved to separate class under automationGenerator
-    public static void createJavaMethodInClass(@NotNull final Project project, @NotNull final List<String> fqcn, @NotNull final String testCaseName) {
-        if (fqcn.isEmpty() || testCaseName.isEmpty()) return;
-
-        ApplicationManager.getApplication().invokeLater(() -> WriteCommandAction.runWriteCommandAction(project, "Create Test Method", null, () -> {
-            try {
-                String fqcnString = String.join(".", fqcn);
-
-                if (!fqcnString.endsWith("Test")) {
-                    fqcnString += "Test";
-                }
-
-                String methodName = toCamelCase(testCaseName);
-
-                PsiClass targetClass = JavaPsiFacade.getInstance(project)
-                        .findClass(fqcnString, GlobalSearchScope.projectScope(project));
-
-                if (targetClass != null) {
-                    PsiMethod[] existingMethods = targetClass.findMethodsByName(methodName, false);
-
-                    if (existingMethods.length == 0) {
-                        PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
-
-                        String methodText = "@Test\n" +
-                                "public void " + methodName + "() {\n" +
-                                "    // TODO: Auto-generated test steps for " + testCaseName + "\n" +
-                                "}";
-
-                        PsiMethod newMethod = factory.createMethodFromText(methodText, targetClass);
-                        PsiElement addedElement = targetClass.add(newMethod);
-                        CodeStyleManager.getInstance(project).reformat(addedElement);
-
-                        System.out.println("[TRACE] Successfully injected method: " + methodName + " into " + fqcnString);
-                    } else {
-                        System.out.println("[WARNING] Method already exists: " + methodName);
-                    }
-                } else {
-                    System.out.println("[WARNING] Could not find class for FQCN: " + fqcnString);
-                }
-            } catch (Exception ex) {
-                System.err.println("[ERROR] Failed to inject Java method: " + ex.getMessage());
-            }
-        }));
-    }
-
     public static @Nullable VirtualFile getMainSourceRoot(final @NotNull Project project) {
         Module[] modules = ModuleManager.getInstance(project).getModules();
 
@@ -477,6 +428,21 @@ public class Tools {
         System.out.println("Final FQCN Result: " + fqcn);
         System.out.println("-----------------------------");
         return fqcn;
+    }
+
+    public static String toPascalCase(String text) {
+        if (text == null || text.trim().isEmpty()) return "";
+
+        String[] words = text.split("[\\s_\\-]+");
+        StringBuilder pascalCase = new StringBuilder();
+
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                pascalCase.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1).toLowerCase());
+            }
+        }
+        return pascalCase.toString();
     }
 
 
