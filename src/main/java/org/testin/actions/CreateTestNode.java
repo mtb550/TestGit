@@ -55,17 +55,30 @@ public class CreateTestNode extends DumbAwareAction {
             else
                 System.out.println("No creation logic defined for type: " + directoryType);
 
-            System.out.println("start..");
+            System.out.println("start generate..");
             if (codeGenerator != null && codeGenerator.isSelected() && directoryType != null && directoryType.getAction() != null) {
                 if (directoryType == DirectoryType.TSP) {
                     System.out.println("Selected directory type: " + directoryType);
                     GeneratorType.CREATE_TEST_SET_PACKAGE.getAction().execute(Config.getProject(), javaPackageName, path);
+                    return;
                 }
 
                 if (directoryType == DirectoryType.TS) {
                     System.out.println("Selected directory type: " + directoryType);
                     GeneratorType.CREATE_TEST_SET.getAction().execute(Config.getProject(), javaPackageName, path);
+                    return;
                 }
+
+                if (directoryType == DirectoryType.TRP) {
+                    System.out.println("no need to generate, Selected directory type: " + directoryType);
+                    return;
+                }
+
+                if (directoryType == DirectoryType.TR) {
+                    System.out.println("no need to generate, Selected directory type: " + directoryType);
+                }
+
+
             }
 
         }).show();
