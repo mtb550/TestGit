@@ -12,6 +12,7 @@ import java.util.function.BiConsumer;
 public enum Priority {
     HIGH(
             "High",
+            1,
             JBColor.RED.brighter().brighter(),
             true,
             KeyboardSet.PriorityHigh
@@ -19,6 +20,7 @@ public enum Priority {
 
     MEDIUM(
             "Medium",
+            2,
             JBColor.BLUE.brighter(),
             true,
             KeyboardSet.PriorityMedium
@@ -26,19 +28,22 @@ public enum Priority {
 
     LOW(
             "Low",
+            3,
             JBColor.GRAY.brighter(),
             true,
             KeyboardSet.PriorityLow
     );
 
     private final String name;
+    private final int value;
     private final Color color;
     private final boolean active;
     private final KeyboardSet shortcut;
     private final BiConsumer<Set<Priority>, Boolean> action;
 
-    Priority(final String name, final Color color, final boolean active, final KeyboardSet shortcut) {
+    Priority(final String name, final int value, final Color color, final boolean active, final KeyboardSet shortcut) {
         this.name = name;
+        this.value = value;
         this.color = color;
         this.active = active;
         this.shortcut = shortcut;

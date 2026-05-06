@@ -9,6 +9,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
+import org.testin.pojo.Group;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.util.Tools;
 
@@ -138,11 +139,37 @@ public class CreateJavaMethodInClass {
         }
 
         if (!methodExists) {
-            String methodText = String.format("@Test(description = \"%s\", testName = \"%s\")", tc.getDescription(), tc.getId()) +
-                    "\npublic void " + methodName + "() {\n    // TODO: Auto-generated\n}";
+            StringBuilder attributes = new StringBuilder();
+
+            if (!tc.getGroup().isEmpty()) {
+                List<String> activeGroups = tc.getGroup().stream()
+                        .filter(g -> g != Group.UNASSIGNED)
+                        .map(g -> "\"" + g.getName() + "\"")
+                        .toList();
+
+                if (!activeGroups.isEmpty()) {
+                    attributes.append(", groups = {")
+                            .append(String.join(", ", activeGroups))
+                            .append("}");
+                }
+            }
+
+            attributes.append(", priority = ").append(tc.getPriority().getValue());
+
+            String annotationText = String.format("@Test(description = \"%s\", testName = \"%s\"%s)",
+                    tc.getDescription(),
+                    tc.getId(),
+                    attributes);
+
+            String methodText = annotationText + "\npublic void " + methodName + "() {\n    System.out.println(\"hello world\");\n}";
+
             PsiMethod newMethod = factory.createMethodFromText(methodText, targetClass);
             PsiElement addedElement = targetClass.add(newMethod);
+
             CodeStyleManager.getInstance(project).reformat(addedElement);
+
+            System.out.println("Injected method: " + methodName + " with Priority: " + tc.getPriority().getName());
         }
     }
+
 }
