@@ -3,7 +3,7 @@ package org.testin.pojo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.testin.pojo.dto.dirs.*;
-import org.testin.util.automationGenerator.GeneratorType;
+import org.testin.util.autoGenerator.GeneratorType;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public enum CreateNodeMenu {
             TestProjectDirectoryDto.class,
             DirectoryType.TP,
             "set name..",
-            GeneratorType.CREATE_PROJECT
+            GeneratorType.CREATE_TEST_PROJECT
     ),
 
     TEST_CASES_MAIN_DIR(

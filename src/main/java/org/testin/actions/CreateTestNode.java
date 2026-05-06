@@ -7,11 +7,13 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import org.testin.pojo.CreateNodeMenu;
+import org.testin.pojo.Config;
+import org.testin.pojo.DirectoryType;
 import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
 import org.testin.ui.createNodes.CreateNodesDialog;
 import org.testin.util.KeyboardSet;
+import org.testin.util.autoGenerator.GeneratorType;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -39,18 +41,32 @@ public class CreateTestNode extends DumbAwareAction {
 
         if (!(parentNode.getUserObject() instanceof DirectoryDto parentDir)) return;
 
-        CreateNodeMenu menu = parentDir.getMenu();
+        new CreateNodesDialog(parentDir.getMenu(), (name, directoryType, codeGenerator) -> {
+            if (name == null || name.isEmpty()) return;
 
-        // todo, activate checkbox -> setting button.
-        new CreateNodesDialog(menu, (enteredName, selectedType, generateState) -> {
-            if (enteredName == null || enteredName.isEmpty()) return;
+            // todo, cover all regex -> dots, slashes ..etc
+            String processedName = name.replace("_", " ");
+            String javaPackageName = processedName.replace(" ", "").toLowerCase();
 
-            Path newDirPath = parentDir.getPath().resolve(enteredName);
+            Path newDirPath = parentDir.getPath().resolve(name);
 
-            if (selectedType != null && selectedType.getAction() != null)
-                selectedType.getAction().execute(this, e.getProject(), enteredName, parentNode, parentDir, newDirPath);
+            if (directoryType != null && directoryType.getAction() != null)
+                directoryType.getAction().execute(this, e.getProject(), name, parentNode, parentDir, newDirPath);
             else
-                System.out.println("No creation logic defined for type: " + selectedType);
+                System.out.println("No creation logic defined for type: " + directoryType);
+
+            System.out.println("start..");
+            if (codeGenerator != null && codeGenerator.isSelected() && directoryType != null && directoryType.getAction() != null) {
+                if (directoryType == DirectoryType.TSP) {
+                    System.out.println("Selected directory type: " + directoryType);
+                    GeneratorType.CREATE_TEST_SET_PACKAGE.getAction().execute(Config.getProject(), javaPackageName, path);
+                }
+
+                if (directoryType == DirectoryType.TS) {
+                    System.out.println("Selected directory type: " + directoryType);
+                    GeneratorType.CREATE_TEST_SET.getAction().execute(Config.getProject(), javaPackageName, path);
+                }
+            }
 
         }).show();
     }

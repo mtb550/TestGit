@@ -15,11 +15,10 @@ import org.testin.pojo.dto.dirs.TestRunsMainDirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
 import org.testin.ui.createNodes.CreateNodesDialog;
 import org.testin.util.TreeUtilImpl;
-import org.testin.util.automationGenerator.GeneratorType;
+import org.testin.util.autoGenerator.GeneratorType;
 import org.testin.util.notifications.Notifier;
 
 import java.nio.file.Path;
-import java.util.Collections;
 
 public class CreateTestProject extends DumbAwareAction {
     private final ProjectPanel projectPanel;
@@ -30,10 +29,11 @@ public class CreateTestProject extends DumbAwareAction {
     }
 
     public void execute() {
-        new CreateNodesDialog(CreateNodeMenu.TEST_PROJECT, (name, selectedType, generateState) -> {
+        new CreateNodesDialog(CreateNodeMenu.TEST_PROJECT, (name, directoryType, codeGenerator) -> {
 
             if (name == null || name.trim().isEmpty()) return;
 
+            // todo, cover all regex -> dots, slashes ..etc
             String processedName = name.replace("_", " ");
 
             TestProjectDirectoryDto newTestProjectDirectory = new TestProjectDirectoryDto().setName(processedName);
@@ -69,8 +69,8 @@ public class CreateTestProject extends DumbAwareAction {
 
                 Notifier.info("New Test Project", String.format("Test Project %s has been added", processedName));
 
-                if (generateState.isSelected()) {
-                    GeneratorType.CREATE_PROJECT.getAction().execute(Config.getProject(), processedName, Collections.emptyList());
+                if (codeGenerator.isSelected()) {
+                    GeneratorType.CREATE_TEST_PROJECT.getAction().execute(Config.getProject(), processedName, null);
                 }
             });
         }

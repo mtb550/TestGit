@@ -11,7 +11,7 @@ import org.testin.pojo.Config;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.ui.testCase.*;
 import org.testin.util.KeyboardSet;
-import org.testin.util.automationGenerator.GeneratorType;
+import org.testin.util.autoGenerator.GeneratorType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -106,7 +106,7 @@ public class UpdateTestCaseUI extends TestCaseUIBase {
         popup = JBPopupFactory.getInstance()
                 .createComponentPopupBuilder(mainPanel, targetSection.getFocusComponent())
                 .setTitle("Update " + targetField.getName())
-                .setSettingButtons(generateOrUpdateCode)
+                .setSettingButtons(codeGenerator)
                 .setRequestFocus(true)
                 .setCancelOnWindowDeactivation(false)
                 .setCancelOnClickOutside(false)

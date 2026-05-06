@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.util.KeyboardSet;
-import org.testin.util.automationGenerator.GeneratorType;
+import org.testin.util.autoGenerator.GeneratorType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -108,7 +108,7 @@ public class CreateTestCaseUI extends TestCaseUIBase {
         popup = JBPopupFactory.getInstance()
                 .createComponentPopupBuilder(mainPanel, DescriptionSection.getFocusComponent())
                 .setTitle("Create Test Case")
-                .setSettingButtons(generateOrUpdateCode)
+                .setSettingButtons(codeGenerator)
                 .setRequestFocus(true)
                 .setCancelOnWindowDeactivation(false)
                 .setCancelOnClickOutside(false)
@@ -124,7 +124,7 @@ public class CreateTestCaseUI extends TestCaseUIBase {
 
         Runnable saveAction = save(dto, onSave, new JBPopup[]{popup});
 
-        // registe enter shortcut
+        // register enter shortcut
         registerShortcut(mainPanel, KeyboardSet.Enter.getCustomShortcut(), saveAction::run);
     }
 

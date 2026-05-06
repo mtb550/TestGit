@@ -5,7 +5,6 @@ import org.testin.pojo.DirectoryType;
 import org.testin.pojo.NodeCreator;
 import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.pojo.dto.dirs.TestSetPackageDirectoryDto;
-import org.testin.util.Tools;
 import org.testin.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -23,6 +22,6 @@ public class CreateTestSetPackage implements NodeCreator {
         TreeUtilImpl.createNode(action.getTree(), parentNode, newTestSetPackageDirectory);
         TreeUtilImpl.createDataVf(this, newDirPath, DirectoryType.TSP.getMarker());
 
-        Tools.createJavaPackageInTestRoot(project, name);
+        //Tools.createJavaPackageInTestRoot(project, name);
     }
 }

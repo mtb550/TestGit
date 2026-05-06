@@ -1,0 +1,77 @@
+package org.testin.util.autoGenerator;
+
+import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VirtualFile;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.testin.util.Tools;
+
+import javax.swing.tree.TreePath;
+import java.io.IOException;
+import java.util.List;
+
+public class CreateTestSet implements GeneratorAction {
+
+    @Override
+    public void execute(final @NotNull Project project, final @NotNull String targetName, final @Nullable TreePath path) {
+        if (path == null) return;
+        List<String> fqcn = Tools.extractFqcn(path);
+        String basePackage = String.join(".", fqcn);
+
+        // Java Class (PascalCase)
+        String[] words = targetName.split(" ");
+        StringBuilder classNameBuilder = new StringBuilder();
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                classNameBuilder.append(word.substring(0, 1).toUpperCase()).append(word.substring(1).toLowerCase());
+            }
+        }
+
+        String className = classNameBuilder.toString();
+
+        if (!className.endsWith("Test")) {
+            className += "Test";
+        }
+
+        String fileName = className + ".java";
+
+        System.out.println("Ready to generate Test Class: " + className + " in package: " + basePackage);
+
+        String finalClassName = className;
+        WriteAction.run(() -> {
+            try {
+                VirtualFile sourceRoot = Tools.getMainSourceRoot(project);
+
+                if (sourceRoot != null) {
+                    String relativePath = basePackage.replace('.', '/');
+                    VirtualFile packageDir = VfsUtil.createDirectoryIfMissing(sourceRoot, relativePath);
+
+                    if (packageDir != null) {
+                        VirtualFile existingFile = packageDir.findChild(fileName);
+
+                        if (existingFile == null) {
+                            VirtualFile javaFile = packageDir.createChildData(this, fileName);
+
+                            String fileContent = "package " + basePackage + ";\n\n" +
+                                    "public class " + finalClassName + " {\n" +
+                                    "    \n" +
+                                    "}\n";
+
+                            VfsUtil.saveText(javaFile, fileContent);
+                            System.out.println("Test Class created physically at: " + javaFile.getPath());
+                        } else {
+                            System.out.println("File already exists: " + existingFile.getPath());
+                        }
+                    }
+                } else {
+                    System.out.println("Could not find Main Source Root in the project modules.");
+                }
+
+            } catch (IOException ex) {
+                System.out.println("Error creating test class: " + ex.getMessage());
+            }
+        });
+    }
+}

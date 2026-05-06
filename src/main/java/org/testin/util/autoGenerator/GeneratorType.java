@@ -1,10 +1,10 @@
-package org.testin.util.automationGenerator;
+package org.testin.util.autoGenerator;
 
 import lombok.Getter;
 
 @Getter
 public enum GeneratorType {
-    CREATE_PROJECT(
+    CREATE_TEST_PROJECT(
             "Create Test Project",
             "Create Automation Test Project",
             new CreateTestProject()
@@ -19,7 +19,7 @@ public enum GeneratorType {
     CREATE_TEST_SET_PACKAGE(
             "Create Test Set Package",
             "Create Automation Test Package",
-            new CreateTestPackage()
+            new CreateTestSetPackage()
     ),
 
     CREATE_TEST_CASE(

@@ -9,8 +9,8 @@ import com.intellij.openapi.ui.popup.JBPopup;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.dto.TestCaseDto;
-import org.testin.util.automationGenerator.GenerateOrUpdateCode;
-import org.testin.util.automationGenerator.GeneratorType;
+import org.testin.util.autoGenerator.CodeGenerator;
+import org.testin.util.autoGenerator.GeneratorType;
 import org.testin.util.statusBar.IStatusBarItem;
 
 import javax.swing.*;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public abstract class TestCaseUIBase {
-    protected final GenerateOrUpdateCode generateOrUpdateCode;
+    protected final CodeGenerator codeGenerator;
     protected final DescriptionSection DescriptionSection;
     protected final ExpectedResultSection expectedResultSection;
     protected final PrioritySection prioritySection;
@@ -36,7 +36,7 @@ public abstract class TestCaseUIBase {
     private PropertyChangeListener focusListener;
 
     public TestCaseUIBase(final @NotNull GeneratorType generatorType) {
-        this.generateOrUpdateCode = new GenerateOrUpdateCode(generatorType);
+        this.codeGenerator = new CodeGenerator(generatorType);
         this.DescriptionSection = new DescriptionSection();
         this.expectedResultSection = new ExpectedResultSection();
         this.stepsSection = new StepsSection();
@@ -118,7 +118,7 @@ public abstract class TestCaseUIBase {
 
             String title = dto.getDescription();
             if (DescriptionSection.getWrapper().getParent() == null || !title.trim().isEmpty()) {
-                onSave.accept(dto, generateOrUpdateCode.isSelected());
+                onSave.accept(dto, codeGenerator.isSelected());
 
                 if (popupWrapper[0] != null)
                     popupWrapper[0].closeOk(null);

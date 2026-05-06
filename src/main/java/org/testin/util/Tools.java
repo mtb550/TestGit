@@ -20,10 +20,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jps.model.java.JavaSourceRootType;
 import org.testin.pojo.Config;
+import org.testin.pojo.DirectoryType;
 import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.settings.AppSettingsState;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -426,6 +428,55 @@ public class Tools {
         }
 
         return null;
+    }
+
+    public static List<String> extractFqcn(TreePath path) {
+        List<String> fqcn = new ArrayList<>();
+
+        System.out.println("--- Start Extracting FQCN ---");
+
+        DefaultMutableTreeNode lastNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+        if (!(lastNode.getUserObject() instanceof DirectoryDto dir)) return fqcn;
+
+        Path dirPath = dir.getPath();
+        System.out.println("dir path: " + dirPath);
+
+        assert Config.getTestinPath() != null;
+
+        try {
+            Path relativePath = Config.getTestinPath().relativize(dirPath);
+            System.out.println("Relative Path: " + relativePath);
+
+            int testCasesIndex = -1;
+            String tcdName = DirectoryType.TCD.getPathName();
+
+            for (int i = 0; i < relativePath.getNameCount(); i++) {
+                String nodeName = relativePath.getName(i).toString();
+                if (nodeName.equals(tcdName) || nodeName.equalsIgnoreCase("testcases")) {
+                    testCasesIndex = i;
+                    break;
+                }
+            }
+
+            if (testCasesIndex > 0) {
+                String projectName = relativePath.getName(testCasesIndex - 1).toString();
+                fqcn.add(projectName.replace(" ", "").toLowerCase());
+                System.out.println("  -> Added Project Name: " + projectName);
+
+                for (int i = testCasesIndex + 1; i < relativePath.getNameCount(); i++) {
+                    String pkgName = relativePath.getName(i).toString();
+                    fqcn.add(pkgName.replace(" ", "").toLowerCase());
+                    System.out.println("  -> Added Package: " + pkgName);
+                }
+            }
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error calculating relative path: " + e.getMessage());
+        }
+
+        System.out.println("Final FQCN Result: " + fqcn);
+        System.out.println("-----------------------------");
+        return fqcn;
     }
 
 
