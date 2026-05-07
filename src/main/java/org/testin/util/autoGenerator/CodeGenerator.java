@@ -4,6 +4,7 @@ import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.util.ui.JBUI;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.awt.*;
 
@@ -12,9 +13,11 @@ public class CodeGenerator extends JBCheckBox {
     private final String PROP_KEY = "testin.automation.generateCode";
 
     @Getter
+    @Setter
     private int change; // todo, here to put the type of update -> group or priority so you can assign the proper update class based on that
 
     @Getter
+    @Setter
     private int typeOfChange; // todo, here to put the type of update -> group or priority so you can assign the proper update class based on that
 
     public CodeGenerator(final GeneratorType generatorType) {

@@ -41,7 +41,8 @@ public class UpdateTestCase extends DumbAwareAction {
         List<TestCaseDto> selectedItems = list.getSelectedValuesList();
         if (selectedItems.isEmpty()) return;
 
-        new TestCaseUpdateMenu().show(selectedItems, updatedItems -> {
+        new TestCaseUpdateMenu(selectedItems, (updatedItems, codeGenerator) -> {
+
             TestCaseCacheService.getInstance(Config.getProject()).addNewItems(updatedItems);
             TestCasePersistService.getInstance(Config.getProject()).persist(path, updatedItems);
 
@@ -57,8 +58,37 @@ public class UpdateTestCase extends DumbAwareAction {
                         detailsPanel.refreshCurrentView();
                     }
                 }
+
+                if (codeGenerator != null && codeGenerator.isSelected()) {
+                    System.out.println("TRACE [UpdateTestCase]: Code generator is selected! Change Type received: " + codeGenerator.getTypeOfChange());
+
+                    // todo, all if statements here to be moved to enum class
+                    if (codeGenerator.getTypeOfChange() == 1) {
+                        System.out.println("TRACE [UpdateTestCase]: Routing to UpdateTestCaseDescription()...");
+                        //new UpdateTestCaseDescription().execute(Config.getProject(), updatedItems.getFirst().getFqcn(), updatedItems.getFirst());
+                        return;
+                    }
+
+                    if (codeGenerator.getTypeOfChange() == 2) {
+                        System.out.println("TRACE [UpdateTestCase]: Routing to Update Expected Results (Type 2)...");
+                        return;
+                    }
+
+                    if (codeGenerator.getTypeOfChange() == 3) {
+                        System.out.println("TRACE [UpdateTestCase]: Routing to Update Steps (Type 3)...");
+                        return;
+                    }
+
+//                    CreateJavaMethodInClass generator = new CreateJavaMethodInClass();
+//                    for (TestCaseDto tc : updatedItems) {
+//                        generator.execute(Config.getProject(), tc.getFqcn(), tc);
+//                    }
+                } else {
+                    System.out.println("TRACE [UpdateTestCase]: Code generator is NOT selected or is null.");
+                }
+
             });
-        });
+        }).show();
     }
 
     @Override

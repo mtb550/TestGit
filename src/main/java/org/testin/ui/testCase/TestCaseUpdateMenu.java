@@ -15,25 +15,52 @@ import org.testin.pojo.Config;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.ui.testCase.update.UpdateTestCaseFields;
 import org.testin.ui.testCase.update.UpdateTestCaseUI;
+import org.testin.util.autoGenerator.CodeGenerator;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class TestCaseUpdateMenu {
 
-    public void show(final List<TestCaseDto> items, final Consumer<List<TestCaseDto>> updatedItems) {
+    private final List<TestCaseDto> items;
+    private final BiConsumer<List<TestCaseDto>, CodeGenerator> updatedItems;
+
+    public TestCaseUpdateMenu(final List<TestCaseDto> items, final BiConsumer<List<TestCaseDto>, CodeGenerator> updatedItems) {
+        this.items = items;
+        this.updatedItems = updatedItems;
+    }
+
+    public void show() {
         boolean isSingle = items.size() == 1;
         String title = isSingle ? "Update Test Case" : "Update " + items.size() + " Test Cases";
 
-        showMenu(title, field -> {
-            if (isSingle)
-                new UpdateTestCaseUI(items.getFirst(), field, (tc, codeGenerator) -> updatedItems.accept(items)).show();
-            else
-                field.getBulkAction().show(items, updatedItems);
+        showMenu(title, selectedItem -> {
+
+            int targetChangeType = selectedItem.getChangeType();
+            System.out.println("TRACE [TestCaseUpdateMenu]: Menu item selected -> " + selectedItem.getName() + " | changeType = " + targetChangeType);
+
+            if (isSingle) {
+                new UpdateTestCaseUI(items.getFirst(), selectedItem, (tc, codeGenerator) -> {
+
+                    codeGenerator.setTypeOfChange(targetChangeType);
+                    System.out.println("TRACE [TestCaseUpdateMenu]: Single Edit Save -> Injecting changeType " + codeGenerator.getTypeOfChange() + " into UI's CodeGenerator.");
+
+                    updatedItems.accept(items, codeGenerator);
+
+                }).show();
+
+            } else {
+                selectedItem.getBulkAction().show(items, (list, codeGenerator) -> {
+
+                    System.out.println("TRACE [TestCaseUpdateMenu]: Bulk Edit Save -> Passing main menu CodeGenerator with changeType " + codeGenerator.getTypeOfChange());
+                    updatedItems.accept(list, codeGenerator);
+                });
+            }
         });
     }
 

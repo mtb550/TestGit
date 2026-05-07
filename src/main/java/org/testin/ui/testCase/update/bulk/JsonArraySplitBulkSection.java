@@ -28,6 +28,7 @@ import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
 import org.testin.pojo.dto.TestCaseDto;
+import org.testin.util.autoGenerator.CodeGenerator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,7 +36,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public abstract class JsonArraySplitBulkSection {
     protected abstract void applyValues(final List<TestCaseDto> items, final List<List<String>> newValues);
@@ -46,9 +47,8 @@ public abstract class JsonArraySplitBulkSection {
 
     protected abstract List<List<String>> extractOriginalValues(final List<TestCaseDto> items);
 
-    public void show(final List<TestCaseDto> selectedItems, final Consumer<List<TestCaseDto>> updatedItems) {
+    public void show(final List<TestCaseDto> selectedItems, final BiConsumer<List<TestCaseDto>, CodeGenerator> updatedItems) {
         Project project = Config.getProject();
-        if (project == null) return;
 
         List<List<String>> originalValues = new ArrayList<>();
         List<List<String>> activeValues = new ArrayList<>();
@@ -309,7 +309,8 @@ public abstract class JsonArraySplitBulkSection {
             syncStateFromEditor.run();
             applyValues(selectedItems, activeValues);
             if (updatedItems != null)
-                updatedItems.accept(selectedItems);
+                // todo, apply update automation edit bulk test cases. set to null for now
+                updatedItems.accept(selectedItems, null);
             popup.closeOk(null);
         };
 
@@ -524,10 +525,6 @@ public abstract class JsonArraySplitBulkSection {
     protected String unescapeJson(final String str) {
         if (str == null) return "";
         return str.replace("\\\"", "\"").replace("\\\\", "\\");
-    }
-
-    protected interface BiConsumer<T, U> {
-        void accept(T t, U u);
     }
 
     protected static class ItemMarker {

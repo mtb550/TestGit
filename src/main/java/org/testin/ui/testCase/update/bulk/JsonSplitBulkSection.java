@@ -28,6 +28,7 @@ import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
 import org.testin.pojo.dto.TestCaseDto;
+import org.testin.util.autoGenerator.CodeGenerator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,7 +36,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public abstract class JsonSplitBulkSection {
     protected abstract void applyValues(final List<TestCaseDto> items, final List<String> newValues);
@@ -46,9 +47,8 @@ public abstract class JsonSplitBulkSection {
 
     protected abstract void appendJsonItem(final TestCaseDto tc, final int index, final boolean isLast, final StringBuilder leftSb, final StringBuilder rightSb, final List<int[]> rightEditableRanges);
 
-    public void show(final List<TestCaseDto> selectedItems, final Consumer<List<TestCaseDto>> updatedItems) {
+    public void show(final List<TestCaseDto> selectedItems, final BiConsumer<List<TestCaseDto>, CodeGenerator> updatedItems) {
         Project project = Config.getProject();
-        if (project == null) return;
 
         StringBuilder leftSb = new StringBuilder();
         StringBuilder rightSb = new StringBuilder();
@@ -281,7 +281,8 @@ public abstract class JsonSplitBulkSection {
 
             applyValues(selectedItems, newValues);
             if (updatedItems != null)
-                updatedItems.accept(selectedItems);
+                // todo, apply update automation edit bulk test cases. set to null for now
+                updatedItems.accept(selectedItems, null);
             popup.closeOk(null);
         };
 
