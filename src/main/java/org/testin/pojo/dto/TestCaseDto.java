@@ -47,7 +47,7 @@ public class TestCaseDto {
 
     @NonNull
     @Builder.Default
-    private String status = "";
+    private String status = ""; // todo, to be update to fetch from enum class (Test Case Status)
 
     @NonNull
     @Builder.Default
