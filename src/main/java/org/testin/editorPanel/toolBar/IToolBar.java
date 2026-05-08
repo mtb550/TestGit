@@ -1,5 +1,7 @@
 package org.testin.editorPanel.toolBar;
 
+import java.util.Set;
+
 public interface IToolBar {
     void onToolBarSearchValueChanged(final String query);
 
@@ -16,4 +18,6 @@ public interface IToolBar {
 
     default void onStartExecutionClicked() {
     }
+
+    Set<String> getAvailableModules();
 }

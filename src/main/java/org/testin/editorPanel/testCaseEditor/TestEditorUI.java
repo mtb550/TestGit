@@ -400,6 +400,14 @@ public class TestEditorUI implements Disposable, IToolBar, IEditorUI {
         }
     }
 
+    @Override
+    public Set<String> getAvailableModules() {
+        if (this.sessionCache != null) {
+            return this.sessionCache.getLoadedModules();
+        }
+        return Collections.emptySet();
+    }
+
     private List<TestCaseDto> getFilteredList() {
         final String query = (toolBar != null && toolBar.getSearchTxt() != null)
                 ? toolBar.getSearchTxt().getSearchQuery() : "";
@@ -411,6 +419,7 @@ public class TestEditorUI implements Disposable, IToolBar, IEditorUI {
 
         final Set<Group> groupFilter = filterPopup != null ? filterPopup.getSelectedGroup() : Collections.emptySet();
         final Set<Priority> priorityFilter = filterPopup != null ? filterPopup.getSelectedPriority() : Collections.emptySet();
+        final Set<String> moduleFilter = filterPopup != null ? filterPopup.getSelectedModule() : Collections.emptySet();
 
         if (allTestCaseDtos.isEmpty()) {
             return Collections.emptyList();
@@ -422,8 +431,9 @@ public class TestEditorUI implements Disposable, IToolBar, IEditorUI {
                         final boolean matchesSearch = query.isEmpty() || tc.getDescription().toLowerCase().contains(query) || tc.getId().toString().toLowerCase().contains(query) || tc.getExpectedResult().toLowerCase().contains(query) || tc.getSteps().stream().anyMatch(step -> step != null && step.toLowerCase().contains(query));
                         final boolean matchesPriority = priorityFilter.isEmpty() || priorityFilter.contains(tc.getPriority());
                         final boolean matchesGroup = groupFilter.isEmpty() || (groupFilter.contains(Group.UNASSIGNED) && (tc.getGroup().isEmpty())) || (tc.getGroup().stream().anyMatch(groupFilter::contains));
+                        final boolean matchesModule = moduleFilter.isEmpty() || moduleFilter.contains(tc.getModule());
 
-                        return matchesSearch && matchesGroup && matchesPriority;
+                        return matchesSearch && matchesGroup && matchesPriority && matchesModule;
                     })
                     .collect(Collectors.toList());
         }

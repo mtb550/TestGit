@@ -14,7 +14,11 @@ import java.util.stream.Stream;
 public class RunSessionCache {
 
     private final TestRunDto metadata;
+
     private final List<TestCaseDto> loadedItems = Collections.synchronizedList(new ArrayList<>());
+
+    private final Set<String> loadedModules = Collections.synchronizedSet(new HashSet<>());
+
     @Setter
     private ICacheListener listener;
 
@@ -28,9 +32,14 @@ public class RunSessionCache {
         return new ArrayList<>(loadedItems);
     }
 
+    public Set<String> getLoadedModules() {
+        return new HashSet<>(loadedModules);
+    }
+
     public void dispose() {
         isDisposed = true;
         loadedItems.clear();
+        loadedModules.clear();
         listener = null;
     }
 
@@ -67,6 +76,9 @@ public class RunSessionCache {
                                     if (tc != null && idsToFind.contains(tc.getId())) {
                                         loadedItems.add(tc);
                                         batch.add(tc);
+
+                                        final String moduleName = tc.getModule();
+                                        if (!moduleName.trim().isEmpty()) loadedModules.add(moduleName.trim());
 
                                         if (batch.size() >= BATCH_SIZE) {
                                             final List<TestCaseDto> itemsToSend = new ArrayList<>(batch);

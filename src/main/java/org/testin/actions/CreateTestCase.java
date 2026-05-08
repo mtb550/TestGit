@@ -46,22 +46,22 @@ public class CreateTestCase extends DumbAwareAction {
 
     private static void performCreation(final @NotNull IEditorUI ui, final @NotNull Path path, final @NotNull JBList<TestCaseDto> list, final @NotNull CollectionListModel<TestCaseDto> model) {
         new CreateTestCaseUI((newTc, codeGenerator) -> {
-            boolean isEmpty = model.isEmpty();
+            final boolean isEmpty = model.isEmpty();
             newTc.setIsHead(isEmpty);
 
-            TestCaseDto lastTc = isEmpty ? null : model.getElementAt(model.getSize() - 1);
+            final TestCaseDto lastTc = isEmpty ? null : model.getElementAt(model.getSize() - 1);
             if (lastTc != null) lastTc.setNext(newTc.getId());
 
-            List<String> logicalPath = Tools.extractLogicalPath(path);
+            final List<String> logicalPath = Tools.extractLogicalPath(path);
             newTc.setPath(logicalPath);
 
-            List<String> generatedFqcn = Tools.generateFqcn(logicalPath);
+            final List<String> generatedFqcn = Tools.generateFqcn(logicalPath);
             newTc.setFqcn(generatedFqcn);
 
             ui.appendNewTestCase(newTc);
 
-            Project project = Config.getProject();
-            List<TestCaseDto> affectedNodes = Stream.of(newTc, lastTc).filter(Objects::nonNull).toList();
+            final Project project = Config.getProject();
+            final List<TestCaseDto> affectedNodes = Stream.of(newTc, lastTc).filter(Objects::nonNull).toList();
             TestCaseCacheService.getInstance(project).addNewItems(affectedNodes);
             TestCasePersistService.getInstance(project).persist(path, affectedNodes);
 

@@ -2,9 +2,7 @@ package org.testin.editorPanel.toolBar.components;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.DataManager;
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.DumbAwareToggleAction;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
@@ -12,14 +10,14 @@ import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.testin.pojo.Group;
 import org.testin.pojo.Priority;
 import org.testin.pojo.TestEditorAttributes;
 import org.testin.util.IconManager;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Supplier;
 
 public class FilterPopup extends AbstractButton implements IToolbarItem {
     @Getter
@@ -28,13 +26,19 @@ public class FilterPopup extends AbstractButton implements IToolbarItem {
     @Getter
     private final Set<Priority> selectedPriority = new HashSet<>();
 
+    @Getter
+    private final Set<String> selectedModule = new HashSet<>();
+    private final Supplier<Set<String>> availableModulesSupplier;
+
     private final DefaultActionGroup cachedActionGroup;
 
-    private final Runnable onToolBarFilterResetted;
+    private final Runnable onToolBarFilterReset;
 
-    public FilterPopup(final Runnable onToolBarFilterResetted, final Runnable onToolBarFilterSelectedChanged) {
+    public FilterPopup(final Runnable onToolBarFilterReset, final Runnable onToolBarFilterSelectedChanged, final Supplier<Set<String>> availableModulesSupplier) {
         super("Filter", AllIcons.General.Filter);
-        this.onToolBarFilterResetted = onToolBarFilterResetted;
+        this.onToolBarFilterReset = onToolBarFilterReset;
+
+        this.availableModulesSupplier = availableModulesSupplier;
 
         this.cachedActionGroup = buildActionGroup(onToolBarFilterSelectedChanged);
 
@@ -43,7 +47,7 @@ public class FilterPopup extends AbstractButton implements IToolbarItem {
     }
 
     public void updateToolBarFilterState() {
-        int activeFiltersCount = selectedPriority.size() + selectedGroup.size();
+        int activeFiltersCount = selectedPriority.size() + selectedGroup.size() + selectedModule.size();
         if (activeFiltersCount == 0) {
             setText(null);
             setToolTipText("Filter");
@@ -58,9 +62,10 @@ public class FilterPopup extends AbstractButton implements IToolbarItem {
     public void resetToolBarFilter() {
         selectedPriority.clear();
         selectedGroup.clear();
+        selectedModule.clear();
         updateToolBarFilterState();
-        if (onToolBarFilterResetted != null) {
-            onToolBarFilterResetted.run();
+        if (onToolBarFilterReset != null) {
+            onToolBarFilterReset.run();
         }
     }
 
@@ -70,7 +75,7 @@ public class FilterPopup extends AbstractButton implements IToolbarItem {
         filterResetBtn.add(new DumbAwareAction("Reset Filters", "Clear active filters", AllIcons.Actions.Cancel) {
             @Override
             public void update(@NotNull AnActionEvent e) {
-                boolean hasActiveFilters = !selectedPriority.isEmpty() || !selectedGroup.isEmpty();
+                boolean hasActiveFilters = !selectedPriority.isEmpty() || !selectedGroup.isEmpty() || !selectedModule.isEmpty();
                 e.getPresentation().setEnabledAndVisible(hasActiveFilters);
             }
 
@@ -140,6 +145,50 @@ public class FilterPopup extends AbstractButton implements IToolbarItem {
             });
         });
         filterResetBtn.add(filterGroupMenu);
+
+        // module filter
+        ActionGroup filterModuleMenu = new ActionGroup("Module", true) {
+            @Override
+            public AnAction @NotNull [] getChildren(@Nullable AnActionEvent e) {
+                List<AnAction> actions = new ArrayList<>();
+
+                Set<String> modules = availableModulesSupplier.get();
+
+                if (!modules.isEmpty()) {
+                    List<String> sortedModules = new ArrayList<>(modules);
+                    Collections.sort(sortedModules);
+
+                    for (String module : sortedModules) {
+                        actions.add(new DumbAwareToggleAction(module) {
+                            @Override
+                            public boolean isSelected(@NotNull AnActionEvent e) {
+                                return selectedModule.contains(module);
+                            }
+
+                            @Override
+                            public void setSelected(@NotNull AnActionEvent e, boolean state) {
+                                if (state) {
+                                    selectedModule.add(module);
+                                } else {
+                                    selectedModule.remove(module);
+                                }
+                                updateToolBarFilterState();
+                                if (onToolBarFilterSelectedChanged != null) {
+                                    onToolBarFilterSelectedChanged.run();
+                                }
+                            }
+
+                            @Override
+                            public @NotNull ActionUpdateThread getActionUpdateThread() {
+                                return ActionUpdateThread.BGT;
+                            }
+                        });
+                    }
+                }
+                return actions.toArray(new AnAction[0]);
+            }
+        };
+        filterResetBtn.add(filterModuleMenu);
 
         return filterResetBtn;
     }
