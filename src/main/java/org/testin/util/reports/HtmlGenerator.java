@@ -35,7 +35,7 @@ public final class HtmlGenerator {
                 String statusText = statusEnum.name();
                 String colorHex = "#" + statusEnum.getHex();
 
-                String duration = Tools.getFormattedDuration(result.getDuration());
+                String duration = Tools.getInstance().getFormattedDuration(result.getDuration());
 
                 html.append("<tr>")
                         .append("<td>").append(seq.getAndIncrement()).append("</td>")

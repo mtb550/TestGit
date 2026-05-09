@@ -49,7 +49,7 @@ public class Rename extends DumbAwareAction {
         String newName = Messages.showInputDialog("Enter new name:", "Rename", AllIcons.Actions.Edit, dir.getName(), null);
         if (newName == null || newName.isBlank() || newName.equals(dir.getName())) return;
 
-        Tools.closeEditor(dir.getName());
+        Tools.getInstance().closeEditor(dir.getName());
 
         Path oldPath = dir.getPath();
         Path newPath = oldPath.getParent().resolve(newName);
@@ -63,7 +63,7 @@ public class Rename extends DumbAwareAction {
                     .setModifiedAt(LocalDateTime.now())
                     .setModifiedBy("Muteb almughyiri");
 
-            Tools.updateChildrenPathsRecursive(node, oldPath, newPath);
+            Tools.getInstance().updateChildrenPathsRecursive(node, oldPath, newPath);
             ((DefaultTreeModel) tree.getModel()).nodeChanged(node);
 
             if (dir instanceof TestProjectDirectoryDto && projectPanel.getTestProjectSelector() != null) {

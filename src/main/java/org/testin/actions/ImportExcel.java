@@ -162,7 +162,7 @@ public class ImportExcel extends DumbAwareAction {
                 final VirtualFile fileToOpen = newFile;
 
                 ApplicationManager.getApplication().invokeLater(() -> {
-                    Tools.openWithAssociatedProgram(fileToOpen);
+                    Tools.getInstance().openWithAssociatedProgram(fileToOpen);
                     Notifier.info("Sample Ready", "Sample file has been added to your project and opened in Excel.");
                 });
 

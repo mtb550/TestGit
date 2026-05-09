@@ -144,7 +144,7 @@ public class TreeTransferHandler extends TransferHandler {
 
             sourceDir.setPath(newPath);
 
-            Tools.updateChildrenPathsRecursive(movedNode, oldPath, newPath);
+            Tools.getInstance().updateChildrenPathsRecursive(movedNode, oldPath, newPath);
 
             System.out.println("Moved successfully to: " + newPath);
         });

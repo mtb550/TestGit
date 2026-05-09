@@ -85,7 +85,7 @@ public final class PdfGenerator {
                     );
                     table.addCell(statusCell);
 
-                    String duration = Tools.getFormattedDuration(result.getDuration());
+                    String duration = Tools.getInstance().getFormattedDuration(result.getDuration());
                     table.addCell(new Cell().add(new Paragraph(duration != null ? duration : "N/A")));
                 });
             } else {

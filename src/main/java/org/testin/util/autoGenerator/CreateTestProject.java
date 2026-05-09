@@ -22,9 +22,9 @@ public class CreateTestProject implements GeneratorAction {
                 // todo, add new step to remove all dots and chars and slashes.
                 WriteAction.run(() -> {
 
-                    String safePackageName = Tools.toCamelCase(targetName);
+                    String safePackageName = Tools.getInstance().toCamelCase(targetName);
 
-                    VirtualFile sourceRoot = Tools.getMainSourceRoot(project);
+                    VirtualFile sourceRoot = Tools.getInstance().getMainSourceRoot(project);
 
                     if (sourceRoot != null) {
                         VirtualFile newPackage = VfsUtil.createDirectoryIfMissing(sourceRoot, safePackageName);

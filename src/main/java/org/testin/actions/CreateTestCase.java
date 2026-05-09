@@ -52,10 +52,10 @@ public class CreateTestCase extends DumbAwareAction {
             final TestCaseDto lastTc = isEmpty ? null : model.getElementAt(model.getSize() - 1);
             if (lastTc != null) lastTc.setNext(newTc.getId());
 
-            final List<String> logicalPath = Tools.extractLogicalPath(path);
+            final List<String> logicalPath = Tools.getInstance().extractLogicalPath(path);
             newTc.setPath(logicalPath);
 
-            final List<String> generatedFqcn = Tools.generateFqcn(logicalPath);
+            final List<String> generatedFqcn = Tools.getInstance().generateFqcn(logicalPath);
             newTc.setFqcn(generatedFqcn);
 
             ui.appendNewTestCase(newTc);

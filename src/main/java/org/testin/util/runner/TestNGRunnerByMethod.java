@@ -34,7 +34,7 @@ public class TestNGRunnerByMethod {
 
                     List<String> packageList = new ArrayList<>(cleanedFqcn);
                     String baseClassName = packageList.removeLast();
-                    String expectedClassName = Tools.toPascalCase(baseClassName);
+                    String expectedClassName = Tools.getInstance().toPascalCase(baseClassName);
 
                     if (expectedClassName.toLowerCase().endsWith("test")) {
                         if (expectedClassName.endsWith("test")) {

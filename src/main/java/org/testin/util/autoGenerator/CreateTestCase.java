@@ -17,7 +17,7 @@ public class CreateTestCase implements GeneratorAction {
 
     public void execute(final @NotNull Project project, final @NotNull String targetName, final @Nullable TreePath path) {
         if (path == null) return;
-        List<String> fqcn = Tools.extractFqcn(path);
+        List<String> fqcn = Tools.getInstance().extractFqcn(path);
         if (fqcn.isEmpty() || targetName.isEmpty()) return;
 
         ApplicationManager.getApplication().invokeLater(() -> {
@@ -29,7 +29,7 @@ public class CreateTestCase implements GeneratorAction {
                         fqcnString += "Test";
                     }
 
-                    String methodName = Tools.toCamelCase(targetName);
+                    String methodName = Tools.getInstance().toCamelCase(targetName);
 
                     PsiClass targetClass = JavaPsiFacade.getInstance(project)
                             .findClass(fqcnString, GlobalSearchScope.projectScope(project));

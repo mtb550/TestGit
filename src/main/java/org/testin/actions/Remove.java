@@ -60,7 +60,7 @@ public class Remove extends DumbAwareAction {
                 DirectoryDto pkg = (DirectoryDto) node.getUserObject();
 
                 if (pkg instanceof TestSetDirectoryDto || pkg instanceof TestRunDirectoryDto)
-                    Tools.closeEditor(pkg.getName());
+                    Tools.getInstance().closeEditor(pkg.getName());
 
                 TreeUtilImpl.removeVf(this, pkg.getPath());
                 TreeUtilImpl.removeNode(node, tree);

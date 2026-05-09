@@ -28,7 +28,7 @@ public class CreateJavaMethodInClass {
 
                 List<String> packageList = new ArrayList<>(cleanedFqcn);
                 String baseClassName = packageList.removeLast();
-                String expectedClassName = Tools.toPascalCase(baseClassName);
+                String expectedClassName = Tools.getInstance().toPascalCase(baseClassName);
 
                 if (expectedClassName.toLowerCase().endsWith("test")) {
                     if (expectedClassName.endsWith("test")) {
@@ -40,7 +40,7 @@ public class CreateJavaMethodInClass {
 
                 String packageName = String.join(".", packageList).toLowerCase();
                 String fqcnString = packageName + "." + expectedClassName;
-                String methodName = Tools.toCamelCase(tc.getDescription());
+                String methodName = Tools.getInstance().toCamelCase(tc.getDescription());
 
                 JavaPsiFacade psiFacade = JavaPsiFacade.getInstance(project);
                 GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
@@ -48,7 +48,7 @@ public class CreateJavaMethodInClass {
                 PsiClass targetClass = psiFacade.findClass(fqcnString, scope);
 
                 if (targetClass == null) {
-                    VirtualFile sourceRoot = Tools.getMainSourceRoot(project);
+                    VirtualFile sourceRoot = Tools.getInstance().getMainSourceRoot(project);
                     if (sourceRoot != null) {
                         String relativePath = String.join("/", packageList);
                         VirtualFile packageDir = VfsUtil.createDirectoryIfMissing(sourceRoot, relativePath);
@@ -84,7 +84,7 @@ public class CreateJavaMethodInClass {
     }
 
     private void retryInjectPhysically(Project project, List<String> packageList, String className, String methodName, TestCaseDto tc) {
-        VirtualFile sourceRoot = Tools.getMainSourceRoot(project);
+        VirtualFile sourceRoot = Tools.getInstance().getMainSourceRoot(project);
         if (sourceRoot == null) return;
 
         String relativePath = String.join("/", packageList) + "/" + className + ".java";

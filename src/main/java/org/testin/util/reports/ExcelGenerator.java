@@ -57,7 +57,7 @@ public final class ExcelGenerator {
                 ws.value(row, 2, statusEnum.name());
                 ws.style(row, 2).fontColor(statusEnum.getHex()).bold().set();
 
-                String formattedDuration = Tools.getFormattedDuration(result.getDuration());
+                String formattedDuration = Tools.getInstance().getFormattedDuration(result.getDuration());
                 ws.value(row, 3, formattedDuration);
 
                 ws.value(row, 4, expectedResult);

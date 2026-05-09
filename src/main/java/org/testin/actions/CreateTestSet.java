@@ -24,7 +24,7 @@ public class CreateTestSet implements NodeCreator {
         TreeUtilImpl.createDataVf(this, newDirPath, DirectoryType.TS.getMarker());
         TreeUtilImpl.createNode(action.getTree(), parentNode, newTestSetDirectory);
 
-        Tools.createJavaClassInTestRoot(project, parentDir.getName(), name);
+        Tools.getInstance().createJavaClassInTestRoot(project, parentDir.getName(), name);
         TestEditor.open(newTestSetDirectory);
     }
 }

@@ -12,6 +12,8 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jps.model.java.JavaSourceRootType;
@@ -32,15 +34,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Tools {
+
+    private static final Tools INSTANCE = new Tools();
+
+    public static Tools getInstance() {
+        return INSTANCE;
+    }
+
     @NotNull
-    public static String format(@Nullable final String text) {
+    public String format(@Nullable final String text) {
         if (StringUtil.isEmptyOrSpaces(text)) return "";
         String s = text.trim();
         return StringUtil.capitalize(s) + ".";
     }
 
-    public static void printTestSourceRoots(final Project project) {
+    public void printTestSourceRoots(final Project project) {
         System.out.println("printTestSourceRoots.printTestSourceRoots()");
 
         ProjectFileIndex fileIndex = ProjectRootManager.getInstance(project).getFileIndex();
@@ -52,7 +62,7 @@ public class Tools {
         }
     }
 
-    public static void refreshPath(final Path path) {
+    public void refreshPath(final Path path) {
         System.out.println("Tools.refreshPath()");
 
         if (path == null) return;
@@ -69,17 +79,16 @@ public class Tools {
         }
     }
 
-    public static int generateUniqueId() {
+    public int generateUniqueId() {
         return (int) (System.currentTimeMillis() % 100000);
     }
 
-    public static void refreshFileSystem(final File ioFile) {
+    public void refreshFileSystem(final File ioFile) {
         System.out.println("Tools.refreshFileSystem()");
         LocalFileSystem.getInstance().refreshAndFindFileByIoFile(ioFile);
-
     }
 
-    public static String toCamelCase(final String text) {
+    public String toCamelCase(final String text) {
         if (text == null || text.isEmpty()) return text;
         String[] words = text.split("[\\W_]+");
         StringBuilder result = new StringBuilder();
@@ -96,7 +105,7 @@ public class Tools {
     }
 
     @Deprecated
-    public static String fileToFqcn(final File file) {
+    public String fileToFqcn(final File file) {
         if (file == null) return "";
 
         String path = file.getAbsolutePath().replace("\\", "/");
@@ -149,7 +158,7 @@ public class Tools {
         return fqcn.toString();
     }
 
-    public static @NotNull List<String> extractLogicalPath(final @NotNull Path path) {
+    public @NotNull List<String> extractLogicalPath(final @NotNull Path path) {
         if (path.toString().isEmpty()) return new ArrayList<>();
 
         String pathStr = path.toAbsolutePath().toString().replace("\\", "/");
@@ -173,7 +182,7 @@ public class Tools {
         return logicalPath;
     }
 
-    public static @NotNull List<String> generateFqcn(final @NotNull List<String> storedPath) {
+    public @NotNull List<String> generateFqcn(final @NotNull List<String> storedPath) {
         List<String> fqcnParts = new ArrayList<>();
 
         String basePath = AppSettingsState.getInstance().rootAutomationPath;
@@ -205,7 +214,7 @@ public class Tools {
         return fqcnParts;
     }
 
-    private static @NotNull String extractRelativePath(@NotNull Path path) {
+    private @NotNull String extractRelativePath(@NotNull Path path) {
         String pathStr = path.toAbsolutePath().toString().replace("\\", "/");
 
         int markerIndex = pathStr.indexOf("/org/testin/");
@@ -222,7 +231,7 @@ public class Tools {
         return pathStr;
     }
 
-    public static boolean isEditorOpen(final String editorName) {
+    public boolean isEditorOpen(final String editorName) {
         FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
         VirtualFile[] openFiles = editorManager.getOpenFiles();
 
@@ -236,7 +245,7 @@ public class Tools {
         return false;
     }
 
-    public static void closeEditor(final String editorName) {
+    public void closeEditor(final String editorName) {
         FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
         VirtualFile[] openFiles = editorManager.getOpenFiles();
 
@@ -248,7 +257,7 @@ public class Tools {
         }
     }
 
-    public static void updateChildrenPathsRecursive(final DefaultMutableTreeNode parentNode, final Path oldParentPath, final Path newParentPath) {
+    public void updateChildrenPathsRecursive(final DefaultMutableTreeNode parentNode, final Path oldParentPath, final Path newParentPath) {
         for (int i = 0; i < parentNode.getChildCount(); i++) {
             DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) parentNode.getChildAt(i);
 
@@ -263,12 +272,12 @@ public class Tools {
         }
     }
 
-    public static String getFormattedDuration(final Duration duration) {
+    public String getFormattedDuration(final Duration duration) {
         if (duration == null) return null;
         return String.format("%02d:%02d:%02d", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
     }
 
-    public static void createJavaPackageInTestRoot(@NotNull final Project project, @NotNull final String packageName) {
+    public void createJavaPackageInTestRoot(@NotNull final Project project, @NotNull final String packageName) {
         ApplicationManager.getApplication().invokeLater(() ->
                 ApplicationManager.getApplication().runWriteAction(() -> {
                     try {
@@ -299,7 +308,7 @@ public class Tools {
                 }));
     }
 
-    public static void createJavaClassInTestRoot(@NotNull final Project project, @NotNull final String packageName, @NotNull final String className) {
+    public void createJavaClassInTestRoot(@NotNull final Project project, @NotNull final String packageName, @NotNull final String className) {
 
         ApplicationManager.getApplication().invokeLater(() ->
                 ApplicationManager.getApplication().runWriteAction(() -> {
@@ -355,7 +364,7 @@ public class Tools {
                 }));
     }
 
-    private static String buildClassContent(String fullPackageName, String className) {
+    private String buildClassContent(String fullPackageName, String className) {
         StringBuilder content = new StringBuilder();
 
         if (fullPackageName != null && !fullPackageName.isEmpty()) {
@@ -369,7 +378,7 @@ public class Tools {
         return content.toString();
     }
 
-    public static @Nullable VirtualFile getMainSourceRoot(final @NotNull Project project) {
+    public @Nullable VirtualFile getMainSourceRoot(final @NotNull Project project) {
         Module[] modules = ModuleManager.getInstance(project).getModules();
 
         for (Module module : modules) {
@@ -384,7 +393,7 @@ public class Tools {
         return null;
     }
 
-    public static List<String> extractFqcn(TreePath path) {
+    public List<String> extractFqcn(TreePath path) {
         List<String> fqcn = new ArrayList<>();
 
         System.out.println("--- Start Extracting FQCN ---");
@@ -433,7 +442,7 @@ public class Tools {
         return fqcn;
     }
 
-    public static String toPascalCase(String text) {
+    public String toPascalCase(String text) {
         if (text == null || text.trim().isEmpty()) return "";
 
         String[] words = text.split("[\\s_\\-]+");
@@ -448,7 +457,7 @@ public class Tools {
         return pascalCase.toString();
     }
 
-    public static void openWithAssociatedProgram(VirtualFile virtualFile) {
+    public void openWithAssociatedProgram(VirtualFile virtualFile) {
         if (virtualFile == null || !virtualFile.exists()) {
             Notifier.error("Open Error", "The file does not exist.");
             return;
@@ -478,6 +487,4 @@ public class Tools {
             }
         });
     }
-
-
 }

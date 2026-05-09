@@ -23,7 +23,7 @@ public class CodeNavigator {
         }
 
         final Project project = Config.getProject();
-        final String methodName = Tools.toCamelCase(testCaseName);
+        final String methodName = Tools.getInstance().toCamelCase(testCaseName);
 
         ApplicationManager.getApplication().executeOnPooledThread(() ->
                 ApplicationManager.getApplication().runReadAction(() -> {
@@ -39,7 +39,7 @@ public class CodeNavigator {
 
                     List<String> packageList = new ArrayList<>(cleanedFqcn);
                     String baseClassName = packageList.removeLast();
-                    String expectedClassName = Tools.toPascalCase(baseClassName);
+                    String expectedClassName = Tools.getInstance().toPascalCase(baseClassName);
 
                     if (expectedClassName.toLowerCase().endsWith("test")) {
                         if (expectedClassName.endsWith("test")) {

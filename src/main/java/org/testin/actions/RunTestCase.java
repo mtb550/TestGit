@@ -30,7 +30,7 @@ public class RunTestCase extends DumbAwareAction {
             if (tc == null || "RUNNING".equals(tc.getTempStatus())) continue;
 
             Notifier.showCustomBottomRightBalloon("Running Test Case: ", tc.getDescription());
-            TestNGRunnerByMethod.runTestMethod(tc.getFqcn(), Tools.toCamelCase(tc.getDescription()));
+            TestNGRunnerByMethod.runTestMethod(tc.getFqcn(), Tools.getInstance().toCamelCase(tc.getDescription()));
         }
     }
 

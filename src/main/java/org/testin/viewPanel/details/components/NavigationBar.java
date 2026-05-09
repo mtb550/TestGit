@@ -87,7 +87,7 @@ public class NavigationBar extends BaseDetails {
                         if (vf == null) return;
 
                         if (isTestSet) {
-                            if (Tools.isEditorOpen(file.getName())) {
+                            if (Tools.getInstance().isEditorOpen(file.getName())) {
                                 return;
                             }
 

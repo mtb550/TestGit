@@ -35,7 +35,7 @@ public class Open extends DumbAwareAction {
         if (node == null) return;
 
         if (node.getUserObject() instanceof DirectoryDto pkg) {
-            if (Tools.isEditorOpen(pkg.getName())) {
+            if (Tools.getInstance().isEditorOpen(pkg.getName())) {
                 System.out.println("Editor already open, focusing: " + pkg.getName());
                 return;
             }

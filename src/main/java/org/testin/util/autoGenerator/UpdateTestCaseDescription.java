@@ -26,7 +26,7 @@ public class UpdateTestCaseDescription {
 
                     List<String> packageList = new ArrayList<>(cleanedFqcn);
                     String baseClassName = packageList.remove(packageList.size() - 1);
-                    String expectedClassName = Tools.toPascalCase(baseClassName);
+                    String expectedClassName = Tools.getInstance().toPascalCase(baseClassName);
 
                     if (expectedClassName.toLowerCase().endsWith("test")) {
                         if (expectedClassName.endsWith("test")) {
@@ -66,7 +66,7 @@ public class UpdateTestCaseDescription {
                                     PsiAnnotationMemberValue newDesc = factory.createExpressionFromText("\"" + tc.getDescription() + "\"", null);
                                     targetAnnotation.setDeclaredAttributeValue("description", newDesc);
 
-                                    String newMethodName = Tools.toCamelCase(tc.getDescription());
+                                    String newMethodName = Tools.getInstance().toCamelCase(tc.getDescription());
                                     if (!targetMethod.getName().equals(newMethodName)) {
                                         targetMethod.setName(newMethodName);
                                     }

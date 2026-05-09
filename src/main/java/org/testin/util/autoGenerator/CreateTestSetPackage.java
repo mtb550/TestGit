@@ -17,7 +17,7 @@ public class CreateTestSetPackage implements GeneratorAction {
     @Override
     public void execute(final @NotNull Project project, final @NotNull String targetName, final @Nullable TreePath path) {
         if (path == null) return;
-        List<String> fqcn = Tools.extractFqcn(path);
+        List<String> fqcn = Tools.getInstance().extractFqcn(path);
 
         String basePackage = String.join(".", fqcn);
         String fullPackagePath = basePackage.isEmpty() ? targetName : basePackage + "." + targetName;
@@ -26,7 +26,7 @@ public class CreateTestSetPackage implements GeneratorAction {
 
         WriteAction.run(() -> {
             try {
-                VirtualFile sourceRoot = Tools.getMainSourceRoot(project);
+                VirtualFile sourceRoot = Tools.getInstance().getMainSourceRoot(project);
 
                 if (sourceRoot != null) {
                     String relativePath = fullPackagePath.replace('.', '/');

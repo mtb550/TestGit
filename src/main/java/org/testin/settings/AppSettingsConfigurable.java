@@ -205,7 +205,7 @@ public class AppSettingsConfigurable implements Configurable {
         rootTestinPathField.setText(settings.rootTestinPath != null ? settings.rootTestinPath : "");
 
         Project project = Config.getProject();
-        VirtualFile mainSourceRoot = Tools.getMainSourceRoot(project);
+        VirtualFile mainSourceRoot = Tools.getInstance().getMainSourceRoot(project);
 
         if (mainSourceRoot != null) {
             rootAutomationPathField.setText(mainSourceRoot.getPath());

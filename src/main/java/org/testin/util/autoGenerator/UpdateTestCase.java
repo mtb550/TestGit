@@ -12,7 +12,7 @@ import java.util.List;
 public class UpdateTestCase implements GeneratorAction {
 
     public void execute(final @NotNull Project project, final @NotNull String targetName, final @NotNull TreePath path) {
-        List<String> fqcn = Tools.extractFqcn(path);
+        List<String> fqcn = Tools.getInstance().extractFqcn(path);
         // .join(".")
         if (fqcn.isEmpty() || targetName.isEmpty()) return;
 
