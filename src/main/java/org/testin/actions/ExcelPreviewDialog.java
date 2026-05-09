@@ -8,11 +8,12 @@ import org.jetbrains.annotations.Nullable;
 import org.testin.pojo.dto.TestCaseDto;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-// todo, to be enhanced, add horizontal scroll, add remain columns, make all cells editable.
+// todo, to be enhanced, make it dynamic for re-use, add horizontal scroll, add remain columns, make all cells editable.
 public class ExcelPreviewDialog extends DialogWrapper {
     private final List<TestCaseDto> testCases;
 
@@ -20,7 +21,7 @@ public class ExcelPreviewDialog extends DialogWrapper {
         super(project, true);
         this.testCases = testCases;
 
-        setTitle("Preview Excel Import");
+        setTitle("Preview & Edit Excel Import");
         setOKButtonText("Import");
         setCancelButtonText("Cancel");
 
@@ -38,7 +39,7 @@ public class ExcelPreviewDialog extends DialogWrapper {
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false;
+                return column == 1;
             }
         };
 
@@ -56,9 +57,23 @@ public class ExcelPreviewDialog extends DialogWrapper {
             });
         }
 
+        model.addTableModelListener(e -> {
+            if (e.getType() == TableModelEvent.UPDATE) {
+                int row = e.getFirstRow();
+                int col = e.getColumn();
+
+                if (row >= 0 && col == 1) {
+                    String updatedDescription = (String) model.getValueAt(row, col);
+                    testCases.get(row).setDescription(updatedDescription);
+                }
+            }
+        });
+
         JBTable table = new JBTable(model);
         table.setFillsViewportHeight(true);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+        table.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
 
         JBScrollPane scrollPane = new JBScrollPane(table);
         panel.add(scrollPane, BorderLayout.CENTER);

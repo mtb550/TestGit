@@ -197,6 +197,7 @@ public class ImportExcel extends DumbAwareAction {
                 Connection connection = null;
                 Recordset recordset = null;
                 try {
+                    // todo, bug: if test set has test cases, should start after the last with isHead=false and next={last_test_case_uuid}
                     // todo, expected result is not arranged if it is multi lines. to be fixed.
                     // todo, if import, we need generate code context menu, to generate all in one click.
                     // todo, filter by module in status bar
@@ -209,7 +210,7 @@ public class ImportExcel extends DumbAwareAction {
 
                     indicator.setText("Mapping column headers...");
                     Map<String, String> headerMap = buildCaseInsensitiveHeaderMap(recordset.getFieldNames(), IMPORT_COLUMNS);
-                    Map<String, String> filesToWrite = new LinkedHashMap<>();
+
                     List<TestCaseDto> previewList = new ArrayList<>();
 
                     TestCaseDto previousTestCase = null;
@@ -229,32 +230,30 @@ public class ImportExcel extends DumbAwareAction {
                             }
                         }
 
-                        previewList.add(currentTestCase);
-
                         if (previousTestCase == null) currentTestCase.setIsHead(true);
                         else {
                             currentTestCase.setIsHead(null);
                             previousTestCase.setNext(currentTestCase.getId());
-                            filesToWrite.put(previousTestCase.getId() + ".json", mapper.writeValueAsString(previousTestCase));
                         }
                         currentTestCase.setNext(null);
                         previousTestCase = currentTestCase;
+
+                        previewList.add(currentTestCase);
 
                         rowCount++;
 
                         if (rowCount % 50 == 0) {
                             indicator.setText2("Parsed " + rowCount + " test cases...");
                         }
-
                     }
-
-                    if (previousTestCase != null && !indicator.isCanceled())
-                        filesToWrite.put(previousTestCase.getId() + ".json", mapper.writeValueAsString(previousTestCase));
 
                     if (indicator.isCanceled()) {
                         Notifier.warn("Import Cancelled", "Import was cancelled by the user.");
                         return;
                     }
+
+                    recordset.close();
+                    connection.close();
 
                     indicator.setText("Waiting for user confirmation...");
                     indicator.setText2("");
@@ -265,17 +264,19 @@ public class ImportExcel extends DumbAwareAction {
                         if (dialog.showAndGet()) {
 
                             ApplicationManager.getApplication().runWriteAction(() -> {
-                                for (Map.Entry<String, String> entry : filesToWrite.entrySet()) {
-                                    try {
-                                        VirtualFile newJsonFile = targetDirectory.createChildData(this, entry.getKey());
-                                        newJsonFile.setBinaryContent(entry.getValue().getBytes(StandardCharsets.UTF_8));
-                                    } catch (IOException ex) {
-                                        System.err.println("Failed to write file: " + entry.getKey());
+                                try {
+                                    for (TestCaseDto tc : previewList) {
+                                        String jsonContent = mapper.writeValueAsString(tc);
+                                        VirtualFile newJsonFile = targetDirectory.createChildData(this, tc.getId() + ".json");
+                                        newJsonFile.setBinaryContent(jsonContent.getBytes(StandardCharsets.UTF_8));
                                     }
+                                    Notifier.info("Import Complete", "Successfully imported " + previewList.size() + " test cases.");
+                                    targetDirectory.refresh(false, true);
+                                    Tools.getInstance().closeThenOpenTestEditor(targetDirectory, ts);
+
+                                } catch (IOException ex) {
+                                    System.err.println("Failed to write files: " + ex.getMessage());
                                 }
-                                Notifier.info("Import Complete", "Successfully imported " + filesToWrite.size() + " test cases.");
-                                targetDirectory.refresh(false, true);
-                                Tools.getInstance().closeThenOpenTestEditor(targetDirectory, ts);
                             });
 
                         } else {
