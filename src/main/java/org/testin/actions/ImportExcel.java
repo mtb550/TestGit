@@ -25,6 +25,7 @@ import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
 import org.testin.pojo.dto.dirs.TestSetPackageDirectoryDto;
 import org.testin.ui.ExcelPreviewDialog;
 import org.testin.util.Tools;
+import org.testin.util.TreeUtilImpl;
 import org.testin.util.notifications.Notifier;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -98,13 +99,13 @@ public class ImportExcel extends DumbAwareAction {
         );
 
         if (userChoice == 0) {
-            openFileChooserAndProcess(targetDirectory, dirDto);
+            openFileChooserAndProcess(targetDirectory, dirDto, parentNode);
         } else if (userChoice == 1) {
             downloadSampleFile(e);
         }
     }
 
-    private void openFileChooserAndProcess(final VirtualFile targetDirectory, final DirectoryDto selectedDirDto) {
+    private void openFileChooserAndProcess(final VirtualFile targetDirectory, final DirectoryDto selectedDirDto, final DefaultMutableTreeNode parentNode) {
         final FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false)
                 .withTitle("Select Spreadsheet File")
                 .withDescription("Please choose an .xls or .xlsx file");
@@ -121,7 +122,7 @@ public class ImportExcel extends DumbAwareAction {
                                 "Please select a valid Excel file and try again."));
                 return;
             }
-            processWithPoi(selectedFile.getPath(), targetDirectory, selectedDirDto);
+            processWithPoi(selectedFile.getPath(), targetDirectory, selectedDirDto, parentNode);
         }
     }
 
@@ -168,7 +169,7 @@ public class ImportExcel extends DumbAwareAction {
         });
     }
 
-    private void processWithPoi(final String filePath, final VirtualFile targetDirectory, final DirectoryDto selectedDirDto) {
+    private void processWithPoi(final String filePath, final VirtualFile targetDirectory, final DirectoryDto selectedDirDto, final DefaultMutableTreeNode parentNode) {
         File file = new File(filePath);
         if (!file.exists() || !file.canRead()) {
             Notifier.getInstance().error("File Error", "Java cannot read this file!");
@@ -188,6 +189,23 @@ public class ImportExcel extends DumbAwareAction {
                     // todo, if import, we need generate code context menu, to generate all in one click.
                     // todo, filter by module in status bar
                     // todo, fetch sheet name dynamically (Sheet 1) or sheet(0), get all sheets in JBTable tabs
+
+                    indicator.setText("Checking for existing test cases...");
+
+                    VirtualFile[] existingChildren = targetDirectory.getChildren();
+                    if (existingChildren != null) {
+                        for (VirtualFile child : existingChildren) {
+                            if (!child.isDirectory() && child.getName().endsWith(".json")) {
+                                try (InputStream is = child.getInputStream()) {
+                                    TestCaseDto tc = mapper.readValue(is, TestCaseDto.class);
+                                    if (tc.getNext() == null) {
+                                        break;
+                                    }
+                                } catch (Exception ignored) {
+                                }
+                            }
+                        }
+                    }
 
                     Map<String, List<TestCaseDto>> allSheetsData = new LinkedHashMap<>();
                     int totalParsed = 0;
@@ -311,7 +329,15 @@ public class ImportExcel extends DumbAwareAction {
 
                                             VirtualFile sheetDir = targetDirectory.findChild(safeDirName);
                                             if (sheetDir == null) {
+
                                                 sheetDir = targetDirectory.createChildDirectory(this, safeDirName);
+
+                                                TestSetDirectoryDto newTsDto = new TestSetDirectoryDto()
+                                                        .setName(safeDirName)
+                                                        .setPath(selectedDirDto.getPath().resolve(safeDirName));
+
+                                                TreeUtilImpl.createNode(tree, parentNode, newTsDto);
+                                                Tools.getInstance().createJavaClassInTestRoot(Config.getProject(), selectedDirDto.getName(), safeDirName);
                                             }
 
                                             if (sheetDir.findChild(".ts") == null) {
@@ -351,7 +377,7 @@ public class ImportExcel extends DumbAwareAction {
         });
     }
 
-    private void linkAndSaveTestCases(VirtualFile dir, List<TestCaseDto> testCases, TestCaseDto existingTail, ObjectMapper mapper, Object requestor) throws IOException {
+    private void linkAndSaveTestCases(final VirtualFile dir, final List<TestCaseDto> testCases, final TestCaseDto existingTail, final ObjectMapper mapper, final Object requestor) throws IOException {
         TestCaseDto previousNode = existingTail;
 
         for (TestCaseDto currentTestCase : testCases) {
@@ -378,7 +404,7 @@ public class ImportExcel extends DumbAwareAction {
         }
     }
 
-    private TestCaseDto findExistingTail(VirtualFile directory, ObjectMapper mapper) {
+    private TestCaseDto findExistingTail(final VirtualFile directory, final ObjectMapper mapper) {
         if (directory == null) return null;
         VirtualFile[] children = directory.getChildren();
         if (children != null) {
