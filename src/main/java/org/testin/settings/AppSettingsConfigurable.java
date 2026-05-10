@@ -138,7 +138,7 @@ public class AppSettingsConfigurable implements Configurable {
                         });
                     }
                 } catch (IOException ex) {
-                    Notifier.error("Status Update Failed", "Could not rename project directory: " + ex.getMessage());
+                    Notifier.getInstance().error("Status Update Failed", "Could not rename project directory: " + ex.getMessage());
                 }
             });
         }

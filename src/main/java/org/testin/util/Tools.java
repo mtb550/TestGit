@@ -474,21 +474,21 @@ public class Tools {
 
     public void openWithAssociatedProgram(VirtualFile virtualFile) {
         if (virtualFile == null || !virtualFile.exists()) {
-            Notifier.error("Open Error", "The file does not exist.");
+            Notifier.getInstance().error("Open Error", "The file does not exist.");
             return;
         }
 
         File file = new File(virtualFile.getPath());
 
         if (!Desktop.isDesktopSupported()) {
-            Notifier.error("System Error", "Desktop operations are not supported on this system.");
+            Notifier.getInstance().error("System Error", "Desktop operations are not supported on this system.");
             return;
         }
 
         Desktop desktop = Desktop.getDesktop();
 
         if (!desktop.isSupported(Desktop.Action.OPEN)) {
-            Notifier.error("System Error", "The 'Open' action is not supported on this system.");
+            Notifier.getInstance().error("System Error", "The 'Open' action is not supported on this system.");
             return;
         }
 
@@ -497,7 +497,7 @@ public class Tools {
                 desktop.open(file);
             } catch (IOException e) {
                 ApplicationManager.getApplication().invokeLater(() ->
-                        Notifier.error("Execution Error", "Failed to open the file: " + e.getMessage())
+                        Notifier.getInstance().error("Execution Error", "Failed to open the file: " + e.getMessage())
                 );
             }
         });

@@ -60,7 +60,7 @@ public class TestMethodGutter extends RelatedItemLineMarkerProvider implements D
     private void openViewPanel(Project project, String targetId) {
         Path rootPath = Config.getTestinPath();
         if (rootPath == null) {
-            Notifier.error("Config Error", "Testin path is not configured.");
+            Notifier.getInstance().error("Config Error", "Testin path is not configured.");
             return;
         }
 
@@ -81,7 +81,7 @@ public class TestMethodGutter extends RelatedItemLineMarkerProvider implements D
                 if (foundFile == null) {
                     System.err.println("[GUTTER TRACE] File not found in external path: " + targetId + ".json");
                     ApplicationManager.getApplication().invokeLater(() ->
-                            Notifier.warn("Not Found", "No JSON file found in external path for ID: " + targetId)
+                            Notifier.getInstance().warn("Not Found", "No JSON file found in external path for ID: " + targetId)
                     );
                     return;
                 }
@@ -97,7 +97,7 @@ public class TestMethodGutter extends RelatedItemLineMarkerProvider implements D
             } catch (Exception ex) {
                 System.err.println("[GUTTER TRACE] IO Error: " + ex.getMessage());
                 ApplicationManager.getApplication().invokeLater(() ->
-                        Notifier.error("Error", "Could not read JSON file: " + ex.getMessage())
+                        Notifier.getInstance().error("Error", "Could not read JSON file: " + ex.getMessage())
                 );
             }
         });

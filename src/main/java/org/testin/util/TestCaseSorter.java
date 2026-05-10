@@ -27,7 +27,7 @@ public class TestCaseSorter {
         final Set<UUID> unsortedIds = new HashSet<>();
 
         if (head == null) {
-            Notifier.warn("Warning", "No Head found in test cases.");
+            Notifier.getInstance().warn("Warning", "No Head found in test cases.");
             unsortedList.forEach(tc -> unsortedIds.add(tc.getId()));
             return new SortResult(unsortedList, unsortedIds);
         }

@@ -46,7 +46,7 @@ public final class TestRunReport {
                 File jsonFile = dirPath.resolve(folderName + ".json").toFile();
 
                 if (!jsonFile.exists() || !jsonFile.isFile()) {
-                    Notifier.error("Report Error", "JSON data file not found: " + jsonFile.getAbsolutePath());
+                    Notifier.getInstance().error("Report Error", "JSON data file not found: " + jsonFile.getAbsolutePath());
                     return;
                 }
 
@@ -75,14 +75,14 @@ public final class TestRunReport {
 
                 Files.write(reportFile.toPath(), fileBytes);
 
-                Notifier.infoWithOpenAndCopy(
+                Notifier.getInstance().infoWithOpenAndCopy(
                         format + " Report Generated",
                         "Saved successfully: " + reportFile.getName(),
                         reportFile
                 );
 
             } catch (Exception e) {
-                Notifier.error("Report Error", "Failed to generate " + format + " report: " + e.getMessage());
+                Notifier.getInstance().error("Report Error", "Failed to generate " + format + " report: " + e.getMessage());
             }
         });
     }

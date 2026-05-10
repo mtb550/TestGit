@@ -14,6 +14,8 @@ import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.wm.IdeFrame;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.awt.RelativePoint;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
 
@@ -22,10 +24,17 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Notifier {
-    private static final String GROUP_ID = "testin.notifications";
 
-    public static void softShow(@NotNull final String title, @NotNull final String message) {
+    private static final Notifier INSTANCE = new Notifier();
+    private final String GROUP_ID = "testin.notifications";
+
+    public static Notifier getInstance() {
+        return INSTANCE;
+    }
+
+    public void softShow(@NotNull final String title, @NotNull final String message) {
 
         SwingUtilities.invokeLater(() -> {
             IdeFrame ideFrame = WindowManager.getInstance().getIdeFrame(Config.getProject());
@@ -48,49 +57,49 @@ public class Notifier {
         });
     }
 
-    public static void info(final @NotNull String message) {
+    public void info(final @NotNull String message) {
         NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
                 .createNotification(message, NotificationType.INFORMATION) // Notice: No Title!
                 .notify(Config.getProject());
     }
 
-    public static void warn(final @NotNull String message) {
+    public void warn(final @NotNull String message) {
         NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
                 .createNotification(message, NotificationType.WARNING)
                 .notify(Config.getProject());
     }
 
-    public static void error(final @NotNull String message) {
+    public void error(final @NotNull String message) {
         NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
                 .createNotification(message, NotificationType.ERROR)
                 .notify(Config.getProject());
     }
 
-    public static void info(final @NotNull String title, final @NotNull String message) {
+    public void info(final @NotNull String title, final @NotNull String message) {
         NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
                 .createNotification(title, message, NotificationType.INFORMATION)
                 .notify(Config.getProject());
     }
 
-    public static void warn(final @NotNull String title, final @NotNull String message) {
+    public void warn(final @NotNull String title, final @NotNull String message) {
         NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
                 .createNotification(title, message, NotificationType.WARNING)
                 .notify(Config.getProject());
     }
 
-    public static void error(final @NotNull String title, final @NotNull String message) {
+    public void error(final @NotNull String title, final @NotNull String message) {
         NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
                 .createNotification(title, message, NotificationType.ERROR)
                 .notify(Config.getProject());
     }
 
-    public static void warnWithAction(final @NotNull String title, final @NotNull String message, final @NotNull String actionName, final @NotNull Runnable action) {
+    public void warnWithAction(final @NotNull String title, final @NotNull String message, final @NotNull String actionName, final @NotNull Runnable action) {
         final Notification notification = NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
                 .createNotification(title, message, NotificationType.WARNING); // استخدام نوع WARNING
@@ -99,7 +108,7 @@ public class Notifier {
         notification.notify(Config.getProject());
     }
 
-    public static void infoWithAction(final @NotNull String title, final @NotNull String message, final @NotNull String actionName, final @NotNull Runnable action) {
+    public void infoWithAction(final @NotNull String title, final @NotNull String message, final @NotNull String actionName, final @NotNull Runnable action) {
         final Notification notification = NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
                 .createNotification(title, message, NotificationType.INFORMATION);
@@ -108,7 +117,7 @@ public class Notifier {
         notification.notify(Config.getProject());
     }
 
-    public static void infoWithOpenAndCopy(final @NotNull String title, final @NotNull String message, final @NotNull File file) {
+    public void infoWithOpenAndCopy(final @NotNull String title, final @NotNull String message, final @NotNull File file) {
         final Notification notification = NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
                 .createNotification(title, message, NotificationType.INFORMATION);
@@ -125,6 +134,4 @@ public class Notifier {
 
         notification.notify(Config.getProject());
     }
-
-
 }

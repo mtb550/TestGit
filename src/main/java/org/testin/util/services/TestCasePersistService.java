@@ -30,7 +30,7 @@ public final class TestCasePersistService implements Disposable {
             try {
                 VirtualFile dirVFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(path.toFile());
                 if (dirVFile == null) {
-                    Notifier.error("Save Error", "Could not resolve directory: " + path);
+                    Notifier.getInstance().error("Save Error", "Could not resolve directory: " + path);
                     return;
                 }
 
@@ -48,10 +48,10 @@ public final class TestCasePersistService implements Disposable {
                     VfsUtil.saveText(targetFile, jsonContent);
                 }
 
-                Notifier.info("Test Case Created", tcs.getFirst().getDescription());
+                Notifier.getInstance().info("Test Case Created", tcs.getFirst().getDescription());
 
             } catch (IOException e) {
-                Notifier.error("Save Error", "Failed to persist data: " + e.getMessage());
+                Notifier.getInstance().error("Save Error", "Failed to persist data: " + e.getMessage());
             }
         }));
     }

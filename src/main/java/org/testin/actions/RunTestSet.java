@@ -56,7 +56,7 @@ public class RunTestSet extends DumbAwareAction {
                 System.out.println("fqcn: " + fqcn);
                 TestNGRunnerByClass.runTestClass(fqcn);
             } else {
-                Notifier.error("Run Failed", "Could not parse class name from file path: " + ts.getPath().toFile().getName());
+                Notifier.getInstance().error("Run Failed", "Could not parse class name from file path: " + ts.getPath().toFile().getName());
             }
         }
     }

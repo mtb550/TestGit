@@ -27,7 +27,7 @@ public class StartupActivity implements ProjectActivity {
         if (settings.rootTestinPath != null && !settings.rootTestinPath.trim().isEmpty())
             testinPath = Path.of(settings.rootTestinPath);
         else
-            Notifier.warnWithAction(
+            Notifier.getInstance().warnWithAction(
                     "Testin Setup Required",
                     "Please configure the Root Testin Folder to enable test management features.",
                     "Open Settings",

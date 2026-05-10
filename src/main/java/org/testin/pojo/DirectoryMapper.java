@@ -25,7 +25,7 @@ public class DirectoryMapper {
                     .setPathName(path.getFileName().toString());
 
         } catch (Exception e) {
-            Notifier.error("Read Test Project Failed", "Skipping invalid format: " + path.getFileName().toString());
+            Notifier.getInstance().error("Read Test Project Failed", "Skipping invalid format: " + path.getFileName().toString());
             System.err.println(e.getMessage());
             e.printStackTrace(System.err);
             return null;
@@ -39,7 +39,7 @@ public class DirectoryMapper {
                     .setPath(path);
 
         } catch (Exception e) {
-            Notifier.error("Read Test Case Package Failed", "Failed to parse directory: " + path.getFileName());
+            Notifier.getInstance().error("Read Test Case Package Failed", "Failed to parse directory: " + path.getFileName());
             System.err.println(e.getMessage());
             e.printStackTrace(System.err);
             return null;
@@ -53,7 +53,7 @@ public class DirectoryMapper {
                     .setPath(path);
 
         } catch (Exception e) {
-            Notifier.error("Read Test Case Package Failed", "Failed to parse directory: " + path.getFileName());
+            Notifier.getInstance().error("Read Test Case Package Failed", "Failed to parse directory: " + path.getFileName());
             System.err.println(e.getMessage());
             e.printStackTrace(System.err);
             return null;
@@ -67,7 +67,7 @@ public class DirectoryMapper {
                     .setPath(path);
 
         } catch (Exception e) {
-            Notifier.error("Read Test Case Package Failed", "Failed to parse directory: " + path.getFileName());
+            Notifier.getInstance().error("Read Test Case Package Failed", "Failed to parse directory: " + path.getFileName());
             System.err.println(e.getMessage());
             e.printStackTrace(System.err);
             return null;
@@ -81,7 +81,7 @@ public class DirectoryMapper {
                     .setPath(path);
 
         } catch (Exception e) {
-            Notifier.error("Read Test Run Package Failed", "Failed to parse directory: " + path.getFileName());
+            Notifier.getInstance().error("Read Test Run Package Failed", "Failed to parse directory: " + path.getFileName());
             System.err.println(e.getMessage());
             e.printStackTrace(System.err);
             return null;
@@ -95,7 +95,7 @@ public class DirectoryMapper {
                     .setPath(path);
 
         } catch (Exception e) {
-            Notifier.error("Read Test Set Failed", "Failed to parse directory: " + path.getFileName());
+            Notifier.getInstance().error("Read Test Set Failed", "Failed to parse directory: " + path.getFileName());
             System.err.println(e.getMessage());
             e.printStackTrace(System.err);
             return null;
@@ -109,7 +109,7 @@ public class DirectoryMapper {
                     .setPath(path);
 
         } catch (Exception e) {
-            Notifier.error("Read Test Run Failed", "Failed to parse directory: " + path.getFileName());
+            Notifier.getInstance().error("Read Test Run Failed", "Failed to parse directory: " + path.getFileName());
             System.err.println(e.getMessage());
             e.printStackTrace(System.err);
             return null;
