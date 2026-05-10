@@ -3,19 +3,20 @@ package org.testin.ui;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.ui.table.JBTable;
 import org.jetbrains.annotations.Nullable;
+import org.testin.pojo.Group;
 import org.testin.pojo.Priority;
 import org.testin.pojo.TestEditorAttributes;
 import org.testin.pojo.dto.TestCaseDto;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -26,6 +27,7 @@ import java.util.List;
 public class ExcelPreviewDialog extends DialogWrapper {
     private final Map<String, List<TestCaseDto>> originalSheetsData;
     private final Map<String, DefaultTableModel> tableModelsMap = new LinkedHashMap<>();
+    private final Project project;
 
     private final List<TestEditorAttributes> importAttributes = Arrays.stream(TestEditorAttributes.values())
             .filter(TestEditorAttributes::isImportValue)
@@ -33,6 +35,7 @@ public class ExcelPreviewDialog extends DialogWrapper {
 
     public ExcelPreviewDialog(@Nullable final Project project, final Map<String, List<TestCaseDto>> sheetsData) {
         super(project, true);
+        this.project = project;
         this.originalSheetsData = sheetsData;
 
         setTitle("Preview & Select Excel Import");
@@ -87,16 +90,32 @@ public class ExcelPreviewDialog extends DialogWrapper {
                 model.addRow(rowData);
             }
 
-            model.addTableModelListener(e -> {
-                if (e.getType() == TableModelEvent.UPDATE) {
-                    int row = e.getFirstRow();
-                    int col = e.getColumn();
+            model.addTableModelListener(new TableModelListener() {
+                boolean isUpdating = false;
 
-                    if (row >= 0 && col >= 2) {
-                        String updatedValue = String.valueOf(model.getValueAt(row, col));
-                        TestEditorAttributes currentAttr = importAttributes.get(col - 2);
+                @Override
+                public void tableChanged(TableModelEvent e) {
+                    if (isUpdating) return;
 
-                        currentAttr.getImportSetter().accept(testCases.get(row), updatedValue);
+                    if (e.getType() == TableModelEvent.UPDATE) {
+                        int row = e.getFirstRow();
+                        int col = e.getColumn();
+
+                        if (row >= 0 && col >= 2) {
+                            isUpdating = true;
+                            try {
+                                String updatedValue = String.valueOf(model.getValueAt(row, col));
+                                TestEditorAttributes currentAttr = importAttributes.get(col - 2);
+                                TestCaseDto tc = testCases.get(row);
+
+                                currentAttr.getImportSetter().accept(tc, updatedValue);
+
+                                String formattedValue = currentAttr.getValueExtractor().apply(tc);
+                                model.setValueAt(formattedValue, row, col);
+                            } finally {
+                                isUpdating = false;
+                            }
+                        }
                     }
                 }
             });
@@ -147,17 +166,6 @@ public class ExcelPreviewDialog extends DialogWrapper {
             idColumn.setMaxWidth(50);
             idColumn.setMinWidth(50);
 
-            for (int i = 2; i < table.getColumnCount(); i++) {
-                TableColumn col = table.getColumnModel().getColumn(i);
-                String colName = columns[i];
-
-                if (colName.equals("Description") || colName.equals("Expected Result") || colName.equals("Steps")) {
-                    col.setPreferredWidth(300);
-                } else {
-                    col.setPreferredWidth(120);
-                }
-            }
-
             try {
                 TableColumn priorityCol = table.getColumn("Priority");
                 ComboBox<String> priorityBox = new ComboBox<>();
@@ -166,6 +174,35 @@ public class ExcelPreviewDialog extends DialogWrapper {
                 }
                 priorityCol.setCellEditor(new DefaultCellEditor(priorityBox));
             } catch (IllegalArgumentException ignored) {
+            }
+
+            try {
+                TableColumn groupCol = table.getColumn("Group");
+                groupCol.setCellEditor(new GroupMultiSelectEditor(project));
+            } catch (IllegalArgumentException ignored) {
+            }
+
+            for (int i = 2; i < table.getColumnCount(); i++) {
+                TableColumn col = table.getColumnModel().getColumn(i);
+                int maxWidth = 0;
+
+                TableCellRenderer headerRenderer = col.getHeaderRenderer();
+                if (headerRenderer == null) {
+                    headerRenderer = table.getTableHeader().getDefaultRenderer();
+                }
+                Component headerComp = headerRenderer.getTableCellRendererComponent(table, col.getHeaderValue(), false, false, 0, i);
+                maxWidth = headerComp.getPreferredSize().width;
+
+                for (int r = 0; r < table.getRowCount(); r++) {
+                    TableCellRenderer renderer = table.getCellRenderer(r, i);
+                    Component comp = table.prepareRenderer(renderer, r, i);
+                    maxWidth = Math.max(comp.getPreferredSize().width, maxWidth);
+                }
+
+                maxWidth += 20;
+                if (maxWidth > 600) maxWidth = 600;
+
+                col.setPreferredWidth(maxWidth);
             }
 
             JBScrollPane scrollPane = new JBScrollPane(table);
@@ -195,5 +232,81 @@ public class ExcelPreviewDialog extends DialogWrapper {
             }
         }
         return selectedCases;
+    }
+
+    private static class GroupMultiSelectEditor extends AbstractCellEditor implements TableCellEditor {
+        private final JButton button = new JButton();
+        private String currentValue = "";
+
+        public GroupMultiSelectEditor(final Project project) {
+            button.setBorderPainted(false);
+            button.setHorizontalAlignment(SwingConstants.LEFT);
+            button.setBackground(UIManager.getColor("Table.selectionBackground"));
+            button.setForeground(UIManager.getColor("Table.selectionForeground"));
+
+            button.addActionListener(e -> {
+                GroupSelectionDialog dialog = new GroupSelectionDialog(project, currentValue);
+                if (dialog.showAndGet()) {
+                    currentValue = dialog.getSelectedGroupsStr();
+                }
+                fireEditingStopped();
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            currentValue = value != null ? value.toString() : "";
+            button.setText(currentValue);
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return currentValue;
+        }
+    }
+
+    private static class GroupSelectionDialog extends DialogWrapper {
+        private final JBList<String> list;
+
+        public GroupSelectionDialog(Project project, String currentSelection) {
+            super(project, true);
+            setTitle("Select Groups");
+
+            DefaultListModel<String> model = new DefaultListModel<>();
+            for (Group g : Group.values()) {
+                model.addElement(g.getName());
+            }
+            list = new JBList<>(model);
+            list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+
+            if (currentSelection != null && !currentSelection.isBlank()) {
+                List<String> selectedList = Arrays.stream(currentSelection.split(","))
+                        .map(String::trim).toList();
+
+                List<Integer> indices = new ArrayList<>();
+                for (int i = 0; i < model.getSize(); i++) {
+                    if (selectedList.contains(model.getElementAt(i))) {
+                        indices.add(i);
+                    }
+                }
+                list.setSelectedIndices(indices.stream().mapToInt(i -> i).toArray());
+            }
+
+            init();
+        }
+
+        @Nullable
+        @Override
+        protected JComponent createCenterPanel() {
+            JPanel panel = new JPanel(new BorderLayout());
+            panel.setPreferredSize(new Dimension(250, 200));
+            panel.add(new JBScrollPane(list), BorderLayout.CENTER);
+            return panel;
+        }
+
+        public String getSelectedGroupsStr() {
+            return String.join(", ", list.getSelectedValuesList());
+        }
     }
 }
