@@ -192,12 +192,30 @@ public class ImportExcel extends DumbAwareAction {
                 ObjectMapper mapper = Config.getMapper();
 
                 try (Workbook workbook = WorkbookFactory.create(file)) {
-                    // todo, bug: if test set has test cases, should start after the last with isHead=false and next={last_test_case_uuid}
                     // todo, expected result is not arranged if it is multi lines. to be fixed.
                     // todo, if import, we need generate code context menu, to generate all in one click.
                     // todo, filter by module in status bar
                     // todo, fetch sheet name dynamically (Sheet 1) or sheet(0), get all sheets in JBTable tabs
                     Sheet sheet = workbook.getSheetAt(0);
+
+                    indicator.setText("Checking for existing test cases...");
+                    TestCaseDto existingTail = null;
+
+                    VirtualFile[] existingChildren = targetDirectory.getChildren();
+                    if (existingChildren != null) {
+                        for (VirtualFile child : existingChildren) {
+                            if (!child.isDirectory() && child.getName().endsWith(".json")) {
+                                try (InputStream is = child.getInputStream()) {
+                                    TestCaseDto tc = mapper.readValue(is, TestCaseDto.class);
+                                    if (tc.getNext() == null) {
+                                        existingTail = tc;
+                                        break;
+                                    }
+                                } catch (Exception ignored) {
+                                }
+                            }
+                        }
+                    }
 
                     indicator.setText("Mapping column headers...");
 
@@ -222,7 +240,7 @@ public class ImportExcel extends DumbAwareAction {
                     }
 
                     List<TestCaseDto> previewList = new ArrayList<>();
-                    TestCaseDto previousTestCase = null;
+                    TestCaseDto previousTestCase = existingTail;
                     int rowCount = 0;
 
                     indicator.setText("Parsing rows into JSON...");
@@ -286,6 +304,8 @@ public class ImportExcel extends DumbAwareAction {
                         return;
                     }
 
+                    final TestCaseDto finalExistingTail = existingTail;
+
                     indicator.setText("Waiting for user confirmation...");
                     indicator.setText2("");
 
@@ -296,6 +316,14 @@ public class ImportExcel extends DumbAwareAction {
 
                             ApplicationManager.getApplication().runWriteAction(() -> {
                                 try {
+                                    if (finalExistingTail != null) {
+                                        VirtualFile tailFile = targetDirectory.findChild(finalExistingTail.getId() + ".json");
+                                        if (tailFile != null) {
+                                            String tailJsonContent = mapper.writeValueAsString(finalExistingTail);
+                                            tailFile.setBinaryContent(tailJsonContent.getBytes(StandardCharsets.UTF_8));
+                                        }
+                                    }
+
                                     for (TestCaseDto tc : previewList) {
                                         String jsonContent = mapper.writeValueAsString(tc);
                                         VirtualFile newJsonFile = targetDirectory.createChildData(this, tc.getId() + ".json");
