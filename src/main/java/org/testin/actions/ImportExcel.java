@@ -20,6 +20,7 @@ import org.testin.pojo.Config;
 import org.testin.pojo.TestEditorAttributes;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
+import org.testin.ui.ExcelPreviewDialog;
 import org.testin.util.Tools;
 import org.testin.util.notifications.Notifier;
 
@@ -204,8 +205,6 @@ public class ImportExcel extends DumbAwareAction {
                     }
 
                     Map<String, List<TestCaseDto>> allSheetsData = new LinkedHashMap<>();
-
-                    TestCaseDto previousTestCase = existingTail;
                     int totalParsed = 0;
 
                     indicator.setText("Parsing rows into JSON...");
@@ -247,6 +246,8 @@ public class ImportExcel extends DumbAwareAction {
                             if (isRowEmpty) continue;
 
                             final TestCaseDto currentTestCase = new TestCaseDto().setId(UUID.randomUUID());
+                            currentTestCase.setNext(null);
+                            currentTestCase.setIsHead(null);
 
                             for (TestEditorAttributes attr : TestEditorAttributes.values()) {
                                 if (attr.isImportValue()) {
@@ -260,14 +261,6 @@ public class ImportExcel extends DumbAwareAction {
                                     attr.getImportSetter().accept(currentTestCase, rawValue);
                                 }
                             }
-
-                            if (previousTestCase == null) currentTestCase.setIsHead(true);
-                            else {
-                                currentTestCase.setIsHead(null);
-                                previousTestCase.setNext(currentTestCase.getId());
-                            }
-                            currentTestCase.setNext(null);
-                            previousTestCase = currentTestCase;
 
                             sheetPreviewList.add(currentTestCase);
                             totalParsed++;
@@ -295,7 +288,6 @@ public class ImportExcel extends DumbAwareAction {
                     }
 
                     final TestCaseDto finalExistingTail = existingTail;
-                    final int finalTotalParsed = totalParsed;
 
                     indicator.setText("Waiting for user confirmation...");
                     indicator.setText2("");
@@ -305,8 +297,28 @@ public class ImportExcel extends DumbAwareAction {
 
                         if (dialog.showAndGet()) {
 
+                            List<TestCaseDto> selectedCasesToImport = dialog.getSelectedTestCases();
+
+                            if (selectedCasesToImport.isEmpty()) {
+                                Notifier.getInstance().warn("No Selection", "No test cases were selected for import.");
+                                return;
+                            }
+
                             ApplicationManager.getApplication().runWriteAction(() -> {
                                 try {
+                                    TestCaseDto previousNode = finalExistingTail;
+
+                                    for (TestCaseDto currentTestCase : selectedCasesToImport) {
+                                        if (previousNode == null) {
+                                            currentTestCase.setIsHead(true);
+                                        } else {
+                                            currentTestCase.setIsHead(null);
+                                            previousNode.setNext(currentTestCase.getId());
+                                        }
+                                        currentTestCase.setNext(null);
+                                        previousNode = currentTestCase;
+                                    }
+
                                     if (finalExistingTail != null) {
                                         VirtualFile tailFile = targetDirectory.findChild(finalExistingTail.getId() + ".json");
                                         if (tailFile != null) {
@@ -315,15 +327,13 @@ public class ImportExcel extends DumbAwareAction {
                                         }
                                     }
 
-                                    for (List<TestCaseDto> sheetList : allSheetsData.values()) {
-                                        for (TestCaseDto tc : sheetList) {
-                                            String jsonContent = mapper.writeValueAsString(tc);
-                                            VirtualFile newJsonFile = targetDirectory.createChildData(this, tc.getId() + ".json");
-                                            newJsonFile.setBinaryContent(jsonContent.getBytes(StandardCharsets.UTF_8));
-                                        }
+                                    for (TestCaseDto tc : selectedCasesToImport) {
+                                        String jsonContent = mapper.writeValueAsString(tc);
+                                        VirtualFile newJsonFile = targetDirectory.createChildData(this, tc.getId() + ".json");
+                                        newJsonFile.setBinaryContent(jsonContent.getBytes(StandardCharsets.UTF_8));
                                     }
 
-                                    Notifier.getInstance().info("Import Complete", "Successfully imported " + finalTotalParsed + " test cases.");
+                                    Notifier.getInstance().info("Import Complete", "Successfully imported " + selectedCasesToImport.size() + " test cases.");
                                     targetDirectory.refresh(false, true);
                                     Tools.getInstance().closeThenOpenTestEditor(targetDirectory, ts);
 
@@ -333,7 +343,7 @@ public class ImportExcel extends DumbAwareAction {
                             });
 
                         } else {
-                            Notifier.getInstance().softShow("Import Cancelled", "Import was cancelled by you.");
+                            Notifier.getInstance().softShow("Import Cancelled", "Import was cancelled from preview dialog.");
                         }
                     });
 
