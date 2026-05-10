@@ -215,14 +215,15 @@ public class ExcelPreviewDialog extends DialogWrapper {
         return panel;
     }
 
-    public List<TestCaseDto> getSelectedTestCases() {
-        List<TestCaseDto> selectedCases = new ArrayList<>();
+    public Map<String, List<TestCaseDto>> getSelectedTestCasesBySheet() {
+        Map<String, List<TestCaseDto>> selectedCasesBySheet = new LinkedHashMap<>();
 
         for (Map.Entry<String, List<TestCaseDto>> entry : originalSheetsData.entrySet()) {
             String sheetName = entry.getKey();
             List<TestCaseDto> allCasesInSheet = entry.getValue();
             DefaultTableModel model = tableModelsMap.get(sheetName);
 
+            List<TestCaseDto> selectedCases = new ArrayList<>();
             if (model != null) {
                 for (int row = 0; row < model.getRowCount(); row++) {
                     Boolean isSelected = (Boolean) model.getValueAt(row, 0);
@@ -231,8 +232,11 @@ public class ExcelPreviewDialog extends DialogWrapper {
                     }
                 }
             }
+            if (!selectedCases.isEmpty()) {
+                selectedCasesBySheet.put(sheetName, selectedCases);
+            }
         }
-        return selectedCases;
+        return selectedCasesBySheet;
     }
 
     private static class GroupMultiSelectEditor extends AbstractCellEditor implements TableCellEditor {

@@ -12,10 +12,10 @@ import org.testin.util.reports.TestRunReport;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 // TODO: implement save as to allow tester to specify save place
-public class GenerateReportXlsx extends DumbAwareAction {
+public class GenerateReportExcel extends DumbAwareAction {
     private final SimpleTree tree;
 
-    public GenerateReportXlsx(final SimpleTree tree) {
+    public GenerateReportExcel(final SimpleTree tree) {
         super("As Excel", "Generate test run Excel report", AllIcons.Nodes.DataTables);
         this.tree = tree;
     }
@@ -24,7 +24,7 @@ public class GenerateReportXlsx extends DumbAwareAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
         if (selectedNode != null && selectedNode.getUserObject() instanceof TestRunDirectoryDto tr) {
-            new TestRunReport(tr).build().asXlsx();
+            new TestRunReport(tr).build().asExcel();
         }
     }
 

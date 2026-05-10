@@ -34,8 +34,8 @@ public final class TestRunReport {
         processAndSave("PDF", ".pdf");
     }
 
-    public void asXlsx() {
-        processAndSave("EXCEL (xlsx)", ".xlsx");
+    public void asExcel() {
+        processAndSave("EXCEL", ".xlsx");
     }
 
     private void processAndSave(String format, String extension) {
@@ -65,7 +65,7 @@ public final class TestRunReport {
 
                     case "PDF" -> fileBytes = new PdfGenerator().generate(runData, detailsMap);
 
-                    case "EXCEL (xlsx)" -> fileBytes = new ExcelGenerator().generate(runData, detailsMap);
+                    case "EXCEL" -> fileBytes = new ExcelGenerator().generate(runData, detailsMap);
 
                     case null, default -> throw new UnsupportedOperationException("Unknown format: " + format);
                 }

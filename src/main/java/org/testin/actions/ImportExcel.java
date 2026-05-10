@@ -19,7 +19,10 @@ import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
 import org.testin.pojo.TestEditorAttributes;
 import org.testin.pojo.dto.TestCaseDto;
+import org.testin.pojo.dto.dirs.DirectoryDto;
+import org.testin.pojo.dto.dirs.TestCasesMainDirectoryDto;
 import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
+import org.testin.pojo.dto.dirs.TestSetPackageDirectoryDto;
 import org.testin.ui.ExcelPreviewDialog;
 import org.testin.util.Tools;
 import org.testin.util.notifications.Notifier;
@@ -68,12 +71,13 @@ public class ImportExcel extends DumbAwareAction {
         final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         final Object userObject = parentNode.getUserObject();
 
-        if (!(userObject instanceof TestSetDirectoryDto ts)) {
-            Notifier.getInstance().error("Import Error", "Please select a valid Test Set Node.");
+        if (!(userObject instanceof DirectoryDto dirDto) ||
+                !(dirDto instanceof TestSetDirectoryDto || dirDto instanceof TestSetPackageDirectoryDto || dirDto instanceof TestCasesMainDirectoryDto)) {
+            Notifier.getInstance().error("Import Error", "Please select a valid Test Set, Test Set Package, or Test Cases Directory.");
             return;
         }
 
-        VirtualFile targetDirectory = LocalFileSystem.getInstance().findFileByPath(ts.getPath().toString());
+        VirtualFile targetDirectory = LocalFileSystem.getInstance().findFileByPath(dirDto.getPath().toString());
 
         if (targetDirectory != null && !targetDirectory.isDirectory()) {
             targetDirectory = targetDirectory.getParent();
@@ -94,13 +98,13 @@ public class ImportExcel extends DumbAwareAction {
         );
 
         if (userChoice == 0) {
-            openFileChooserAndProcess(targetDirectory, ts);
+            openFileChooserAndProcess(targetDirectory, dirDto);
         } else if (userChoice == 1) {
             downloadSampleFile(e);
         }
     }
 
-    private void openFileChooserAndProcess(final VirtualFile targetDirectory, final TestSetDirectoryDto ts) {
+    private void openFileChooserAndProcess(final VirtualFile targetDirectory, final DirectoryDto selectedDirDto) {
         final FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false)
                 .withTitle("Select Spreadsheet File")
                 .withDescription("Please choose an .xls or .xlsx file");
@@ -117,7 +121,7 @@ public class ImportExcel extends DumbAwareAction {
                                 "Please select a valid Excel file and try again."));
                 return;
             }
-            processWithPoi(selectedFile.getPath(), targetDirectory, ts);
+            processWithPoi(selectedFile.getPath(), targetDirectory, selectedDirDto);
         }
     }
 
@@ -164,7 +168,7 @@ public class ImportExcel extends DumbAwareAction {
         });
     }
 
-    private void processWithPoi(final String filePath, final VirtualFile targetDirectory, final TestSetDirectoryDto ts) {
+    private void processWithPoi(final String filePath, final VirtualFile targetDirectory, final DirectoryDto selectedDirDto) {
         File file = new File(filePath);
         if (!file.exists() || !file.canRead()) {
             Notifier.getInstance().error("File Error", "Java cannot read this file!");
@@ -184,25 +188,6 @@ public class ImportExcel extends DumbAwareAction {
                     // todo, if import, we need generate code context menu, to generate all in one click.
                     // todo, filter by module in status bar
                     // todo, fetch sheet name dynamically (Sheet 1) or sheet(0), get all sheets in JBTable tabs
-
-                    indicator.setText("Checking for existing test cases...");
-                    TestCaseDto existingTail = null;
-
-                    VirtualFile[] existingChildren = targetDirectory.getChildren();
-                    if (existingChildren != null) {
-                        for (VirtualFile child : existingChildren) {
-                            if (!child.isDirectory() && child.getName().endsWith(".json")) {
-                                try (InputStream is = child.getInputStream()) {
-                                    TestCaseDto tc = mapper.readValue(is, TestCaseDto.class);
-                                    if (tc.getNext() == null) {
-                                        existingTail = tc;
-                                        break;
-                                    }
-                                } catch (Exception ignored) {
-                                }
-                            }
-                        }
-                    }
 
                     Map<String, List<TestCaseDto>> allSheetsData = new LinkedHashMap<>();
                     int totalParsed = 0;
@@ -291,8 +276,6 @@ public class ImportExcel extends DumbAwareAction {
                         return;
                     }
 
-                    final TestCaseDto finalExistingTail = existingTail;
-
                     indicator.setText("Waiting for user confirmation...");
                     indicator.setText2("");
 
@@ -301,45 +284,48 @@ public class ImportExcel extends DumbAwareAction {
 
                         if (dialog.showAndGet()) {
 
-                            List<TestCaseDto> selectedCasesToImport = dialog.getSelectedTestCases();
+                            Map<String, List<TestCaseDto>> selectedCasesBySheet = dialog.getSelectedTestCasesBySheet();
 
-                            if (selectedCasesToImport.isEmpty()) {
+                            if (selectedCasesBySheet.isEmpty()) {
                                 Notifier.getInstance().softShow("No Selection", "No test cases were selected for import.");
                                 return;
                             }
 
                             ApplicationManager.getApplication().runWriteAction(() -> {
                                 try {
-                                    TestCaseDto previousNode = finalExistingTail;
+                                    if (selectedDirDto instanceof TestSetDirectoryDto ts) {
+                                        TestCaseDto tail = findExistingTail(targetDirectory, mapper);
+                                        List<TestCaseDto> flatList = new ArrayList<>();
+                                        selectedCasesBySheet.values().forEach(flatList::addAll);
 
-                                    for (TestCaseDto currentTestCase : selectedCasesToImport) {
-                                        if (previousNode == null) {
-                                            currentTestCase.setIsHead(true);
-                                        } else {
-                                            currentTestCase.setIsHead(null);
-                                            previousNode.setNext(currentTestCase.getId());
+                                        linkAndSaveTestCases(targetDirectory, flatList, tail, mapper, ImportExcel.this);
+
+                                        Tools.getInstance().closeThenOpenTestEditor(targetDirectory, ts);
+                                        Notifier.getInstance().info("Import Complete", "Successfully imported " + flatList.size() + " test cases.");
+
+                                    } else {
+                                        int totalImported = 0;
+                                        for (Map.Entry<String, List<TestCaseDto>> entry : selectedCasesBySheet.entrySet()) {
+                                            String safeDirName = entry.getKey().replaceAll("[\\\\/:*?\"<>|]", "_");
+                                            List<TestCaseDto> sheetCases = entry.getValue();
+
+                                            VirtualFile sheetDir = targetDirectory.findChild(safeDirName);
+                                            if (sheetDir == null) {
+                                                sheetDir = targetDirectory.createChildDirectory(this, safeDirName);
+                                            }
+
+                                            if (sheetDir.findChild(".ts") == null) {
+                                                sheetDir.createChildData(this, ".ts");
+                                            }
+
+                                            TestCaseDto tail = findExistingTail(sheetDir, mapper);
+                                            linkAndSaveTestCases(sheetDir, sheetCases, tail, mapper, ImportExcel.this);
+                                            totalImported += sheetCases.size();
                                         }
-                                        currentTestCase.setNext(null);
-                                        previousNode = currentTestCase;
+                                        Notifier.getInstance().info("Import Complete", "Successfully imported " + totalImported + " test cases into separate Test Sets.");
                                     }
 
-                                    if (finalExistingTail != null) {
-                                        VirtualFile tailFile = targetDirectory.findChild(finalExistingTail.getId() + ".json");
-                                        if (tailFile != null) {
-                                            String tailJsonContent = mapper.writeValueAsString(finalExistingTail);
-                                            tailFile.setBinaryContent(tailJsonContent.getBytes(StandardCharsets.UTF_8));
-                                        }
-                                    }
-
-                                    for (TestCaseDto tc : selectedCasesToImport) {
-                                        String jsonContent = mapper.writeValueAsString(tc);
-                                        VirtualFile newJsonFile = targetDirectory.createChildData(this, tc.getId() + ".json");
-                                        newJsonFile.setBinaryContent(jsonContent.getBytes(StandardCharsets.UTF_8));
-                                    }
-
-                                    Notifier.getInstance().info("Import Complete", "Successfully imported " + selectedCasesToImport.size() + " test cases.");
                                     targetDirectory.refresh(false, true);
-                                    Tools.getInstance().closeThenOpenTestEditor(targetDirectory, ts);
 
                                 } catch (IOException ex) {
                                     System.err.println("Failed to write files: " + ex.getMessage());
@@ -365,6 +351,52 @@ public class ImportExcel extends DumbAwareAction {
         });
     }
 
+    private void linkAndSaveTestCases(VirtualFile dir, List<TestCaseDto> testCases, TestCaseDto existingTail, ObjectMapper mapper, Object requestor) throws IOException {
+        TestCaseDto previousNode = existingTail;
+
+        for (TestCaseDto currentTestCase : testCases) {
+            if (previousNode == null) {
+                currentTestCase.setIsHead(true);
+            } else {
+                currentTestCase.setIsHead(null);
+                previousNode.setNext(currentTestCase.getId());
+            }
+            currentTestCase.setNext(null);
+            previousNode = currentTestCase;
+        }
+
+        if (existingTail != null) {
+            VirtualFile tailFile = dir.findChild(existingTail.getId() + ".json");
+            if (tailFile != null) {
+                tailFile.setBinaryContent(mapper.writeValueAsString(existingTail).getBytes(StandardCharsets.UTF_8));
+            }
+        }
+
+        for (TestCaseDto tc : testCases) {
+            VirtualFile newJsonFile = dir.createChildData(requestor, tc.getId() + ".json");
+            newJsonFile.setBinaryContent(mapper.writeValueAsString(tc).getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    private TestCaseDto findExistingTail(VirtualFile directory, ObjectMapper mapper) {
+        if (directory == null) return null;
+        VirtualFile[] children = directory.getChildren();
+        if (children != null) {
+            for (VirtualFile child : children) {
+                if (!child.isDirectory() && child.getName().endsWith(".json")) {
+                    try (InputStream is = child.getInputStream()) {
+                        TestCaseDto tc = mapper.readValue(is, TestCaseDto.class);
+                        if (tc.getNext() == null) {
+                            return tc;
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public void update(final @NotNull AnActionEvent e) {
         final TreePath path = tree.getSelectionPath();
@@ -378,6 +410,8 @@ public class ImportExcel extends DumbAwareAction {
         final DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
         final Object userObject = selectedNode.getUserObject();
 
-        e.getPresentation().setEnabled(userObject instanceof TestSetDirectoryDto);
+        e.getPresentation().setEnabled(userObject instanceof TestSetDirectoryDto ||
+                userObject instanceof TestSetPackageDirectoryDto ||
+                userObject instanceof TestCasesMainDirectoryDto);
     }
 }

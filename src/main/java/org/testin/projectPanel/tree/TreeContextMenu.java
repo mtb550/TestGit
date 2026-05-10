@@ -70,7 +70,7 @@ public class TreeContextMenu extends DefaultActionGroup {
                 List.of(
                         new GenerateReportHtml(tree),
                         new GenerateReportPdf(tree),
-                        new GenerateReportXlsx(tree),
+                        new GenerateReportExcel(tree),
                         new GenerateReportJson(tree),
                         new GenerateReportXml(tree)
                 )
