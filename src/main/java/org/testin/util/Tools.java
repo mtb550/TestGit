@@ -20,6 +20,8 @@ import org.jetbrains.jps.model.java.JavaSourceRootType;
 import org.testin.editorPanel.UnifiedVirtualFile;
 import org.testin.pojo.Config;
 import org.testin.pojo.DirectoryType;
+import org.testin.pojo.Group;
+import org.testin.pojo.Priority;
 import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
 import org.testin.settings.AppSettingsState;
@@ -32,15 +34,25 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Tools {
 
     private static final Tools INSTANCE = new Tools();
+
+    private final Pattern SANITIZE_PATTERN = Pattern.compile("[^a-zA-Z0-9 _]");
+    private final Pattern STEP_MUSH_PATTERN = Pattern.compile(".*\\s\\d+[-.].*");
+    private final Pattern STEP_LINE_PATTERN = Pattern.compile("(\\s)(?=\\d+[-.])");
+    private final Pattern STEP_CLEAN_PATTERN = Pattern.compile("^\\d+[-.]\\s*");
+
 
     public static Tools getInstance() {
         return INSTANCE;
@@ -525,4 +537,70 @@ public class Tools {
                         .ifPresent(editorManager -> editorManager.openFile(newVirtualFile, true))
         );
     }
+
+    public String sanitizeDescription(final String rawDesc) {
+        if (rawDesc == null || rawDesc.isBlank()) return "EMPTY_DESCRIPTION";
+        String cleaned = SANITIZE_PATTERN.matcher(rawDesc).replaceAll("").trim();
+        return cleaned.isEmpty() ? "EMPTY_DESCRIPTION" : cleaned;
+    }
+
+    public List<String> parseStepsSafe(final String stepsRaw) {
+        if (stepsRaw == null || stepsRaw.isBlank()) {
+            return new ArrayList<>();
+        }
+
+        String text = stepsRaw;
+
+        if (!text.contains("\n") && STEP_MUSH_PATTERN.matcher(text).matches()) {
+            text = STEP_LINE_PATTERN.matcher(text).replaceAll("\n");
+        }
+
+        return Arrays.stream(text.split("\n"))
+                .map(line -> STEP_CLEAN_PATTERN.matcher(line).replaceFirst("").trim())
+                .filter(line -> !line.isEmpty())
+                .collect(Collectors.toList());
+    }
+
+    public Priority parsePrioritySafe(final String priorityStr) {
+        if (priorityStr == null || priorityStr.isBlank()) {
+            return Priority.LOW;
+        }
+        try {
+            return Priority.valueOf(priorityStr.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Priority.LOW;
+        }
+    }
+
+    public ZonedDateTime parseDateSafe(final String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) {
+            return ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        }
+        try {
+            return LocalDateTime.parse(dateStr, Config.EXCEL_DATE_FORMATTER).atZone(ZoneId.systemDefault());
+        } catch (Exception e) {
+            return ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        }
+    }
+
+    public List<Group> parseGroupsSafe(final String rawGroups) {
+        if (rawGroups == null || rawGroups.isBlank()) {
+            return new ArrayList<>();
+        }
+
+        return Arrays.stream(rawGroups.split(","))
+                .map(String::trim)
+                .filter(g -> !g.isEmpty())
+                .map(String::toUpperCase)
+                .map(groupName -> {
+                    try {
+                        return Group.valueOf(groupName);
+                    } catch (IllegalArgumentException ex) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
 }

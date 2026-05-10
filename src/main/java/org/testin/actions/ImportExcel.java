@@ -17,8 +17,6 @@ import com.intellij.ui.treeStructure.SimpleTree;
 import org.apache.poi.ss.usermodel.*;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
-import org.testin.pojo.Group;
-import org.testin.pojo.Priority;
 import org.testin.pojo.TestEditorAttributes;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
@@ -31,20 +29,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class ImportExcel extends DumbAwareAction {
-    // todo, all patterns to be moved to Tools class.
-    private final static Pattern SANITIZE_PATTERN = Pattern.compile("[^a-zA-Z0-9 _]");
-    private final static Pattern STEP_MUSH_PATTERN = Pattern.compile(".*\\s\\d+[-.].*");
-    private final static Pattern STEP_LINE_PATTERN = Pattern.compile("(\\s)(?=\\d+[-.])");
-    private final static Pattern STEP_CLEAN_PATTERN = Pattern.compile("^\\d+[-.]\\s*");
 
     private final List<String> IMPORT_COLUMNS = Arrays.stream(TestEditorAttributes.values())
             .filter(TestEditorAttributes::isImportValue)
@@ -133,7 +120,6 @@ public class ImportExcel extends DumbAwareAction {
         }
     }
 
-    // todo, to be removed and use Tools.getTestSourceRoot
     private void downloadSampleFile(AnActionEvent e) {
         if (e.getProject() == null) return;
 
@@ -145,6 +131,7 @@ public class ImportExcel extends DumbAwareAction {
         }
 
         ApplicationManager.getApplication().runWriteAction(() -> {
+            // todo, to be removed and use Tools.getTestSourceRoot
             try (InputStream in = getClass().getResourceAsStream("/files/import_sample.xls")) {
 
                 if (in == null) {
@@ -196,7 +183,6 @@ public class ImportExcel extends DumbAwareAction {
                     // todo, if import, we need generate code context menu, to generate all in one click.
                     // todo, filter by module in status bar
                     // todo, fetch sheet name dynamically (Sheet 1) or sheet(0), get all sheets in JBTable tabs
-                    Sheet sheet = workbook.getSheetAt(0);
 
                     indicator.setText("Checking for existing test cases...");
                     TestCaseDto existingTail = null;
@@ -217,87 +203,91 @@ public class ImportExcel extends DumbAwareAction {
                         }
                     }
 
-                    indicator.setText("Mapping column headers...");
+                    Map<String, List<TestCaseDto>> allSheetsData = new LinkedHashMap<>();
 
-                    Row headerRow = sheet.getRow(0);
-                    if (headerRow == null) {
-                        ApplicationManager.getApplication().invokeLater(() ->
-                                Notifier.warn("Empty File", "The selected Excel file appears to be empty.")
-                        );
-                        return;
-                    }
-
-                    DataFormatter dataFormatter = new DataFormatter();
-                    Map<String, Integer> headerIndexMap = new HashMap<>();
-
-                    for (Cell cell : headerRow) {
-                        String headerName = dataFormatter.formatCellValue(cell).trim();
-                        for (String reqCol : IMPORT_COLUMNS) {
-                            if (reqCol.equalsIgnoreCase(headerName)) {
-                                headerIndexMap.put(reqCol.toLowerCase(), cell.getColumnIndex());
-                            }
-                        }
-                    }
-
-                    List<TestCaseDto> previewList = new ArrayList<>();
                     TestCaseDto previousTestCase = existingTail;
-                    int rowCount = 0;
+                    int totalParsed = 0;
 
                     indicator.setText("Parsing rows into JSON...");
 
-                    for (int r = 1; r <= sheet.getLastRowNum(); r++) {
-                        if (indicator.isCanceled()) break;
+                    for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+                        Sheet sheet = workbook.getSheetAt(i);
+                        String sheetName = sheet.getSheetName();
 
-                        Row row = sheet.getRow(r);
-                        if (row == null) continue;
+                        Row headerRow = sheet.getRow(0);
+                        if (headerRow == null) continue;
 
-                        boolean isRowEmpty = true;
-                        for (int c = 0; c < row.getLastCellNum(); c++) {
-                            if (!dataFormatter.formatCellValue(row.getCell(c)).trim().isEmpty()) {
-                                isRowEmpty = false;
-                                break;
-                            }
-                        }
-                        if (isRowEmpty) continue;
+                        DataFormatter dataFormatter = new DataFormatter();
+                        Map<String, Integer> headerIndexMap = new HashMap<>();
 
-                        final TestCaseDto currentTestCase = new TestCaseDto().setId(UUID.randomUUID());
-
-                        for (TestEditorAttributes attr : TestEditorAttributes.values()) {
-                            if (attr.isImportValue()) {
-                                Integer colIndex = headerIndexMap.get(attr.getName().toLowerCase());
-                                String rawValue = "";
-
-                                if (colIndex != null) {
-                                    Cell dataCell = row.getCell(colIndex);
-                                    rawValue = dataFormatter.formatCellValue(dataCell).trim();
+                        for (Cell cell : headerRow) {
+                            String headerName = dataFormatter.formatCellValue(cell).trim();
+                            for (String reqCol : IMPORT_COLUMNS) {
+                                if (reqCol.equalsIgnoreCase(headerName)) {
+                                    headerIndexMap.put(reqCol.toLowerCase(), cell.getColumnIndex());
                                 }
-                                attr.getImportSetter().accept(ImportExcel.this, currentTestCase, rawValue);
                             }
                         }
 
-                        if (previousTestCase == null) currentTestCase.setIsHead(true);
-                        else {
-                            currentTestCase.setIsHead(null);
-                            previousTestCase.setNext(currentTestCase.getId());
+                        List<TestCaseDto> sheetPreviewList = new ArrayList<>();
+
+                        for (int r = 1; r <= sheet.getLastRowNum(); r++) {
+                            if (indicator.isCanceled()) break;
+
+                            Row row = sheet.getRow(r);
+                            if (row == null) continue;
+
+                            boolean isRowEmpty = true;
+                            for (int c = 0; c < row.getLastCellNum(); c++) {
+                                if (!dataFormatter.formatCellValue(row.getCell(c)).trim().isEmpty()) {
+                                    isRowEmpty = false;
+                                    break;
+                                }
+                            }
+                            if (isRowEmpty) continue;
+
+                            final TestCaseDto currentTestCase = new TestCaseDto().setId(UUID.randomUUID());
+
+                            for (TestEditorAttributes attr : TestEditorAttributes.values()) {
+                                if (attr.isImportValue()) {
+                                    Integer colIndex = headerIndexMap.get(attr.getName().toLowerCase());
+                                    String rawValue = "";
+
+                                    if (colIndex != null) {
+                                        Cell dataCell = row.getCell(colIndex);
+                                        rawValue = dataFormatter.formatCellValue(dataCell).trim();
+                                    }
+                                    attr.getImportSetter().accept(currentTestCase, rawValue);
+                                }
+                            }
+
+                            if (previousTestCase == null) currentTestCase.setIsHead(true);
+                            else {
+                                currentTestCase.setIsHead(null);
+                                previousTestCase.setNext(currentTestCase.getId());
+                            }
+                            currentTestCase.setNext(null);
+                            previousTestCase = currentTestCase;
+
+                            sheetPreviewList.add(currentTestCase);
+                            totalParsed++;
+
+                            if (totalParsed % 50 == 0) {
+                                indicator.setText2("Parsed " + totalParsed + " test cases...");
+                            }
                         }
-                        currentTestCase.setNext(null);
-                        previousTestCase = currentTestCase;
 
-                        previewList.add(currentTestCase);
-
-                        rowCount++;
-
-                        if (rowCount % 50 == 0) {
-                            indicator.setText2("Parsed " + rowCount + " test cases...");
+                        if (!sheetPreviewList.isEmpty()) {
+                            allSheetsData.put(sheetName, sheetPreviewList);
                         }
                     }
 
                     if (indicator.isCanceled()) {
-                        Notifier.warn("Import Cancelled", "Import was cancelled by the user.");
+                        Notifier.softShow("Import Cancelled", "Import was cancelled by you.");
                         return;
                     }
 
-                    if (previewList.isEmpty()) {
+                    if (allSheetsData.isEmpty()) {
                         ApplicationManager.getApplication().invokeLater(() ->
                                 Notifier.warn("No Data", "No valid test cases found in the Excel file.")
                         );
@@ -305,12 +295,13 @@ public class ImportExcel extends DumbAwareAction {
                     }
 
                     final TestCaseDto finalExistingTail = existingTail;
+                    final int finalTotalParsed = totalParsed;
 
                     indicator.setText("Waiting for user confirmation...");
                     indicator.setText2("");
 
                     ApplicationManager.getApplication().invokeLater(() -> {
-                        ExcelPreviewDialog dialog = new ExcelPreviewDialog(Config.getProject(), previewList);
+                        ExcelPreviewDialog dialog = new ExcelPreviewDialog(Config.getProject(), allSheetsData);
 
                         if (dialog.showAndGet()) {
 
@@ -324,12 +315,15 @@ public class ImportExcel extends DumbAwareAction {
                                         }
                                     }
 
-                                    for (TestCaseDto tc : previewList) {
-                                        String jsonContent = mapper.writeValueAsString(tc);
-                                        VirtualFile newJsonFile = targetDirectory.createChildData(this, tc.getId() + ".json");
-                                        newJsonFile.setBinaryContent(jsonContent.getBytes(StandardCharsets.UTF_8));
+                                    for (List<TestCaseDto> sheetList : allSheetsData.values()) {
+                                        for (TestCaseDto tc : sheetList) {
+                                            String jsonContent = mapper.writeValueAsString(tc);
+                                            VirtualFile newJsonFile = targetDirectory.createChildData(this, tc.getId() + ".json");
+                                            newJsonFile.setBinaryContent(jsonContent.getBytes(StandardCharsets.UTF_8));
+                                        }
                                     }
-                                    Notifier.info("Import Complete", "Successfully imported " + previewList.size() + " test cases.");
+
+                                    Notifier.info("Import Complete", "Successfully imported " + finalTotalParsed + " test cases.");
                                     targetDirectory.refresh(false, true);
                                     Tools.getInstance().closeThenOpenTestEditor(targetDirectory, ts);
 
@@ -339,7 +333,7 @@ public class ImportExcel extends DumbAwareAction {
                             });
 
                         } else {
-                            Notifier.info("Import Cancelled", "Import was cancelled from preview dialog.");
+                            Notifier.softShow("Import Cancelled", "Import was cancelled by you.");
                         }
                     });
 
@@ -355,72 +349,6 @@ public class ImportExcel extends DumbAwareAction {
                 }
             }
         });
-    }
-
-    // todo, move all below to Tools class
-    public String sanitizeDescription(final String rawDesc) {
-        if (rawDesc == null || rawDesc.isBlank()) return "EMPTY_DESCRIPTION";
-        String cleaned = SANITIZE_PATTERN.matcher(rawDesc).replaceAll("").trim();
-        return cleaned.isEmpty() ? "EMPTY_DESCRIPTION" : cleaned;
-    }
-
-    public List<String> parseStepsSafe(final String stepsRaw) {
-        if (stepsRaw == null || stepsRaw.isBlank()) {
-            return new ArrayList<>();
-        }
-
-        String text = stepsRaw;
-
-        if (!text.contains("\n") && STEP_MUSH_PATTERN.matcher(text).matches()) {
-            text = STEP_LINE_PATTERN.matcher(text).replaceAll("\n");
-        }
-
-        return Arrays.stream(text.split("\n"))
-                .map(line -> STEP_CLEAN_PATTERN.matcher(line).replaceFirst("").trim())
-                .filter(line -> !line.isEmpty())
-                .collect(Collectors.toList());
-    }
-
-    public Priority parsePrioritySafe(final String priorityStr) {
-        if (priorityStr == null || priorityStr.isBlank()) {
-            return Priority.LOW;
-        }
-        try {
-            return Priority.valueOf(priorityStr.trim().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return Priority.LOW;
-        }
-    }
-
-    public ZonedDateTime parseDateSafe(final String dateStr) {
-        if (dateStr == null || dateStr.isBlank()) {
-            return ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        }
-        try {
-            return LocalDateTime.parse(dateStr, Config.EXCEL_DATE_FORMATTER).atZone(ZoneId.systemDefault());
-        } catch (Exception e) {
-            return ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        }
-    }
-
-    public List<Group> parseGroupsSafe(final String rawGroups) {
-        if (rawGroups == null || rawGroups.isBlank()) {
-            return new ArrayList<>();
-        }
-
-        return Arrays.stream(rawGroups.split(","))
-                .map(String::trim)
-                .filter(g -> !g.isEmpty())
-                .map(String::toUpperCase)
-                .map(groupName -> {
-                    try {
-                        return Group.valueOf(groupName);
-                    } catch (IllegalArgumentException ex) {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
     }
 
     @Override

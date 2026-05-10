@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.testin.editorPanel.Shared;
 import org.testin.pojo.dto.TestCaseDto;
+import org.testin.util.Tools;
 
 import javax.swing.*;
 import java.util.List;
@@ -26,7 +27,7 @@ public enum TestEditorAttributes {
             false,
             tc -> String.valueOf(tc.getId()),
             null,
-            (action, tc, v) -> {
+            (tc, v) -> {
             }
     ),
 
@@ -38,7 +39,7 @@ public enum TestEditorAttributes {
             true,
             TestCaseDto::getDescription,
             null,
-            (action, tc, v) -> tc.setDescription(action.sanitizeDescription(v))
+            (tc, v) -> tc.setDescription(Tools.getInstance().sanitizeDescription(v))
     ),
 
     EXPECTED_RESULT(
@@ -48,7 +49,7 @@ public enum TestEditorAttributes {
             true,
             TestCaseDto::getExpectedResult,
             null,
-            (action, tc, v) -> tc.setExpectedResult(v)
+            TestCaseDto::setExpectedResult
     ),
 
     STEPS(
@@ -58,7 +59,7 @@ public enum TestEditorAttributes {
             true,
             tc -> String.join(", ", tc.getSteps()),
             null,
-            (action, tc, v) -> tc.setSteps(action.parseStepsSafe(v))
+            (tc, v) -> tc.setSteps(Tools.getInstance().parseStepsSafe(v))
     ),
 
     PRIORITY(
@@ -68,17 +69,17 @@ public enum TestEditorAttributes {
             true,
             tc -> tc.getPriority().getName(),
             tc -> List.of(Shared.createPriorityBadge(tc)),
-            (action, tc, v) -> tc.setPriority(action.parsePrioritySafe(v))
+            (tc, v) -> tc.setPriority(Tools.getInstance().parsePrioritySafe(v))
     ),
 
-    FCQN(
-            "FCQN",
+    FQCN(
+            "FQCN",
             true,
             false,
             false,
             tc -> String.join(".", tc.getFqcn()),
             null,
-            (action, tc, v) -> {
+            (tc, v) -> {
             }
     ),
 
@@ -89,7 +90,7 @@ public enum TestEditorAttributes {
             true,
             TestCaseDto::getReference,
             null,
-            (action, tc, v) -> tc.setReference(v)
+            TestCaseDto::setReference
     ),
 
     GROUP(
@@ -99,7 +100,7 @@ public enum TestEditorAttributes {
             true,
             tc -> tc.getGroup().stream().map(Group::getName).collect(Collectors.joining(", ")),
             tc -> tc.getGroup().stream().map(Shared::createGroupBadge).collect(Collectors.<JComponent>toList()),
-            (action, tc, v) -> tc.setGroup(action.parseGroupsSafe(v))
+            (tc, v) -> tc.setGroup(Tools.getInstance().parseGroupsSafe(v))
     ),
 
     PATH(
@@ -109,7 +110,7 @@ public enum TestEditorAttributes {
             false,
             tc -> String.join(" > ", tc.getPath()),
             null,
-            (action, tc, v) -> {
+            (tc, v) -> {
             }
     ),
 
@@ -122,7 +123,7 @@ public enum TestEditorAttributes {
             true,
             TestCaseDto::getModule,
             null,
-            (action, tc, v) -> tc.setModule(v)
+            TestCaseDto::setModule
     ),
 
     STATUS(
@@ -132,7 +133,7 @@ public enum TestEditorAttributes {
             true,
             TestCaseDto::getTempStatus,
             null,
-            (action, tc, v) -> tc.setStatus(v)
+            TestCaseDto::setStatus
     ),
 
     CREATE_BY(
@@ -142,7 +143,7 @@ public enum TestEditorAttributes {
             true,
             TestCaseDto::getCreatedBy,
             null,
-            (action, tc, v) -> tc.setCreatedBy(v)
+            TestCaseDto::setCreatedBy
     ),
 
     UPDATE_BY(
@@ -152,7 +153,7 @@ public enum TestEditorAttributes {
             true,
             TestCaseDto::getUpdatedBy,
             null,
-            (action, tc, v) -> tc.setUpdatedBy(v)
+            TestCaseDto::setUpdatedBy
     ),
 
     CREATE_AT(
@@ -162,7 +163,7 @@ public enum TestEditorAttributes {
             true,
             tc -> tc.getCreatedAt().format(Config.getDateFormatterPattern()),
             null,
-            (action, tc, v) -> tc.setCreatedAt(action.parseDateSafe(v))
+            (tc, v) -> tc.setCreatedAt(Tools.getInstance().parseDateSafe(v))
     ),
 
     UPDATE_AT(
@@ -172,7 +173,7 @@ public enum TestEditorAttributes {
             true,
             tc -> tc.getUpdatedAt().format(Config.getDateFormatterPattern()),
             null,
-            (action, tc, v) -> tc.setUpdatedAt(action.parseDateSafe(v))
+            (tc, v) -> tc.setUpdatedAt(Tools.getInstance().parseDateSafe(v))
     );
 
     private final String name;

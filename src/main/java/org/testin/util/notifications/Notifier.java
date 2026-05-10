@@ -25,24 +25,24 @@ import java.io.File;
 public class Notifier {
     private static final String GROUP_ID = "testin.notifications";
 
-    public static void showCustomBottomRightBalloon(String title, String message) {
+    public static void softShow(@NotNull final String title, @NotNull final String message) {
 
         SwingUtilities.invokeLater(() -> {
             IdeFrame ideFrame = WindowManager.getInstance().getIdeFrame(Config.getProject());
             if (ideFrame == null || ideFrame.getStatusBar() == null) return;
 
-            JComponent statusBarComponent = ideFrame.getStatusBar().getComponent();
+            final JComponent statusBarComponent = ideFrame.getStatusBar().getComponent();
 
-            String htmlContent = String.format("<html><b>%s</b><br>%s</html>", title, message);
+            final String htmlContent = String.format("<html><b>%s</b><br>%s</html>", title, message);
 
-            Balloon balloon = JBPopupFactory.getInstance()
+            final Balloon balloon = JBPopupFactory.getInstance()
                     .createHtmlTextBalloonBuilder(htmlContent, MessageType.INFO, null)
                     .setFadeoutTime(4000)
                     .setAnimationCycle(200)
                     .createBalloon();
 
-            Point targetPoint = new Point(statusBarComponent.getWidth() - 30, statusBarComponent.getHeight() / 2);
-            RelativePoint relativePoint = new RelativePoint(statusBarComponent, targetPoint);
+            final Point targetPoint = new Point(statusBarComponent.getWidth() - 30, statusBarComponent.getHeight() / 2);
+            final RelativePoint relativePoint = new RelativePoint(statusBarComponent, targetPoint);
 
             balloon.show(relativePoint, Balloon.Position.above);
         });
@@ -91,7 +91,7 @@ public class Notifier {
     }
 
     public static void warnWithAction(final @NotNull String title, final @NotNull String message, final @NotNull String actionName, final @NotNull Runnable action) {
-        Notification notification = NotificationGroupManager.getInstance()
+        final Notification notification = NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
                 .createNotification(title, message, NotificationType.WARNING); // استخدام نوع WARNING
 
@@ -100,7 +100,7 @@ public class Notifier {
     }
 
     public static void infoWithAction(final @NotNull String title, final @NotNull String message, final @NotNull String actionName, final @NotNull Runnable action) {
-        Notification notification = NotificationGroupManager.getInstance()
+        final Notification notification = NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
                 .createNotification(title, message, NotificationType.INFORMATION);
 
@@ -109,7 +109,7 @@ public class Notifier {
     }
 
     public static void infoWithOpenAndCopy(final @NotNull String title, final @NotNull String message, final @NotNull File file) {
-        Notification notification = NotificationGroupManager.getInstance()
+        final Notification notification = NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
                 .createNotification(title, message, NotificationType.INFORMATION);
 
