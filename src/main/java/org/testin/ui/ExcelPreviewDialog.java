@@ -49,7 +49,6 @@ public class ExcelPreviewDialog extends DialogWrapper {
     @Override
     protected JComponent createCenterPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setPreferredSize(new Dimension(1100, 600));
 
         JBTabbedPane tabbedPane = new JBTabbedPane();
 
@@ -129,8 +128,6 @@ public class ExcelPreviewDialog extends DialogWrapper {
             table.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
 
             TableColumn importColumn = table.getColumnModel().getColumn(0);
-            importColumn.setMaxWidth(40);
-            importColumn.setMinWidth(40);
 
             JCheckBox headerCheckbox = new JCheckBox();
             headerCheckbox.setSelected(true);
@@ -162,10 +159,6 @@ public class ExcelPreviewDialog extends DialogWrapper {
                 }
             });
 
-            TableColumn idColumn = table.getColumnModel().getColumn(1);
-            idColumn.setMaxWidth(50);
-            idColumn.setMinWidth(50);
-
             try {
                 TableColumn priorityCol = table.getColumn("Priority");
                 ComboBox<String> priorityBox = new ComboBox<>();
@@ -182,7 +175,7 @@ public class ExcelPreviewDialog extends DialogWrapper {
             } catch (IllegalArgumentException ignored) {
             }
 
-            for (int i = 2; i < table.getColumnCount(); i++) {
+            for (int i = 0; i < table.getColumnCount(); i++) {
                 TableColumn col = table.getColumnModel().getColumn(i);
                 int maxWidth = 0;
 
@@ -200,7 +193,6 @@ public class ExcelPreviewDialog extends DialogWrapper {
                 }
 
                 maxWidth += 20;
-                if (maxWidth > 600) maxWidth = 600;
 
                 col.setPreferredWidth(maxWidth);
             }
@@ -300,7 +292,6 @@ public class ExcelPreviewDialog extends DialogWrapper {
         @Override
         protected JComponent createCenterPanel() {
             JPanel panel = new JPanel(new BorderLayout());
-            panel.setPreferredSize(new Dimension(250, 200));
             panel.add(new JBScrollPane(list), BorderLayout.CENTER);
             return panel;
         }
