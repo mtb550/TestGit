@@ -58,9 +58,6 @@ dependencies {
     // Source: https://mvnrepository.com/artifact/commons-io/commons-io
     implementation("commons-io:commons-io:2.21.0")
 
-    // Source: https://mvnrepository.com/artifact/com.codoid.products/fillo
-    implementation("com.codoid.products:fillo:1.24")
-
     // Source: https://mvnrepository.com/artifact/org.testng/testng
     testImplementation("org.testng:testng:7.12.0")
 
@@ -72,6 +69,12 @@ dependencies {
 
     // Source: https://mvnrepository.com/artifact/org.dhatim/fastexcel
     implementation("org.dhatim:fastexcel:0.20.0")
+
+    // Source: https://mvnrepository.com/artifact/org.apache.poi/poi
+    implementation("org.apache.poi:poi:5.5.1")
+
+    // Source: https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
+    implementation("org.apache.poi:poi-ooxml:5.5.1")
 }
 
 intellijPlatform {

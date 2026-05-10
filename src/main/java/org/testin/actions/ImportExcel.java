@@ -1,8 +1,5 @@
 package org.testin.actions;
 
-import com.codoid.products.fillo.Connection;
-import com.codoid.products.fillo.Fillo;
-import com.codoid.products.fillo.Recordset;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -17,6 +14,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
+import org.apache.poi.ss.usermodel.*;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
 import org.testin.pojo.Group;
@@ -117,19 +115,21 @@ public class ImportExcel extends DumbAwareAction {
     private void openFileChooserAndProcess(final VirtualFile targetDirectory, final TestSetDirectoryDto ts) {
         final FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false)
                 .withTitle("Select Spreadsheet File")
-                .withDescription("Please choose an .xls file");
+                .withDescription("Please choose an .xls or .xlsx file");
 
         final VirtualFile selectedFile = FileChooser.chooseFile(descriptor, Config.getProject(), null);
 
         if (selectedFile != null) {
-            if (!"xls".equalsIgnoreCase(selectedFile.getExtension())) {
+            String extension = selectedFile.getExtension();
+
+            if (extension == null || (!extension.equalsIgnoreCase("xls") && !extension.equalsIgnoreCase("xlsx"))) {
                 ApplicationManager.getApplication().invokeLater(() -> Notifier.error("Invalid File Format",
-                        "Only '.xls' files are allowed.\n\n" +
-                                "You selected an '." + selectedFile.getExtension() + "' file.\n" +
-                                "Please save your Excel file as 'Excel 97-2003 Workbook (*.xls)' and try again."));
+                        "Only Excel files (.xls, .xlsx) are allowed.\n\n" +
+                                "You selected an '." + extension + "' file.\n" +
+                                "Please select a valid Excel file and try again."));
                 return;
             }
-            processWithFillo(selectedFile.getPath(), targetDirectory, ts);
+            processWithPoi(selectedFile.getPath(), targetDirectory, ts);
         }
     }
 
@@ -176,7 +176,7 @@ public class ImportExcel extends DumbAwareAction {
         });
     }
 
-    private void processWithFillo(final String filePath, final VirtualFile targetDirectory, final TestSetDirectoryDto ts) {
+    private void processWithPoi(final String filePath, final VirtualFile targetDirectory, final TestSetDirectoryDto ts) {
         File file = new File(filePath);
         if (!file.exists() || !file.canRead()) {
             Notifier.error("File Error", "Java cannot read this file!");
@@ -189,43 +189,70 @@ public class ImportExcel extends DumbAwareAction {
                 indicator.setIndeterminate(true);
                 indicator.setText("Connecting to Excel file...");
 
-                System.setProperty("log4j2.disable.jmx", "true");
-                Fillo fillo = new Fillo();
-
                 ObjectMapper mapper = Config.getMapper();
 
-                Connection connection = null;
-                Recordset recordset = null;
-                try {
+                try (Workbook workbook = WorkbookFactory.create(file)) {
                     // todo, bug: if test set has test cases, should start after the last with isHead=false and next={last_test_case_uuid}
                     // todo, expected result is not arranged if it is multi lines. to be fixed.
                     // todo, if import, we need generate code context menu, to generate all in one click.
                     // todo, filter by module in status bar
-
-                    connection = fillo.getConnection(filePath); // todo, fetch sheet name dynamically (Sheet 1)
-                    String actualSheetName = connection.getMetaData().getTableNames().getFirst();
-                    String query = "SELECT * FROM \"" + actualSheetName + "\"";
-                    System.out.println(query);
-                    recordset = connection.executeQuery(query);
+                    // todo, fetch sheet name dynamically (Sheet 1) or sheet(0), get all sheets in JBTable tabs
+                    Sheet sheet = workbook.getSheetAt(0);
 
                     indicator.setText("Mapping column headers...");
-                    Map<String, String> headerMap = buildCaseInsensitiveHeaderMap(recordset.getFieldNames(), IMPORT_COLUMNS);
+
+                    Row headerRow = sheet.getRow(0);
+                    if (headerRow == null) {
+                        ApplicationManager.getApplication().invokeLater(() ->
+                                Notifier.warn("Empty File", "The selected Excel file appears to be empty.")
+                        );
+                        return;
+                    }
+
+                    DataFormatter dataFormatter = new DataFormatter();
+                    Map<String, Integer> headerIndexMap = new HashMap<>();
+
+                    for (Cell cell : headerRow) {
+                        String headerName = dataFormatter.formatCellValue(cell).trim();
+                        for (String reqCol : IMPORT_COLUMNS) {
+                            if (reqCol.equalsIgnoreCase(headerName)) {
+                                headerIndexMap.put(reqCol.toLowerCase(), cell.getColumnIndex());
+                            }
+                        }
+                    }
 
                     List<TestCaseDto> previewList = new ArrayList<>();
-
                     TestCaseDto previousTestCase = null;
                     int rowCount = 0;
 
                     indicator.setText("Parsing rows into JSON...");
 
-                    while (recordset.next()) {
+                    for (int r = 1; r <= sheet.getLastRowNum(); r++) {
                         if (indicator.isCanceled()) break;
+
+                        Row row = sheet.getRow(r);
+                        if (row == null) continue;
+
+                        boolean isRowEmpty = true;
+                        for (int c = 0; c < row.getLastCellNum(); c++) {
+                            if (!dataFormatter.formatCellValue(row.getCell(c)).trim().isEmpty()) {
+                                isRowEmpty = false;
+                                break;
+                            }
+                        }
+                        if (isRowEmpty) continue;
 
                         final TestCaseDto currentTestCase = new TestCaseDto().setId(UUID.randomUUID());
 
                         for (TestEditorAttributes attr : TestEditorAttributes.values()) {
                             if (attr.isImportValue()) {
-                                String rawValue = getFieldSafe(recordset, attr.getName(), headerMap);
+                                Integer colIndex = headerIndexMap.get(attr.getName().toLowerCase());
+                                String rawValue = "";
+
+                                if (colIndex != null) {
+                                    Cell dataCell = row.getCell(colIndex);
+                                    rawValue = dataFormatter.formatCellValue(dataCell).trim();
+                                }
                                 attr.getImportSetter().accept(ImportExcel.this, currentTestCase, rawValue);
                             }
                         }
@@ -252,8 +279,12 @@ public class ImportExcel extends DumbAwareAction {
                         return;
                     }
 
-                    recordset.close();
-                    connection.close();
+                    if (previewList.isEmpty()) {
+                        ApplicationManager.getApplication().invokeLater(() ->
+                                Notifier.warn("No Data", "No valid test cases found in the Excel file.")
+                        );
+                        return;
+                    }
 
                     indicator.setText("Waiting for user confirmation...");
                     indicator.setText2("");
@@ -286,44 +317,16 @@ public class ImportExcel extends DumbAwareAction {
 
                 } catch (Exception ex) {
                     System.err.println("Import crashed: " + ex.getMessage());
+                    ex.printStackTrace(System.err);
+
                     ApplicationManager.getApplication().invokeLater(() ->
                             Notifier.error("Failed to import data: " +
                                     "\n(Tip: Ensure the file is completely closed in Microsoft Excel and try again.)\n"
                                     + ex.getMessage())
                     );
-                } finally {
-                    if (recordset != null) recordset.close();
-                    if (connection != null) connection.close();
                 }
             }
         });
-    }
-
-    private Map<String, String> buildCaseInsensitiveHeaderMap(final List<String> actualExcelColumns, final List<String> requestedColumns) {
-        Map<String, String> map = new HashMap<>();
-        for (String requested : requestedColumns) {
-            actualExcelColumns.stream()
-                    .filter(excelCol -> excelCol.equalsIgnoreCase(requested))
-                    .findFirst()
-                    .ifPresent(actualCasing -> map.put(requested.toLowerCase(), actualCasing));
-        }
-        return map;
-    }
-
-    private String getFieldSafe(final Recordset recordset, final String requestedFieldName, final Map<String, String> headerMap) {
-        try {
-            String exactMatchedColumn = headerMap.get(requestedFieldName.toLowerCase());
-
-            if (exactMatchedColumn == null) {
-                return "";
-            }
-
-            String value = recordset.getField(exactMatchedColumn);
-            return (value != null && !value.isBlank()) ? value.trim() : "";
-
-        } catch (Exception ex) {
-            return "";
-        }
     }
 
     // todo, move all below to Tools class
