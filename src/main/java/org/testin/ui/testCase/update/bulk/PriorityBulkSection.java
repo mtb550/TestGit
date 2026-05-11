@@ -19,12 +19,13 @@ public class PriorityBulkSection extends JsonSplitBulkSection {
 
     @Override
     protected void appendJsonItem(TestCaseDto tc, int index, boolean isLast, StringBuilder leftSb, StringBuilder rightSb, List<int[]> rightEditableRanges) {
-        String id = "Item-" + (index + 1);
-        String escapedTitle = escapeJson(tc.getDescription());
+        String id = escapeJson(tc.getId().toString());
+        String escapedDescription = escapeJson(tc.getDescription());
+        // todo, add expected result to be shown once update bulk Priority
         String priorityStr = tc.getPriority().name();
         String escapedPriority = escapeJson(priorityStr);
 
-        String prefix = "  {\n    \"id\": \"" + id + "\",\n    \"title\": \"" + escapedTitle + "\",\n    \"priority\": \"";
+        String prefix = "  {\n    \"id\": \"" + id + "\",\n    \"description\": \"" + escapedDescription + "\",\n    \"priority\": \"";
         String suffix = "\"\n  }";
         String comma = isLast ? "\n" : ",\n";
 

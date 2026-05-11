@@ -27,6 +27,7 @@ public abstract class TestCaseUIBase {
     protected final CodeGenerator codeGenerator;
     protected final DescriptionSection DescriptionSection;
     protected final ExpectedResultSection expectedResultSection;
+    protected final ModuleSection moduleSection;
     protected final PrioritySection prioritySection;
     protected final GroupSection groupSection;
     protected final StepsSection stepsSection;
@@ -39,6 +40,7 @@ public abstract class TestCaseUIBase {
         this.codeGenerator = new CodeGenerator(generatorType);
         this.DescriptionSection = new DescriptionSection();
         this.expectedResultSection = new ExpectedResultSection();
+        this.moduleSection = new ModuleSection();
         this.stepsSection = new StepsSection();
         this.prioritySection = new PrioritySection();
         this.groupSection = new GroupSection();

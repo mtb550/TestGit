@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class TestCaseCacheService implements Disposable {
     private final Set<String> titles = ConcurrentHashMap.newKeySet();
     private final Set<String> expectedResults = ConcurrentHashMap.newKeySet();
+    private final Set<String> modules = ConcurrentHashMap.newKeySet();
     private final Set<String> steps = ConcurrentHashMap.newKeySet();
 
     public static TestCaseCacheService getInstance(final Project project) {
@@ -31,6 +32,10 @@ public final class TestCaseCacheService implements Disposable {
         return Collections.unmodifiableSet(expectedResults);
     }
 
+    public Set<String> getModules() {
+        return Collections.unmodifiableSet(modules);
+    }
+
     public Set<String> getSteps() {
         return Collections.unmodifiableSet(steps);
     }
@@ -43,6 +48,10 @@ public final class TestCaseCacheService implements Disposable {
         if (e != null && !e.trim().isEmpty()) expectedResults.add(e.trim());
     }
 
+    public void addModule(final String e) {
+        if (e != null && !e.trim().isEmpty()) modules.add(e.trim());
+    }
+
     public void addStep(final String s) {
         if (s != null && !s.trim().isEmpty()) steps.add(s.trim());
     }
@@ -53,6 +62,7 @@ public final class TestCaseCacheService implements Disposable {
                 testCases.forEach(tc -> {
                     addDescription(tc.getDescription());
                     addExpectedResult(tc.getExpectedResult());
+                    addModule(tc.getModule());
                     Optional.of(tc.getSteps()).ifPresent(stepList -> stepList.forEach(this::addStep));
                 }));
     }
@@ -63,6 +73,7 @@ public final class TestCaseCacheService implements Disposable {
                 tcs.forEach(tc -> {
                     this.addDescription(tc.getDescription());
                     this.addExpectedResult(tc.getExpectedResult());
+                    this.addModule(tc.getModule());
                     tc.getSteps().forEach(this::addStep);
                 })
         );
@@ -72,6 +83,7 @@ public final class TestCaseCacheService implements Disposable {
     public void dispose() {
         titles.clear();
         expectedResults.clear();
+        modules.clear();
         steps.clear();
     }
 }

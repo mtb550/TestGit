@@ -104,10 +104,10 @@ public abstract class JsonArraySplitBulkSection {
 
             for (int i = 0; i < selectedItems.size(); i++) {
                 TestCaseDto tc = selectedItems.get(i);
-                String id = "Item-" + (i + 1);
-                String escapedTitle = escapeJson(tc.getDescription());
+                String id = escapeJson(tc.getId().toString());
+                String escapedDescription = escapeJson(tc.getDescription());
 
-                String prefix = "  {\n    \"id\": \"" + id + "\",\n    \"title\": \"" + escapedTitle + "\",\n    \"" + getArrayFieldName() + "\": [\n";
+                String prefix = "  {\n    \"id\": \"" + id + "\",\n    \"description\": \"" + escapedDescription + "\",\n    \"" + getArrayFieldName() + "\": [\n";
                 leftSb.append(prefix);
                 rightSb.append(prefix);
 

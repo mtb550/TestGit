@@ -64,7 +64,7 @@ public class UpdateTestCase extends DumbAwareAction {
                     System.out.println("TRACE [UpdateTestCase]: Code generator is selected! Change Type received: " + codeGenerator.getGeneratorType());
 
                     // todo, all if statements here to be moved to enum class
-                    if (codeGenerator.getGeneratorType() == GeneratorType.UPDATE_TEST_CASE_Description) {
+                    if (codeGenerator.getGeneratorType() == GeneratorType.UPDATE_TEST_CASE_DESCRIPTION) {
                         System.out.println("TRACE [UpdateTestCase]: Routing to UpdateTestCaseDescription()...");
                         //new UpdateTestCaseDescription().execute(Config.getProject(), updatedItems.getFirst().getFqcn(), updatedItems.getFirst());
                         return;
@@ -72,6 +72,16 @@ public class UpdateTestCase extends DumbAwareAction {
 
                     if (codeGenerator.getGeneratorType() == GeneratorType.UPDATE_TEST_CASE_EXPECTED_RESULT) {
                         System.out.println("TRACE [UpdateTestCase]: Routing to Update Expected Results (Type 2)...");
+                        return;
+                    }
+
+                    if (codeGenerator.getGeneratorType() == GeneratorType.UPDATE_TEST_CASE_GROUP) {
+                        System.out.println("TRACE [UpdateTestCase]: Routing to Update Group (Type 2)...");
+                        return;
+                    }
+
+                    if (codeGenerator.getGeneratorType() == GeneratorType.UPDATE_TEST_CASE_MODULE) {
+                        System.out.println("TRACE [UpdateTestCase]: Routing to Update Module (Type 2)...");
                         return;
                     }
 

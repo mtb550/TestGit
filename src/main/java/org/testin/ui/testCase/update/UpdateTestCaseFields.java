@@ -76,25 +76,36 @@ public enum UpdateTestCaseFields implements IStatusBarItem {
     ),
 
     DESCRIPTION(
-            "Title",
+            "Description",
             KeyboardSet.UpdateTestCaseDescription,
             AllIcons.Actions.Edit,
             new IStatusBarItem[]{SAVE},
             true,
-            GeneratorType.UPDATE_TEST_CASE_Description,
+            GeneratorType.UPDATE_TEST_CASE_DESCRIPTION,
             (items, updatedItems) -> new DescriptionBulkSection().show(items, updatedItems),
             TestCaseUIBase::getDescriptionSection
     ),
 
     EXPECTED_RESULT(
             "Expected Results",
-            KeyboardSet.UpdateTestCaseExpected,
+            KeyboardSet.UpdateTestCaseExpectedResult,
             AllIcons.General.InspectionsOK,
             new IStatusBarItem[]{SAVE},
             true,
             GeneratorType.UPDATE_TEST_CASE_EXPECTED_RESULT,
-            (items, updatedItems) -> new ExpectedBulkSection().show(items, updatedItems),
+            (items, updatedItems) -> new ExpectedResultBulkSection().show(items, updatedItems),
             TestCaseUIBase::getExpectedResultSection
+    ),
+
+    MODULE(
+            "Module",
+            KeyboardSet.UpdateTestCaseModule,
+            AllIcons.General.ContextHelp,
+            new IStatusBarItem[]{SAVE},
+            true,
+            GeneratorType.UPDATE_TEST_CASE_MODULE,
+            (items, updatedItems) -> new ModuleBulkSection().show(items, updatedItems),
+            TestCaseUIBase::getModuleSection
     ),
 
     AUTO_COMPLETE(

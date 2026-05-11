@@ -92,12 +92,22 @@ public enum CreateTestCaseFields implements IStatusBarItem {
 
     EXPECTED_RESULT(
             "Expected Results",
-            KeyboardSet.CreateTestCaseExpected,
+            KeyboardSet.CreateTestCaseExpectedResult,
             AllIcons.General.InspectionsOK,
             new IStatusBarItem[]{SAVE, NAVIGATE_TAB},
             true,
             TestCaseUIBase::getExpectedResultSection,
             "set expected result"
+    ),
+
+    MODULE(
+            "Module",
+            KeyboardSet.CreateTestCaseModule,
+            AllIcons.General.ContextHelp,
+            new IStatusBarItem[]{SAVE, NAVIGATE_TAB},
+            true,
+            TestCaseUIBase::getModuleSection,
+            "set module"
     ),
 
     STEPS(

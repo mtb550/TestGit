@@ -28,7 +28,7 @@ public enum GeneratorType {
             new CreateTestCase()
     ),
 
-    UPDATE_TEST_CASE_Description(
+    UPDATE_TEST_CASE_DESCRIPTION(
             "Update Test Case",
             "Update Automation Test Method Description & Name",
             new UpdateTestCase()
@@ -37,6 +37,12 @@ public enum GeneratorType {
     UPDATE_TEST_CASE_EXPECTED_RESULT(
             "Update Test Case",
             "Update Automation Test Method Expected Result",
+            new UpdateTestCase()
+    ),
+
+    UPDATE_TEST_CASE_MODULE(
+            "Update Test Case",
+            "Update Automation Test Method Groups",
             new UpdateTestCase()
     ),
 

@@ -441,7 +441,7 @@ public abstract class JsonSplitBulkSection {
         return nearestOffset;
     }
 
-    private void setupEditorAppearance(Editor editor, Project project) {
+    private void setupEditorAppearance(final Editor editor, final Project project) {
         FileType jsonFileType = FileTypeManager.getInstance().getFileTypeByExtension("json");
         EditorHighlighter highlighter = EditorHighlighterFactory.getInstance().createEditorHighlighter(project, new com.intellij.testFramework.LightVirtualFile("dummy.json", jsonFileType, ""));
 

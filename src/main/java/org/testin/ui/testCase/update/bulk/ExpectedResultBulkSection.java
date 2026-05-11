@@ -4,7 +4,7 @@ import org.testin.pojo.dto.TestCaseDto;
 
 import java.util.List;
 
-public class ExpectedBulkSection extends JsonSplitBulkSection {
+public class ExpectedResultBulkSection extends JsonSplitBulkSection {
 
     @Override
     protected String getPopupTitle() {
@@ -18,19 +18,19 @@ public class ExpectedBulkSection extends JsonSplitBulkSection {
 
     @Override
     protected void appendJsonItem(TestCaseDto tc, int index, boolean isLast, StringBuilder leftSb, StringBuilder rightSb, List<int[]> rightEditableRanges) {
-        String id = "Item-" + (index + 1);
-        String escapedTitle = escapeJson(tc.getDescription());
-        String escapedExpected = escapeJson(tc.getExpectedResult());
+        String id = escapeJson(tc.getId().toString());
+        String escapedDescription = escapeJson(tc.getDescription());
+        String escapedExpectedResult = escapeJson(tc.getExpectedResult());
 
-        String prefix = "  {\n    \"id\": \"" + id + "\",\n    \"title\": \"" + escapedTitle + "\",\n    \"expected\": \"";
+        String prefix = "  {\n    \"id\": \"" + id + "\",\n    \"description\": \"" + escapedDescription + "\",\n    \"expectedResult\": \"";
         String suffix = "\"\n  }";
         String comma = isLast ? "\n" : ",\n";
 
-        leftSb.append(prefix).append(escapedExpected).append(suffix).append(comma);
+        leftSb.append(prefix).append(escapedExpectedResult).append(suffix).append(comma);
 
         rightSb.append(prefix);
         int startOffset = rightSb.length();
-        rightSb.append(escapedExpected);
+        rightSb.append(escapedExpectedResult);
         int endOffset = rightSb.length();
         rightEditableRanges.add(new int[]{startOffset, endOffset});
         rightSb.append(suffix).append(comma);
