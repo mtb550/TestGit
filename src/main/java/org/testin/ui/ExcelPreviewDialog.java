@@ -23,7 +23,6 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 
-// todo, to be enhanced, make it dynamic for re-use, add horizontal scroll, add remain columns, make all cells editable.
 public class ExcelPreviewDialog extends DialogWrapper {
     private final Map<String, List<TestCaseDto>> originalSheetsData;
     private final Map<String, DefaultTableModel> tableModelsMap = new LinkedHashMap<>();

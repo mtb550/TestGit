@@ -2,6 +2,7 @@ package org.testin.actions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooser;
@@ -30,6 +31,7 @@ import org.testin.util.notifications.Notifier;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -182,12 +184,10 @@ public class ImportExcel extends DumbAwareAction {
                 indicator.setText("Connecting to Excel file...");
 
                 ObjectMapper mapper = Config.getMapper();
+                Map<String, List<TestCaseDto>> allSheetsData = new LinkedHashMap<>();
 
-                try (Workbook workbook = WorkbookFactory.create(file)) {
-                    // todo, expected result is not arranged if it is multi lines. to be fixed.
-                    // todo, if import, we need generate code context menu, to generate all in one click.
-                    // todo, filter by module in status bar
-                    // todo, fetch sheet name dynamically (Sheet 1) or sheet(0), get all sheets in JBTable tabs
+                try (InputStream fis = new FileInputStream(file);
+                     Workbook workbook = WorkbookFactory.create(fis)) {
 
                     indicator.setText("Checking for existing test cases...");
 
@@ -206,9 +206,7 @@ public class ImportExcel extends DumbAwareAction {
                         }
                     }
 
-                    Map<String, List<TestCaseDto>> allSheetsData = new LinkedHashMap<>();
                     int totalParsed = 0;
-
                     indicator.setText("Parsing rows into JSON...");
 
                     for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
@@ -244,7 +242,7 @@ public class ImportExcel extends DumbAwareAction {
 
                             boolean isRowEmpty = true;
                             for (int c = 0; c < row.getLastCellNum(); c++) {
-                                if (!dataFormatter.formatCellValue(row.getCell(c)).trim().isEmpty()) {
+                                if (row.getCell(c) != null && !dataFormatter.formatCellValue(row.getCell(c)).trim().isEmpty()) {
                                     isRowEmpty = false;
                                     break;
                                 }
@@ -281,72 +279,6 @@ public class ImportExcel extends DumbAwareAction {
                         }
                     }
 
-                    if (indicator.isCanceled()) {
-                        Notifier.getInstance().softShow("Import Cancelled", "Import was cancelled by you.");
-                        return;
-                    }
-
-                    if (allSheetsData.isEmpty()) {
-                        ApplicationManager.getApplication().invokeLater(() ->
-                                Notifier.getInstance().warn("No Data", "No valid test cases found in the Excel file.")
-                        );
-                        return;
-                    }
-
-                    indicator.setText("Waiting for user confirmation...");
-                    indicator.setText2("");
-
-                    ApplicationManager.getApplication().invokeLater(() -> {
-                        ExcelPreviewDialog dialog = new ExcelPreviewDialog(Config.getProject(), allSheetsData);
-
-                        if (dialog.showAndGet()) {
-
-                            Map<String, List<TestCaseDto>> selectedCasesBySheet = dialog.getSelectedTestCasesBySheet();
-
-                            if (selectedCasesBySheet.isEmpty()) {
-                                Notifier.getInstance().softShow("No Selection", "No test cases were selected for import.");
-                                return;
-                            }
-
-                            ApplicationManager.getApplication().runWriteAction(() -> {
-                                try {
-                                    if (selectedDirDto instanceof TestSetDirectoryDto ts) {
-                                        TestCaseDto tail = findExistingTail(targetDirectory, mapper);
-                                        List<TestCaseDto> flatList = new ArrayList<>();
-                                        selectedCasesBySheet.values().forEach(flatList::addAll);
-
-                                        linkAndSaveTestCases(targetDirectory, flatList, tail, mapper, ImportExcel.this);
-
-                                        Tools.getInstance().closeThenOpenTestEditor(targetDirectory, ts);
-                                        Notifier.getInstance().info("Import Complete", "Successfully imported " + flatList.size() + " test cases.");
-
-                                    } else {
-                                        int totalImported = 0;
-                                        for (Map.Entry<String, List<TestCaseDto>> entry : selectedCasesBySheet.entrySet()) {
-                                            String rawSheetName = entry.getKey();
-                                            List<TestCaseDto> sheetCases = entry.getValue();
-
-                                            VirtualFile sheetDir = new CreateTestSet().inBackground(ImportExcel.this, targetDirectory, selectedDirDto, parentNode, tree, rawSheetName);
-
-                                            TestCaseDto tail = findExistingTail(sheetDir, mapper);
-                                            linkAndSaveTestCases(sheetDir, sheetCases, tail, mapper, ImportExcel.this);
-                                            totalImported += sheetCases.size();
-                                        }
-                                        Notifier.getInstance().info("Import Complete", "Successfully imported " + totalImported + " test cases into separate Test Sets.");
-                                    }
-
-                                    targetDirectory.refresh(false, true);
-
-                                } catch (IOException ex) {
-                                    System.err.println("Failed to write files: " + ex.getMessage());
-                                }
-                            });
-
-                        } else {
-                            Notifier.getInstance().softShow("Import Cancelled", "Import was cancelled from preview dialog.");
-                        }
-                    });
-
                 } catch (Exception ex) {
                     System.err.println("Import crashed: " + ex.getMessage());
                     ex.printStackTrace(System.err);
@@ -356,7 +288,74 @@ public class ImportExcel extends DumbAwareAction {
                                     "\n(Tip: Ensure the file is completely closed in Microsoft Excel and try again.)\n"
                                     + ex.getMessage())
                     );
+                    return;
                 }
+
+                if (indicator.isCanceled()) {
+                    Notifier.getInstance().softShow("Import Cancelled", "Import was cancelled by you.");
+                    return;
+                }
+
+                if (allSheetsData.isEmpty()) {
+                    ApplicationManager.getApplication().invokeLater(() ->
+                            Notifier.getInstance().warn("No Data", "No valid test cases found in the Excel file.")
+                    );
+                    return;
+                }
+
+                indicator.setText("Waiting for user confirmation...");
+                indicator.setText2("");
+
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    ExcelPreviewDialog dialog = new ExcelPreviewDialog(Config.getProject(), allSheetsData);
+
+                    if (dialog.showAndGet()) {
+
+                        Map<String, List<TestCaseDto>> selectedCasesBySheet = dialog.getSelectedTestCasesBySheet();
+
+                        if (selectedCasesBySheet.isEmpty()) {
+                            Notifier.getInstance().softShow("No Selection", "No test cases were selected for import.");
+                            return;
+                        }
+
+                        ApplicationManager.getApplication().runWriteAction(() -> {
+                            try {
+                                if (selectedDirDto instanceof TestSetDirectoryDto ts) {
+                                    TestCaseDto tail = findExistingTail(targetDirectory, mapper);
+                                    List<TestCaseDto> flatList = new ArrayList<>();
+                                    selectedCasesBySheet.values().forEach(flatList::addAll);
+
+                                    linkAndSaveTestCases(targetDirectory, flatList, tail, mapper, ImportExcel.this);
+
+                                    Tools.getInstance().closeThenOpenTestEditor(targetDirectory, ts);
+                                    Notifier.getInstance().info("Import Complete", "Successfully imported " + flatList.size() + " test cases.");
+
+                                } else {
+                                    int totalImported = 0;
+                                    for (Map.Entry<String, List<TestCaseDto>> entry : selectedCasesBySheet.entrySet()) {
+                                        String rawSheetName = entry.getKey();
+                                        List<TestCaseDto> sheetCases = entry.getValue();
+
+                                        VirtualFile sheetDir = new CreateTestSet().inBackground(ImportExcel.this, targetDirectory, selectedDirDto, parentNode, tree, rawSheetName);
+
+                                        TestCaseDto tail = findExistingTail(sheetDir, mapper);
+                                        linkAndSaveTestCases(sheetDir, sheetCases, tail, mapper, ImportExcel.this);
+                                        totalImported += sheetCases.size();
+                                    }
+                                    Notifier.getInstance().info("Import Complete", "Successfully imported " + totalImported + " test cases into separate Test Sets.");
+                                }
+
+                                targetDirectory.refresh(false, true);
+
+                            } catch (IOException ex) {
+                                System.err.println("Failed to write files: " + ex.getMessage());
+                            }
+                        });
+
+                    } else {
+                        Notifier.getInstance().softShow("Import Cancelled", "Import was cancelled from preview dialog.");
+                    }
+                });
             }
         });
     }
@@ -423,5 +422,10 @@ public class ImportExcel extends DumbAwareAction {
         e.getPresentation().setEnabled(userObject instanceof TestSetDirectoryDto ||
                 userObject instanceof TestSetPackageDirectoryDto ||
                 userObject instanceof TestCasesMainDirectoryDto);
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
     }
 }
