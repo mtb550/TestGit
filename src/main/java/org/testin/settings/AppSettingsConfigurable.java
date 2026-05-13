@@ -1,5 +1,6 @@
 package org.testin.settings;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.options.Configurable;
@@ -7,6 +8,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextComponentAccessor;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.TitledSeparator;
@@ -29,7 +31,10 @@ import org.testin.util.Tools;
 import org.testin.util.notifications.Notifier;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,6 +51,7 @@ public class AppSettingsConfigurable implements Configurable {
 
     private final JBCheckBox readModeCheckBox = new JBCheckBox("Enable read mode (view only)");
 
+    private final JButton openFolderBtn = new JButton("Open");
     private final JButton activateBtn = new JButton("Activate");
     private final JButton deactivateBtn = new JButton("Deactivate");
     private final JButton archiveBtn = new JButton("Archive");
@@ -67,6 +73,30 @@ public class AppSettingsConfigurable implements Configurable {
                         .withDescription("Choose the directory where your test projects are stored"),
                 TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT
         );
+
+        rootTestinPathField.getTextField().getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) { updateOpenFolderBtnState(); }
+            @Override
+            public void removeUpdate(DocumentEvent e) { updateOpenFolderBtnState(); }
+            @Override
+            public void changedUpdate(DocumentEvent e) { updateOpenFolderBtnState(); }
+        });
+
+        openFolderBtn.setIcon(AllIcons.Actions.MenuOpen);
+        openFolderBtn.setDisabledIcon(IconLoader.getDisabledIcon(AllIcons.Actions.MenuOpen));
+        openFolderBtn.setEnabled(false);
+        openFolderBtn.addActionListener(e -> {
+            try {
+                Desktop.getDesktop().open(new File(rootTestinPathField.getText()));
+            } catch (Exception ex) {
+                Notifier.getInstance().error("Error", "Could not open folder: " + ex.getMessage());
+            }
+        });
+
+        JPanel pathPanel = new JPanel(new BorderLayout(5, 0));
+        pathPanel.add(rootTestinPathField, BorderLayout.CENTER);
+        pathPanel.add(openFolderBtn, BorderLayout.EAST);
 
         rootAutomationPathField.setEnabled(false);
         rootAutomationPathField.setToolTipText("Automatically detected base package path for your automation framework");
@@ -90,7 +120,7 @@ public class AppSettingsConfigurable implements Configurable {
         buttonPanel.add(renameBtn);
 
         return FormBuilder.createFormBuilder()
-                .addLabeledComponent(new JBLabel("Root testin folder: "), rootTestinPathField, 1, false)
+                .addLabeledComponent(new JBLabel("Root testin folder: "), pathPanel, 1, false)
                 .addLabeledComponent(new JBLabel("Root Automation folder: "), rootAutomationPathField, 1, false)
                 .addVerticalGap(10)
                 .addComponent(new TitledSeparator("Project Management"))
@@ -100,6 +130,21 @@ public class AppSettingsConfigurable implements Configurable {
                 .addComponent(readModeCheckBox)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
+    }
+
+    private void updateOpenFolderBtnState() {
+        String pathStr = rootTestinPathField.getText();
+        if (pathStr.trim().isEmpty()) {
+            openFolderBtn.setEnabled(false);
+            return;
+        }
+
+        try {
+            Path path = Path.of(pathStr);
+            openFolderBtn.setEnabled(Files.exists(path) && Files.isDirectory(path));
+        } catch (Exception ex) {
+            openFolderBtn.setEnabled(false);
+        }
     }
 
     @Deprecated(forRemoval = true, since = "after remove status from name, this method logic should be moved to .pr with remove split and _")
@@ -147,21 +192,25 @@ public class AppSettingsConfigurable implements Configurable {
     private void refreshProjectList() {
         testProjectList.removeAllElements();
 
-        Path rootPath = Path.of(rootTestinPathField.getText());
+        String pathStr = rootTestinPathField.getText();
+        if (pathStr.trim().isEmpty()) return;
 
-        if (Files.exists(rootPath) && Files.isDirectory(rootPath)) {
+        try {
+            Path rootPath = Path.of(pathStr);
 
-            try (Stream<Path> paths = Files.list(rootPath)) {
-                paths.filter(Files::isDirectory)
-                        .filter(path -> path.getFileName().toString().startsWith("PR_"))
-                        .map(DirectoryMapper::testProjectNode)
-                        .filter(Objects::nonNull)
-                        .forEach(testProjectList::addElement);
+            if (Files.exists(rootPath) && Files.isDirectory(rootPath)) {
+                try (Stream<Path> paths = Files.list(rootPath)) {
+                    paths.filter(Files::isDirectory)
+                            .filter(path -> path.getFileName().toString().startsWith("PR_"))
+                            .map(DirectoryMapper::testProjectNode)
+                            .filter(Objects::nonNull)
+                            .forEach(testProjectList::addElement);
 
-            } catch (Exception e) {
-                System.err.println("Failed to refresh project list: " + e.getMessage());
-                e.printStackTrace(System.err);
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Failed to refresh project list: " + e.getMessage());
+            e.printStackTrace(System.err);
         }
     }
 
@@ -214,6 +263,8 @@ public class AppSettingsConfigurable implements Configurable {
         }
 
         readModeCheckBox.setSelected(settings.readMode);
+
+        updateOpenFolderBtnState();
         refreshProjectList();
     }
 }
