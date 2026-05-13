@@ -1,0 +1,14 @@
+package org.testin.util.git;
+
+import org.testin.pojo.dto.TestCaseDto;
+
+import java.nio.file.Path;
+import java.util.List;
+
+public record TestCaseDiff(String testCaseId, Path relativeFilePath, DiffType type, TestCaseDto oldState,
+                           TestCaseDto newState, List<FieldChange> fieldChanges) {
+    public enum DiffType {ADDED, MODIFIED}
+
+    public record FieldChange(String fieldName, String oldValue, String newValue) {
+    }
+}

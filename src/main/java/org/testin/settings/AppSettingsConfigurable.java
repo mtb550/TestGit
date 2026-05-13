@@ -76,11 +76,19 @@ public class AppSettingsConfigurable implements Configurable {
 
         rootTestinPathField.getTextField().getDocument().addDocumentListener(new DocumentListener() {
             @Override
-            public void insertUpdate(DocumentEvent e) { updateOpenFolderBtnState(); }
+            public void insertUpdate(DocumentEvent e) {
+                updateOpenFolderBtnState();
+            }
+
             @Override
-            public void removeUpdate(DocumentEvent e) { updateOpenFolderBtnState(); }
+            public void removeUpdate(DocumentEvent e) {
+                updateOpenFolderBtnState();
+            }
+
             @Override
-            public void changedUpdate(DocumentEvent e) { updateOpenFolderBtnState(); }
+            public void changedUpdate(DocumentEvent e) {
+                updateOpenFolderBtnState();
+            }
         });
 
         openFolderBtn.setIcon(AllIcons.Actions.MenuOpen);

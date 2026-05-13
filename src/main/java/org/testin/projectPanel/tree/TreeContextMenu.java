@@ -60,7 +60,7 @@ public class TreeContextMenu extends DefaultActionGroup {
         addSeparator();
 
         add(new OpenOldVersions());
-        add(new ViewCommits());
+        add(new ViewCommits(tree));
         add(new TestRuns());
         addSeparator();
 
