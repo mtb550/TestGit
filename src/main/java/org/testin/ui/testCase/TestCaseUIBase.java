@@ -130,6 +130,7 @@ public abstract class TestCaseUIBase {
         };
     }
 
+    // todo, move to separate class
     public interface IUIAction {
         void execute();
     }

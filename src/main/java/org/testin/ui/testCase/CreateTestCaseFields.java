@@ -10,6 +10,56 @@ import java.util.function.Function;
 
 @Getter
 public enum CreateTestCaseFields implements IStatusBarItem {
+    DESCRIPTION_SHORTCUT(
+            "Description",
+            KeyboardSet.CreateTestCaseDescription,
+            null,
+            new IStatusBarItem[]{},
+            false,
+            null,
+            null
+    ),
+
+    EXPECTED_RESULT_SHORTCUT(
+            "Expected Result",
+            KeyboardSet.CreateTestCaseExpectedResult,
+            null,
+            new IStatusBarItem[]{},
+            false,
+            null,
+            null
+    ),
+
+    STEPS_SHORTCUT(
+            "Steps",
+            KeyboardSet.CreateTestCaseAddStep,
+            null,
+            new IStatusBarItem[]{},
+            false,
+            null,
+            null
+    ),
+
+    PRIORITY_SHORTCUT(
+            "Priority",
+            KeyboardSet.CreateTestCasePriority,
+            null,
+            new IStatusBarItem[]{},
+            false,
+            null,
+            null
+    ),
+
+    GROUP_SHORTCUT(
+            "Groups",
+            KeyboardSet.CreateTestCaseGroup,
+            null,
+            new IStatusBarItem[]{},
+            false,
+            null,
+            null
+    ),
+
     SAVE(
             "Save",
             KeyboardSet.Enter,
@@ -82,9 +132,9 @@ public enum CreateTestCaseFields implements IStatusBarItem {
 
     DESCRIPTION(
             "Description",
-            KeyboardSet.CreateTestCaseTitle,
+            KeyboardSet.CreateTestCaseDescription,
             AllIcons.Actions.Edit,
-            new IStatusBarItem[]{SAVE, NAVIGATE_TAB},
+            new IStatusBarItem[]{SAVE, NAVIGATE_TAB, DESCRIPTION_SHORTCUT, EXPECTED_RESULT_SHORTCUT, STEPS_SHORTCUT, PRIORITY_SHORTCUT, GROUP_SHORTCUT},
             true,
             TestCaseUIBase::getDescriptionSection,
             "set description"

@@ -63,7 +63,7 @@ public class DescriptionSection implements ICreateTestCaseSection {
 
     @Override
     public void setupShortcut(final JComponent mainPanel, final JPanel slot, final TestCaseUIBase base, final TestCaseUIBase.IUIAction repackAction) {
-        base.registerShortcut(mainPanel, KeyboardSet.CreateTestCaseTitle.getCustomShortcut(), () -> {
+        base.registerShortcut(mainPanel, KeyboardSet.CreateTestCaseDescription.getCustomShortcut(), () -> {
             showSection(slot);
             repackAction.execute();
         });
