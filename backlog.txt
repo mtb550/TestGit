@@ -170,13 +170,6 @@ fix step issues: 1- remove use CTRL+D, 2- add new array item for all cursors not
 view panel enhancements:
 merge created by at and updated by at.
 
-try it. IntelliJ hint.
-JBPopupFactory.getInstance()
-                .createHtmlTextBalloonBuilder(SUCCESS_MESSAGE, MessageType.INFO, null)
-                .setFadeoutTime(HINT_FADEOUT_MS)
-                .createBalloon()
-                .show(RelativePoint.getCenterOf(component), Balloon.Position.above);
-
 ui enhance:
 1-
 persist edit. (pending). remove save method in section classes,
@@ -304,7 +297,6 @@ show pass/fail/blocked in proper and big ui.
 render to next test case if set the run status.
 may be pop up can help, mostly if you can be always on top.
 
-------------------------------------
 timer:===============
 add to dto: startedAt, EndedAt, total duration, path.
 add path to run attributes.
@@ -321,13 +313,10 @@ or use current edit menu be make it not visible if current editor is the test ed
 make shortcut to set actual result, screenshot or exception (evidence, find another word), test case run status.
 
 how to make timer is accurate
---------------
 
 fix mac shortcuts. check create test case and generate code on mac
 
---------------
 new magicked features, copy or cut test cases from specific editor and paste it in another editor.
---------------
 
 CTRL+Z to revert back if change description for singe or bulk test cases
 
@@ -337,14 +326,11 @@ compatability with by charm, use option of plugin that make same release matched
 install robot framework and try gutter and navigate to code.
 
 amazing feature: select multi test set then open together it in the editor.
-drag and drop for project panel to editor panel
 
-remain enhancements for create new node ui.
-add status bar to create new node shows: enter:save scape:cancel.
-regex, no dot or special chars.
+drag and drop for test sets and test runs from project panel to editor panel
+
+regex, no dot or special chars for create new node ui.
+
 apply check box once update test case.
-
-
-add: update module to the update test case menu.
 
 test cases repository options: local server and connect via ssh, git source, ftp server, nosql db,
