@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.testin.actions.OpenTestRun;
 import org.testin.editorPanel.EditorCM;
 import org.testin.editorPanel.IEditorUI;
 import org.testin.editorPanel.StatusBar;
@@ -337,7 +338,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
 
                     if (vf.getDirectoryDto() instanceof TestRunDirectoryDto trDto) // todo, remve if statement. no need
                         // todo, Tools.Tools.isEditorOpen(). add new method, openEditor. and use it in all project, with invoke later.
-                        RunEditor.open(trDto, projectPanel);
+                        new OpenTestRun(trDto, projectPanel).execute();
                 });
             } catch (final Exception e) {
                 e.printStackTrace(System.err);

@@ -6,13 +6,13 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
-import org.testin.editorPanel.testRunEditor.RunEditor;
 import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.pojo.dto.dirs.TestRunDirectoryDto;
 import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
 import org.testin.util.KeyboardSet;
 import org.testin.util.Tools;
+import org.testin.util.notifications.Notifier;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -29,7 +29,7 @@ public class Open extends DumbAwareAction {
         this.registerCustomShortcutSet(KeyboardSet.Enter.getCustomShortcut(), tree);
     }
 
-    public static void execute(final ProjectPanel projectPanel, final SimpleTree tree) {
+    public void execute() {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
         if (node == null) return;
 
@@ -40,17 +40,23 @@ public class Open extends DumbAwareAction {
             }
 
             System.out.println("Opening Test Set: " + pkg.getPath());
-            if (pkg instanceof TestSetDirectoryDto ts)
+            if (pkg instanceof TestSetDirectoryDto ts) {
                 Tools.getInstance().openTestEditor(ts);
+                return;
+            }
 
-            if (pkg instanceof TestRunDirectoryDto tr)
-                RunEditor.open(tr, projectPanel);
+            if (pkg instanceof TestRunDirectoryDto tr) {
+                new OpenTestRun(tr, projectPanel).execute();
+                return;
+            }
+
+            Notifier.getInstance().softShow("unknown node", "unable to open " + pkg.getName());
         }
     }
 
     @Override
     public void actionPerformed(final @NotNull AnActionEvent e) {
-        execute(projectPanel, tree);
+        execute();
     }
 
     @Override

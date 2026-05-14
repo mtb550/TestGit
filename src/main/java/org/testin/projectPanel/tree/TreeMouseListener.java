@@ -51,7 +51,7 @@ public class TreeMouseListener extends PopupHandler {
             return;
 
         if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-            Open.execute(projectPanel, tree);
+            new Open(projectPanel, tree).execute();
             e.consume();
         }
     }
