@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "org.testin"
-version = "2.2.0-SNAPSHOT"
+version = "2.3.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
