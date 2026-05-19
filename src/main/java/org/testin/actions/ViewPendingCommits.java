@@ -152,6 +152,16 @@ public class ViewPendingCommits extends DumbAwareAction {
                 try {
                     GitCommandRunner.execute(repoPath, "git", "init");
 
+                    try {
+                        GitCommandRunner.execute(repoPath, "git", "checkout", "-b", "main");
+                    } catch (Exception ignored) {
+                    }
+
+                    try {
+                        GitCommandRunner.execute(repoPath, "git", "config", "--local", "http.sslVerify", "false");
+                    } catch (Exception ignored) {
+                    }
+
                     ApplicationManager.getApplication().invokeLater(() ->
                             Notifier.getInstance().info("Git Initialized", "Successfully initialized Git in:\n" + repoPath.getFileName())
                     );
@@ -210,6 +220,11 @@ public class ViewPendingCommits extends DumbAwareAction {
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
                 try {
+                    try {
+                        GitCommandRunner.execute(repoPath, "git", "branch", "-M", "main");
+                    } catch (Exception ignored) {
+                    }
+
                     indicator.setText("Syncing with remote (Pull --rebase)...");
                     try {
                         GitCommandRunner.execute(repoPath, "git", "pull", "--rebase", "--autostash", "origin", "main");
