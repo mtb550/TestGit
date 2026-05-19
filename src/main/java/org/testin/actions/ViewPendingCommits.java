@@ -116,16 +116,14 @@ public class ViewPendingCommits extends DumbAwareAction {
                     commitIndicator.setText("Committing files...");
                     GitCommandRunner.execute(repoPath, "git", "commit", "-m", commitMessage);
 
-                    ApplicationManager.getApplication().invokeLater(() -> {
-                        Notifier.getInstance().infoWithAction(
-                                "Commit successful",
-                                "Changes committed locally. Would you like to push to the remote repository now?",
-                                "Push to Remote",
-                                () -> pushToRemote(repoPath)
-                        );
-                    });
+                    ApplicationManager.getApplication().invokeLater(() -> Notifier.getInstance().infoWithAction(
+                            "Commit successful",
+                            "Changes committed locally. Would you like to push to the remote repository now?",
+                            "Push to Remote",
+                            () -> pushToRemote(repoPath)
+                    ));
 
-                } catch (Exception ex) {
+                } catch (final Exception ex) {
                     String errorMsg = ex.getMessage();
                     if (errorMsg != null && errorMsg.contains("Author identity unknown")) {
                         ApplicationManager.getApplication().invokeLater(() ->
@@ -220,9 +218,10 @@ public class ViewPendingCommits extends DumbAwareAction {
                     indicator.setText("Pushing commits...");
                     GitCommandRunner.execute(repoPath, "git", "push", "-u", "origin", "main");
 
-                    ApplicationManager.getApplication().invokeLater(() ->
-                            Notifier.getInstance().info("Push Successful", "Test cases were successfully pushed to the remote repository!")
-                    );
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        Notifier.getInstance().getPushToRemoteNotification().expire();
+                        Notifier.getInstance().info("Push Successful", "Test cases were successfully pushed to the remote repository!");
+                    });
 
                 } catch (Exception ex) {
                     ApplicationManager.getApplication().invokeLater(() ->

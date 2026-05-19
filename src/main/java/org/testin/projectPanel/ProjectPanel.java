@@ -16,7 +16,7 @@ import org.testin.projectPanel.tree.ProjectTree;
 import org.testin.projectPanel.tree.TestCaseTreeBuilder;
 import org.testin.projectPanel.tree.TestProjectTreeBuilder;
 import org.testin.projectPanel.tree.TestRunTreeBuilder;
-import org.testin.projectPanel.versionSelector.VersionSelector;
+import org.testin.projectPanel.versionSelector.BranchSelector;
 import org.testin.settings.AppSettingsConfigurable;
 import org.testin.util.Bundle;
 
@@ -29,7 +29,7 @@ public class ProjectPanel implements Disposable {
     private final TestProjectTreeBuilder testProjectTreeBuilder;
     private final TestCaseTreeBuilder testCaseTreeBuilder;
     private final TestRunTreeBuilder testRunTreeBuilder;
-    private VersionSelector versionSelector;
+    private BranchSelector branchSelector;
     private ProjectTree projectTree;
 
     public ProjectPanel(Project project) {
@@ -49,8 +49,8 @@ public class ProjectPanel implements Disposable {
             JBPanel<?> topBar = new JBPanel<>(new BorderLayout());
             topBar.add(testProjectSelector.getSelectedTestProject(), BorderLayout.NORTH);
 
-            versionSelector = new VersionSelector(testProjectSelector.getSelectedTestProject().getItem());
-            topBar.add(versionSelector.getComponent(), BorderLayout.SOUTH);
+            branchSelector = new BranchSelector(testProjectSelector.getSelectedTestProject().getItem());
+            topBar.add(branchSelector.getComponent(), BorderLayout.SOUTH);
 
             panel.add(topBar, BorderLayout.NORTH);
 
@@ -77,8 +77,8 @@ public class ProjectPanel implements Disposable {
             JBPanel<?> topBar = new JBPanel<>(new BorderLayout());
             topBar.add(testProjectSelector.getSelectedTestProject(), BorderLayout.NORTH);
 
-            versionSelector = new VersionSelector(testProjectSelector.getSelectedTestProject().getItem());
-            topBar.add(versionSelector.getComponent(), BorderLayout.SOUTH);
+            branchSelector = new BranchSelector(testProjectSelector.getSelectedTestProject().getItem());
+            topBar.add(branchSelector.getComponent(), BorderLayout.SOUTH);
 
             panel.add(topBar, BorderLayout.NORTH);
 

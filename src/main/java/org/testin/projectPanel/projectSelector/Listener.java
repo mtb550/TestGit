@@ -11,12 +11,12 @@ public class Listener implements ActionListener {
     private final ProjectPanel projectPanel;
     private TestProjectDirectoryDto lastSelected = null;
 
-    public Listener(ProjectPanel projectPanel) {
+    public Listener(final ProjectPanel projectPanel) {
         this.projectPanel = projectPanel;
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(final ActionEvent e) {
         if (e.getSource() instanceof JComboBox<?> comboBox) {
             if (comboBox.getSelectedItem() instanceof TestProjectDirectoryDto selected) {
                 if (selected.equals(lastSelected)) {

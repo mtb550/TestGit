@@ -15,6 +15,7 @@ import com.intellij.openapi.wm.IdeFrame;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.awt.RelativePoint;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
@@ -29,6 +30,9 @@ public class Notifier {
 
     private static final Notifier INSTANCE = new Notifier();
     private final String GROUP_ID = "testin.notifications";
+
+    @Getter
+    private Notification pushToRemoteNotification;
 
     public static Notifier getInstance() {
         return INSTANCE;
@@ -60,7 +64,7 @@ public class Notifier {
     public void info(final @NotNull String message) {
         NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
-                .createNotification(message, NotificationType.INFORMATION) // Notice: No Title!
+                .createNotification(message, NotificationType.INFORMATION)
                 .notify(Config.getProject());
     }
 
@@ -102,7 +106,7 @@ public class Notifier {
     public void warnWithAction(final @NotNull String title, final @NotNull String message, final @NotNull String actionName, final @NotNull Runnable action) {
         final Notification notification = NotificationGroupManager.getInstance()
                 .getNotificationGroup(GROUP_ID)
-                .createNotification(title, message, NotificationType.WARNING); // استخدام نوع WARNING
+                .createNotification(title, message, NotificationType.WARNING);
 
         notification.addAction(NotificationAction.createSimple(actionName, action));
         notification.notify(Config.getProject());
@@ -114,6 +118,7 @@ public class Notifier {
                 .createNotification(title, message, NotificationType.INFORMATION);
 
         notification.addAction(NotificationAction.createSimple(actionName, action));
+        pushToRemoteNotification = notification;
         notification.notify(Config.getProject());
     }
 

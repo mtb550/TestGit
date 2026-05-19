@@ -28,7 +28,7 @@ public class TestProjectSelector {
     @Setter
     private ComboBox<TestProjectDirectoryDto> selectedTestProject;
 
-    public TestProjectSelector(ProjectPanel projectPanel) {
+    public TestProjectSelector(final ProjectPanel projectPanel) {
         this.projectPanel = projectPanel;
         testProjectList = new DefaultComboBoxModel<>();
         selectedTestProject = new ComboBox<>(testProjectList);
@@ -85,7 +85,7 @@ public class TestProjectSelector {
         return true;
     }
 
-    public void addTestProject(TestProjectDirectoryDto newTestTestProjectDirectory) {
+    public void addTestProject(final TestProjectDirectoryDto newTestTestProjectDirectory) {
         System.out.println("TestProjectSelector.addTestProject()");
         if (!selectedTestProject.isEnabled()) {
             projectPanel.showEmptyState();
@@ -99,7 +99,7 @@ public class TestProjectSelector {
         }
     }
 
-    public void removeTestProject(SimpleTree tree, TestProjectDirectoryDto testProjectDirectory) {
+    public void removeTestProject(final SimpleTree tree, final TestProjectDirectoryDto testProjectDirectory) {
         int indexToRemove = -1;
         for (int i = 0; i < testProjectList.getSize(); i++) {
             if (testProjectList.getElementAt(i).getName().equals(testProjectDirectory.getName())) {
@@ -131,12 +131,15 @@ public class TestProjectSelector {
         tree.repaint();
     }
 
-    public void filterByTestProject(TestProjectDirectoryDto testProjectDirectory) {
+    public void filterByTestProject(final TestProjectDirectoryDto testProjectDirectory) {
         System.out.println("Panel.filterByProject(): " + testProjectDirectory.getName());
 
         projectPanel.getTestCaseTreeBuilder().buildTree(selectedTestProject.getItem());
         projectPanel.getTestRunTreeBuilder().buildTree(selectedTestProject.getItem());
 
+        if (projectPanel.getBranchSelector() != null) {
+            projectPanel.getBranchSelector().updateProject(testProjectDirectory);
+        }
     }
 
 }
