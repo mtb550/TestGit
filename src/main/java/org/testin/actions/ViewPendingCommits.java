@@ -1,6 +1,8 @@
 package org.testin.actions;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -15,11 +17,7 @@ import git4idea.checkin.GitUserNameNotDefinedDialog;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
 import org.testin.pojo.dto.dirs.TestProjectDirectoryDto;
-import org.testin.util.Tools;
-import org.testin.util.git.GitCommandRunner;
-import org.testin.util.git.GitDiffProcessor;
-import org.testin.util.git.PendingCommitsDialog;
-import org.testin.util.git.TestCaseDiff;
+import org.testin.util.*;
 import org.testin.util.notifications.Notifier;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -31,6 +29,7 @@ import java.util.List;
 
 public class ViewPendingCommits extends DumbAwareAction {
     private final SimpleTree tree;
+    private Notification pushNotification;
 
     public ViewPendingCommits(final @NotNull SimpleTree tree) {
         super("View Pending Commits", "Review and push changed test cases", AllIcons.Actions.Commit);
@@ -104,7 +103,7 @@ public class ViewPendingCommits extends DumbAwareAction {
         });
     }
 
-    private void performCommitWorkflow(Path repoPath, String commitMessage) {
+    private void performCommitWorkflow(final Path repoPath, final String commitMessage) {
         ProgressManager.getInstance().run(new Task.Backgroundable(Config.getProject(), "Committing to local Git", false) {
             @Override
             public void run(@NotNull ProgressIndicator commitIndicator) {
@@ -116,12 +115,18 @@ public class ViewPendingCommits extends DumbAwareAction {
                     commitIndicator.setText("Committing files...");
                     GitCommandRunner.execute(repoPath, "git", "commit", "-m", commitMessage);
 
-                    ApplicationManager.getApplication().invokeLater(() -> Notifier.getInstance().infoWithAction(
-                            "Commit successful",
-                            "Changes committed locally. Would you like to push to the remote repository now?",
-                            "Push to Remote",
-                            () -> pushToRemote(repoPath)
-                    ));
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        NotificationAction pushAction = NotificationAction.createSimple(
+                                "Push to Remote",
+                                () -> pushToRemote(repoPath)
+                        );
+
+                        pushNotification = Notifier.getInstance().infoWithActions(
+                                "Commit successful",
+                                "Changes committed locally. Would you like to push to the remote repository now?",
+                                pushAction
+                        );
+                    });
 
                 } catch (final Exception ex) {
                     String errorMsg = ex.getMessage();
@@ -139,7 +144,7 @@ public class ViewPendingCommits extends DumbAwareAction {
         });
     }
 
-    private void initializeGitRepository(Path repoPath) {
+    private void initializeGitRepository(final Path repoPath) {
         ProgressManager.getInstance().run(new Task.Backgroundable(Config.getProject(), "Initializing git repository", false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -159,7 +164,7 @@ public class ViewPendingCommits extends DumbAwareAction {
         });
     }
 
-    private void pushToRemote(Path repoPath) {
+    private void pushToRemote(final Path repoPath) {
         String remoteUrl = "";
         try {
             remoteUrl = GitCommandRunner.execute(repoPath, "git", "config", "--get", "remote.origin.url").trim();
@@ -199,7 +204,7 @@ public class ViewPendingCommits extends DumbAwareAction {
         }
     }
 
-    private void executeGitPush(Path repoPath) {
+    private void executeGitPush(final Path repoPath) {
         ProgressManager.getInstance().run(new Task.Backgroundable(Config.getProject(), "Pushing to Remote", false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -219,11 +224,15 @@ public class ViewPendingCommits extends DumbAwareAction {
                     GitCommandRunner.execute(repoPath, "git", "push", "-u", "origin", "main");
 
                     ApplicationManager.getApplication().invokeLater(() -> {
-                        Notifier.getInstance().getPushToRemoteNotification().expire();
+                        if (pushNotification != null) {
+                            pushNotification.expire();
+                            pushNotification = null;
+                        }
+
                         Notifier.getInstance().info("Push Successful", "Test cases were successfully pushed to the remote repository!");
                     });
 
-                } catch (Exception ex) {
+                } catch (final Exception ex) {
                     ApplicationManager.getApplication().invokeLater(() ->
                             Notifier.getInstance().error("Push Failed", "Could not push to remote:\n" + ex.getMessage())
                     );
@@ -232,7 +241,7 @@ public class ViewPendingCommits extends DumbAwareAction {
         });
     }
 
-    private void promptAndSetGitIdentity(Path repoPath, String pendingCommitMessage) {
+    private void promptAndSetGitIdentity(final Path repoPath, final String pendingCommitMessage) {
         ApplicationManager.getApplication().invokeLater(() -> {
 
             VirtualFile vRepoPath = LocalFileSystem.getInstance().findFileByIoFile(repoPath.toFile());

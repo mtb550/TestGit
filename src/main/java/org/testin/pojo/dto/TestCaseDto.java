@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import org.testin.pojo.Config;
 import org.testin.pojo.Group;
 import org.testin.pojo.Priority;
-import org.testin.util.git.TolerantDateDeserializer;
+import org.testin.util.DateDeserializer;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -83,14 +83,14 @@ public class TestCaseDto {
     @NonNull
     @Builder.Default
     @JsonProperty("createdAt")
-    @JsonDeserialize(using = TolerantDateDeserializer.class)
+    @JsonDeserialize(using = DateDeserializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Config.DATE_FORMAT_PATTERN, locale = "en_US")
     private ZonedDateTime createdAt = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
     @NonNull
     @Builder.Default
     @JsonProperty("updatedAt")
-    @JsonDeserialize(using = TolerantDateDeserializer.class)
+    @JsonDeserialize(using = DateDeserializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "EEEE dd-MM-yyyy 'At' HH:mm:ss '['VV']'", locale = "en_US")
     private ZonedDateTime updatedAt = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 

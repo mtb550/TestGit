@@ -1,4 +1,4 @@
-package org.testin.util.git;
+package org.testin.util;
 
 import org.testin.pojo.dto.TestCaseDto;
 

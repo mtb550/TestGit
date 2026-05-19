@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
 import org.testin.pojo.dto.dirs.TestProjectDirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
-import org.testin.util.git.GitCommandRunner;
+import org.testin.util.GitCommandRunner;
 import org.testin.util.notifications.Notifier;
 
 import javax.swing.*;
@@ -44,7 +44,7 @@ public class BranchSelector {
         updateProject(testProjectDirectory);
     }
 
-    public void updateProject(TestProjectDirectoryDto testProjectDirectory) {
+    public void updateProject(final TestProjectDirectoryDto testProjectDirectory) {
         this.projectPath = testProjectDirectory != null ? testProjectDirectory.getPath() : null;
 
         isUpdating = true;
@@ -76,7 +76,7 @@ public class BranchSelector {
         }
     }
 
-    private void onSelection(ActionEvent e) {
+    private void onSelection(final ActionEvent e) {
         if (isUpdating) return;
 
         String selectedBranch = getSelectedBranch();
@@ -89,7 +89,7 @@ public class BranchSelector {
         checkoutBranchAndRefreshTree(selectedBranch);
     }
 
-    private void checkoutBranchAndRefreshTree(String targetBranch) {
+    private void checkoutBranchAndRefreshTree(final String targetBranch) {
         if (projectPath == null) return;
 
         ProgressManager.getInstance().run(new Task.Backgroundable(Config.getProject(), "Checking out branch: " + targetBranch, false) {
@@ -97,7 +97,7 @@ public class BranchSelector {
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
                 try {
-                    GitCommandRunner.execute(projectPath, new String[]{"git", "checkout", targetBranch});
+                    GitCommandRunner.execute(projectPath, "git", "checkout", targetBranch);
                     currentBranch = targetBranch;
 
                     ApplicationManager.getApplication().invokeLater(() -> {
@@ -183,7 +183,7 @@ public class BranchSelector {
         });
     }
 
-    private List<String> parseBranches(String commandOutput) {
+    private List<String> parseBranches(final String commandOutput) {
         List<String> branchList = new ArrayList<>();
         if (commandOutput == null || commandOutput.trim().isEmpty()) {
             return branchList;

@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
 import org.testin.pojo.dto.dirs.TestProjectDirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
-import org.testin.util.git.GitCommandRunner;
+import org.testin.util.GitCommandRunner;
 import org.testin.util.notifications.Notifier;
 
 import javax.swing.tree.DefaultMutableTreeNode;

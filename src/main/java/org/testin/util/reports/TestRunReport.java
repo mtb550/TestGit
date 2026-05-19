@@ -1,16 +1,26 @@
 package org.testin.util.reports;
 
+import com.intellij.icons.AllIcons;
+import com.intellij.ide.BrowserUtil;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.ide.CopyPasteManager;
+import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.pojo.dto.TestRunDto;
 import org.testin.pojo.dto.dirs.TestRunDirectoryDto;
 import org.testin.util.notifications.Notifier;
 
+import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -71,14 +81,30 @@ public final class TestRunReport {
                 }
 
                 String cleanName = runData.getRunName().replace(".json", "");
-                File reportFile = dirPath.resolve(cleanName + "_Report" + extension).toFile();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                String timestamp = LocalDateTime.now().format(formatter);
+
+                File reportFile = dirPath.resolve(cleanName + "_Report_" + timestamp + extension).toFile();
 
                 Files.write(reportFile.toPath(), fileBytes);
 
-                Notifier.getInstance().infoWithOpenAndCopy(
+                NotificationAction openAction = NotificationAction.createSimple("Open report", () ->
+                        BrowserUtil.browse(reportFile.toURI().toString())
+                );
+
+                NotificationAction copyAction = new NotificationAction("Copy path") {
+                    @Override
+                    public void actionPerformed(@NotNull AnActionEvent e, @NotNull Notification notification) {
+                        CopyPasteManager.getInstance().setContents(new StringSelection(reportFile.getAbsolutePath()));
+                    }
+                };
+                copyAction.getTemplatePresentation().setIcon(AllIcons.Actions.Copy);
+
+                Notifier.getInstance().infoWithActions(
                         format + " Report Generated",
                         "Saved successfully: " + reportFile.getName(),
-                        reportFile
+                        openAction,
+                        copyAction
                 );
 
             } catch (Exception e) {
@@ -90,7 +116,7 @@ public final class TestRunReport {
     private Map<UUID, TestCaseDto> fetchTestCaseDetails(TestRunDto metadata) {
         Map<UUID, TestCaseDto> detailsMap = new ConcurrentHashMap<>();
 
-        if (metadata.getTestCase() == null || metadata.getTestCase().isEmpty()) {
+        if (metadata.getTestCase().isEmpty()) {
             return detailsMap;
         }
 
@@ -98,7 +124,7 @@ public final class TestRunReport {
             Path dirPath = tcPathObj.getPath();
             List<UUID> targetIds = tcPathObj.getUuid();
 
-            if (dirPath == null || !Files.exists(dirPath) || targetIds == null || targetIds.isEmpty()) {
+            if (dirPath == null || !Files.exists(dirPath) || targetIds.isEmpty()) {
                 continue;
             }
 

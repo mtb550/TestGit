@@ -1,4 +1,4 @@
-package org.testin.util.git;
+package org.testin.util;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.Locale;
 
-public class TolerantDateDeserializer extends JsonDeserializer<ZonedDateTime> {
+public class DateDeserializer extends JsonDeserializer<ZonedDateTime> {
     @Override
     public ZonedDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         String text = p.getText();

@@ -1,4 +1,4 @@
-package org.testin.util.git;
+package org.testin.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.project.Project;
