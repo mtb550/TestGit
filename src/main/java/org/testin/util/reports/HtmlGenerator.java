@@ -19,20 +19,37 @@ public final class HtmlGenerator {
         StringBuilder html = new StringBuilder();
 
         html.append("<html><head><style>")
-                .append("table {width:100%; border-collapse:collapse; font-size: 12px; font-family: sans-serif;}")
-                .append("th,td {border:1px solid #ddd; padding:6px; vertical-align:top;}")
-                .append("th {background-color: #f4f4f4; text-align: left;}")
+                .append(".table-container { width: 100%; overflow-x: auto; border: 1px solid #ccc; margin-top: 10px; }")
+                .append("table { border-collapse: collapse; font-size: 12px; font-family: sans-serif; width: max-content; }")
+                .append("th { background-color: #f4f4f4; text-align: left; padding: 8px; border: 1px solid #ddd; }")
+                .append("td { padding: 0; border: 1px solid #ddd; vertical-align: top; }")
+                .append(".cell-content { padding: 8px; overflow-wrap: break-word; white-space: normal; }")
                 .append("</style></head><body>");
 
         html.append("<h2>Test Run Report: ").append(tr.getRunName().replace(".json", "")).append("</h2>");
         html.append("<p><strong>Platform:</strong> ").append(tr.getPlatform()).append("</p>");
         html.append("<p><strong>Status:</strong> ").append(tr.getStatus().name()).append("</p>");
 
-        html.append("<table><tr>")
-                .append("<th>#</th><th>ID</th><th>Title</th><th>Status</th><th>Duration</th>")
-                .append("<th>Expected Result</th><th>Priority</th><th>Module</th><th>Groups</th>")
-                .append("<th>Created By</th><th>Updated By</th><th>Created At</th><th>Updated At</th>")
-                .append("<th>Reference</th><th>Steps</th><th>FQCN</th>")
+        html.append("<div class='table-container'>")
+                .append("<table>")
+                .append("<tr>")
+                .append("<th>#</th>")
+                .append("<th>ID</th>")
+                .append("<th>Title</th>")
+                .append("<th>Status</th>")
+                .append("<th>Duration</th>")
+                .append("<th>Expected Result</th>")
+                .append("<th>Priority</th>")
+                .append("<th>Module</th>")
+                .append("<th>Groups</th>")
+                .append("<th>Created By</th>")
+                .append("<th>Updated By</th>")
+                .append("<th>Created At</th>")
+                .append("<th>Updated At</th>")
+                .append("<th>Reference</th>")
+                .append("<th>Steps</th>")
+                .append("<th>FQCN</th>")
+                .append("<th>Code</th>")
                 .append("</tr>");
 
         if (!tr.getResults().isEmpty()) {
@@ -40,51 +57,54 @@ public final class HtmlGenerator {
 
             tr.getResults().forEach(result -> {
                 UUID id = result.getTestCaseId();
-                TestCaseDto d = (detailsMap != null) ? detailsMap.get(id) : null;
+                TestCaseDto d = detailsMap.get(id);
 
                 String statusText = result.getStatus().name();
                 String colorHex = "#" + result.getStatus().getHex();
                 String duration = Tools.getInstance().getFormattedDuration(result.getDuration());
 
-                String title = d != null ? d.getDescription() : "N/A";
-                String expected = d != null ? d.getExpectedResult() : "N/A";
-                String priority = d != null ? d.getPriority().name() : "N/A";
-                String module = d != null ? d.getModule() : "N/A";
-                String createdBy = d != null ? d.getCreatedBy() : "N/A";
-                String updatedBy = d != null ? d.getUpdatedBy() : "N/A";
-                String reference = d != null ? d.getReference() : "N/A";
+                String createdAt = d.getCreatedAt().format(DATE_FORMATTER);
+                String updatedAt = d.getUpdatedAt().format(DATE_FORMATTER);
 
-                String createdAt = d != null ? d.getCreatedAt().format(DATE_FORMATTER) : "N/A";
-                String updatedAt = d != null ? d.getUpdatedAt().format(DATE_FORMATTER) : "N/A";
-
-                String groups = (d != null && !d.getGroup().isEmpty()) ? d.getGroup().stream().map(Enum::name).collect(Collectors.joining("<br>")) : "N/A";
-                String steps = (d != null && !d.getSteps().isEmpty()) ? String.join("<br>", d.getSteps()) : "N/A";
-                String fqcn = (d != null && !d.getFqcn().isEmpty()) ? String.join("<br>", d.getFqcn()) : "N/A";
+                String groups = d.getGroup().stream().map(Enum::name).collect(Collectors.joining("<br>"));
+                String steps = String.join("<br>", d.getSteps());
+                String fqcn = String.join("<br>", d.getFqcn());
 
                 html.append("<tr>")
-                        .append("<td>").append(seq.getAndIncrement()).append("</td>")
-                        .append("<td>").append(id != null ? id.toString() : "N/A").append("</td>")
-                        .append("<td>").append(title).append("</td>")
-                        .append("<td style='color:").append(colorHex).append("; font-weight:bold;'>").append(statusText).append("</td>")
-                        .append("<td>").append(duration != null ? duration : "N/A").append("</td>")
-                        .append("<td>").append(expected).append("</td>")
-                        .append("<td>").append(priority).append("</td>")
-                        .append("<td>").append(module).append("</td>")
-                        .append("<td>").append(groups).append("</td>")
-                        .append("<td>").append(createdBy).append("</td>")
-                        .append("<td>").append(updatedBy).append("</td>")
-                        .append("<td>").append(createdAt).append("</td>")
-                        .append("<td>").append(updatedAt).append("</td>")
-                        .append("<td>").append(reference).append("</td>")
-                        .append("<td>").append(steps).append("</td>")
-                        .append("<td>").append(fqcn).append("</td>")
+                        .append(wrap(String.valueOf(seq.getAndIncrement()), "40px"))
+                        .append(wrap(id == null ? "" : id.toString(), "250px"))
+                        .append(wrap(d.getDescription(), "500px"))
+                        .append("<td style='color:").append(colorHex)
+                        .append("; font-weight:bold;'><div class='cell-content' style='max-width:100px;'>")
+                        .append(statusText).append("</div></td>")
+                        .append(wrap(duration, "100px"))
+                        .append(wrap(d.getExpectedResult(), "500px"))
+                        .append(wrap(d.getPriority().name(), "80px"))
+                        .append(wrap(d.getModule(), "150px"))
+                        .append(wrap(groups, "150px"))
+                        .append(wrap(d.getCreatedBy(), "150px"))
+                        .append(wrap(d.getUpdatedBy(), "150px"))
+                        .append(wrap(createdAt, "250px"))
+                        .append(wrap(updatedAt, "250px"))
+                        .append(wrap(d.getReference(), "150px"))
+                        .append(wrap(steps, "300px"))
+                        .append(wrap(fqcn, "250px"))
+                        .append(wrap("<a href='#'>Navigate</a>", "80px"))
                         .append("</tr>");
             });
         } else {
-            html.append("<tr><td colspan='16' style='text-align:center;'>No test results found.</td></tr>");
+            html.append("<tr><td colspan='17' style='text-align:center;'>No test results found.</td></tr>");
         }
 
-        html.append("</table></body></html>");
+        html.append("</table>");
+        html.append("</div>");
+        html.append("</body>");
+        html.append("</html>");
+
         return html.toString();
+    }
+
+    private String wrap(String content, String maxWidth) {
+        return "<td><div class='cell-content' style='max-width:" + maxWidth + ";'>" + content + "</div></td>";
     }
 }
