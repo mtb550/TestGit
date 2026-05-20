@@ -13,6 +13,7 @@ import org.testin.pojo.Config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CodeNavigator {
 
@@ -23,7 +24,6 @@ public class CodeNavigator {
         }
 
         final Project project = Config.getProject();
-        final String methodName = Tools.getInstance().toCamelCase(testCaseName);
 
         ApplicationManager.getApplication().executeOnPooledThread(() ->
                 ApplicationManager.getApplication().runReadAction(() -> {
@@ -37,20 +37,50 @@ public class CodeNavigator {
                         return;
                     }
 
-                    List<String> packageList = new ArrayList<>(cleanedFqcn);
-                    String baseClassName = packageList.removeLast();
-                    String expectedClassName = Tools.getInstance().toPascalCase(baseClassName);
+                    String methodName;
+                    String baseClassName;
 
+                    String targetMethodName = formatMethodName(testCaseName);
+
+                    if (cleanedFqcn.size() >= 2) {
+                        String last = cleanedFqcn.getLast();
+                        String secondToLast = cleanedFqcn.get(cleanedFqcn.size() - 2);
+
+                        if (secondToLast.toLowerCase().endsWith("test") || last.equalsIgnoreCase(targetMethodName)) {
+                            methodName = cleanedFqcn.remove(cleanedFqcn.size() - 1);
+                            baseClassName = cleanedFqcn.remove(cleanedFqcn.size() - 1);
+
+                        } else if (last.toLowerCase().endsWith("test")) {
+                            methodName = targetMethodName;
+                            baseClassName = cleanedFqcn.removeLast();
+
+                        } else {
+                            methodName = targetMethodName;
+                            baseClassName = cleanedFqcn.removeLast();
+                        }
+
+                    } else {
+                        baseClassName = cleanedFqcn.removeLast();
+                        methodName = targetMethodName;
+                    }
+
+                    String expectedClassName = Tools.getInstance().toPascalCase(baseClassName);
                     if (expectedClassName.toLowerCase().endsWith("test")) {
-                        if (expectedClassName.endsWith("test")) {
+                        if (!expectedClassName.endsWith("Test")) {
                             expectedClassName = expectedClassName.substring(0, expectedClassName.length() - 4) + "Test";
                         }
                     } else {
                         expectedClassName += "Test";
                     }
 
-                    String fqcnString = String.join(".", packageList).toLowerCase() + "." + expectedClassName;
+                    String packageName = cleanedFqcn.stream()
+                            .map(String::toLowerCase)
+                            .collect(Collectors.joining("."));
+
+                    String fqcnString = packageName.isEmpty() ? expectedClassName : packageName + "." + expectedClassName;
+
                     System.out.println("[NAVIGATOR] Searching for cleaned FQCN: " + fqcnString);
+                    System.out.println("[NAVIGATOR] Looking for method: " + methodName);
 
                     PsiClass targetClass = JavaPsiFacade.getInstance(project)
                             .findClass(fqcnString, GlobalSearchScope.projectScope(project));
@@ -59,9 +89,11 @@ public class CodeNavigator {
                         Navigatable targetElement = targetClass;
                         PsiMethod[] exactMethods = targetClass.findMethodsByName(methodName, false);
 
-                        if (exactMethods.length > 0) {
+                        if (exactMethods.length > 0)
                             targetElement = exactMethods[0];
-                        } else {
+
+                        else {
+
                             for (PsiMethod method : targetClass.getMethods()) {
                                 if (method.getName().equalsIgnoreCase(methodName)) {
                                     targetElement = method;
@@ -88,15 +120,36 @@ public class CodeNavigator {
 
     private List<String> sanitizeFqcn(List<String> rawFqcn) {
         List<String> sanitized = new ArrayList<>();
-        boolean startAdding = false;
         for (String part : rawFqcn) {
-            if (startAdding) {
-                if (!part.equalsIgnoreCase("testCases")) {
-                    sanitized.add(part.replace(" ", "").toLowerCase());
-                }
+            if (part.contains("/") || part.contains("\\")) {
+                continue;
             }
-            if (part.equalsIgnoreCase("testin")) startAdding = true;
+            if (!part.equalsIgnoreCase("testCases")) {
+                sanitized.add(part.replace(" ", ""));
+            }
         }
         return sanitized;
+    }
+
+    private String formatMethodName(String description) {
+        if (description == null || description.isEmpty()) return "testMethod";
+
+        String[] words = description.split("[^a-zA-Z0-9]+");
+        StringBuilder methodName = new StringBuilder();
+
+        for (String word : words) {
+            if (word.isEmpty()) continue;
+
+            if (methodName.isEmpty()) {
+                methodName.append(word.toLowerCase());
+            } else {
+                methodName.append(word.substring(0, 1).toUpperCase());
+                if (word.length() > 1) {
+                    methodName.append(word.substring(1).toLowerCase());
+                }
+            }
+        }
+
+        return methodName.toString();
     }
 }

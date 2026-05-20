@@ -68,7 +68,9 @@ public class TestSessionCache {
                                         notifyItemsLoaded(itemsToSend);
                                     }
                                 }
-                            } catch (final Exception ignored) {
+                            } catch (final Exception ex) {
+                                System.err.println("Unable to read test case file: " + filePath.toAbsolutePath());
+                                ex.printStackTrace(System.err);
                             }
                         });
 

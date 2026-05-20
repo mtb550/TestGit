@@ -21,6 +21,7 @@ import org.testin.util.services.TestCasePersistService;
 
 import javax.swing.*;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -55,12 +56,40 @@ public class CreateTestCase extends DumbAwareAction {
             final List<String> logicalPath = Tools.getInstance().extractLogicalPath(path);
             newTc.setPath(logicalPath);
 
-            final List<String> generatedFqcn = Tools.getInstance().generateFqcn(logicalPath);
-            newTc.setFqcn(generatedFqcn);
+            final Project project = Config.getProject();
+            final String projectName = project.getName();
 
+            List<String> generatedFqcn;
+            int startIndex = -1;
+
+            for (int i = 0; i < logicalPath.size(); i++) {
+                if (logicalPath.get(i).equalsIgnoreCase(projectName) || logicalPath.get(i).equalsIgnoreCase("testin")) {
+                    startIndex = i;
+                    break;
+                }
+            }
+
+            if (startIndex != -1 && startIndex + 1 < logicalPath.size())
+                generatedFqcn = new ArrayList<>(logicalPath.subList(startIndex + 1, logicalPath.size()));
+
+            else
+                generatedFqcn = new ArrayList<>(logicalPath);
+
+            if (!generatedFqcn.isEmpty()) {
+                int lastIdx = generatedFqcn.size() - 1;
+                String lastElement = generatedFqcn.get(lastIdx);
+                int dotIdx = lastElement.lastIndexOf('.');
+                if (dotIdx > 0) {
+                    generatedFqcn.set(lastIdx, lastElement.substring(0, dotIdx));
+                }
+            }
+
+            String methodName = formatMethodName(newTc.getDescription());
+            generatedFqcn.add(methodName);
+
+            newTc.setFqcn(generatedFqcn);
             ui.appendNewTestCase(newTc);
 
-            final Project project = Config.getProject();
             final List<TestCaseDto> affectedNodes = Stream.of(newTc, lastTc).filter(Objects::nonNull).toList();
             TestCaseCacheService.getInstance(project).addNewItems(affectedNodes);
             TestCasePersistService.getInstance(project).persist(path, affectedNodes);
@@ -80,6 +109,28 @@ public class CreateTestCase extends DumbAwareAction {
             //if (tree != null && parentNode != null) TreeUtilImpl.createNode(tree, parentNode, newTc);
 
         }).show();
+    }
+
+    private static String formatMethodName(String description) {
+        if (description == null || description.isEmpty()) return "testMethod";
+
+        String[] words = description.split("[^a-zA-Z0-9]+");
+        StringBuilder methodName = new StringBuilder();
+
+        for (String word : words) {
+            if (word.isEmpty()) continue;
+
+            if (methodName.isEmpty())
+                methodName.append(word.toLowerCase());
+
+            else {
+                methodName.append(word.substring(0, 1).toUpperCase());
+                if (word.length() > 1)
+                    methodName.append(word.substring(1).toLowerCase());
+
+            }
+        }
+        return methodName.toString();
     }
 
     @Override

@@ -89,7 +89,9 @@ public class RunSessionCache {
                                 } catch (final Exception ignored) {
                                 }
                             });
-                } catch (final Exception e) {
+                } catch (final Exception ex) {
+                    System.err.println("Unable to read test case file: " + dirPath.toAbsolutePath());
+                    ex.printStackTrace(System.err);
                     if (!isDisposed) System.err.println("Failed to load cases from: " + dirPath);
                 }
             }

@@ -15,6 +15,7 @@ import org.testin.util.Tools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CreateJavaMethodInClass {
 
@@ -26,21 +27,41 @@ public class CreateJavaMethodInClass {
                 List<String> cleanedFqcn = sanitizeFqcn(rawFqcn);
                 if (cleanedFqcn.isEmpty()) return;
 
+                String targetMethodName = formatMethodName(tc.getDescription());
+                String methodName;
+                String baseClassName;
                 List<String> packageList = new ArrayList<>(cleanedFqcn);
-                String baseClassName = packageList.removeLast();
-                String expectedClassName = Tools.getInstance().toPascalCase(baseClassName);
 
+                if (packageList.size() >= 2) {
+                    String last = packageList.getLast();
+                    String secondToLast = packageList.get(packageList.size() - 2);
+
+                    if (secondToLast.toLowerCase().endsWith("test") || last.equalsIgnoreCase(targetMethodName)) {
+                        methodName = packageList.removeLast();
+                        baseClassName = packageList.removeLast();
+                    } else if (last.toLowerCase().endsWith("test")) {
+                        methodName = targetMethodName;
+                        baseClassName = packageList.removeLast();
+                    } else {
+                        methodName = targetMethodName;
+                        baseClassName = packageList.removeLast();
+                    }
+                } else {
+                    baseClassName = packageList.removeLast();
+                    methodName = targetMethodName;
+                }
+
+                String expectedClassName = Tools.getInstance().toPascalCase(baseClassName);
                 if (expectedClassName.toLowerCase().endsWith("test")) {
-                    if (expectedClassName.endsWith("test")) {
+                    if (!expectedClassName.endsWith("Test")) {
                         expectedClassName = expectedClassName.substring(0, expectedClassName.length() - 4) + "Test";
                     }
                 } else {
                     expectedClassName += "Test";
                 }
 
-                String packageName = String.join(".", packageList).toLowerCase();
-                String fqcnString = packageName + "." + expectedClassName;
-                String methodName = Tools.getInstance().toCamelCase(tc.getDescription());
+                String packageName = packageList.stream().map(String::toLowerCase).collect(Collectors.joining("."));
+                String fqcnString = packageName.isEmpty() ? expectedClassName : packageName + "." + expectedClassName;
 
                 JavaPsiFacade psiFacade = JavaPsiFacade.getInstance(project);
                 GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
@@ -50,7 +71,7 @@ public class CreateJavaMethodInClass {
                 if (targetClass == null) {
                     VirtualFile sourceRoot = Tools.getInstance().getMainSourceRoot(project);
                     if (sourceRoot != null) {
-                        String relativePath = String.join("/", packageList);
+                        String relativePath = String.join("/", packageList).toLowerCase();
                         VirtualFile packageDir = VfsUtil.createDirectoryIfMissing(sourceRoot, relativePath);
 
                         if (packageDir != null) {
@@ -59,8 +80,12 @@ public class CreateJavaMethodInClass {
 
                             if (javaFile == null) {
                                 javaFile = packageDir.createChildData(this, fileName);
-                                String basePackage = String.join(".", packageList);
-                                String fileContent = "package " + basePackage + ";\n\npublic class " + expectedClassName + " {\n\n}\n";
+                                String fileContent;
+                                if (packageName.isEmpty()) {
+                                    fileContent = "public class " + expectedClassName + " {\n\n}\n";
+                                } else {
+                                    fileContent = "package " + packageName + ";\n\npublic class " + expectedClassName + " {\n\n}\n";
+                                }
                                 VfsUtil.saveText(javaFile, fileContent);
                                 javaFile.refresh(false, false);
                             }
@@ -87,7 +112,7 @@ public class CreateJavaMethodInClass {
         VirtualFile sourceRoot = Tools.getInstance().getMainSourceRoot(project);
         if (sourceRoot == null) return;
 
-        String relativePath = String.join("/", packageList) + "/" + className + ".java";
+        String relativePath = String.join("/", packageList).toLowerCase() + "/" + className + ".java";
         VirtualFile javaFile = sourceRoot.findFileByRelativePath(relativePath);
 
         if (javaFile != null) {
@@ -103,16 +128,36 @@ public class CreateJavaMethodInClass {
 
     private List<String> sanitizeFqcn(List<String> rawFqcn) {
         List<String> sanitized = new ArrayList<>();
-        boolean startAdding = false;
         for (String part : rawFqcn) {
-            if (startAdding) {
-                if (!part.equalsIgnoreCase("testCases")) {
-                    sanitized.add(part.replace(" ", "").toLowerCase());
-                }
+            if (part.contains("/") || part.contains("\\")) {
+                continue;
             }
-            if (part.equalsIgnoreCase("testin")) startAdding = true;
+            if (!part.equalsIgnoreCase("testCases")) {
+                sanitized.add(part.replace(" ", ""));
+            }
         }
         return sanitized;
+    }
+
+    private String formatMethodName(String description) {
+        if (description == null || description.isEmpty()) return "testMethod";
+
+        String[] words = description.split("[^a-zA-Z0-9]+");
+        StringBuilder methodName = new StringBuilder();
+
+        for (String word : words) {
+            if (word.isEmpty()) continue;
+
+            if (methodName.isEmpty()) {
+                methodName.append(word.toLowerCase());
+            } else {
+                methodName.append(word.substring(0, 1).toUpperCase());
+                if (word.length() > 1) {
+                    methodName.append(word.substring(1).toLowerCase());
+                }
+            }
+        }
+        return methodName.toString();
     }
 
     private void injectMethod(Project project, PsiClass targetClass, String methodName, TestCaseDto tc) {
@@ -171,5 +216,4 @@ public class CreateJavaMethodInClass {
             System.out.println("Injected method: " + methodName + " with Priority: " + tc.getPriority().getName());
         }
     }
-
 }
