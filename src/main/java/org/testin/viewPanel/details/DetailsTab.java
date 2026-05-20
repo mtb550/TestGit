@@ -77,7 +77,7 @@ public class DetailsTab {
         row = new Badges().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
         row = new ExpectedResult().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
         row = new Steps().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
-        row = new Fqcn().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
+        //row = new Fqcn().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
         row = new Referrence().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
         row = new Module().render(panel, (GridBagConstraints) gbc.clone(), dto, row);
         row = new CreatedBy().render(panel, (GridBagConstraints) gbc.clone(), dto, row);

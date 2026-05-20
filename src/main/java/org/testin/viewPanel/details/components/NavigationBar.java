@@ -54,7 +54,7 @@ public class NavigationBar extends BaseDetails {
         final JPanel pathPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pathPanel.setOpaque(false);
 
-        if (currentPath != null && Config.getProject() != null) {
+        if (currentPath != null) {
             final List<File> fileList = buildPathFileList(currentPath);
             for (int i = 0; i < fileList.size(); i++) {
                 final Project project = Config.getProject();
@@ -91,8 +91,8 @@ public class NavigationBar extends BaseDetails {
                             }
 
                             final TestSetDirectoryDto ts = new TestSetDirectoryDto();
-                            ts.setPath(file.toPath());
-                            ts.setName(file.getName());
+                            ts.setPath(file.toPath()); // todo, why set path here?
+                            ts.setName(file.getName()); // todo, why set name here ?
                             Tools.getInstance().openTestEditor(ts);
                         } else {
                             ProjectView.getInstance(project).select(null, vf, true);
@@ -125,21 +125,20 @@ public class NavigationBar extends BaseDetails {
     @NotNull
     private List<File> buildPathFileList(@NotNull final Path path) {
         final List<File> fileList = new ArrayList<>();
-        if (Config.getProject() == null) return fileList;
-
-        final String basePathString = Config.getProject().getBasePath();
+        final String projectName = Config.getProject().getName();
         File currentDir = path.toFile();
 
-        if (basePathString != null) {
-            final File baseDir = new File(basePathString);
-            while (currentDir != null && !currentDir.getAbsolutePath().equalsIgnoreCase(baseDir.getAbsolutePath())) {
-                fileList.addFirst(currentDir);
-                currentDir = currentDir.getParentFile();
-            }
-            fileList.addFirst(baseDir);
-        } else {
+        while (currentDir != null) {
             fileList.addFirst(currentDir);
+
+            final String dirName = currentDir.getName();
+            if (dirName.equalsIgnoreCase(projectName) || dirName.equalsIgnoreCase("testin")) {
+                break;
+            }
+
+            currentDir = currentDir.getParentFile();
         }
+
         return fileList;
     }
 
