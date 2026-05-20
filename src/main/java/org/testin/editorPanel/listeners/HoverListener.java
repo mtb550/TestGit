@@ -9,6 +9,7 @@ import org.testin.actions.RunTestCase;
 import org.testin.editorPanel.IEditorUI;
 import org.testin.editorPanel.testRunEditor.RunEditorUI;
 import org.testin.pojo.CardHoverAction;
+import org.testin.pojo.TestStatus;
 import org.testin.pojo.dto.TestCaseDto;
 
 import java.awt.*;
@@ -81,9 +82,20 @@ public class HoverListener extends MouseAdapter {
         if (action != null) {
             final TestCaseDto tc = list.getModel().getElementAt(index);
 
-            if (action == CardHoverAction.NAVIGATE) new NavigateToCode(list).execute(tc);
-            else if (action == CardHoverAction.RUN) new RunTestCase(list).execute(tc);
-            else System.out.println("Test Case [" + tc.getDescription() + "] updated to: " + action.name());
+            if (action == CardHoverAction.NAVIGATE) {
+                new NavigateToCode(list).execute(tc);
+            } else if (action == CardHoverAction.RUN) {
+                new RunTestCase(list).execute(tc);
+            } else {
+                try {
+                    TestStatus status = TestStatus.valueOf(action.name());
+                    if (ui instanceof RunEditorUI runUi) {
+                        runUi.handleManualStatusUpdate(tc, status);
+                    }
+                } catch (IllegalArgumentException ex) {
+                    System.out.println("Unknown action: " + action.name());
+                }
+            }
 
             e.consume();
         }

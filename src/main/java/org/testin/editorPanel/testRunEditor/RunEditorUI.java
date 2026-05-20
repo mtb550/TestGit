@@ -674,7 +674,41 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
             item.setExecutedAt(LocalDateTime.now());
         }
 
+        persistRunDataAsync();
         startTimerForIndex(currentlyExecutingIndex + 1);
+    }
+
+    public void handleManualStatusUpdate(final TestCaseDto tc, final TestStatus newStatus) {
+        TestRunDto.TestRunItems item = resultsMap.get(tc.getId());
+        if (item != null) {
+            item.setStatus(newStatus);
+            item.setExecutedAt(LocalDateTime.now());
+
+            int tcIndex = currentTestCaseDtos.indexOf(tc);
+            if (tcIndex != -1 && tcIndex == currentlyExecutingIndex) {
+                stopExecution();
+            }
+
+            if (list != null) {
+                list.repaint();
+            }
+
+            persistRunDataAsync();
+        }
+    }
+
+    private void persistRunDataAsync() {
+        if (metadata == null || vf.getDirectoryDto() == null) return;
+
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try {
+                Path dirPath = vf.getDirectoryDto().getPath();
+                File jsonFile = new File(dirPath.toFile(), metadata.getRunName());
+                Config.getMapper().writerWithDefaultPrettyPrinter().writeValue(jsonFile, metadata);
+            } catch (Exception e) {
+                System.err.println("Failed to persist test run data: " + e.getMessage());
+            }
+        });
     }
 
     private void stopExecution() {
