@@ -13,9 +13,11 @@ import org.testin.editorPanel.testCaseEditor.TestEditorUI;
 import org.testin.pojo.Config;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.ui.testCase.CreateTestCaseUI;
+import org.testin.util.Bundle;
 import org.testin.util.KeyboardSet;
 import org.testin.util.Tools;
 import org.testin.util.autoGenerator.CreateJavaMethodInClass;
+import org.testin.util.notifications.Notifier;
 import org.testin.util.services.TestCaseCacheService;
 import org.testin.util.services.TestCasePersistService;
 
@@ -63,7 +65,7 @@ public class CreateTestCase extends DumbAwareAction {
             int startIndex = -1;
 
             for (int i = 0; i < logicalPath.size(); i++) {
-                if (logicalPath.get(i).equalsIgnoreCase(projectName) || logicalPath.get(i).equalsIgnoreCase("testin")) {
+                if (logicalPath.get(i).equalsIgnoreCase(projectName) || logicalPath.get(i).equalsIgnoreCase(Bundle.getPluginName())) {
                     startIndex = i;
                     break;
                 }
@@ -92,6 +94,7 @@ public class CreateTestCase extends DumbAwareAction {
             final List<TestCaseDto> affectedNodes = Stream.of(newTc, lastTc).filter(Objects::nonNull).toList();
             TestCaseCacheService.getInstance(project).addNewItems(affectedNodes);
             TestCasePersistService.getInstance(project).persist(path, affectedNodes);
+            Notifier.getInstance().softShow("Created..");
 
             if (codeGenerator != null && codeGenerator.isSelected())
                 new CreateJavaMethodInClass().execute(project, newTc.getFqcn(), newTc);

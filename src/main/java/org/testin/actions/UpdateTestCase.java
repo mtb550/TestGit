@@ -13,6 +13,7 @@ import org.testin.pojo.dto.TestCaseDto;
 import org.testin.ui.testCase.TestCaseUpdateMenu;
 import org.testin.util.KeyboardSet;
 import org.testin.util.autoGenerator.GeneratorType;
+import org.testin.util.notifications.Notifier;
 import org.testin.util.services.TestCaseCacheService;
 import org.testin.util.services.TestCasePersistService;
 import org.testin.viewPanel.ViewPanel;
@@ -46,6 +47,7 @@ public class UpdateTestCase extends DumbAwareAction {
 
             TestCaseCacheService.getInstance(Config.getProject()).addNewItems(updatedItems);
             TestCasePersistService.getInstance(Config.getProject()).persist(path, updatedItems);
+            Notifier.getInstance().softShow("Updated..");
 
             ApplicationManager.getApplication().invokeLater(() -> {
                 list.repaint();

@@ -12,7 +12,7 @@ public class MyVfsListener implements BulkFileListener {
 /*        for (VFileEvent event : events) {
             VirtualFile file = event.getFile();
             if (file != null && file.isValid()) {
-                if (event.getPath().contains("testin")) {
+                if (event.getPath().contains(Bundle.getPluginName())) {
                     Config.setRootFolder();
                     break;
                 }

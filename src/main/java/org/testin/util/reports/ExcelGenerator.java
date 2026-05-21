@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.TestStatus;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.pojo.dto.TestRunDto;
+import org.testin.util.Bundle;
 import org.testin.util.Tools;
 
 import java.io.ByteArrayOutputStream;
@@ -17,7 +18,7 @@ public final class ExcelGenerator {
     public byte[] generate(final @NotNull TestRunDto tr, final Map<UUID, TestCaseDto> detailsMap) throws Exception {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 
-            Workbook wb = new Workbook(os, "testin", "1.0");
+            Workbook wb = new Workbook(os, Bundle.getPluginName(), "1.0");
             Worksheet ws = wb.newWorksheet("Test Run Report");
 
             ws.value(0, 0, "Test Run Report:");

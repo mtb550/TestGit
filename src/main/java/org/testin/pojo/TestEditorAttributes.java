@@ -22,6 +22,7 @@ public enum TestEditorAttributes {
 
     ID(
             "ID",
+            "ID:",
             true,
             false,
             false,
@@ -34,6 +35,7 @@ public enum TestEditorAttributes {
     /// TODO:: added to tool bar details, to be shown but disabled
     DESCRIPTION(
             "Description",
+            "Description:",
             true,
             true,
             true,
@@ -44,6 +46,7 @@ public enum TestEditorAttributes {
 
     EXPECTED_RESULT(
             "Expected Result",
+            "Expected Result:",
             true,
             true,
             true,
@@ -54,6 +57,7 @@ public enum TestEditorAttributes {
 
     STEPS(
             "Steps",
+            "Steps:",
             true,
             true,
             true,
@@ -64,6 +68,7 @@ public enum TestEditorAttributes {
 
     PRIORITY(
             "Priority",
+            "Priority:",
             true,
             true,
             true,
@@ -74,6 +79,7 @@ public enum TestEditorAttributes {
 
     FQCN(
             "FQCN",
+            "FQCN:",
             true,
             false,
             false,
@@ -85,6 +91,7 @@ public enum TestEditorAttributes {
 
     REFERENCE(
             "Reference",
+            "Reference:",
             true,
             false,
             true,
@@ -95,6 +102,7 @@ public enum TestEditorAttributes {
 
     GROUP(
             "Group",
+            "Group:",
             true,
             true,
             true,
@@ -105,6 +113,7 @@ public enum TestEditorAttributes {
 
     PATH(
             "Path",
+            "Path:",
             true,
             false,
             false,
@@ -118,6 +127,7 @@ public enum TestEditorAttributes {
 
     MODULE(
             "Module",
+            "Module:",
             true,
             false,
             true,
@@ -128,6 +138,7 @@ public enum TestEditorAttributes {
 
     STATUS(
             "Status",
+            "Status:",
             true,
             false,
             true,
@@ -138,6 +149,7 @@ public enum TestEditorAttributes {
 
     CREATE_BY(
             "Created By",
+            "Created By:",
             true,
             false,
             true,
@@ -148,6 +160,7 @@ public enum TestEditorAttributes {
 
     UPDATE_BY(
             "Updated By",
+            "Updated By:",
             true,
             false,
             true,
@@ -158,6 +171,7 @@ public enum TestEditorAttributes {
 
     CREATE_AT(
             "Created At",
+            "Created At:",
             true,
             false,
             true,
@@ -168,6 +182,7 @@ public enum TestEditorAttributes {
 
     UPDATE_AT(
             "Updated At",
+            "Updated At:",
             true,
             false,
             true,
@@ -177,6 +192,7 @@ public enum TestEditorAttributes {
     );
 
     private final String name;
+    private final String name2;
     private final boolean standardToolBarOption;
     private final boolean defaultToolBarSelected;
     private final boolean importValue;

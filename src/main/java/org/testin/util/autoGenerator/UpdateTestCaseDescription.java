@@ -7,7 +7,9 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.search.GlobalSearchScope;
+import org.testin.pojo.DirectoryType;
 import org.testin.pojo.dto.TestCaseDto;
+import org.testin.util.Bundle;
 import org.testin.util.Tools;
 
 import java.util.ArrayList;
@@ -89,11 +91,11 @@ public class UpdateTestCaseDescription {
         boolean startAdding = false;
         for (String part : rawFqcn) {
             if (startAdding) {
-                if (!part.equalsIgnoreCase("testCases")) {
+                if (!part.equalsIgnoreCase(DirectoryType.TCD.getPathName())) {
                     sanitized.add(part.replace(" ", "").toLowerCase());
                 }
             }
-            if (part.equalsIgnoreCase("testin")) startAdding = true;
+            if (part.equalsIgnoreCase(Bundle.getPluginName())) startAdding = true;
         }
         return sanitized;
     }

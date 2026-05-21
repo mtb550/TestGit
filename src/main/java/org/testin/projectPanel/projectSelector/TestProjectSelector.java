@@ -48,7 +48,7 @@ public class TestProjectSelector {
 
         testProjectList.removeAllElements();
 
-        Path root = Config.getTestinPath();
+        final Path root = Config.getTestinPath();
 
         if (root == null) return false;
 
@@ -64,6 +64,9 @@ public class TestProjectSelector {
                         .filter(Objects::nonNull)
                         //.filter(p -> p.getProjectStatus() == ProjectStatus.ACTIVE)
                         .forEach(testProjectList::addElement);
+
+                for (int i = 0; i < testProjectList.getSize(); i++) // todo, to be removed
+                    System.out.println("project name: " + testProjectList.getElementAt(i).getName() + ". path: " + testProjectList.getElementAt(i).getPath());
 
             } catch (Exception e) {
                 System.err.println("Error reading directory: " + e.getMessage());

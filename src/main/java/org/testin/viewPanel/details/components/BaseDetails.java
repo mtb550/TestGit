@@ -17,7 +17,6 @@ public abstract class BaseDetails {
     protected static final int LABEL_WIDTH = 255;
     protected static final float LABEL_FONT_SIZE = 20.0f;
     protected static final float VALUE_FONT_SIZE = 23.0f;
-    private static final String EMPTY_VALUE_PLACEHOLDER = "-";
     private static final int LABEL_INSETS_TOP = 12;
     private static final int LABEL_INSETS_LEFT = 16;
     private static final int LABEL_INSETS_BOTTOM = 12;
@@ -31,9 +30,10 @@ public abstract class BaseDetails {
 
     protected int addRow(@NotNull final JBPanel<?> panel, @NotNull final GridBagConstraints gbc, @NotNull final String labelText, @Nullable final String valueText, final int row) {
 
-        final String finalValue = (valueText == null || valueText.trim().isEmpty()) ? EMPTY_VALUE_PLACEHOLDER : valueText;
+        if (valueText == null || valueText.trim().isEmpty())
+            return row;
 
-        final JTextArea valueArea = new JTextArea(finalValue);
+        final JTextArea valueArea = new JTextArea(valueText);
         valueArea.setFont(JBFont.label().deriveFont(Font.PLAIN, VALUE_FONT_SIZE));
         valueArea.setLineWrap(true);
         valueArea.setWrapStyleWord(true);

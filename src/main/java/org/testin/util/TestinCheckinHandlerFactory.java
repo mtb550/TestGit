@@ -18,7 +18,7 @@ public class TestinCheckinHandlerFactory extends CheckinHandlerFactory {
                             String path = change.getAfterRevision() != null
                                     ? change.getAfterRevision().getFile().getPath()
                                     : "";
-                            return path.contains("testin");
+                            return path.contains(Bundle.getPluginName());
                         });
 
                 if (containsManagedFiles) {

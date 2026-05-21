@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import org.testin.pojo.Config;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
+import org.testin.util.Bundle;
 import org.testin.util.Tools;
 
 import javax.swing.*;
@@ -132,7 +133,7 @@ public class NavigationBar extends BaseDetails {
             fileList.addFirst(currentDir);
 
             final String dirName = currentDir.getName();
-            if (dirName.equalsIgnoreCase(projectName) || dirName.equalsIgnoreCase("testin")) {
+            if (dirName.equalsIgnoreCase(projectName) || dirName.equalsIgnoreCase(Bundle.getPluginName())) {
                 break;
             }
 

@@ -175,7 +175,7 @@ public class Tools {
         for (int i = 0; i < segments.length; i++) {
             String segment = segments[i];
 
-            if (segment.equals("testCases")) continue;
+            if (segment.equals(DirectoryType.TCD.getPathName())) continue;
 
             String[] parts = segment.split("_", 3); // todo, no need. to be removed _
             String rawName = (parts.length >= 2) ? parts[1] : segment;
@@ -211,7 +211,7 @@ public class Tools {
         List<String> logicalPath = new ArrayList<>();
 
         for (String segment : segments) {
-            if (segment.isEmpty() || segment.equals("testCases")) continue;
+            if (segment.isEmpty() || segment.equals(DirectoryType.TCD.getPathName())) continue;
 
             logicalPath.add(segment);
         }
@@ -230,7 +230,7 @@ public class Tools {
         for (int i = 0; i < storedPath.size(); i++) {
             String segment = storedPath.get(i);
 
-            if (segment == null || segment.isEmpty() || segment.equals("testCases")) continue;
+            if (segment == null || segment.isEmpty() || segment.equals(DirectoryType.TCD.getPathName())) continue;
 
             String formattedName = toCamelCase(segment);
 
@@ -452,7 +452,7 @@ public class Tools {
 
             for (int i = 0; i < relativePath.getNameCount(); i++) {
                 String nodeName = relativePath.getName(i).toString();
-                if (nodeName.equals(tcdName) || nodeName.equalsIgnoreCase("testcases")) {
+                if (nodeName.equals(tcdName) || nodeName.equalsIgnoreCase(DirectoryType.TCD.getPathName())) {
                     testCasesIndex = i;
                     break;
                 }
@@ -631,7 +631,7 @@ public class Tools {
             if (part.contains("/") || part.contains("\\")) {
                 continue;
             }
-            if (!part.equalsIgnoreCase("testCases")) {
+            if (!part.equalsIgnoreCase(DirectoryType.TCD.getPathName())) {
                 sanitized.add(part.replace(" ", ""));
             }
         }

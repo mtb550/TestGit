@@ -9,12 +9,16 @@ public class DirectoryMapper {
     public static TestProjectDirectoryDto testProjectNode(final Path path) {
         try {
             TestCasesMainDirectoryDto tcd = new TestCasesMainDirectoryDto()
-                    .setPath(path.resolve("testCases"))
-                    .setName("Test Cases");
+                    .setPath(path.resolve(DirectoryType.TCD.getPathName()))
+                    .setName(DirectoryType.TCD.getDisplayedName());
+
+            System.out.println("test case project path: " + tcd.getPath());
 
             TestRunsMainDirectoryDto trd = new TestRunsMainDirectoryDto()
-                    .setPath(path.resolve("testRuns"))
-                    .setName("Test Runs");
+                    .setPath(path.resolve(DirectoryType.TRD.getPathName()))
+                    .setName(DirectoryType.TRD.getDisplayedName());
+
+            System.out.println("test run project path: " + tcd.getPath());
 
             return new TestProjectDirectoryDto()
                     .setTestCasesDirectory(tcd)

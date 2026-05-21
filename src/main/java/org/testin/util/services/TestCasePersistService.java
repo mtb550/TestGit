@@ -48,8 +48,6 @@ public final class TestCasePersistService implements Disposable {
                     VfsUtil.saveText(targetFile, jsonContent);
                 }
 
-                Notifier.getInstance().info("Test Case Created", tcs.getFirst().getDescription());
-
             } catch (IOException e) {
                 Notifier.getInstance().error("Save Error", "Failed to persist data: " + e.getMessage());
             }

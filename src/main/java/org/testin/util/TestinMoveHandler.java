@@ -15,7 +15,7 @@ public class TestinMoveHandler {
 
         for (Change change : manager.getDefaultChangeList().getChanges()) {
             String path = ChangesUtil.getFilePath(change).getPath();
-            if (path.contains("testin")) {
+            if (path.contains(Bundle.getPluginName())) {
                 manager.moveChangesTo(automationList, change);
             }
         }

@@ -2,6 +2,8 @@ package org.testin.util.reports;
 
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
+import org.testin.pojo.RunEditorAttributes;
+import org.testin.pojo.TestEditorAttributes;
 import org.testin.pojo.TestStatus;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.pojo.dto.TestRunDto;
@@ -33,23 +35,23 @@ public final class HtmlGenerator {
         html.append("<p><strong>Status:</strong> ").append(tr.getStatus().name()).append("</p>");
 
         html.append("<div class='table-container'><table><tr>")
-                .append("<th id='col-seq'>#</th>")
-                .append("<th id='col-id'>ID</th>")
-                .append("<th id='col-description'>Description</th>")
-                .append("<th id='col-status'>Status</th>")
-                .append("<th id='col-duration'>Duration</th>")
-                .append("<th id='col-expected'>Expected Result</th>")
-                .append("<th id='col-priority'>Priority</th>")
-                .append("<th id='col-module'>Module</th>")
-                .append("<th id='col-groups'>Groups</th>")
-                .append("<th id='col-created-by'>Created By</th>")
-                .append("<th id='col-updated-by'>Updated By</th>")
-                .append("<th id='col-created-at'>Created At</th>")
-                .append("<th id='col-updated-at'>Updated At</th>")
-                .append("<th id='col-reference'>Reference</th>")
-                .append("<th id='col-steps'>Steps</th>")
-                .append("<th id='col-fqcn'>FQCN</th>")
-                .append("<th id='col-code'>Code</th>")
+                .append("<th class='col-seq'>#</th>")
+                .append(String.format("<th class='col-id'>%s</th>", TestEditorAttributes.ID.getName()))
+                .append(String.format("<th class='col-description'>%s</th>", TestEditorAttributes.DESCRIPTION.getName()))
+                .append(String.format("<th class='col-status'>%s</th>", RunEditorAttributes.RUN_STATUS.getName()))
+                .append(String.format("<th class='col-duration'>%s</th>", RunEditorAttributes.DURATION.getName()))
+                .append(String.format("<th class='col-expected'>%s</th>", TestEditorAttributes.EXPECTED_RESULT.getName()))
+                .append(String.format("<th class='col-priority'>%s</th>", TestEditorAttributes.PRIORITY.getName()))
+                .append(String.format("<th class='col-module'>%s</th>", TestEditorAttributes.MODULE.getName()))
+                .append(String.format("<th class='col-groups'>%s</th>", TestEditorAttributes.GROUP.getName()))
+                .append(String.format("<th class='col-created-by'>%s</th>", TestEditorAttributes.CREATE_BY.getName()))
+                .append(String.format("<th class='col-updated-by'>%s</th>", TestEditorAttributes.UPDATE_BY.getName()))
+                .append(String.format("<th class='col-created-at'>%s</th>", TestEditorAttributes.CREATE_AT.getName()))
+                .append(String.format("<th class='col-updated-at'>%s</th>", TestEditorAttributes.UPDATE_AT.getName()))
+                .append(String.format("<th class='col-reference'>%s</th>", TestEditorAttributes.REFERENCE.getName()))
+                .append(String.format("<th class='col-steps'>%s</th>", TestEditorAttributes.STEPS.getName()))
+                .append(String.format("<th class='col-fqcn'>%s</th>", TestEditorAttributes.FQCN.getName()))
+                .append("<th class='col-code'>Code</th>")
                 .append("</tr>");
 
         if (!tr.getResults().isEmpty()) {
@@ -105,7 +107,7 @@ public final class HtmlGenerator {
         if (status == null) return cell("col-status", "", "100px");
 
         String colorHex = "#" + status.getHex();
-        return "<td id='col-status' style='color:" + colorHex + "; font-weight:bold;'>" +
+        return "<td class='col-status' style='color:" + colorHex + "; font-weight:bold;'>" +
                 "<div class='cell-content' style='max-width:100px;'>" + status.name() + "</div>" +
                 "</td>";
     }
@@ -115,9 +117,9 @@ public final class HtmlGenerator {
         return cell("col-duration", formatted, "100px");
     }
 
-    private String dateCell(final String colId, final ZonedDateTime dateTime) {
+    private String dateCell(final String colClass, final ZonedDateTime dateTime) {
         String formatted = dateTime != null ? dateTime.format(Config.getDateFormatterPattern()) : "";
-        return cell(colId, formatted, "250px");
+        return cell(colClass, formatted, "250px");
     }
 
     private String groupsCell(final List<? extends Enum<?>> groups) {
@@ -135,8 +137,8 @@ public final class HtmlGenerator {
         return cell("col-fqcn", content, "250px");
     }
 
-    private String cell(final String colId, final String content, final String maxWidth) {
-        return "<td id='" + colId + "'>" +
+    private String cell(final String colClass, final String content, final String maxWidth) {
+        return "<td class='" + colClass + "'>" +
                 "<div class='cell-content' style='max-width:" + maxWidth + ";'>" + content + "</div>" +
                 "</td>";
     }

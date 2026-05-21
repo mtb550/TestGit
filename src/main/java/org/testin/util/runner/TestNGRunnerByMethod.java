@@ -16,6 +16,8 @@ import com.theoryinpractice.testng.configuration.TestNGConfigurationType;
 import com.theoryinpractice.testng.model.TestType;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
+import org.testin.pojo.DirectoryType;
+import org.testin.util.Bundle;
 import org.testin.util.Tools;
 
 import java.util.ArrayList;
@@ -95,11 +97,11 @@ public class TestNGRunnerByMethod {
         boolean startAdding = false;
         for (String part : rawFqcn) {
             if (startAdding) {
-                if (!part.equalsIgnoreCase("testCases")) {
+                if (!part.equalsIgnoreCase(DirectoryType.TCD.getPathName())) {
                     sanitized.add(part.replace(" ", "").toLowerCase());
                 }
             }
-            if (part.equalsIgnoreCase("testin")) startAdding = true;
+            if (part.equalsIgnoreCase(Bundle.getPluginName())) startAdding = true;
         }
         return sanitized;
     }

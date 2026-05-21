@@ -41,7 +41,31 @@ public class Notifier {
 
             final Balloon balloon = JBPopupFactory.getInstance()
                     .createHtmlTextBalloonBuilder(htmlContent, MessageType.INFO, null)
-                    .setFadeoutTime(4000)
+                    .setFadeoutTime(5000)
+                    .setAnimationCycle(200)
+                    .createBalloon();
+
+            final Point targetPoint = new Point(statusBarComponent.getWidth() - 30, statusBarComponent.getHeight() / 2);
+            final RelativePoint relativePoint = new RelativePoint(statusBarComponent, targetPoint);
+
+            balloon.show(relativePoint, Balloon.Position.above);
+        });
+    }
+
+    public void softShow(@NotNull final String message) {
+
+        SwingUtilities.invokeLater(() -> {
+            IdeFrame ideFrame = WindowManager.getInstance().getIdeFrame(Config.getProject());
+            if (ideFrame == null || ideFrame.getStatusBar() == null) return;
+
+            final JComponent statusBarComponent = ideFrame.getStatusBar().getComponent();
+            if (statusBarComponent == null) return;
+
+            final String htmlContent = String.format("<html>%s</html>", message);
+
+            final Balloon balloon = JBPopupFactory.getInstance()
+                    .createHtmlTextBalloonBuilder(htmlContent, MessageType.INFO, null)
+                    .setFadeoutTime(5000)
                     .setAnimationCycle(200)
                     .createBalloon();
 
