@@ -149,6 +149,13 @@ public class Tools {
         return fqcn;
     }
 
+    public List<String> appendFqcn(final List<String> parentFqcn, final String fileName) {
+        List<String> newFqcn = new ArrayList<>(parentFqcn.size() + 1);
+        newFqcn.addAll(parentFqcn);
+        newFqcn.add(fileName);
+        return newFqcn;
+    }
+
     public List<String> getTestSourceRootFqcn() {
         Project project = Config.getProject();
         List<String> sourceRootFqcn = new ArrayList<>();

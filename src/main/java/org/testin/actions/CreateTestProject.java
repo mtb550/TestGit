@@ -70,20 +70,27 @@ public class CreateTestProject extends DumbAwareAction {
             // todo, cover all regex -> dots, slashes ..etc
             String processedName = name.replace("_", " ");
 
-            TestProjectDirectoryDto newTestProjectDirectory = new TestProjectDirectoryDto().setName(processedName);
+            TestProjectDirectoryDto newTestProjectDirectory = TestProjectDirectoryDto
+                    .builder()
+                    .name(processedName)
+                    .build();
 
             String folderName = newTestProjectDirectory.getName();
             Path projectPath = Config.getTestinPath().resolve(folderName);
-            newTestProjectDirectory.setPathName(folderName).setPath(projectPath);
+            newTestProjectDirectory.setPathName(folderName);
+            newTestProjectDirectory.setPath(projectPath);
 
-            newTestProjectDirectory
-                    .setTestCasesDirectory(new TestCasesMainDirectoryDto()
-                            .setPath(newTestProjectDirectory.getPath().resolve(DirectoryType.TCD.getPathName()))
-                            .setName(DirectoryType.TCD.getDisplayedName()))
+            newTestProjectDirectory.setTestCasesDirectory(TestCasesMainDirectoryDto
+                    .builder()
+                    .path(newTestProjectDirectory.getPath().resolve(DirectoryType.TCD.getPathName()))
+                    .name(DirectoryType.TCD.getDisplayedName())
+                    .build());
 
-                    .setTestRunsDirectory(new TestRunsMainDirectoryDto()
-                            .setPath(newTestProjectDirectory.getPath().resolve(DirectoryType.TRD.getPathName()))
-                            .setName(DirectoryType.TRD.getDisplayedName()));
+            newTestProjectDirectory.setTestRunsDirectory(TestRunsMainDirectoryDto
+                    .builder()
+                    .path(newTestProjectDirectory.getPath().resolve(DirectoryType.TRD.getPathName()))
+                    .name(DirectoryType.TRD.getDisplayedName())
+                    .build());
 
             TreeUtilImpl.executeVfsAction(Config.getTestinPath(), "IO Error", vf -> {
 

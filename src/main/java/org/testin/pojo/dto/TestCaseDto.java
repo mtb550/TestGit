@@ -25,6 +25,8 @@ import java.util.UUID;
 @Accessors(chain = true)
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
+@ToString()
+// todo, use @SuperBuilder
 public class TestCaseDto {
 
     private UUID next;

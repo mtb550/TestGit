@@ -57,11 +57,10 @@ public class Rename extends DumbAwareAction {
         TreeUtilImpl.executeVfsAction(oldPath, "Rename Failed", vf -> {
             vf.rename(this, newName);
 
-            dir.setName(newName)
-                    .setName(newName)
-                    .setPath(newPath)
-                    .setModifiedAt(LocalDateTime.now())
-                    .setModifiedBy("Muteb almughyiri");
+            dir.setName(newName);
+            dir.setPath(newPath);
+            dir.setModifiedAt(LocalDateTime.now());
+            dir.setModifiedBy("Muteb almughyiri");
 
             Tools.getInstance().updateChildrenPathsRecursive(node, oldPath, newPath);
             ((DefaultTreeModel) tree.getModel()).nodeChanged(node);

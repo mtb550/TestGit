@@ -20,9 +20,11 @@ public class TestRunTreeBuilder extends AbstractTreeBuilder {
     }
 
     @Override
-    protected DirectoryDto mapPathToDirectory(final Path path) {
-        if (Files.exists(path.resolve(DirectoryType.TRP.getMarker()))) return DirectoryMapper.testRunPackageNode(path);
-        if (Files.exists(path.resolve(DirectoryType.TR.getMarker()))) return DirectoryMapper.testRunNode(path);
+    protected DirectoryDto mapPathToDirectory(final Path path, final DirectoryDto parentDir) {
+        if (Files.exists(path.resolve(DirectoryType.TRP.getMarker())))
+            return DirectoryMapper.testRunPackageNode(path, parentDir);
+        if (Files.exists(path.resolve(DirectoryType.TR.getMarker())))
+            return DirectoryMapper.testRunNode(path, parentDir);
         return null;
     }
 }

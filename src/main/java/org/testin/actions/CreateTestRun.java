@@ -30,9 +30,11 @@ public class CreateTestRun implements NodeCreator {
         TestRunDto metadata = new TestRunDto();
         metadata.setStatus(TestRunStatus.CREATED);
 
-        TestRunDirectoryDto tr = new TestRunDirectoryDto()
-                .setName(name)
-                .setPath(newDirPath);
+        TestRunDirectoryDto tr = TestRunDirectoryDto
+                .builder()
+                .name(name)
+                .path(newDirPath)
+                .build();
 
         TreeUtilImpl.createVf(this, parentDir.getPath(), name);
         TreeUtilImpl.createDataVf(this, newDirPath, DirectoryType.TR.getMarker());
@@ -42,7 +44,7 @@ public class CreateTestRun implements NodeCreator {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             final Path testCasesPath = tp.getTestCasesDirectory().getPath();
 
-            final DefaultTreeModel fullModel = new DefaultTreeModel(buildDirectoryTree(testCasesPath, true));
+            final DefaultTreeModel fullModel = new DefaultTreeModel(buildDirectoryTree(testCasesPath, true, parentDir));
 
             final UnifiedVirtualFile virtualFile = new UnifiedVirtualFile(
                     tr,
@@ -60,10 +62,10 @@ public class CreateTestRun implements NodeCreator {
         });
     }
 
-    private DefaultMutableTreeNode buildDirectoryTree(final Path folder, final boolean isRoot) {
+    private DefaultMutableTreeNode buildDirectoryTree(final Path folder, final boolean isRoot, DirectoryDto parentDir) {
         final Object label = isRoot
                 ? "Test Cases (" + folder.getParent().getFileName().toString() + ")"
-                : resolveDirectoryObject(folder);
+                : resolveDirectoryObject(folder, parentDir);
 
         final DefaultMutableTreeNode node = new DefaultMutableTreeNode(label);
 
@@ -76,8 +78,7 @@ public class CreateTestRun implements NodeCreator {
                             .thenComparing(p -> p.getFileName().toString().toLowerCase()))
                     .forEach(child -> {
                         if (Files.isDirectory(child)) {
-                            // استدعاء الدالة لنفسها إذا وجدنا مجلدًا فرعيًا
-                            node.add(buildDirectoryTree(child, false));
+                            node.add(buildDirectoryTree(child, false, parentDir));
                         } else if (child.toString().endsWith(".json")) {
                             try {
                                 final TestCaseDto tc = Config.getMapper().readValue(child.toFile(), TestCaseDto.class);
@@ -95,12 +96,12 @@ public class CreateTestRun implements NodeCreator {
         return node;
     }
 
-    private Object resolveDirectoryObject(final Path folder) {
+    private Object resolveDirectoryObject(final Path folder, DirectoryDto parentDir) {
         if (Files.exists(folder.resolve(DirectoryType.TSP.getMarker())))
-            return DirectoryMapper.testSetPackageNode(folder);
+            return DirectoryMapper.testSetPackageNode(folder, parentDir);
 
         if (Files.exists(folder.resolve(DirectoryType.TS.getMarker())))
-            return DirectoryMapper.testSetNode(folder);
+            return DirectoryMapper.testSetNode(folder, parentDir);
 
         return folder.getFileName().toString();
     }

@@ -18,12 +18,12 @@ public abstract class AbstractTreeBuilder {
     @Getter
     protected DefaultMutableTreeNode rootNode;
 
-    public AbstractTreeBuilder(ProjectPanel projectPanel) {
+    public AbstractTreeBuilder(final ProjectPanel projectPanel) {
         this.projectPanel = projectPanel;
         this.rootNode = new DefaultMutableTreeNode("loading..");
     }
 
-    public void buildTree(DirectoryDto rootDirectoryDto) {
+    public void buildTree(final DirectoryDto rootDirectoryDto) {
         DefaultMutableTreeNode localRoot = new DefaultMutableTreeNode(rootDirectoryDto);
 
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
@@ -31,7 +31,7 @@ public abstract class AbstractTreeBuilder {
 
             if (Files.exists(rootPath) && Files.isDirectory(rootPath)) {
                 try (Stream<Path> paths = Files.list(rootPath)) {
-                    paths.map(this::mapPathToDirectory)
+                    paths.map(path -> mapPathToDirectory(path, rootDirectoryDto))
                             .filter(Objects::nonNull)
                             .forEachOrdered(dir -> localRoot.add(buildNodeRecursive(dir)));
 
@@ -50,13 +50,13 @@ public abstract class AbstractTreeBuilder {
         });
     }
 
-    private DefaultMutableTreeNode buildNodeRecursive(@NotNull DirectoryDto dir) {
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode(dir);
-        Path currentPath = dir.getPath();
+    private DefaultMutableTreeNode buildNodeRecursive(@NotNull final DirectoryDto currentDir) {
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(currentDir);
+        Path currentPath = currentDir.getPath();
 
         if (Files.exists(currentPath) && Files.isDirectory(currentPath)) {
             try (Stream<Path> paths = Files.list(currentPath)) {
-                paths.map(this::mapPathToDirectory)
+                paths.map(path -> mapPathToDirectory(path, currentDir))
                         .filter(Objects::nonNull)
                         .forEachOrdered(childDir -> node.add(buildNodeRecursive(childDir)));
 
@@ -68,5 +68,5 @@ public abstract class AbstractTreeBuilder {
         return node;
     }
 
-    protected abstract DirectoryDto mapPathToDirectory(Path path);
+    protected abstract DirectoryDto mapPathToDirectory(final Path path, final DirectoryDto parentDir);
 }

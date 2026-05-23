@@ -1,8 +1,11 @@
 package org.testin.pojo.dto;
 
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString()
+// todo, use @SuperBuilder
 public class VersionDto {
     private int id;
 

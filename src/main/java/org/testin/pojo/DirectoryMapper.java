@@ -5,72 +5,62 @@ import org.testin.util.Tools;
 import org.testin.util.notifications.Notifier;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public class DirectoryMapper {
-    // todo, why static!!
+    // todo, why static!! use getInstance()
     public static TestProjectDirectoryDto testProjectNode(final Path path) {
+        final String fileName = path.getFileName().toString();
         try {
-            TestCasesMainDirectoryDto tcd = new TestCasesMainDirectoryDto()
-                    .setPath(path.resolve(DirectoryType.TCD.getPathName()))
-                    .setName(DirectoryType.TCD.getDisplayedName());
+            final TestProjectDirectoryDto testProjectDirectoryDto = TestProjectDirectoryDto.builder()
+                    .name(fileName)
+                    .path(path)
+                    .pathName(fileName)
+                    .fqcn(List.of(fileName))
+                    //.projectStatus(ProjectStatus.valueOf(parts[1])) // todo, to be moved to .pr file
+                    .build();
 
-            System.out.println("test case project path: " + tcd.getPath());
+            TestCasesMainDirectoryDto tcd = TestCasesMainDirectoryDto.builder()
+                    .path(path.resolve(DirectoryType.TCD.getPathName()))
+                    .name(DirectoryType.TCD.getDisplayedName())
+                    .fqcn(List.of(fileName, DirectoryType.TCD.getPathName()))
+                    .parent(testProjectDirectoryDto)
+                    .build();
 
-            TestRunsMainDirectoryDto trd = new TestRunsMainDirectoryDto()
-                    .setPath(path.resolve(DirectoryType.TRD.getPathName()))
-                    .setName(DirectoryType.TRD.getDisplayedName());
+            TestRunsMainDirectoryDto trd = TestRunsMainDirectoryDto.builder()
+                    .path(path.resolve(DirectoryType.TRD.getPathName()))
+                    .name(DirectoryType.TRD.getDisplayedName())
+                    .fqcn(List.of(fileName, DirectoryType.TRD.getPathName()))
+                    .parent(testProjectDirectoryDto)
+                    .build();
 
-            System.out.println("test run project path: " + trd.getPath());
+            testProjectDirectoryDto.setTestCasesDirectory(tcd);
+            testProjectDirectoryDto.setTestRunsDirectory(trd);
 
-            return new TestProjectDirectoryDto()
-                    .setTestCasesDirectory(tcd)
-                    .setTestRunsDirectory(trd)
-                    .setName(path.getFileName().toString())
-                    //.setProjectStatus(ProjectStatus.valueOf(parts[1])) // todo, to be moved to .pr file with date created and created by and modified by. modifed at.
-                    .setPath(path)
-                    .setPathName(path.getFileName().toString());
+            System.out.println("retrieve the project directory: " + testProjectDirectoryDto);
+            return testProjectDirectoryDto;
 
         } catch (Exception e) {
-            Notifier.getInstance().error("Read Test Project Failed", "Skipping invalid format: " + path.getFileName().toString());
+            Notifier.getInstance().error("Read Test Project Failed", "Skipping invalid format: " + fileName);
             System.err.println(e.getMessage());
             e.printStackTrace(System.err);
             return null;
         }
     }
 
-    public static TestCasesMainDirectoryDto testCasesRootNode(Path path) {
+    public static TestCasesMainDirectoryDto testCasesRootNode(final Path path, final TestProjectDirectoryDto parent) {
+        final String fileName = path.getFileName().toString();
         try {
-            return new TestCasesMainDirectoryDto()
-                    .setName(path.getFileName().toString())
-                    .setPath(path);
+            TestCasesMainDirectoryDto testCasesMainDirectoryDto = TestCasesMainDirectoryDto
+                    .builder()
+                    .name(path.getFileName().toString())
+                    .path(path)
+                    .parent(parent)
+                    .fqcn(Tools.getInstance().appendFqcn(parent.getFqcn(), fileName))
+                    .build();
 
-        } catch (Exception e) {
-            Notifier.getInstance().error("Read Test Case Package Failed", "Failed to parse directory: " + path.getFileName());
-            System.err.println(e.getMessage());
-            e.printStackTrace(System.err);
-            return null;
-        }
-    }
-
-    public static TestRunsMainDirectoryDto testRunsRootNode(Path path) {
-        try {
-            return new TestRunsMainDirectoryDto()
-                    .setName(path.getFileName().toString())
-                    .setPath(path);
-
-        } catch (Exception e) {
-            Notifier.getInstance().error("Read Test Case Package Failed", "Failed to parse directory: " + path.getFileName());
-            System.err.println(e.getMessage());
-            e.printStackTrace(System.err);
-            return null;
-        }
-    }
-
-    public static TestSetPackageDirectoryDto testSetPackageNode(Path path) {
-        try {
-            return new TestSetPackageDirectoryDto()
-                    .setName(path.getFileName().toString())
-                    .setPath(path);
+            System.out.println("retrieve the test cases main directory: " + testCasesMainDirectoryDto);
+            return testCasesMainDirectoryDto;
 
         } catch (Exception e) {
             Notifier.getInstance().error("Read Test Case Package Failed", "Failed to parse directory: " + path.getFileName());
@@ -80,11 +70,63 @@ public class DirectoryMapper {
         }
     }
 
-    public static TestRunPackageDirectoryDto testRunPackageNode(Path path) {
+    public static TestRunsMainDirectoryDto testRunsRootNode(final Path path, final TestProjectDirectoryDto parent) {
+        final String fileName = path.getFileName().toString();
         try {
-            return new TestRunPackageDirectoryDto()
-                    .setName(path.getFileName().toString())
-                    .setPath(path);
+            TestRunsMainDirectoryDto testRunsMainDirectoryDto = TestRunsMainDirectoryDto
+                    .builder()
+                    .name(path.getFileName().toString())
+                    .path(path)
+                    .parent(parent)
+                    .fqcn(Tools.getInstance().appendFqcn(parent.getFqcn(), fileName))
+                    .build();
+
+            System.out.println("retrieve the test runs main directory: " + testRunsMainDirectoryDto);
+            return testRunsMainDirectoryDto;
+
+        } catch (Exception e) {
+            Notifier.getInstance().error("Read Test Case Package Failed", "Failed to parse directory: " + path.getFileName());
+            System.err.println(e.getMessage());
+            e.printStackTrace(System.err);
+            return null;
+        }
+    }
+
+    public static TestSetPackageDirectoryDto testSetPackageNode(final Path path, final DirectoryDto parent) {
+        final String fileName = path.getFileName().toString();
+        try {
+            TestSetPackageDirectoryDto testSetPackageDirectoryDto = TestSetPackageDirectoryDto
+                    .builder()
+                    .name(fileName)
+                    .path(path)
+                    .parent(parent)
+                    .fqcn(Tools.getInstance().appendFqcn(parent.getFqcn(), fileName))
+                    .build();
+
+            System.out.println("retrieve the test set package directory: " + testSetPackageDirectoryDto);
+            return testSetPackageDirectoryDto;
+
+        } catch (Exception e) {
+            Notifier.getInstance().error("Read Test Case Package Failed", "Failed to parse directory: " + path.getFileName());
+            System.err.println(e.getMessage());
+            e.printStackTrace(System.err);
+            return null;
+        }
+    }
+
+    public static TestRunPackageDirectoryDto testRunPackageNode(final Path path, final DirectoryDto parent) {
+        final String fileName = path.getFileName().toString();
+        try {
+            TestRunPackageDirectoryDto testRunPackageDirectoryDto = TestRunPackageDirectoryDto
+                    .builder()
+                    .name(fileName)
+                    .path(path)
+                    .parent(parent)
+                    .fqcn(Tools.getInstance().appendFqcn(parent.getFqcn(), fileName))
+                    .build();
+
+            System.out.println("retrieve the test run package directory: " + testRunPackageDirectoryDto);
+            return testRunPackageDirectoryDto;
 
         } catch (Exception e) {
             Notifier.getInstance().error("Read Test Run Package Failed", "Failed to parse directory: " + path.getFileName());
@@ -94,12 +136,19 @@ public class DirectoryMapper {
         }
     }
 
-    public static TestSetDirectoryDto testSetNode(Path path) {
+    public static TestSetDirectoryDto testSetNode(final Path path, final DirectoryDto parent) {
+        final String fileName = path.getFileName().toString();
         try {
-            return new TestSetDirectoryDto()
-                    .setName(path.getFileName().toString())
-                    .setPath(path)
-                    .setFqcn(Tools.getInstance().getTestSetFqcn(path));
+            TestSetDirectoryDto testSetDirectoryDto = TestSetDirectoryDto
+                    .builder()
+                    .name(fileName)
+                    .path(path)
+                    .parent(parent)
+                    .fqcn(Tools.getInstance().appendFqcn(parent.getFqcn(), fileName))
+                    .build();
+
+            System.out.println("retrieve the test set directory: " + testSetDirectoryDto);
+            return testSetDirectoryDto;
 
         } catch (Exception e) {
             Notifier.getInstance().error("Read Test Set Failed", "Failed to parse directory: " + path.getFileName());
@@ -109,11 +158,19 @@ public class DirectoryMapper {
         }
     }
 
-    public static TestRunDirectoryDto testRunNode(Path path) {
+    public static TestRunDirectoryDto testRunNode(final Path path, final DirectoryDto parent) {
+        final String fileName = path.getFileName().toString();
         try {
-            return new TestRunDirectoryDto()
-                    .setName(path.getFileName().toString())
-                    .setPath(path);
+            TestRunDirectoryDto testRunDirectoryDto = TestRunDirectoryDto
+                    .builder()
+                    .name(fileName)
+                    .path(path)
+                    .parent(parent)
+                    .fqcn(Tools.getInstance().appendFqcn(parent.getFqcn(), fileName))
+                    .build();
+
+            System.out.println("retrieve the test run directory: " + testRunDirectoryDto);
+            return testRunDirectoryDto;
 
         } catch (Exception e) {
             Notifier.getInstance().error("Read Test Run Failed", "Failed to parse directory: " + path.getFileName());

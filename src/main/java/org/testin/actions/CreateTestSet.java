@@ -20,9 +20,11 @@ public class CreateTestSet implements NodeCreator {
 
     @Override
     public void execute(final CreateTestNode action, final Project project, final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath) {
-        TestSetDirectoryDto newTestSetDirectory = new TestSetDirectoryDto()
-                .setName(name)
-                .setPath(parentDir.getPath().resolve(name));
+        TestSetDirectoryDto newTestSetDirectory = TestSetDirectoryDto
+                .builder()
+                .name(name)
+                .path(parentDir.getPath().resolve(name))
+                .build();
 
         TreeUtilImpl.createVf(this, parentDir.getPath(), newTestSetDirectory.getName());
         TreeUtilImpl.createDataVf(this, newDirPath, DirectoryType.TS.getMarker());
@@ -42,9 +44,11 @@ public class CreateTestSet implements NodeCreator {
             sheetDir = targetDirectory.createChildDirectory(requestor, safeDirName);
             isNewDirCreated = true;
 
-            TestSetDirectoryDto newTsDto = new TestSetDirectoryDto()
-                    .setName(safeDirName)
-                    .setPath(parentDirDto.getPath().resolve(safeDirName));
+            TestSetDirectoryDto newTsDto = TestSetDirectoryDto
+                    .builder()
+                    .name(safeDirName)
+                    .path(parentDirDto.getPath().resolve(safeDirName))
+                    .build();
 
             TreeUtilImpl.createNode(tree, parentNode, newTsDto);
             Tools.getInstance().createJavaClassInTestRoot(Config.getProject(), parentDirDto.getName(), safeDirName);
