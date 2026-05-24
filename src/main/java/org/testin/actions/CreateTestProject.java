@@ -8,10 +8,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
 import org.testin.pojo.CreateNodeMenu;
+import org.testin.pojo.DirectoryMapper;
 import org.testin.pojo.DirectoryType;
-import org.testin.pojo.dto.dirs.TestCasesMainDirectoryDto;
 import org.testin.pojo.dto.dirs.TestProjectDirectoryDto;
-import org.testin.pojo.dto.dirs.TestRunsMainDirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
 import org.testin.ui.createNodes.CreateNodesDialog;
 import org.testin.util.TreeUtilImpl;
@@ -28,30 +27,15 @@ public class CreateTestProject extends DumbAwareAction {
         this.projectPanel = projectPanel;
     }
 
-    private String extractProjectNameFromUrl(String gitUrl) {
+    private String extractProjectNameFromUrl(final String gitUrl) {
         String name = gitUrl;
-
-        // Remove trailing slash if present
-        if (name.endsWith("/")) {
-            name = name.substring(0, name.length() - 1);
-        }
-
-        // Remove .git extension if present
-        if (name.endsWith(".git")) {
-            name = name.substring(0, name.length() - 4);
-        }
-
-        // Find the last slash (works for https) or colon (works for ssh)
+        if (name.endsWith("/")) name = name.substring(0, name.length() - 1);
+        if (name.endsWith(".git")) name = name.substring(0, name.length() - 4);
         int lastSlashIndex = name.lastIndexOf('/');
         int lastColonIndex = name.lastIndexOf(':');
-
         int splitIndex = Math.max(lastSlashIndex, lastColonIndex);
-
-        if (splitIndex != -1 && splitIndex < name.length() - 1) {
-            return name.substring(splitIndex + 1);
-        }
-
-        return "ImportedTestProject"; // Fallback if URL is malformed
+        if (splitIndex != -1 && splitIndex < name.length() - 1) return name.substring(splitIndex + 1);
+        return "ImportedTestProject";
     }
 
     public void execute() {
@@ -61,36 +45,20 @@ public class CreateTestProject extends DumbAwareAction {
             if (directoryType == DirectoryType.IMPORT_TP) {
                 String gitUrl = name.trim();
                 String projectName = extractProjectNameFromUrl(gitUrl);
-
                 new CloneProject(gitUrl, projectName, Config.getTestinPath(), projectPanel).execute();
                 return;
             }
 
-
             // todo, cover all regex -> dots, slashes ..etc
-            String processedName = name.replace("_", " ");
-
-            TestProjectDirectoryDto newTestProjectDirectory = TestProjectDirectoryDto
-                    .builder()
-                    .name(processedName)
-                    .build();
-
-            String folderName = newTestProjectDirectory.getName();
+            String folderName = name.trim();
             Path projectPath = Config.getTestinPath().resolve(folderName);
-            newTestProjectDirectory.setPathName(folderName);
-            newTestProjectDirectory.setPath(projectPath);
 
-            newTestProjectDirectory.setTestCasesDirectory(TestCasesMainDirectoryDto
-                    .builder()
-                    .path(newTestProjectDirectory.getPath().resolve(DirectoryType.TCD.getPathName()))
-                    .name(DirectoryType.TCD.getDisplayedName())
-                    .build());
+            TestProjectDirectoryDto newTestProjectDirectory = DirectoryMapper.getInstance().testProjectNode(projectPath);
 
-            newTestProjectDirectory.setTestRunsDirectory(TestRunsMainDirectoryDto
-                    .builder()
-                    .path(newTestProjectDirectory.getPath().resolve(DirectoryType.TRD.getPathName()))
-                    .name(DirectoryType.TRD.getDisplayedName())
-                    .build());
+            if (newTestProjectDirectory == null) {
+                Notifier.getInstance().error("Creation Failed", "Could not map test project directory in memory.");
+                return;
+            }
 
             TreeUtilImpl.executeVfsAction(Config.getTestinPath(), "IO Error", vf -> {
 
@@ -108,10 +76,10 @@ public class CreateTestProject extends DumbAwareAction {
                 projectDir.refresh(false, true);
                 projectPanel.getTestProjectSelector().addTestProject(newTestProjectDirectory);
 
-                Notifier.getInstance().info("New Test Project", String.format("Test Project %s has been added", processedName));
+                Notifier.getInstance().info("New Test Project", String.format("Test Project %s has been added", name));
 
                 if (codeGenerator.isSelected()) {
-                    GeneratorType.CREATE_TEST_PROJECT.getAction().execute(Config.getProject(), processedName, null);
+                    GeneratorType.CREATE_TEST_PROJECT.getAction().execute(name /*todo, name to be sanitized*/, null);
                 }
             });
         }
@@ -125,9 +93,8 @@ public class CreateTestProject extends DumbAwareAction {
 
     @Override
     public void update(final @NotNull AnActionEvent e) {
-        if (e.getProject() == null || Config.getTestinPath() == null) {
+        if (e.getProject() == null || Config.getTestinPath() == null)
             e.getPresentation().setEnabled(false);
-        }
     }
 
     @Override

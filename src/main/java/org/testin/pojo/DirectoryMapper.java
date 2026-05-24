@@ -8,8 +8,17 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class DirectoryMapper {
-    // todo, why static!! use getInstance()
-    public static TestProjectDirectoryDto testProjectNode(final Path path) {
+
+    private static final DirectoryMapper INSTANCE = new DirectoryMapper();
+
+    private DirectoryMapper() {
+    }
+
+    public static DirectoryMapper getInstance() {
+        return INSTANCE;
+    }
+
+    public TestProjectDirectoryDto testProjectNode(final Path path) { // todo, path is Testin path , no need to pass the path here.
         final String fileName = path.getFileName().toString();
         try {
             final TestProjectDirectoryDto testProjectDirectoryDto = TestProjectDirectoryDto.builder()
@@ -48,7 +57,7 @@ public class DirectoryMapper {
         }
     }
 
-    public static TestCasesMainDirectoryDto testCasesRootNode(final Path path, final TestProjectDirectoryDto parent) {
+    public TestCasesMainDirectoryDto testCasesRootNode(final Path path, final TestProjectDirectoryDto parent) {
         final String fileName = path.getFileName().toString();
         try {
             TestCasesMainDirectoryDto testCasesMainDirectoryDto = TestCasesMainDirectoryDto
@@ -70,7 +79,7 @@ public class DirectoryMapper {
         }
     }
 
-    public static TestRunsMainDirectoryDto testRunsRootNode(final Path path, final TestProjectDirectoryDto parent) {
+    public TestRunsMainDirectoryDto testRunsRootNode(final Path path, final TestProjectDirectoryDto parent) {
         final String fileName = path.getFileName().toString();
         try {
             TestRunsMainDirectoryDto testRunsMainDirectoryDto = TestRunsMainDirectoryDto
@@ -92,7 +101,7 @@ public class DirectoryMapper {
         }
     }
 
-    public static TestSetPackageDirectoryDto testSetPackageNode(final Path path, final DirectoryDto parent) {
+    public TestSetPackageDirectoryDto testSetPackageNode(final Path path, final DirectoryDto parent) {
         final String fileName = path.getFileName().toString();
         try {
             TestSetPackageDirectoryDto testSetPackageDirectoryDto = TestSetPackageDirectoryDto
@@ -114,7 +123,7 @@ public class DirectoryMapper {
         }
     }
 
-    public static TestRunPackageDirectoryDto testRunPackageNode(final Path path, final DirectoryDto parent) {
+    public TestRunPackageDirectoryDto testRunPackageNode(final Path path, final DirectoryDto parent) {
         final String fileName = path.getFileName().toString();
         try {
             TestRunPackageDirectoryDto testRunPackageDirectoryDto = TestRunPackageDirectoryDto
@@ -136,7 +145,7 @@ public class DirectoryMapper {
         }
     }
 
-    public static TestSetDirectoryDto testSetNode(final Path path, final DirectoryDto parent) {
+    public TestSetDirectoryDto testSetNode(final Path path, final DirectoryDto parent) {
         final String fileName = path.getFileName().toString();
         try {
             TestSetDirectoryDto testSetDirectoryDto = TestSetDirectoryDto
@@ -158,7 +167,7 @@ public class DirectoryMapper {
         }
     }
 
-    public static TestRunDirectoryDto testRunNode(final Path path, final DirectoryDto parent) {
+    public TestRunDirectoryDto testRunNode(final Path path, final DirectoryDto parent) {
         final String fileName = path.getFileName().toString();
         try {
             TestRunDirectoryDto testRunDirectoryDto = TestRunDirectoryDto

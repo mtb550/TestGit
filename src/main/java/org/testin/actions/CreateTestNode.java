@@ -7,7 +7,6 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import org.testin.pojo.Config;
 import org.testin.pojo.DirectoryType;
 import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.pojo.dto.dirs.TestProjectDirectoryDto;
@@ -62,13 +61,13 @@ public class CreateTestNode extends DumbAwareAction {
             if (codeGenerator != null && codeGenerator.isSelected() && directoryType != null && directoryType.getAction() != null) {
                 if (directoryType == DirectoryType.TSP) {
                     System.out.println("Selected directory type: " + directoryType);
-                    GeneratorType.CREATE_TEST_SET_PACKAGE.getAction().execute(Config.getProject(), javaPackageName, path);
+                    GeneratorType.CREATE_TEST_SET_PACKAGE.getAction().execute(javaPackageName, path);
                     return;
                 }
 
                 if (directoryType == DirectoryType.TS) {
                     System.out.println("Selected directory type: " + directoryType);
-                    GeneratorType.CREATE_TEST_SET.getAction().execute(Config.getProject(), javaPackageName, path);
+                    GeneratorType.CREATE_TEST_SET.getAction().execute(javaPackageName, path);
                     return;
                 }
 

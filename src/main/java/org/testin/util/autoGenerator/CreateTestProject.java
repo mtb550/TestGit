@@ -2,11 +2,11 @@ package org.testin.util.autoGenerator;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.testin.pojo.Config;
 import org.testin.util.Tools;
 
 import javax.swing.tree.TreePath;
@@ -14,7 +14,7 @@ import javax.swing.tree.TreePath;
 public class CreateTestProject implements GeneratorAction {
 
     @Override
-    public void execute(final @NotNull Project project, final @NotNull String targetName, final @Nullable TreePath path) {
+    public void execute(final @NotNull String targetName, final @Nullable TreePath path) {
         if (targetName.isEmpty()) return;
 
         ApplicationManager.getApplication().invokeLater(() -> ApplicationManager.getApplication().runWriteAction(() -> {
@@ -24,7 +24,7 @@ public class CreateTestProject implements GeneratorAction {
 
                     String safePackageName = Tools.getInstance().toCamelCase(targetName);
 
-                    VirtualFile sourceRoot = Tools.getInstance().getTestSourceRoot(project);
+                    VirtualFile sourceRoot = Tools.getInstance().getTestSourceRoot(Config.getProject());
 
                     if (sourceRoot != null) {
                         VirtualFile newPackage = VfsUtil.createDirectoryIfMissing(sourceRoot, safePackageName);

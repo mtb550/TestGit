@@ -210,7 +210,7 @@ public class AppSettingsConfigurable implements Configurable {
                 try (Stream<Path> paths = Files.list(rootPath)) {
                     paths.filter(Files::isDirectory)
                             //.filter(path -> path.getFileName().toString().startsWith("PR_"))
-                            .map(DirectoryMapper::testProjectNode)
+                            .map(DirectoryMapper.getInstance()::testProjectNode)
                             .filter(Objects::nonNull)
                             .forEach(testProjectList::addElement);
 

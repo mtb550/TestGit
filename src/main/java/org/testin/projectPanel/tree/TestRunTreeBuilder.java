@@ -15,16 +15,16 @@ public class TestRunTreeBuilder extends AbstractTreeBuilder {
         super(projectPanel);
     }
 
-    public void buildTree(TestProjectDirectoryDto selectedTestProjectDirectory) {
+    public void buildTree(final TestProjectDirectoryDto selectedTestProjectDirectory) {
         super.buildTree(selectedTestProjectDirectory.getTestRunsDirectory());
     }
 
     @Override
     protected DirectoryDto mapPathToDirectory(final Path path, final DirectoryDto parentDir) {
         if (Files.exists(path.resolve(DirectoryType.TRP.getMarker())))
-            return DirectoryMapper.testRunPackageNode(path, parentDir);
+            return DirectoryMapper.getInstance().testRunPackageNode(path, parentDir);
         if (Files.exists(path.resolve(DirectoryType.TR.getMarker())))
-            return DirectoryMapper.testRunNode(path, parentDir);
+            return DirectoryMapper.getInstance().testRunNode(path, parentDir);
         return null;
     }
 }

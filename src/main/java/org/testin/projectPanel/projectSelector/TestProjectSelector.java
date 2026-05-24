@@ -60,7 +60,7 @@ public class TestProjectSelector {
                         .filter(path -> !path.getFileName().toString().startsWith("."))
                         .filter(path -> Files.exists(path.resolve(DirectoryType.TP.getMarker())))
                         .peek(path -> System.out.println(path.getFileName().toString())) // todo to be removed.
-                        .map(DirectoryMapper::testProjectNode)
+                        .map(DirectoryMapper.getInstance()::testProjectNode)
                         .filter(Objects::nonNull)
                         //.filter(p -> p.getProjectStatus() == ProjectStatus.ACTIVE) // todo, to be moved to .tp marker
                         .forEach(testProjectList::addElement);

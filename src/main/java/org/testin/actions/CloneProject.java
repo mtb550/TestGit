@@ -24,7 +24,7 @@ public class CloneProject extends DumbAwareAction {
     private final Path targetPath;
     private final ProjectPanel projectPanel;
 
-    public CloneProject(String gitUrl, String projectName, Path targetPath, ProjectPanel projectPanel) {
+    public CloneProject(final String gitUrl, final String projectName, final Path targetPath, final ProjectPanel projectPanel) {
         super("Clone Git Project", "Import an existing test project from Git", AllIcons.Vcs.Clone);
         this.gitUrl = gitUrl;
         this.projectName = projectName;
@@ -33,7 +33,7 @@ public class CloneProject extends DumbAwareAction {
     }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public void actionPerformed(@NotNull final AnActionEvent e) {
         execute();
     }
 

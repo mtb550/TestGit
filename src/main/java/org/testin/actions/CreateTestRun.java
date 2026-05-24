@@ -98,10 +98,10 @@ public class CreateTestRun implements NodeCreator {
 
     private Object resolveDirectoryObject(final Path folder, DirectoryDto parentDir) {
         if (Files.exists(folder.resolve(DirectoryType.TSP.getMarker())))
-            return DirectoryMapper.testSetPackageNode(folder, parentDir);
+            return DirectoryMapper.getInstance().testSetPackageNode(folder, parentDir);
 
         if (Files.exists(folder.resolve(DirectoryType.TS.getMarker())))
-            return DirectoryMapper.testSetNode(folder, parentDir);
+            return DirectoryMapper.getInstance().testSetNode(folder, parentDir);
 
         return folder.getFileName().toString();
     }
