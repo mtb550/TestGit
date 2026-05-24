@@ -29,10 +29,10 @@ public class UnifiedVirtualFile extends LightVirtualFile {
     private EditorType editorType;
 
     // Test Set
-    public UnifiedVirtualFile(final TestSetDirectoryDto directory, final List<TestCaseDto> testCaseDtos) {
+    public UnifiedVirtualFile(final TestSetDirectoryDto directory, final List<TestCaseDto> testCases) {
         super(directory.getName());
         this.directoryDto = directory;
-        this.testCaseDtos = testCaseDtos;
+        this.testCaseDtos = testCases;
         this.setFileType(FileType.TEST_CASE);
     }
 
@@ -53,7 +53,7 @@ public class UnifiedVirtualFile extends LightVirtualFile {
     }
 
     public TestSetDirectoryDto getTestSet() {
-        return directoryDto instanceof TestSetDirectoryDto ? (TestSetDirectoryDto) directoryDto : null;
+        return directoryDto instanceof TestSetDirectoryDto ts ? ts : null;
     }
 
 }
