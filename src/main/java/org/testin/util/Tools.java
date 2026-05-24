@@ -1,7 +1,6 @@
 package org.testin.util;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
@@ -18,14 +17,12 @@ import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jps.model.java.JavaSourceRootType;
-import org.testin.editorPanel.UnifiedVirtualFile;
 import org.testin.pojo.Config;
 import org.testin.pojo.DirectoryType;
 import org.testin.pojo.Group;
 import org.testin.pojo.Priority;
 import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.pojo.dto.dirs.TestProjectDirectoryDto;
-import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
 import org.testin.settings.AppSettingsState;
 import org.testin.util.notifications.Notifier;
 
@@ -41,8 +38,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -391,32 +390,6 @@ public class Tools {
         return pathStr;
     }
 
-    public boolean isEditorOpen(final String editorName) {
-        FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
-        VirtualFile[] openFiles = editorManager.getOpenFiles();
-
-        for (VirtualFile file : openFiles) {
-            if (editorName.equals(file.getName())) {
-                editorManager.openFile(file, true);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public void closeEditor(final String editorName) {
-        FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
-        VirtualFile[] openFiles = editorManager.getOpenFiles();
-
-        for (VirtualFile file : openFiles) {
-            if (editorName.equals(file.getName())) {
-                editorManager.closeFile(file);
-                break;
-            }
-        }
-    }
-
     public void updateChildrenPathsRecursive(final DefaultMutableTreeNode parentNode, final Path oldParentPath, final Path newParentPath) {
         for (int i = 0; i < parentNode.getChildCount(); i++) {
             DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) parentNode.getChildAt(i);
@@ -646,41 +619,6 @@ public class Tools {
                 );
             }
         });
-    }
-
-    public void closeThenOpenTestEditor(final VirtualFile targetDirectory, final TestSetDirectoryDto ts) {
-        if (targetDirectory == null || ts == null) return;
-
-        final Project project = Config.getProject();
-        final FileEditorManager editorManager = FileEditorManager.getInstance(project);
-
-        ApplicationManager.getApplication().invokeLater(() -> {
-            VirtualFile fileToOpen = null;
-
-            for (VirtualFile openFile : editorManager.getOpenFiles()) {
-                if (openFile.getName().equals(targetDirectory.getName())) {
-                    fileToOpen = openFile;
-                    editorManager.closeFile(openFile);
-                    break;
-                }
-            }
-
-            if (fileToOpen == null) {
-                openTestEditor(ts);
-                return;
-            }
-
-            editorManager.openFile(fileToOpen, true);
-        });
-    }
-
-    public void openTestEditor(final TestSetDirectoryDto ts) {
-        final UnifiedVirtualFile newVirtualFile = new UnifiedVirtualFile(ts, new ArrayList<>());
-
-        ApplicationManager.getApplication().invokeLater(() ->
-                Optional.ofNullable(FileEditorManager.getInstance(Config.getProject()))
-                        .ifPresent(editorManager -> editorManager.openFile(newVirtualFile, true))
-        );
     }
 
     public String sanitizeDescription(final String rawDesc) {

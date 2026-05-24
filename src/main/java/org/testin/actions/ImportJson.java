@@ -23,7 +23,7 @@ import org.testin.pojo.dto.dirs.TestCasesMainDirectoryDto;
 import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
 import org.testin.pojo.dto.dirs.TestSetPackageDirectoryDto;
 import org.testin.ui.ExcelPreviewDialog;
-import org.testin.util.Tools;
+import org.testin.util.EditorUtil;
 import org.testin.util.notifications.Notifier;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -171,7 +171,7 @@ public class ImportJson extends DumbAwareAction {
 
                                     linkAndSaveTestCases(targetDirectory, flatList, tail, mapper, ImportJson.this);
 
-                                    Tools.getInstance().closeThenOpenTestEditor(targetDirectory, ts);
+                                    EditorUtil.getInstance().closeThenOpenTestSetEditor(targetDirectory, ts);
                                     Notifier.getInstance().info("Import Complete", "Successfully imported " + flatList.size() + " test cases.");
 
                                 } else {

@@ -8,6 +8,7 @@ import org.testin.pojo.DirectoryType;
 import org.testin.pojo.NodeCreator;
 import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
+import org.testin.util.EditorUtil;
 import org.testin.util.Tools;
 import org.testin.util.TreeUtilImpl;
 
@@ -31,7 +32,7 @@ public class CreateTestSet implements NodeCreator {
         TreeUtilImpl.createNode(action.getTree(), parentNode, newTestSetDirectory);
 
         Tools.getInstance().createJavaClassInTestRoot(project, parentDir.getName(), name);
-        Tools.getInstance().openTestEditor(newTestSetDirectory);
+        EditorUtil.getInstance().openTestSetEditor(newTestSetDirectory);
     }
 
     public VirtualFile inBackground(final Object requestor, final VirtualFile targetDirectory, final DirectoryDto parentDirDto, final DefaultMutableTreeNode parentNode, final SimpleTree tree, final String name) throws IOException {

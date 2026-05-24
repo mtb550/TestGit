@@ -1,5 +1,7 @@
 package org.testin.pojo;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.testin.pojo.dto.dirs.*;
 import org.testin.util.Tools;
 import org.testin.util.notifications.Notifier;
@@ -7,12 +9,10 @@ import org.testin.util.notifications.Notifier;
 import java.nio.file.Path;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DirectoryMapper {
 
     private static final DirectoryMapper INSTANCE = new DirectoryMapper();
-
-    private DirectoryMapper() {
-    }
 
     public static DirectoryMapper getInstance() {
         return INSTANCE;

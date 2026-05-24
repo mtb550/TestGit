@@ -15,7 +15,7 @@ import org.testin.pojo.Config;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
 import org.testin.util.Bundle;
-import org.testin.util.Tools;
+import org.testin.util.EditorUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -87,14 +87,14 @@ public class NavigationBar extends BaseDetails {
                         if (vf == null) return;
 
                         if (isTestSet) {
-                            if (Tools.getInstance().isEditorOpen(file.getName())) {
+                            if (EditorUtil.getInstance().isEditorOpen(file.getName())) {
                                 return;
                             }
 
                             final TestSetDirectoryDto ts = new TestSetDirectoryDto();
                             ts.setPath(file.toPath()); // todo, why set path here?
                             ts.setName(file.getName()); // todo, why set name here ?
-                            Tools.getInstance().openTestEditor(ts);
+                            EditorUtil.getInstance().openTestSetEditor(ts);
                         } else {
                             ProjectView.getInstance(project).select(null, vf, true);
                         }

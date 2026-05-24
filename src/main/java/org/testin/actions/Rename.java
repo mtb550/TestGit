@@ -13,6 +13,7 @@ import org.testin.pojo.dto.dirs.TestCasesMainDirectoryDto;
 import org.testin.pojo.dto.dirs.TestProjectDirectoryDto;
 import org.testin.pojo.dto.dirs.TestRunsMainDirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
+import org.testin.util.EditorUtil;
 import org.testin.util.KeyboardSet;
 import org.testin.util.Tools;
 import org.testin.util.TreeUtilImpl;
@@ -49,7 +50,7 @@ public class Rename extends DumbAwareAction {
         String newName = Messages.showInputDialog("Enter new name:", "Rename", AllIcons.Actions.Edit, dir.getName(), null);
         if (newName == null || newName.isBlank() || newName.equals(dir.getName())) return;
 
-        Tools.getInstance().closeEditor(dir.getName());
+        EditorUtil.getInstance().closeEditor(dir.getName());
 
         Path oldPath = dir.getPath();
         Path newPath = oldPath.getParent().resolve(newName);

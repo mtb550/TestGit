@@ -10,9 +10,8 @@ import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.pojo.dto.dirs.TestRunDirectoryDto;
 import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
+import org.testin.util.EditorUtil;
 import org.testin.util.KeyboardSet;
-import org.testin.util.Tools;
-import org.testin.util.notifications.Notifier;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -22,7 +21,7 @@ public class Open extends DumbAwareAction {
     private final SimpleTree tree;
 
     public Open(final ProjectPanel projectPanel, final SimpleTree tree) {
-        super("Open", "Open selected test set", AllIcons.Actions.MenuOpen);
+        super("Open", "Open selected test sets or runs", AllIcons.Actions.MenuOpen);
         this.projectPanel = projectPanel;
         this.tree = tree;
 
@@ -30,29 +29,30 @@ public class Open extends DumbAwareAction {
     }
 
     public void execute() {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-        if (node == null) return;
+        TreePath[] paths = tree.getSelectionPaths();
+        if (paths == null) return;
 
-        if (node.getUserObject() instanceof DirectoryDto pkg) {
-            if (Tools.getInstance().isEditorOpen(pkg.getName())) {
-                System.out.println("Editor already open, focusing: " + pkg.getName());
-                return;
+        for (TreePath path : paths) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+            if (node == null) continue;
+            if (!(node.getUserObject() instanceof DirectoryDto directoryDto)) return;
+
+
+            if (directoryDto instanceof TestSetDirectoryDto ts) {
+                System.out.println("open test set: " + ts.getPath());
+                EditorUtil.getInstance().openTestSetEditorIfNotOpen(ts);
+                continue;
+
             }
 
-            System.out.println("Opening Test Set: " + pkg.getPath());
-            if (pkg instanceof TestSetDirectoryDto ts) {
-                Tools.getInstance().openTestEditor(ts);
-                return;
+            if (directoryDto instanceof TestRunDirectoryDto tr) {
+                System.out.println("open test run: " + tr.getPath());
+                new OpenTestRun(tr, projectPanel).execute(); // todo, not matched with open test set above, to be unified by create new action: open test set
             }
 
-            if (pkg instanceof TestRunDirectoryDto tr) {
-                new OpenTestRun(tr, projectPanel).execute();
-                return;
-            }
-
-            Notifier.getInstance().softShow("unknown node", "unable to open " + pkg.getName());
         }
     }
+
 
     @Override
     public void actionPerformed(final @NotNull AnActionEvent e) {
@@ -61,14 +61,21 @@ public class Open extends DumbAwareAction {
 
     @Override
     public void update(final @NotNull AnActionEvent e) {
-        TreePath path = tree.getSelectionPath();
+        TreePath[] paths = tree.getSelectionPaths();
+        boolean shouldEnable = false;
 
-        boolean shouldEnable = (path != null &&
-                path.getLastPathComponent() instanceof DefaultMutableTreeNode node &&
-                (node.getUserObject() instanceof TestSetDirectoryDto ||
-                        node.getUserObject() instanceof TestRunDirectoryDto));
+        if (paths != null) {
+            for (TreePath path : paths) {
+                if (path.getLastPathComponent() instanceof DefaultMutableTreeNode node) {
+                    Object userObject = node.getUserObject();
+                    if (userObject instanceof TestSetDirectoryDto || userObject instanceof TestRunDirectoryDto) {
+                        shouldEnable = true;
+                        break;
+                    }
+                }
+            }
+        }
 
-        e.getPresentation().setVisible(true);
         e.getPresentation().setEnabled(shouldEnable);
     }
 

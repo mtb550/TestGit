@@ -8,7 +8,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.dto.dirs.*;
-import org.testin.util.Tools;
+import org.testin.util.EditorUtil;
 import org.testin.util.TreeUtilImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -60,7 +60,7 @@ public class Remove extends DumbAwareAction {
                 DirectoryDto pkg = (DirectoryDto) node.getUserObject();
 
                 if (pkg instanceof TestSetDirectoryDto || pkg instanceof TestRunDirectoryDto)
-                    Tools.getInstance().closeEditor(pkg.getName());
+                    EditorUtil.getInstance().closeEditor(pkg.getName());
 
                 TreeUtilImpl.removeVf(this, pkg.getPath());
                 TreeUtilImpl.removeNode(node, tree);

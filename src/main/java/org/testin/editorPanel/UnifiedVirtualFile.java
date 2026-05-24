@@ -28,7 +28,7 @@ public class UnifiedVirtualFile extends LightVirtualFile {
     private TestRunDto metadata;
     private EditorType editorType;
 
-    // Test Case
+    // Test Set
     public UnifiedVirtualFile(final TestSetDirectoryDto directory, final List<TestCaseDto> testCaseDtos) {
         super(directory.getName());
         this.directoryDto = directory;
