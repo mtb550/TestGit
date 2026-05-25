@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 public class RunSessionCache {
 
-    private final TestRunDto metadata;
+    private final TestRunDto tr;
 
     private final List<TestCaseDto> loadedItems = Collections.synchronizedList(new ArrayList<>());
 
@@ -24,8 +24,8 @@ public class RunSessionCache {
 
     private volatile boolean isDisposed = false;
 
-    public RunSessionCache(final TestRunDto metadata) {
-        this.metadata = metadata;
+    public RunSessionCache(final TestRunDto tr) {
+        this.tr = tr;
     }
 
     public List<TestCaseDto> getLoadedItems() {
@@ -44,7 +44,7 @@ public class RunSessionCache {
     }
 
     public void startLoadingAsync() {
-        if (metadata == null || metadata.getTestCase().isEmpty()) {
+        if (tr == null || tr.getTestCase().isEmpty()) {
             notifyLoadComplete(Collections.emptyList());
             return;
         }
@@ -53,7 +53,7 @@ public class RunSessionCache {
             final List<TestCaseDto> batch = new ArrayList<>();
             final int BATCH_SIZE = 5;
 
-            for (final TestRunDto.TestCase tcPathObj : metadata.getTestCase()) {
+            for (final TestRunDto.TestCase tcPathObj : tr.getTestCase()) {
                 if (isDisposed) break;
 
                 final Path dirPath = tcPathObj.getPath();

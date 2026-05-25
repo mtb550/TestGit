@@ -47,7 +47,7 @@ public class KeyListener extends KeyAdapter {
             final List<TestCaseDto> selectedCases = list.getSelectedValuesList();
 
             if (selectedCases != null && !selectedCases.isEmpty()) {
-                ui.getAllTestCaseDtos().removeAll(selectedCases);
+                ui.getAllTestCases().removeAll(selectedCases);
                 ui.refreshView();
 
                 ApplicationManager.getApplication().executeOnPooledThread(() -> {

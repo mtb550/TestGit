@@ -42,8 +42,8 @@ public class ModelSyncListener implements ListDataListener {
 
         for (int i = e.getIndex0(); i <= e.getIndex1(); i++) {
             final TestCaseDto item = model.getElementAt(i);
-            if (!ui.getAllTestCaseDtos().contains(item)) {
-                ui.getAllTestCaseDtos().add(globalStart++, item);
+            if (!ui.getAllTestCases().contains(item)) {
+                ui.getAllTestCases().add(globalStart++, item);
                 newlyAdded = item;
             }
         }
@@ -63,7 +63,7 @@ public class ModelSyncListener implements ListDataListener {
         if (!active) return;
 
         final int globalStart = (ui.getCurrentPage() - 1) * ui.getPageSize();
-        final List<TestCaseDto> allItems = ui.getAllTestCaseDtos();
+        final List<TestCaseDto> allItems = ui.getAllTestCases();
 
         if (globalStart >= allItems.size()) return;
 

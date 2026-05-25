@@ -28,16 +28,16 @@ public class TreeDropHandler implements FileDropHandler {
 
             ApplicationManager.getApplication().invokeLater(() -> {
                 for (DefaultMutableTreeNode node : nodes) {
+
                     if (node.getUserObject() instanceof TestSetDirectoryDto ts) {
                         System.out.println("dragged Test set: " + ts.getName());
-                        EditorUtil.getInstance().openTestSetEditorIfNotOpen(ts);
+                        EditorUtil.getInstance().openEditorIfNotOpen(ts);
                         continue;
                     }
 
                     if (node.getUserObject() instanceof TestRunDirectoryDto tr) {
                         System.out.println("dragged Test Run: " + tr.getName());
-                        // todo, hook up opening test run here
-                        //continue;
+                        EditorUtil.getInstance().openEditorIfNotOpen(tr);
                     }
                 }
             });

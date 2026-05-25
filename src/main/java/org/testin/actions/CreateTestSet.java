@@ -32,7 +32,7 @@ public class CreateTestSet implements NodeCreator {
         TreeUtilImpl.createNode(action.getTree(), parentNode, newTestSetDirectory);
 
         Tools.getInstance().createJavaClassInTestRoot(project, parentDir.getName(), name);
-        EditorUtil.getInstance().openTestSetEditor(newTestSetDirectory);
+        EditorUtil.getInstance().openEditor(newTestSetDirectory);
     }
 
     public VirtualFile inBackground(final Object requestor, final VirtualFile targetDirectory, final DirectoryDto parentDirDto, final DefaultMutableTreeNode parentNode, final SimpleTree tree, final String name) throws IOException {

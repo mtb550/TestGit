@@ -8,7 +8,7 @@ import javax.swing.*;
 
 @Getter
 @AllArgsConstructor
-public enum RunMetadataFields {
+public enum TestRunConfiguration {
     BUILD_NUMBER("Build Number",
             AllIcons.Actions.Edit,
             null
@@ -16,20 +16,20 @@ public enum RunMetadataFields {
 
     PLATFORM(
             "Platform",
-            AllIcons.Nodes.PpLib, new
-            String[]{"Windows", "Linux", "MacOS", "Android", "iOS"}
+            AllIcons.Nodes.PpLib,
+            new String[]{"Windows", "Linux", "MacOS", "Android", "iOS"}
     ),
 
     LANGUAGE(
             "Language",
-            AllIcons.Nodes.Lambda, new
-            String[]{"English", "Arabic", "French"}
+            AllIcons.Nodes.Lambda,
+            new String[]{"English", "Arabic", "French"}
     ),
 
     BROWSER(
             "Browser",
-            AllIcons.Nodes.WebFolder, new
-            String[]{"Chrome", "Firefox", "Safari", "Edge"}
+            AllIcons.Nodes.WebFolder,
+            new String[]{"Chrome", "Firefox", "Safari", "Edge"}
     ),
 
     DEVICE_TYPE(

@@ -7,7 +7,6 @@ import com.intellij.ui.PopupHandler;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.testin.actions.Open;
 import org.testin.pojo.dto.dirs.DirectoryDto;
-import org.testin.projectPanel.ProjectPanel;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -16,12 +15,10 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 
 public class TreeMouseListener extends PopupHandler {
-    private final ProjectPanel projectPanel;
     private final SimpleTree tree;
     private final TreeContextMenu treeContextMenu;
 
-    public TreeMouseListener(final ProjectPanel projectPanel, final SimpleTree tree, final TreeContextMenu treeContextMenu) {
-        this.projectPanel = projectPanel;
+    public TreeMouseListener(final SimpleTree tree, final TreeContextMenu treeContextMenu) {
         this.tree = tree;
         this.treeContextMenu = treeContextMenu;
     }
@@ -51,7 +48,7 @@ public class TreeMouseListener extends PopupHandler {
             return;
 
         if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-            new Open(projectPanel, tree).execute();
+            new Open(tree).execute();
             e.consume();
         }
     }

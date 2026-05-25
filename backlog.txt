@@ -156,8 +156,6 @@ also, will reduce @Nullable and put @NotNull
 
 remove most static in project.
 
-remove metadata and put make its logic inside run editor.
-
 refactor sorting logic, unsorted are the remain in the list, no need for the loop again.
 
 move all hash maps from: (to bypass re-hashing & oversize reserving)

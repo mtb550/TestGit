@@ -43,7 +43,7 @@ public interface IEditorUI extends Disposable {
 
     Set<?> getSelectedDetails();
 
-    List<TestCaseDto> getAllTestCaseDtos();
+    List<TestCaseDto> getAllTestCases();
 
     void updateSequenceAndSaveAll();
 

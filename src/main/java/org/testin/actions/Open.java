@@ -9,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.pojo.dto.dirs.TestRunDirectoryDto;
 import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
-import org.testin.projectPanel.ProjectPanel;
 import org.testin.util.EditorUtil;
 import org.testin.util.KeyboardSet;
 
@@ -17,12 +16,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 public class Open extends DumbAwareAction {
-    private final ProjectPanel projectPanel;
     private final SimpleTree tree;
 
-    public Open(final ProjectPanel projectPanel, final SimpleTree tree) {
+    public Open(final SimpleTree tree) {
         super("Open", "Open selected test sets or runs", AllIcons.Actions.MenuOpen);
-        this.projectPanel = projectPanel;
         this.tree = tree;
 
         this.registerCustomShortcutSet(KeyboardSet.Enter.getCustomShortcut(), tree);
@@ -40,19 +37,17 @@ public class Open extends DumbAwareAction {
 
             if (directoryDto instanceof TestSetDirectoryDto ts) {
                 System.out.println("open test set: " + ts.getPath());
-                EditorUtil.getInstance().openTestSetEditorIfNotOpen(ts);
+                EditorUtil.getInstance().openEditorIfNotOpen(ts);
                 continue;
-
             }
 
             if (directoryDto instanceof TestRunDirectoryDto tr) {
                 System.out.println("open test run: " + tr.getPath());
-                new OpenTestRun(tr, projectPanel).execute(); // todo, not matched with open test set above, to be unified by create new action: open test set
+                EditorUtil.getInstance().openEditorIfNotOpen(tr);
             }
 
         }
     }
-
 
     @Override
     public void actionPerformed(final @NotNull AnActionEvent e) {

@@ -94,7 +94,7 @@ public class NavigationBar extends BaseDetails {
                             final TestSetDirectoryDto ts = new TestSetDirectoryDto();
                             ts.setPath(file.toPath()); // todo, why set path here?
                             ts.setName(file.getName()); // todo, why set name here ?
-                            EditorUtil.getInstance().openTestSetEditor(ts);
+                            EditorUtil.getInstance().openEditor(ts);
                         } else {
                             ProjectView.getInstance(project).select(null, vf, true);
                         }

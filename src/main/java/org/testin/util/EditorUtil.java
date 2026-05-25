@@ -6,11 +6,12 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.testin.editorPanel.FileType;
 import org.testin.editorPanel.UnifiedVirtualFile;
 import org.testin.pojo.Config;
-import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
+import org.testin.pojo.dto.dirs.DirectoryDto;
+import org.testin.pojo.dto.dirs.TestRunDirectoryDto;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -22,13 +23,13 @@ public class EditorUtil {
         return INSTANCE;
     }
 
-    public boolean isEditorOpen(final String editorName) {
+    public boolean isEditorOpen(final String s) {
         FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
         VirtualFile[] openFiles = editorManager.getOpenFiles();
 
-        for (VirtualFile file : openFiles) {
-            if (editorName.equals(file.getName())) {
-                editorManager.openFile(file, true);
+        for (VirtualFile vf : openFiles) {
+            if (s.equals(vf.getName())) {
+                editorManager.openFile(vf, true);
                 return true;
             }
         }
@@ -36,60 +37,60 @@ public class EditorUtil {
         return false;
     }
 
-    public void closeEditor(final String editorName) {
+    public void closeEditor(final String s) {
         FileEditorManager editorManager = FileEditorManager.getInstance(Config.getProject());
         VirtualFile[] openFiles = editorManager.getOpenFiles();
 
-        for (VirtualFile file : openFiles) {
-            if (editorName.equals(file.getName())) {
-                editorManager.closeFile(file);
+        for (VirtualFile vf : openFiles) {
+            if (s.equals(vf.getName())) {
+                editorManager.closeFile(vf);
                 break;
             }
         }
     }
 
-    public void closeThenOpenTestSetEditor(final VirtualFile targetDirectory, final TestSetDirectoryDto ts) {
-        if (targetDirectory == null || ts == null) return;
+    public void closeThenOpenEditor(final VirtualFile vf, final DirectoryDto dir) {
+        if (vf == null || dir == null) return;
 
         final Project project = Config.getProject();
         final FileEditorManager editorManager = FileEditorManager.getInstance(project);
 
         ApplicationManager.getApplication().invokeLater(() -> {
-            VirtualFile fileToOpen = null;
+            VirtualFile targetVf = null;
 
-            for (VirtualFile openFile : editorManager.getOpenFiles()) {
-                if (openFile.getName().equals(targetDirectory.getName())) {
-                    fileToOpen = openFile;
-                    editorManager.closeFile(openFile);
+            for (VirtualFile openVf : editorManager.getOpenFiles()) {
+                if (openVf.getName().equals(vf.getName())) {
+                    targetVf = openVf;
+                    editorManager.closeFile(openVf);
                     break;
                 }
             }
 
-            if (fileToOpen == null) {
-                openTestSetEditor(ts);
+            if (targetVf == null) {
+                openEditor(dir);
                 return;
             }
 
-            editorManager.openFile(fileToOpen, true);
+            editorManager.openFile(targetVf, true);
         });
     }
 
-    public void openTestSetEditor(final TestSetDirectoryDto ts) {
-        final UnifiedVirtualFile newVirtualFile = new UnifiedVirtualFile(ts, new ArrayList<>());
+    public void openEditor(final DirectoryDto dir) {
+        final FileType ft = dir instanceof TestRunDirectoryDto ? FileType.TEST_RUN : FileType.TEST_CASE;
+        final UnifiedVirtualFile newVf = new UnifiedVirtualFile(dir, ft);
 
         ApplicationManager.getApplication().invokeLater(() ->
                 Optional.ofNullable(FileEditorManager.getInstance(Config.getProject()))
-                        .ifPresent(editorManager -> editorManager.openFile(newVirtualFile, true))
+                        .ifPresent(editorManager -> editorManager.openFile(newVf, true))
         );
     }
 
-    public void openTestSetEditorIfNotOpen(final TestSetDirectoryDto ts) {
-        if (isEditorOpen(ts.getName())) {
-            System.out.println("Editor already open, focusing: " + ts.getName());
+    public void openEditorIfNotOpen(final DirectoryDto dir) {
+        if (isEditorOpen(dir.getName())) {
+            System.out.println("Editor already open, focusing: " + dir.getName());
         } else {
-            System.out.println("Opening Test Set: " + ts.getPath());
-            openTestSetEditor(ts);
+            System.out.println("Opening Editor: " + dir.getPath());
+            openEditor(dir);
         }
     }
-
 }

@@ -171,7 +171,7 @@ public class ImportJson extends DumbAwareAction {
 
                                     linkAndSaveTestCases(targetDirectory, flatList, tail, mapper, ImportJson.this);
 
-                                    EditorUtil.getInstance().closeThenOpenTestSetEditor(targetDirectory, ts);
+                                    EditorUtil.getInstance().closeThenOpenEditor(targetDirectory, ts);
                                     Notifier.getInstance().info("Import Complete", "Successfully imported " + flatList.size() + " test cases.");
 
                                 } else {

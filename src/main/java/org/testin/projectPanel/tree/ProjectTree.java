@@ -52,7 +52,7 @@ public class ProjectTree {
         mainTree.setTransferHandler(transferHandler);
 
         treeContextMenu = new TreeContextMenu(projectPanel, mainTree);
-        mainTree.addMouseListener(new TreeMouseListener(projectPanel, mainTree, treeContextMenu));
+        mainTree.addMouseListener(new TreeMouseListener(mainTree, treeContextMenu));
 
         TreeContextMenu.registerShortcuts(mainTree, transferHandler, treeContextMenu);
     }

@@ -80,7 +80,7 @@ public class TransferListener extends TransferHandler {
                     .map(i -> offset + i)
                     .toArray();
 
-            final List<TestCaseDto> allItems = ui.getAllTestCaseDtos();
+            final List<TestCaseDto> allItems = ui.getAllTestCases();
             final List<TestCaseDto> itemsToMove = new ArrayList<>();
 
             synchronized (allItems) {

@@ -3,48 +3,20 @@ package org.testin.editorPanel;
 import com.intellij.testFramework.LightVirtualFile;
 import lombok.Getter;
 import lombok.Setter;
-import org.testin.pojo.EditorType;
-import org.testin.pojo.dto.TestCaseDto;
-import org.testin.pojo.dto.TestRunDto;
 import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.pojo.dto.dirs.TestRunDirectoryDto;
 import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
-import org.testin.projectPanel.ProjectPanel;
-
-import javax.swing.tree.DefaultTreeModel;
-import java.util.List;
 
 @Getter
 @Setter
 public class UnifiedVirtualFile extends LightVirtualFile {
 
-    // Shared Properties
-    private final DirectoryDto directoryDto;
-    private final List<TestCaseDto> testCaseDtos;
+    private final DirectoryDto dir;
 
-    // Test Run
-    private ProjectPanel projectPanel;
-    private DefaultTreeModel testCasesTreeModel;
-    private TestRunDto metadata;
-    private EditorType editorType;
-
-    // Test Set
-    public UnifiedVirtualFile(final TestSetDirectoryDto directory, final List<TestCaseDto> testCases) {
-        super(directory.getName());
-        this.directoryDto = directory;
-        this.testCaseDtos = testCases;
-        this.setFileType(FileType.TEST_CASE);
-    }
-
-    // Test Run
-    public UnifiedVirtualFile(final TestRunDirectoryDto directory, final DefaultTreeModel treeModel, final List<TestCaseDto> testCaseDtos, final EditorType editorType, final ProjectPanel projectPanel) {
-        super(directory.getName());
-        this.directoryDto = directory;
-        this.testCaseDtos = testCaseDtos;
-        this.testCasesTreeModel = treeModel;
-        this.editorType = editorType;
-        this.projectPanel = projectPanel;
-        this.setFileType(FileType.TEST_RUN);
+    public UnifiedVirtualFile(final DirectoryDto dir, final FileType ft) {
+        super(dir.getName());
+        this.dir = dir;
+        this.setFileType(ft);
     }
 
     @Override
@@ -53,7 +25,10 @@ public class UnifiedVirtualFile extends LightVirtualFile {
     }
 
     public TestSetDirectoryDto getTestSet() {
-        return directoryDto instanceof TestSetDirectoryDto ts ? ts : null;
+        return (TestSetDirectoryDto) dir;
     }
 
+    public TestRunDirectoryDto getTestRun() {
+        return (TestRunDirectoryDto) dir;
+    }
 }

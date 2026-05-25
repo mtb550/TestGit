@@ -36,7 +36,7 @@ public class UnifiedFileEditor extends UserDataHolderBase implements FileEditor 
 
     @Override
     public @NotNull String getName() {
-        return vf.getDirectoryDto().getName();
+        return vf.getDir().getName();
     }
 
     @Override
@@ -80,7 +80,7 @@ public class UnifiedFileEditor extends UserDataHolderBase implements FileEditor 
                 .ifPresent(viewer -> {
 
                     if (selected != null && !selected.isEmpty())
-                        viewer.show(selected, vf.getDirectoryDto().getPath());
+                        viewer.show(selected, vf.getDir().getPath());
 
                     else
                         viewer.reset();

@@ -113,14 +113,14 @@ public final class TestRunReport {
         });
     }
 
-    private Map<UUID, TestCaseDto> fetchTestCaseDetails(TestRunDto metadata) {
+    private Map<UUID, TestCaseDto> fetchTestCaseDetails(TestRunDto tr) {
         Map<UUID, TestCaseDto> detailsMap = new ConcurrentHashMap<>();
 
-        if (metadata.getTestCase().isEmpty()) {
+        if (tr.getTestCase().isEmpty()) {
             return detailsMap;
         }
 
-        for (TestRunDto.TestCase tcPathObj : metadata.getTestCase()) {
+        for (TestRunDto.TestCase tcPathObj : tr.getTestCase()) {
             Path dirPath = tcPathObj.getPath();
             List<UUID> targetIds = tcPathObj.getUuid();
 
