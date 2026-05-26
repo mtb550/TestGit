@@ -7,13 +7,11 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.dto.dirs.TestSetDirectoryDto;
-import org.testin.util.Tools;
 import org.testin.util.notifications.Notifier;
 import org.testin.util.runner.TestNGRunnerByClass;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
-
 
 public class RunTestSet extends DumbAwareAction {
     private final SimpleTree tree;
@@ -49,7 +47,8 @@ public class RunTestSet extends DumbAwareAction {
 
         if (userObject instanceof TestSetDirectoryDto ts) {
             System.out.println(this.getClass() + "directory file: " + ts.getPath().toFile());
-            String fqcn = Tools.getInstance().fileToFqcn(ts.getPath().toFile());  // todo, deprecated as there is an new enhanced method, should change all calls to the new later.
+            //String fqcn = Tools.getInstance().fileToFqcn(ts.getPath().toFile());  // todo, deprecated as there is an new enhanced method, should change all calls to the new later.
+            String fqcn = ""; //todo, to be updated
             System.out.println(this.getClass() + "fqcn path: " + fqcn);
 
             if (!fqcn.trim().isEmpty()) {

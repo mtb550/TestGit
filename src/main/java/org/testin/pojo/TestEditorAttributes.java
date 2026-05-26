@@ -83,7 +83,7 @@ public enum TestEditorAttributes {
             true,
             false,
             false,
-            tc -> String.join(".", tc.getFqcn()),
+            tc -> String.join(" > ", tc.getFqcn()),
             null,
             (tc, v) -> {
             }

@@ -5,10 +5,8 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
@@ -32,7 +30,6 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -60,126 +57,64 @@ public class Tools {
         return INSTANCE;
     }
 
-    public String sanitizePackageName(String name) {
-        if (name == null || name.isEmpty()) return "pkg";
-
-        String cleanName = name.replaceAll("[^a-zA-Z0-9]", " ").trim();
-        String[] words = cleanName.split("\\s+");
+    public String sanitizePackageName(final @NotNull String name) {
+        String removeKeyword = name.replace("-test-cases", "");
+        String cleanName = SANITIZE_PATTERN.matcher(removeKeyword).replaceAll("").trim();
+        String[] split = cleanName.split("[\\s_]+");
 
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < words.length; i++) {
-            String word = words[i];
+        for (int i = 0; i < split.length; i++) {
+            String word = split[i];
             if (word.isEmpty()) continue;
-
-            if (i == 0) {
-                sb.append(word.toLowerCase());
-            } else {
-                sb.append(Character.toUpperCase(word.charAt(0)))
-                        .append(word.substring(1).toLowerCase());
-            }
+            if (i == 0) sb.append(word.toLowerCase());
+            else sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1).toLowerCase());
         }
 
         String result = sb.toString();
 
-        result = result.replaceFirst("^\\d+", "");
+        if (result.isEmpty()) return "generated" + System.currentTimeMillis();
 
-        return result.isEmpty() ? "pkg" : result;
+        if (Character.isDigit(result.charAt(0))) result = "_" + result;
+        return result;
     }
 
-    public String sanitizeClassName(String name) {
-        if (name == null || name.isEmpty()) return "DefaultTest";
+    public String sanitizeClassName(final @NotNull String name) {
+        if (name.trim().isEmpty()) {
+            return "DefaultTest";
+        }
 
-        String cleanName = name.replaceAll("[^a-zA-Z0-9]", " ").trim();
-        String[] words = cleanName.split("\\s+");
+        String cleanName = SANITIZE_PATTERN.matcher(name).replaceAll("").trim();
+        String[] split = cleanName.split("[\\s_]+");
 
         StringBuilder sb = new StringBuilder();
-        for (String word : words) {
+        for (String word : split) {
             if (word.isEmpty()) continue;
-            sb.append(Character.toUpperCase(word.charAt(0)))
-                    .append(word.substring(1).toLowerCase());
+            sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
         }
 
         String result = sb.toString();
-        result = result.replaceFirst("^\\d+", "");
 
-        if (result.isEmpty()) result = "Default";
+        if (result.isEmpty()) return "DefaultTest";
 
-        if (!result.toLowerCase().endsWith("test")) {
-            result += "Test";
-        } else if (!result.endsWith("Test")) {
-            result = result.substring(0, result.length() - 4) + "Test";
-        }
+        if (Character.isDigit(result.charAt(0))) result = "_" + result;
+
+        if (!result.toLowerCase().endsWith("test")) result += "Test";
+        else if (result.equalsIgnoreCase("test")) result = "Test";
 
         return result;
     }
 
-    public List<String> getTestSetFqcn(Path path) {
-        List<String> rawParts = new ArrayList<>(getTestSourceRootFqcn());
+    public List<String> appendFqcn(final List<String> pFqcn, final String s, final DirectoryType t) {
+        List<String> newFqcn = new ArrayList<>(pFqcn.size() + 1);
+        newFqcn.addAll(pFqcn);
 
-        Path basePath = Config.getTestinPath();
+        if (t == DirectoryType.TSP || t == DirectoryType.TP)
+            newFqcn.add(sanitizePackageName(s));
 
-        if (basePath == null) {
-            System.out.println("WARNING: Config.getTestinPath() is null!");
-            rawParts.add(path.getFileName().toString());
-        } else {
-            Path relativePath = basePath.relativize(path);
-            for (Path part : relativePath) {
-                String folderName = part.toString();
+        else if (t == DirectoryType.TS)
+            newFqcn.add(sanitizeClassName(s));
 
-                if (!folderName.equalsIgnoreCase("testCases")) {
-                    rawParts.add(folderName);
-                }
-            }
-        }
-
-        List<String> fqcn = new ArrayList<>();
-
-        for (int i = 0; i < rawParts.size(); i++) {
-            String rawName = rawParts.get(i);
-
-            if (i == rawParts.size() - 1) {
-                fqcn.add(sanitizeClassName(rawName));
-            } else {
-                fqcn.add(sanitizePackageName(rawName));
-            }
-        }
-
-        System.out.println("Generated FQCN for " + path.getFileName() + ": " + fqcn); // todo, to be removed later
-        return fqcn;
-    }
-
-    public List<String> appendFqcn(final List<String> parentFqcn, final String fileName) {
-        List<String> newFqcn = new ArrayList<>(parentFqcn.size() + 1);
-        newFqcn.addAll(parentFqcn);
-        newFqcn.add(fileName);
         return newFqcn;
-    }
-
-    public List<String> getTestSourceRootFqcn() {
-        Project project = Config.getProject();
-        List<String> sourceRootFqcn = new ArrayList<>();
-
-        VirtualFile testSourceRoot = getTestSourceRoot(project);
-
-        if (testSourceRoot != null && project.getBasePath() != null) {
-            Path rootPath = Paths.get(testSourceRoot.getPath());
-            Path projectPath = Paths.get(project.getBasePath());
-
-            if (rootPath.startsWith(projectPath)) {
-                Path relativePath = projectPath.relativize(rootPath);
-
-                for (Path part : relativePath) {
-                    String folderName = part.toString();
-                    if (!folderName.isEmpty()) {
-                        sourceRootFqcn.add(folderName);
-                    }
-                }
-            } else {
-                sourceRootFqcn.add(testSourceRoot.getName());
-            }
-        }
-
-        return sourceRootFqcn;
     }
 
     public Path getProjectPath(final SimpleTree tree) {
@@ -209,44 +144,6 @@ public class Tools {
         return StringUtil.capitalize(s) + ".";
     }
 
-    public void printTestSourceRoots(final Project project) {
-        System.out.println("printTestSourceRoots.printTestSourceRoots()");
-
-        ProjectFileIndex fileIndex = ProjectRootManager.getInstance(project).getFileIndex();
-
-        for (VirtualFile root : ProjectRootManager.getInstance(project).getContentSourceRoots()) {
-            if (fileIndex.isInTestSourceContent(root)) {
-                System.out.println("Test Source Root: " + root.getPath());
-            }
-        }
-    }
-
-    public void refreshPath(final Path path) {
-        System.out.println("Tools.refreshPath()");
-
-        if (path == null) return;
-
-        VirtualFile virtualFile = VfsUtil.findFileByIoFile(path.toFile(), true);
-
-        if (virtualFile != null) {
-            virtualFile.refresh(true, true);
-        } else {
-            File parentFile = path.toFile().getParentFile();
-            if (parentFile != null) {
-                VfsUtil.markDirtyAndRefresh(true, true, true, parentFile);
-            }
-        }
-    }
-
-    public int generateUniqueId() {
-        return (int) (System.currentTimeMillis() % 100000);
-    }
-
-    public void refreshFileSystem(final File ioFile) {
-        System.out.println("Tools.refreshFileSystem()");
-        LocalFileSystem.getInstance().refreshAndFindFileByIoFile(ioFile);
-    }
-
     public String toCamelCase(final String text) {
         if (text == null || text.isEmpty()) return text;
         String[] words = text.split("[\\W_]+");
@@ -261,60 +158,6 @@ public class Tools {
             }
         }
         return result.toString();
-    }
-
-    @Deprecated
-    public String fileToFqcn(final File file) { // todo, to be removed.
-        if (file == null) return "";
-
-        String path = file.getAbsolutePath().replace("\\", "/");
-
-        String marker = "/org/testin/";
-        int index = path.indexOf(marker);
-
-        if (index != -1) {
-            path = path.substring(index + marker.length());
-        } else {
-            if (path.startsWith("org/testin/")) {
-                path = path.substring("org/testin/".length());
-            }
-        }
-
-        int dotIndex = path.lastIndexOf('.');
-        if (dotIndex != -1) {
-            path = path.substring(0, dotIndex);
-        }
-
-        StringBuilder fqcn = new StringBuilder();
-        String basePath = AppSettingsState.getInstance().rootAutomationPath;
-
-        if (basePath != null && !basePath.trim().isEmpty()) {
-            fqcn.append(basePath.trim());
-        }
-
-        String[] segments = path.split("/");
-
-        for (int i = 0; i < segments.length; i++) {
-            String segment = segments[i];
-
-            if (segment.equals(DirectoryType.TCD.getPathName())) continue;
-
-            String[] parts = segment.split("_", 3); // todo, no need. to be removed _
-            String rawName = (parts.length >= 2) ? parts[1] : segment;
-
-            String javaName = toCamelCase(rawName);
-
-            if (i == segments.length - 1 && !javaName.isEmpty()) {
-                javaName = javaName.substring(0, 1).toUpperCase() + javaName.substring(1) + "Test";
-            }
-
-            if (!javaName.isEmpty()) {
-                if (!fqcn.isEmpty()) fqcn.append(".");
-                fqcn.append(javaName);
-            }
-        }
-
-        return fqcn.toString();
     }
 
     public @NotNull List<String> extractLogicalPath(final @NotNull Path path) {
@@ -341,55 +184,6 @@ public class Tools {
         return logicalPath;
     }
 
-    public @NotNull List<String> generateFqcn(final @NotNull List<String> storedPath) {
-        List<String> fqcnParts = new ArrayList<>();
-
-        String basePath = AppSettingsState.getInstance().rootAutomationPath;
-        if (basePath != null && !basePath.trim().isEmpty()) {
-            fqcnParts.add(basePath.trim());
-        }
-
-        for (int i = 0; i < storedPath.size(); i++) {
-            String segment = storedPath.get(i);
-
-            if (segment == null || segment.isEmpty() || segment.equals(DirectoryType.TCD.getPathName())) continue;
-
-            String formattedName = toCamelCase(segment);
-
-            if (i == storedPath.size() - 1) {
-
-                if (!formattedName.isEmpty()) {
-                    formattedName = formattedName.substring(0, 1).toUpperCase() + formattedName.substring(1);
-                }
-
-                if (!formattedName.endsWith("Test")) {
-                    formattedName += "Test";
-                }
-            }
-
-            fqcnParts.add(formattedName);
-        }
-
-        return fqcnParts;
-    }
-
-    private @NotNull String extractRelativePath(@NotNull Path path) {
-        String pathStr = path.toAbsolutePath().toString().replace("\\", "/");
-
-        int markerIndex = pathStr.indexOf("/org/testin/");
-        if (markerIndex != -1) {
-            pathStr = pathStr.substring(markerIndex + "/org/testin/".length());
-        } else if (pathStr.startsWith("org/testin/")) {
-            pathStr = pathStr.substring("org/testin/".length());
-        }
-
-        int dotIndex = pathStr.lastIndexOf('.');
-        if (dotIndex != -1) {
-            pathStr = pathStr.substring(0, dotIndex);
-        }
-        return pathStr;
-    }
-
     public void updateChildrenPathsRecursive(final DefaultMutableTreeNode parentNode, final Path oldParentPath, final Path newParentPath) {
         for (int i = 0; i < parentNode.getChildCount(); i++) {
             DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) parentNode.getChildAt(i);
@@ -408,37 +202,6 @@ public class Tools {
     public String getFormattedDuration(final Duration duration) {
         if (duration == null) return null;
         return String.format("%02d:%02d:%02d", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
-    }
-
-    public void createJavaPackageInTestRoot(@NotNull final Project project, @NotNull final String packageName) {
-        ApplicationManager.getApplication().invokeLater(() ->
-                ApplicationManager.getApplication().runWriteAction(() -> {
-                    try {
-                        ProjectRootManager rootManager = ProjectRootManager.getInstance(project);
-
-                        VirtualFile testRoot = Arrays.stream(rootManager.getContentSourceRoots())
-                                .filter(root -> rootManager.getFileIndex().isInTestSourceContent(root))
-                                .findFirst()
-                                .orElse(null);
-
-                        if (testRoot != null) {
-                            String basePath = AppSettingsState.getInstance().rootAutomationPath;
-
-                            String safePackageName = toCamelCase(packageName);
-
-                            String relativePackagePath = (basePath != null && !basePath.trim().isEmpty())
-                                    ? basePath.replace(".", "/") + "/" + safePackageName
-                                    : safePackageName;
-
-                            VfsUtil.createDirectoryIfMissing(testRoot, relativePackagePath);
-
-                        } else {
-                            System.out.println("[WARNING] No Test Source Root found in the project.");
-                        }
-                    } catch (Exception ex) {
-                        System.err.println("[ERROR] Failed to create Java package: " + ex.getMessage());
-                    }
-                }));
     }
 
     public void createJavaClassInTestRoot(@NotNull final Project project, @NotNull final String packageName, @NotNull final String className) {
@@ -519,60 +282,13 @@ public class Tools {
                     .getSourceRoots(JavaSourceRootType.TEST_SOURCE);
 
             if (!sourceRoots.isEmpty()) {
+                System.out.println("[TRACE] Found test source root: " + sourceRoots.getFirst());
                 return sourceRoots.getFirst();
             }
         }
 
+        System.out.println("[WARNING] No Test Source Root found in the project.");
         return null;
-    }
-
-    public List<String> extractFqcn(TreePath path) {
-        List<String> fqcn = new ArrayList<>();
-
-        System.out.println("--- Start Extracting FQCN ---");
-
-        DefaultMutableTreeNode lastNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-        if (!(lastNode.getUserObject() instanceof DirectoryDto dir)) return fqcn;
-
-        Path dirPath = dir.getPath();
-        System.out.println("dir path: " + dirPath);
-
-        assert Config.getTestinPath() != null;
-
-        try {
-            Path relativePath = Config.getTestinPath().relativize(dirPath);
-            System.out.println("Relative Path: " + relativePath);
-
-            int testCasesIndex = -1;
-            String tcdName = DirectoryType.TCD.getPathName();
-
-            for (int i = 0; i < relativePath.getNameCount(); i++) {
-                String nodeName = relativePath.getName(i).toString();
-                if (nodeName.equals(tcdName) || nodeName.equalsIgnoreCase(DirectoryType.TCD.getPathName())) {
-                    testCasesIndex = i;
-                    break;
-                }
-            }
-
-            if (testCasesIndex > 0) {
-                String projectName = relativePath.getName(testCasesIndex - 1).toString();
-                fqcn.add(projectName.replace(" ", "").toLowerCase());
-                System.out.println("  -> Added Project Name: " + projectName);
-
-                for (int i = testCasesIndex + 1; i < relativePath.getNameCount(); i++) {
-                    String pkgName = relativePath.getName(i).toString();
-                    fqcn.add(pkgName.replace(" ", "").toLowerCase());
-                    System.out.println("  -> Added Package: " + pkgName);
-                }
-            }
-
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error calculating relative path: " + e.getMessage());
-        }
-
-        System.out.println("Final FQCN Result: " + fqcn);
-        System.out.println("-----------------------------");
-        return fqcn;
     }
 
     public String toPascalCase(String text) {
@@ -699,7 +415,7 @@ public class Tools {
         return sanitized;
     }
 
-    public String formatMethodName(final String description) {
+    public String sanitizeMethodName(final String description) {
         if (description == null || description.isEmpty()) return "testMethod";
 
         String[] words = description.split("[^a-zA-Z0-9]+");

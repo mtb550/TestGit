@@ -6,56 +6,38 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.testin.pojo.Config;
+import org.testin.pojo.dto.TestCaseDto;
 import org.testin.util.Tools;
 
-import javax.swing.tree.TreePath;
 import java.io.IOException;
 import java.util.List;
 
 public class CreateTestSet implements GeneratorAction {
 
     @Override
-    public void execute(final @NotNull String targetName, final @Nullable TreePath path) {
-        if (path == null) return;
-        List<String> fqcn = Tools.getInstance().extractFqcn(path);
-        String basePackage = String.join(".", fqcn);
+    public void execute(final @Nullable TestCaseDto tc, final @NotNull List<String> fqcn) {
 
-        // Java Class (PascalCase)
-        String[] words = targetName.split(" ");
-        StringBuilder classNameBuilder = new StringBuilder();
-        for (String word : words) {
-            if (!word.isEmpty()) {
-                classNameBuilder.append(word.substring(0, 1).toUpperCase()).append(word.substring(1).toLowerCase());
-            }
-        }
+        final String path = String.join(".", fqcn.subList(0, fqcn.size() - 1));
+        final String className = fqcn.getLast();
+        final String fileName = className + ".java";
 
-        String className = classNameBuilder.toString();
+        System.out.println("Ready to generate Test Class: " + className + " in package: " + fqcn);
 
-        if (!className.endsWith("Test")) {
-            className += "Test";
-        }
-
-        String fileName = className + ".java";
-
-        System.out.println("Ready to generate Test Class: " + className + " in package: " + basePackage);
-
-        String finalClassName = className;
         WriteAction.run(() -> {
             try {
-                VirtualFile sourceRoot = Tools.getInstance().getTestSourceRoot(Config.getProject());
+                VirtualFile testSourceRoot = Tools.getInstance().getTestSourceRoot(Config.getProject());
 
-                if (sourceRoot != null) {
-                    String relativePath = basePackage.replace('.', '/');
-                    VirtualFile packageDir = VfsUtil.createDirectoryIfMissing(sourceRoot, relativePath);
+                if (testSourceRoot != null) {
+                    VirtualFile vf = VfsUtil.createDirectoryIfMissing(testSourceRoot, path.replace(".", "/"));
 
-                    if (packageDir != null) {
-                        VirtualFile existingFile = packageDir.findChild(fileName);
+                    if (vf != null) {
+                        VirtualFile existingFile = vf.findChild(fileName);
 
                         if (existingFile == null) {
-                            VirtualFile javaFile = packageDir.createChildData(this, fileName);
+                            VirtualFile javaFile = vf.createChildData(this, fileName);
 
-                            String fileContent = "package " + basePackage + ";\n\n" +
-                                    "public class " + finalClassName + " {\n" +
+                            String fileContent = "package " + path + ";\n\n" +
+                                    "public class " + className + " {\n" +
                                     "    \n" +
                                     "}\n";
 

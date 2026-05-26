@@ -38,7 +38,7 @@ public class TestMouseListener extends MouseAdapter {
         this.model = model;
         this.editorCM = editorCM;
         this.emptyMenu = new DefaultActionGroup();
-        this.emptyMenu.add(new CreateTestCase(ui, dir.getPath(), list, model));
+        this.emptyMenu.add(new CreateTestCase(ui, dir, list, model));
     }
 
     @Override

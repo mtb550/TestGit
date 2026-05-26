@@ -9,5 +9,5 @@ import java.nio.file.Path;
 
 @FunctionalInterface
 public interface NodeCreator {
-    void execute(final CreateTestNode action, final Project project, final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath);
+    DirectoryDto execute(final CreateTestNode action, final Project project, final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath);
 }

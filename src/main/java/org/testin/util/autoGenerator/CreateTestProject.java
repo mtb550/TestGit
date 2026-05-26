@@ -7,30 +7,27 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.testin.pojo.Config;
+import org.testin.pojo.dto.TestCaseDto;
 import org.testin.util.Tools;
 
-import javax.swing.tree.TreePath;
+import java.util.List;
 
 public class CreateTestProject implements GeneratorAction {
 
     @Override
-    public void execute(final @NotNull String targetName, final @Nullable TreePath path) {
-        if (targetName.isEmpty()) return;
+    public void execute(final @Nullable TestCaseDto tc, final @NotNull List<String> fqcn) {
 
         ApplicationManager.getApplication().invokeLater(() -> ApplicationManager.getApplication().runWriteAction(() -> {
             try {
-                // todo, add new step to remove all dots and chars and slashes.
                 WriteAction.run(() -> {
-
-                    String safePackageName = Tools.getInstance().toCamelCase(targetName);
 
                     VirtualFile sourceRoot = Tools.getInstance().getTestSourceRoot(Config.getProject());
 
                     if (sourceRoot != null) {
-                        VirtualFile newPackage = VfsUtil.createDirectoryIfMissing(sourceRoot, safePackageName);
+                        VirtualFile vf = VfsUtil.createDirectoryIfMissing(sourceRoot, fqcn.getFirst());
 
-                        if (newPackage != null) {
-                            System.out.println("[TRACE] Successfully created project package inside Source Root: " + newPackage.getPath());
+                        if (vf != null) {
+                            System.out.println("[TRACE] Successfully created project package inside Source Root: " + vf.getPath());
                         }
                     } else {
                         System.err.println("[WARNING] No Source Root found in the project. Please mark a directory as 'Sources Root'.");

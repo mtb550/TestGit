@@ -242,7 +242,7 @@ public class AppSettingsConfigurable implements Configurable {
         if (settings.rootTestinPath != null && !settings.rootTestinPath.trim().isEmpty())
             Config.setTestinPath(Path.of(settings.rootTestinPath));
         else
-            Config.setTestinPath(null);
+            Config.setTestinPath(Path.of(""));
 
         if (settings.rootAutomationPath != null && !settings.rootAutomationPath.trim().isEmpty())
             Config.setAutomationPath(Path.of(settings.rootAutomationPath));

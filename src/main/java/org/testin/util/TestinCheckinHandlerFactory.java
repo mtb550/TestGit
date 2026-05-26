@@ -1,11 +1,11 @@
 package org.testin.util;
 
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vcs.CheckinProjectPanel;
 import com.intellij.openapi.vcs.changes.CommitContext;
 import com.intellij.openapi.vcs.checkin.CheckinHandler;
 import com.intellij.openapi.vcs.checkin.CheckinHandlerFactory;
 import org.jetbrains.annotations.NotNull;
+import org.testin.util.notifications.Notifier;
 
 public class TestinCheckinHandlerFactory extends CheckinHandlerFactory {
     @Override
@@ -22,11 +22,7 @@ public class TestinCheckinHandlerFactory extends CheckinHandlerFactory {
                         });
 
                 if (containsManagedFiles) {
-                    Messages.showErrorDialog(
-                            panel.getProject(),
-                            "Commits to 'testin' paths are disabled. These are managed by automation.",
-                            "Commit Blocked"
-                    );
+                    Notifier.getInstance().error("Commits to 'testin' paths are disabled. These are managed by automation.", "Commit Blocked");
                     return ReturnResult.CANCEL;
                 }
 

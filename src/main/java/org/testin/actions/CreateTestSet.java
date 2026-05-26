@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.testin.pojo.Config;
+import org.testin.pojo.DirectoryMapper;
 import org.testin.pojo.DirectoryType;
 import org.testin.pojo.NodeCreator;
 import org.testin.pojo.dto.dirs.DirectoryDto;
@@ -20,19 +21,17 @@ import java.nio.file.Path;
 public class CreateTestSet implements NodeCreator {
 
     @Override
-    public void execute(final CreateTestNode action, final Project project, final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath) {
-        TestSetDirectoryDto newTestSetDirectory = TestSetDirectoryDto
-                .builder()
-                .name(name)
-                .path(parentDir.getPath().resolve(name))
-                .build();
+    public DirectoryDto execute(final CreateTestNode action, final Project project, final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath) {
+        TestSetDirectoryDto ts = DirectoryMapper.getInstance().testSetNode(newDirPath, parentDir);
 
-        TreeUtilImpl.createVf(this, parentDir.getPath(), newTestSetDirectory.getName());
+        TreeUtilImpl.createVf(this, parentDir.getPath(), ts.getName());
         TreeUtilImpl.createDataVf(this, newDirPath, DirectoryType.TS.getMarker());
-        TreeUtilImpl.createNode(action.getTree(), parentNode, newTestSetDirectory);
+        TreeUtilImpl.createNode(action.getTree(), parentNode, ts);
 
         Tools.getInstance().createJavaClassInTestRoot(project, parentDir.getName(), name);
-        EditorUtil.getInstance().openEditor(newTestSetDirectory);
+        EditorUtil.getInstance().openEditor(ts);
+
+        return ts;
     }
 
     public VirtualFile inBackground(final Object requestor, final VirtualFile targetDirectory, final DirectoryDto parentDirDto, final DefaultMutableTreeNode parentNode, final SimpleTree tree, final String name) throws IOException {
@@ -55,8 +54,8 @@ public class CreateTestSet implements NodeCreator {
             Tools.getInstance().createJavaClassInTestRoot(Config.getProject(), parentDirDto.getName(), safeDirName);
         }
 
-        if (sheetDir.findChild(".ts") == null) {
-            sheetDir.createChildData(requestor, ".ts");
+        if (sheetDir.findChild(DirectoryType.TS.getMarker()) == null) {
+            sheetDir.createChildData(requestor, DirectoryType.TS.getMarker());
         }
 
         if (isNewDirCreated && tree != null && tree.getModel() instanceof DefaultTreeModel treeModel) {

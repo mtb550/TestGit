@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.ui.treeStructure.SimpleTree;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.dto.dirs.*;
@@ -21,13 +22,13 @@ import static org.testin.util.KeyboardSet.DeletePackage;
 public class Remove extends DumbAwareAction {
     private final SimpleTree tree;
 
-    public Remove(SimpleTree tree) {
+    public Remove(final SimpleTree tree) {
         super("Remove", "Remove selected nodes", AllIcons.Actions.GC);
         this.tree = tree;
         this.registerCustomShortcutSet(DeletePackage.getCustomShortcut(), tree);
     }
 
-    private boolean isRemovable(Object dir) {
+    private boolean isRemovable(final Object dir) {
         return dir instanceof DirectoryDto &&
                 !(dir instanceof TestProjectDirectoryDto) &&
                 !(dir instanceof TestCasesMainDirectoryDto) &&
@@ -35,7 +36,7 @@ public class Remove extends DumbAwareAction {
     }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public void actionPerformed(@NotNull final AnActionEvent e) {
         TreePath[] paths = tree.getSelectionPaths();
         if (paths == null || paths.length == 0) return;
 
@@ -64,13 +65,14 @@ public class Remove extends DumbAwareAction {
 
                 TreeUtilImpl.removeVf(this, pkg.getPath());
                 TreeUtilImpl.removeNode(node, tree);
+                VirtualFileManager.getInstance().syncRefresh();
             }
             System.out.println("Removed " + nodesToRemove.size() + " nodes.");
         }
     }
 
     @Override
-    public void update(@NotNull AnActionEvent e) {
+    public void update(@NotNull final AnActionEvent e) {
         TreePath[] paths = tree.getSelectionPaths();
 
         boolean canRemove = paths != null && Arrays.stream(paths)

@@ -3,19 +3,16 @@ package org.testin.util.autoGenerator;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.testin.pojo.Config;
-import org.testin.util.Tools;
+import org.testin.pojo.dto.TestCaseDto;
 
-import javax.swing.tree.TreePath;
 import java.util.List;
 
 public class UpdateTestCase implements GeneratorAction {
 
-    public void execute(final @NotNull String targetName, final @NotNull TreePath path) {
-        List<String> fqcn = Tools.getInstance().extractFqcn(path);
-        // .join(".")
-        if (fqcn.isEmpty() || targetName.isEmpty()) return;
-
+    @Override
+    public void execute(final @Nullable TestCaseDto tc, final @NotNull List<String> fqcn) {
         ApplicationManager.getApplication().invokeLater(() ->
                 WriteCommandAction.runWriteCommandAction(Config.getProject(), "Create Test Method", null, () -> {
                     try {

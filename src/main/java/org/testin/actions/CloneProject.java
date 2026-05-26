@@ -15,20 +15,16 @@ import org.testin.projectPanel.ProjectPanel;
 import org.testin.util.GitCommandRunner;
 import org.testin.util.notifications.Notifier;
 
-import java.nio.file.Path;
-
 public class CloneProject extends DumbAwareAction {
 
     private final String gitUrl;
     private final String projectName;
-    private final Path targetPath;
     private final ProjectPanel projectPanel;
 
-    public CloneProject(final String gitUrl, final String projectName, final Path targetPath, final ProjectPanel projectPanel) {
+    public CloneProject(final String gitUrl, final String projectName, final ProjectPanel projectPanel) {
         super("Clone Git Project", "Import an existing test project from Git", AllIcons.Vcs.Clone);
         this.gitUrl = gitUrl;
         this.projectName = projectName;
-        this.targetPath = targetPath;
         this.projectPanel = projectPanel;
     }
 
@@ -38,10 +34,6 @@ public class CloneProject extends DumbAwareAction {
     }
 
     public void execute() {
-        if (targetPath == null) {
-            Notifier.getInstance().error("Setup Error", "Root TestZoom folder is not set. Please configure it in settings first.");
-            return;
-        }
 
         if (gitUrl == null || gitUrl.trim().isEmpty() || projectName == null || projectName.trim().isEmpty()) {
             Notifier.getInstance().error("Clone Error", "Missing parameters for cloning the project.");
@@ -50,15 +42,15 @@ public class CloneProject extends DumbAwareAction {
 
         ProgressManager.getInstance().run(new Task.Backgroundable(Config.getProject(), "Cloning repository", false) {
             @Override
-            public void run(@NotNull ProgressIndicator indicator) {
+            public void run(@NotNull final ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
                 indicator.setText("Cloning into " + projectName + "...");
 
                 try {
-                    GitCommandRunner.execute(targetPath, "git", "clone", gitUrl, projectName);
+                    GitCommandRunner.execute(Config.getTestinPath(), "git", "clone", gitUrl, projectName);
 
                     ApplicationManager.getApplication().invokeLater(() -> {
-                        VirtualFile vRoot = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(targetPath.toFile());
+                        VirtualFile vRoot = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(Config.getTestinPath().toFile());
                         if (vRoot != null) {
                             vRoot.refresh(false, true);
                         }

@@ -2,6 +2,7 @@ package org.testin.projectPanel;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.SimpleTextAttributes;
@@ -23,6 +24,7 @@ import org.testin.util.Bundle;
 import java.awt.*;
 
 @Getter
+@Service(Service.Level.PROJECT)
 public class ProjectPanel implements Disposable {
     private final JBPanelWithEmptyText panel = new JBPanelWithEmptyText(new BorderLayout());
     private final TestProjectSelector testProjectSelector;
@@ -40,27 +42,7 @@ public class ProjectPanel implements Disposable {
         testCaseTreeBuilder = new TestCaseTreeBuilder(this);
         testRunTreeBuilder = new TestRunTreeBuilder(this);
 
-        boolean status = testProjectSelector.init();
-
-        if (status) {
-            System.out.println("ProjectPanel(). projects found");
-
-            panel.setLayout(new BorderLayout());
-            JBPanel<?> topBar = new JBPanel<>(new BorderLayout());
-            topBar.add(testProjectSelector.getSelectedTestProject(), BorderLayout.NORTH);
-
-            branchSelector = new BranchSelector(this, testProjectSelector.getSelectedTestProject().getItem());
-            topBar.add(branchSelector.getComponent(), BorderLayout.SOUTH);
-
-            panel.add(topBar, BorderLayout.NORTH);
-
-            projectTree = new ProjectTree(this);
-            panel.add(projectTree.getComponent(), BorderLayout.CENTER);
-
-        } else {
-            System.out.println("ProjectPanel(). not projects found");
-            showEmptyState();
-        }
+        setupMainLayout();
 
     }
 
@@ -81,7 +63,6 @@ public class ProjectPanel implements Disposable {
             topBar.add(branchSelector.getComponent(), BorderLayout.SOUTH);
 
             panel.add(topBar, BorderLayout.NORTH);
-
 
             projectTree = new ProjectTree(this);
             panel.add(projectTree.getComponent(), BorderLayout.CENTER);
@@ -110,10 +91,10 @@ public class ProjectPanel implements Disposable {
         emptyText.appendLine("");
         emptyText.appendLine("");
 
-        if (Config.getTestinPath() == null)
+        if (Config.getTestinPath().toString().isEmpty())
             emptyText.appendLine(
                     AllIcons.General.Settings,
-                    "Configure testin settings",
+                    "Configure Testin settings",
                     SimpleTextAttributes.LINK_ATTRIBUTES,
                     e -> ShowSettingsUtil.getInstance().showSettingsDialog(Config.getProject(), AppSettingsConfigurable.class)
             );

@@ -45,41 +45,40 @@ public class CreateTestProject extends DumbAwareAction {
             if (directoryType == DirectoryType.IMPORT_TP) {
                 String gitUrl = name.trim();
                 String projectName = extractProjectNameFromUrl(gitUrl);
-                new CloneProject(gitUrl, projectName, Config.getTestinPath(), projectPanel).execute();
+                new CloneProject(gitUrl, projectName, projectPanel).execute();
                 return;
             }
 
-            // todo, cover all regex -> dots, slashes ..etc
-            String folderName = name.trim();
-            Path projectPath = Config.getTestinPath().resolve(folderName);
+            final String tpName = name.trim();
+            final Path tpPath = Config.getTestinPath().resolve(tpName);
 
-            TestProjectDirectoryDto newTestProjectDirectory = DirectoryMapper.getInstance().testProjectNode(projectPath);
+            TestProjectDirectoryDto newTp = DirectoryMapper.getInstance().testProjectNode(tpPath);
 
-            if (newTestProjectDirectory == null) {
+            if (newTp == null) {
                 Notifier.getInstance().error("Creation Failed", "Could not map test project directory in memory.");
                 return;
             }
 
             TreeUtilImpl.executeVfsAction(Config.getTestinPath(), "IO Error", vf -> {
 
-                VirtualFile projectDir = vf.createChildDirectory(this, folderName);
+                VirtualFile projectDir = vf.createChildDirectory(this, tpName);
                 projectDir.createChildData(this, DirectoryType.TP.getMarker());
 
-                String tcdName = newTestProjectDirectory.getTestCasesDirectory().getPath().getFileName().toString();
+                String tcdName = newTp.getTestCasesDirectory().getPath().getFileName().toString();
                 VirtualFile tcdDir = projectDir.createChildDirectory(this, tcdName);
                 tcdDir.createChildData(this, DirectoryType.TCD.getMarker());
 
-                String trdName = newTestProjectDirectory.getTestRunsDirectory().getPath().getFileName().toString();
+                String trdName = newTp.getTestRunsDirectory().getPath().getFileName().toString();
                 VirtualFile trdDir = projectDir.createChildDirectory(this, trdName);
                 trdDir.createChildData(this, DirectoryType.TRD.getMarker());
 
                 projectDir.refresh(false, true);
-                projectPanel.getTestProjectSelector().addTestProject(newTestProjectDirectory);
+                projectPanel.getTestProjectSelector().addTestProject(newTp);
 
                 Notifier.getInstance().info("New Test Project", String.format("Test Project %s has been added", name));
 
                 if (codeGenerator.isSelected()) {
-                    GeneratorType.CREATE_TEST_PROJECT.getAction().execute(name /*todo, name to be sanitized*/, null);
+                    GeneratorType.CREATE_TEST_PROJECT.getAction().execute(null, newTp.getFqcn());
                 }
             });
         }
@@ -93,7 +92,7 @@ public class CreateTestProject extends DumbAwareAction {
 
     @Override
     public void update(final @NotNull AnActionEvent e) {
-        if (e.getProject() == null || Config.getTestinPath() == null)
+        if (e.getProject() == null || Config.getTestinPath().toString().isEmpty())
             e.getPresentation().setEnabled(false);
     }
 

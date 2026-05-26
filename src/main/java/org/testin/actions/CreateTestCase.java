@@ -12,17 +12,16 @@ import org.testin.editorPanel.IEditorUI;
 import org.testin.editorPanel.testCaseEditor.TestEditorUI;
 import org.testin.pojo.Config;
 import org.testin.pojo.dto.TestCaseDto;
+import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.ui.testCase.CreateTestCaseUI;
-import org.testin.util.Bundle;
 import org.testin.util.KeyboardSet;
 import org.testin.util.Tools;
-import org.testin.util.autoGenerator.CreateJavaMethodInClass;
+import org.testin.util.autoGenerator.GeneratorType;
 import org.testin.util.notifications.Notifier;
 import org.testin.util.services.TestCaseCacheService;
 import org.testin.util.services.TestCasePersistService;
 
 import javax.swing.*;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -32,22 +31,22 @@ public class CreateTestCase extends DumbAwareAction {
     private final CollectionListModel<TestCaseDto> model;
     private final JBList<TestCaseDto> list;
     private final IEditorUI ui;
-    private final Path path;
+    private final DirectoryDto dir;
 
-    public CreateTestCase(final IEditorUI ui, final Path path, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model) {
+    public CreateTestCase(final IEditorUI ui, final DirectoryDto pDir, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model) {
         super("Create Test Case", "Create new test case", AllIcons.Actions.AddToDictionary);
         this.model = model;
         this.list = list;
         this.ui = ui;
-        this.path = path;
+        this.dir = pDir;
         this.registerCustomShortcutSet(KeyboardSet.CreateTestCase.getCustomShortcut(), list);
     }
 
-    public static void execute(final IEditorUI ui, final Path path, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model) {
-        performCreation(ui, path, list, model);
+    public static void execute(final IEditorUI ui, final DirectoryDto dir, final JBList<TestCaseDto> list, final CollectionListModel<TestCaseDto> model) {
+        performCreation(ui, dir, list, model);
     }
 
-    private static void performCreation(final @NotNull IEditorUI ui, final @NotNull Path path, final @NotNull JBList<TestCaseDto> list, final @NotNull CollectionListModel<TestCaseDto> model) {
+    private static void performCreation(final @NotNull IEditorUI ui, final @NotNull DirectoryDto pDir, final @NotNull JBList<TestCaseDto> list, final @NotNull CollectionListModel<TestCaseDto> model) {
         new CreateTestCaseUI((newTc, codeGenerator) -> {
             final boolean isEmpty = model.isEmpty();
             newTc.setIsHead(isEmpty);
@@ -55,67 +54,42 @@ public class CreateTestCase extends DumbAwareAction {
             final TestCaseDto lastTc = isEmpty ? null : model.getElementAt(model.getSize() - 1);
             if (lastTc != null) lastTc.setNext(newTc.getId());
 
-            final List<String> logicalPath = Tools.getInstance().extractLogicalPath(path);
-            newTc.setPath(logicalPath);
-
             final Project project = Config.getProject();
-            final String projectName = project.getName();
 
-            List<String> generatedFqcn;
-            int startIndex = -1;
-
-            for (int i = 0; i < logicalPath.size(); i++) {
-                if (logicalPath.get(i).equalsIgnoreCase(projectName) || logicalPath.get(i).equalsIgnoreCase(Bundle.getPluginName())) {
-                    startIndex = i;
-                    break;
-                }
-            }
-
-            if (startIndex != -1 && startIndex + 1 < logicalPath.size())
-                generatedFqcn = new ArrayList<>(logicalPath.subList(startIndex + 1, logicalPath.size()));
-            else
-                generatedFqcn = new ArrayList<>(logicalPath);
+            List<String> generatedFqcn = new ArrayList<>(pDir.getFqcn());
 
             if (!generatedFqcn.isEmpty()) {
                 int lastIdx = generatedFqcn.size() - 1;
-                String lastElement = generatedFqcn.get(lastIdx);
-                int dotIdx = lastElement.lastIndexOf('.');
-                if (dotIdx > 0) {
-                    generatedFqcn.set(lastIdx, lastElement.substring(0, dotIdx));
-                }
+                String className = Tools.getInstance().sanitizeClassName(generatedFqcn.get(lastIdx));
+                generatedFqcn.set(lastIdx, className);
             }
 
-            String methodName = Tools.getInstance().formatMethodName(newTc.getDescription());
+            String methodName = Tools.getInstance().sanitizeMethodName(newTc.getDescription());
             generatedFqcn.add(methodName);
 
             newTc.setFqcn(generatedFqcn);
+            newTc.setPath(Tools.getInstance().extractLogicalPath(pDir.getPath()));
+
             ui.appendNewTestCase(newTc);
 
             final List<TestCaseDto> affectedNodes = Stream.of(newTc, lastTc).filter(Objects::nonNull).toList();
             TestCaseCacheService.getInstance(project).addNewItems(affectedNodes);
-            TestCasePersistService.getInstance(project).persist(path, affectedNodes);
+
+            TestCasePersistService.getInstance(project).persist(pDir.getPath(), affectedNodes);
             Notifier.getInstance().softShow("Created..");
 
-            if (codeGenerator != null && codeGenerator.isSelected())
-                new CreateJavaMethodInClass().execute(project, newTc.getFqcn(), newTc);
+            if (codeGenerator != null && codeGenerator.isSelected()) {
+                GeneratorType.CREATE_TEST_CASE.getAction().execute(newTc, newTc.getFqcn());
+            }
 
             SwingUtilities.invokeLater(() -> ui.selectTestCase(newTc));
-
-            // todo,to be implemented by use broadcasting
-            /*
-            Config.getProject().getMessageBus()
-                  .syncPublisher(TestCaseEventListener.TEST_CASE_ADDED_TOPIC)
-                  .onTestCaseAdded(newTc);
-            });
-            */
-            //if (tree != null && parentNode != null) TreeUtilImpl.createNode(tree, parentNode, newTc);
 
         }).show();
     }
 
     @Override
     public void actionPerformed(final @NotNull AnActionEvent e) {
-        performCreation(ui, path, list, model);
+        performCreation(ui, dir, list, model);
     }
 
     @Override

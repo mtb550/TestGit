@@ -24,8 +24,8 @@ public class Config {
 
     @Setter
     @Getter
-    @Nullable
-    private static Path testinPath = null;
+    @NotNull
+    private static Path testinPath = Path.of("");
 
     @Setter
     @Getter

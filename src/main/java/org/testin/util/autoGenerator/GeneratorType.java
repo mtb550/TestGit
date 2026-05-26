@@ -25,7 +25,7 @@ public enum GeneratorType {
     CREATE_TEST_CASE(
             "Create Test Case",
             "Create Automation Test Method",
-            new CreateTestCase()
+            new CreateTestMethod()
     ),
 
     UPDATE_TEST_CASE_DESCRIPTION(

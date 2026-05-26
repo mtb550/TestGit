@@ -4,7 +4,6 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogBuilder;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.CheckedTreeNode;
@@ -17,6 +16,7 @@ import org.testin.pojo.dto.dirs.TestRunDirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
 import org.testin.ui.RunCreationForm;
 import org.testin.util.EditorUtil;
+import org.testin.util.notifications.Notifier;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -29,11 +29,11 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class CreateTestRun implements NodeCreator {
+    private TestRunDirectoryDto tr;
 
     @Override
-    public void execute(final CreateTestNode action, final Project project, final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath) {
-
-        TestProjectDirectoryDto tp = action.getProjectPanel().getTestProjectSelector().getSelectedTestProject().getItem();
+    public DirectoryDto execute(final CreateTestNode action, final Project project, final String name, final DefaultMutableTreeNode parentNode, final DirectoryDto parentDir, final Path newDirPath) {
+        final TestProjectDirectoryDto tp = action.getProjectPanel().getTestProjectSelector().getSelectedTestProject().getItem();
 
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             final Path testCasesPath = tp.getTestCasesDirectory().getPath();
@@ -52,19 +52,21 @@ public class CreateTestRun implements NodeCreator {
 
                 dialogBuilder.setOkOperation(() -> {
                     if (form.getFieldValue(TestRunConfiguration.BUILD_NUMBER).isEmpty()) {
-                        Messages.showErrorDialog(project, "Build number is required.", "Validation Error");
+                        Notifier.getInstance().error("Build number is required.", "Validation Error");
                         return;
                     }
 
                     dialogBuilder.getDialogWrapper().close(DialogWrapper.OK_EXIT_CODE);
 
-                    final TestRunDirectoryDto tr = TestRunDirectoryDto.builder().name(name).path(newDirPath).build();
+                    tr = DirectoryMapper.getInstance().testRunNode(newDirPath, parentDir);
                     saveSelectedToJSON(form, name, root, newDirPath, action.getProjectPanel(), tr);
                 });
 
                 dialogBuilder.show();
             });
         });
+
+        return tr;
     }
 
     private void saveSelectedToJSON(final RunCreationForm form, final String runName, final CheckedTreeNode root, final Path savePath, final ProjectPanel projectPanel, final TestRunDirectoryDto tr) {

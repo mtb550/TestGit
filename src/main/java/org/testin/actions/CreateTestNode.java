@@ -44,40 +44,26 @@ public class CreateTestNode extends DumbAwareAction {
         final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
 
         new CreateNodesDialog(parentDir.getMenu(), (name, directoryType, codeGenerator) -> {
+
             if (name == null || name.isEmpty()) return;
-
-            // todo, cover all regex -> dots, slashes ..etc
-            final String processedName = name.replace("_", " ");
-            final String javaPackageName = processedName.replace(" ", "").toLowerCase();
-
+            DirectoryDto dir = null;
             final Path newDirPath = parentDir.getPath().resolve(name);
 
             if (directoryType != null && directoryType.getAction() != null)
-                directoryType.getAction().execute(this, e.getProject(), name, parentNode, parentDir, newDirPath);
+                dir = directoryType.getAction().execute(this, e.getProject(), name, parentNode, parentDir, newDirPath);
+
             else
                 System.out.println("No creation logic defined for type: " + directoryType);
 
-            System.out.println("start generate..");
             if (codeGenerator != null && codeGenerator.isSelected() && directoryType != null && directoryType.getAction() != null) {
+
                 if (directoryType == DirectoryType.TSP) {
-                    System.out.println("Selected directory type: " + directoryType);
-                    GeneratorType.CREATE_TEST_SET_PACKAGE.getAction().execute(javaPackageName, path);
+                    GeneratorType.CREATE_TEST_SET_PACKAGE.getAction().execute(null, dir.getFqcn());
                     return;
                 }
 
                 if (directoryType == DirectoryType.TS) {
-                    System.out.println("Selected directory type: " + directoryType);
-                    GeneratorType.CREATE_TEST_SET.getAction().execute(javaPackageName, path);
-                    return;
-                }
-
-                if (directoryType == DirectoryType.TRP) {
-                    System.out.println("no need to generate, Selected directory type: " + directoryType);
-                    return;
-                }
-
-                if (directoryType == DirectoryType.TR) {
-                    System.out.println("no need to generate, Selected directory type: " + directoryType);
+                    GeneratorType.CREATE_TEST_SET.getAction().execute(null, dir.getFqcn());
                 }
 
             }
