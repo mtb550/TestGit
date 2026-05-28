@@ -33,6 +33,7 @@ import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -52,7 +53,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
     private final List<TestCaseDto> currentTestCases;
 
     @Getter
-    private final @NotNull Map<UUID, TestRunDto.TestRunItems> resultsMap;
+    private final @NotNull Map<UUID, TestRunItems> resultsMap;
 
     CheckboxTree checklistTree;
 
@@ -141,15 +142,15 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
                     Path dirPath = vf.getTestRun().getPath();
                     Path jsonFilePath = dirPath.resolve(vf.getTestRun().getName() + ".json");
 
-                    if (java.nio.file.Files.exists(jsonFilePath)) {
+                    if (Files.exists(jsonFilePath)) {
                         this.tr = Config.getMapper().readValue(jsonFilePath.toFile(), TestRunDto.class);
                     }
                 }
 
                 if (this.tr != null) {
-                    Map<UUID, TestRunDto.TestRunItems> newResults = this.tr.getResults().stream()
+                    Map<UUID, TestRunItems> newResults = this.tr.getResults().stream()
                             .collect(Collectors.toMap(
-                                    TestRunDto.TestRunItems::getTestCaseId,
+                                    TestRunItems::getId,
                                     item -> item,
                                     (existingItem, duplicateItem) -> existingItem
                             ));
@@ -173,9 +174,9 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
                         allTestCases.addAll(items);
                         currentTestCases.addAll(items);
                         items.forEach(item -> {
-                            final TestRunDto.TestRunItems runItem = resultsMap.get(item.getId());
+                            final TestRunItems runItem = resultsMap.get(item.getId());
                             if (runItem != null)
-                                runItem.setTestCaseDetails(item);
+                                runItem.setTc(item);
                         });
                         refreshView();
                     }
@@ -431,7 +432,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
         list.ensureIndexIsVisible(index);
 
         TestCaseDto currentTc = currentTestCases.get(index);
-        TestRunDto.TestRunItems runItem = resultsMap.get(currentTc.getId());
+        TestRunItems runItem = resultsMap.get(currentTc.getId());
 
         if (runItem == null) return;
 
@@ -453,7 +454,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
         if (currentlyExecutingIndex == -1) return;
 
         TestCaseDto currentTc = currentTestCases.get(currentlyExecutingIndex);
-        TestRunDto.TestRunItems item = resultsMap.get(currentTc.getId());
+        TestRunItems item = resultsMap.get(currentTc.getId());
 
         if (item != null) {
             item.setStatus(status);
@@ -465,7 +466,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
     }
 
     public void handleManualStatusUpdate(final TestCaseDto tc, final TestStatus newStatus) {
-        TestRunDto.TestRunItems item = resultsMap.get(tc.getId());
+        TestRunItems item = resultsMap.get(tc.getId());
         if (item != null) {
             item.setStatus(newStatus);
             item.setExecutedAt(LocalDateTime.now());

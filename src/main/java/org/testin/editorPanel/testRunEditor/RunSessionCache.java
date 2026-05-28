@@ -3,8 +3,10 @@ package org.testin.editorPanel.testRunEditor;
 import com.intellij.openapi.application.ApplicationManager;
 import lombok.Setter;
 import org.testin.pojo.Config;
+import org.testin.pojo.TestRunItems;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.pojo.dto.TestRunDto;
+import org.testin.util.Tools;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,7 +46,7 @@ public class RunSessionCache {
     }
 
     public void startLoadingAsync() {
-        if (tr == null || tr.getTestCase().isEmpty()) {
+        if (tr == null || tr.getResults().isEmpty()) {
             notifyLoadComplete(Collections.emptyList());
             return;
         }
@@ -53,13 +55,22 @@ public class RunSessionCache {
             final List<TestCaseDto> batch = new ArrayList<>();
             final int BATCH_SIZE = 5;
 
-            for (final TestRunDto.TestCase tcPathObj : tr.getTestCase()) {
+            final Map<List<String>, List<UUID>> pathMap = new HashMap<>();
+            for (TestRunItems item : tr.getResults()) {
+                pathMap.computeIfAbsent(item.getPath(), k -> new ArrayList<>()).add(item.getId());
+            }
+
+            for (final Map.Entry<List<String>, List<UUID>> entry : pathMap.entrySet()) {
                 if (isDisposed) break;
 
-                final Path dirPath = tcPathObj.getPath();
-                final List<UUID> targetIds = tcPathObj.getUuid();
+                final List<String> pathSegments = entry.getKey();
+                final List<UUID> targetIds = entry.getValue();
+
+                final Path dirPath = Tools.getInstance().buildLocalPathFromList(pathSegments);
 
                 if (dirPath == null || !Files.exists(dirPath) || targetIds.isEmpty()) {
+                    System.err.println("[WARNING] directory path not found: " + dirPath);
+                    System.err.println("[WARNING] path not found: " + pathSegments);
                     continue;
                 }
 
@@ -76,9 +87,6 @@ public class RunSessionCache {
                                     if (tc != null && idsToFind.contains(tc.getId())) {
                                         loadedItems.add(tc);
                                         batch.add(tc);
-
-                                        final String moduleName = tc.getModule();
-                                        if (!moduleName.trim().isEmpty()) loadedModules.add(moduleName.trim());
 
                                         if (batch.size() >= BATCH_SIZE) {
                                             final List<TestCaseDto> itemsToSend = new ArrayList<>(batch);

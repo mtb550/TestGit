@@ -9,10 +9,6 @@ import javax.swing.*;
 @Getter
 @AllArgsConstructor
 public enum TestRunConfiguration {
-    BUILD_NUMBER("Build Number",
-            AllIcons.Actions.Edit,
-            null
-    ),
 
     PLATFORM(
             "Platform",

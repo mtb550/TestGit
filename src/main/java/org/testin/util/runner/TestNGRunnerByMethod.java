@@ -97,7 +97,7 @@ public class TestNGRunnerByMethod {
         boolean startAdding = false;
         for (String part : rawFqcn) {
             if (startAdding) {
-                if (!part.equalsIgnoreCase(DirectoryType.TCD.getPathName())) {
+                if (!part.equalsIgnoreCase(DirectoryType.TCD.getDisplayedName())) {
                     sanitized.add(part.replace(" ", "").toLowerCase());
                 }
             }

@@ -68,7 +68,7 @@ public class CreateTestCase extends DumbAwareAction {
             generatedFqcn.add(methodName);
 
             newTc.setFqcn(generatedFqcn);
-            newTc.setPath(Tools.getInstance().extractLogicalPath(pDir.getPath()));
+            newTc.setPath(pDir.getPath2());
 
             ui.appendNewTestCase(newTc);
 

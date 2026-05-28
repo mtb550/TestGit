@@ -16,6 +16,7 @@ import com.intellij.util.ui.tree.TreeUtil;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.TestRunConfiguration;
+import org.testin.pojo.TestRunItems;
 import org.testin.pojo.TestStatus;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.pojo.dto.TestRunDto;
@@ -35,7 +36,7 @@ public class RunCreationForm {
 
     private final Map<TestRunConfiguration, JComponent> fieldMap = new EnumMap<>(TestRunConfiguration.class);
 
-    public RunCreationForm(final String runName, final CheckedTreeNode root, final Map<UUID, TestRunDto.TestRunItems> resultsMap) {
+    public RunCreationForm(final String runName, final CheckedTreeNode root, final Map<UUID, TestRunItems> resultsMap) {
         mainPanel = new JBPanel<>(new BorderLayout());
 
         JBTextField runNameField = new JBTextField(runName);
@@ -46,14 +47,8 @@ public class RunCreationForm {
                 .addLabeledComponent("Run name:", runNameField);
 
         for (TestRunConfiguration field : TestRunConfiguration.values()) {
-            JComponent inputComponent;
 
-            if (field == TestRunConfiguration.BUILD_NUMBER) {
-                inputComponent = new JBTextField();
-            } else {
-                inputComponent = createEditableCombo(field.getOptions());
-            }
-
+            JComponent inputComponent = createEditableCombo(field.getOptions());
             fieldMap.put(field, inputComponent);
 
             JBLabel label = new JBLabel(field.getDisplayName() + ":", field.getIcon(), SwingConstants.LEFT);
@@ -85,7 +80,7 @@ public class RunCreationForm {
         return comboBox;
     }
 
-    private CheckboxTree.CheckboxTreeCellRenderer createTreeRenderer(final Map<UUID, TestRunDto.TestRunItems> resultsMap) {
+    private CheckboxTree.CheckboxTreeCellRenderer createTreeRenderer(final Map<UUID, TestRunItems> resultsMap) {
         return new CheckboxTree.CheckboxTreeCellRenderer() {
             @Override
             public void customizeRenderer(final @NotNull JTree tree, final @NotNull Object value, final boolean selected,
@@ -97,7 +92,7 @@ public class RunCreationForm {
                     getTextRenderer().append(dir.getName(), SimpleTextAttributes.REGULAR_ATTRIBUTES);
 
                 } else if (userObj instanceof TestCaseDto tc) {
-                    final TestRunDto.TestRunItems result = resultsMap.get(tc.getId());
+                    final TestRunItems result = resultsMap.get(tc.getId());
                     if (result != null) {
                         final TestStatus status = result.getStatus();
                         getTextRenderer().append(tc.getDescription(), status.getStyle());
@@ -115,8 +110,7 @@ public class RunCreationForm {
     }
 
     public void populateConfiguration(final TestRunDto tr) {
-        tr.setBuildNumber(getFieldValue(TestRunConfiguration.BUILD_NUMBER))
-                .setPlatform(getFieldValue(TestRunConfiguration.PLATFORM))
+        tr.setPlatform(getFieldValue(TestRunConfiguration.PLATFORM))
                 .setLanguage(getFieldValue(TestRunConfiguration.LANGUAGE))
                 .setBrowser(getFieldValue(TestRunConfiguration.BROWSER))
                 .setDeviceType(getFieldValue(TestRunConfiguration.DEVICE_TYPE));

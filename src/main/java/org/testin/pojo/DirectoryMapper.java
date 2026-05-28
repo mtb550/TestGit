@@ -27,20 +27,23 @@ public class DirectoryMapper {
                     .pathName(fileName)
                     .fqcn(List.of(Tools.getInstance().sanitizePackageName(fileName)))
                     //.projectStatus(ProjectStatus.valueOf(parts[1])) // todo, to be moved to .pr file
+                    .path2(Tools.getInstance().buildPath2(null, fileName))
                     .build();
 
             TestCasesMainDirectoryDto tcd = TestCasesMainDirectoryDto.builder()
-                    .path(path.resolve(DirectoryType.TCD.getPathName()))
+                    .path(path.resolve(DirectoryType.TCD.getDisplayedName()))
                     .name(DirectoryType.TCD.getDisplayedName())
                     .fqcn(tp.getFqcn())
                     .parent(tp)
+                    .path2(Tools.getInstance().buildPath2(tp.getPath2(), DirectoryType.TCD.getDisplayedName()))
                     .build();
 
             TestRunsMainDirectoryDto trd = TestRunsMainDirectoryDto.builder()
-                    .path(path.resolve(DirectoryType.TRD.getPathName()))
+                    .path(path.resolve(DirectoryType.TRD.getDisplayedName()))
                     .name(DirectoryType.TRD.getDisplayedName())
                     .fqcn(tp.getFqcn())
                     .parent(tp)
+                    .path2(Tools.getInstance().buildPath2(tp.getPath2(), DirectoryType.TRD.getDisplayedName()))
                     .build();
 
             tp.setTestCasesDirectory(tcd);
@@ -57,15 +60,16 @@ public class DirectoryMapper {
         }
     }
 
-    public TestCasesMainDirectoryDto testCasesRootNode(final Path path, final TestProjectDirectoryDto parent) {
+    public TestCasesMainDirectoryDto testCasesRootNode(final Path path, final DirectoryDto parent) {
         final String fileName = path.getFileName().toString();
         try {
             TestCasesMainDirectoryDto testCasesMainDirectoryDto = TestCasesMainDirectoryDto
                     .builder()
-                    .name(path.getFileName().toString())
+                    .name(fileName)
                     .path(path)
                     .parent(parent)
                     .fqcn(parent.getFqcn())
+                    .path2(Tools.getInstance().buildPath2(parent.getPath2(), fileName))
                     .build();
 
             System.out.println("retrieve the test cases main directory: " + testCasesMainDirectoryDto);
@@ -79,15 +83,16 @@ public class DirectoryMapper {
         }
     }
 
-    public TestRunsMainDirectoryDto testRunsRootNode(final Path path, final TestProjectDirectoryDto parent) {
+    public TestRunsMainDirectoryDto testRunsRootNode(final Path path, final DirectoryDto parent) {
         final String fileName = path.getFileName().toString();
         try {
             TestRunsMainDirectoryDto testRunsMainDirectoryDto = TestRunsMainDirectoryDto
                     .builder()
-                    .name(path.getFileName().toString())
+                    .name(fileName)
                     .path(path)
                     .parent(parent)
                     .fqcn((parent.getFqcn()))
+                    .path2(Tools.getInstance().buildPath2(parent.getPath2(), fileName))
                     .build();
 
             System.out.println("retrieve the test runs main directory: " + testRunsMainDirectoryDto);
@@ -110,6 +115,7 @@ public class DirectoryMapper {
                     .path(path)
                     .parent(parent)
                     .fqcn(Tools.getInstance().appendFqcn(parent.getFqcn(), fileName, DirectoryType.TSP))
+                    .path2(Tools.getInstance().buildPath2(parent.getPath2(), fileName))
                     .build();
 
             System.out.println("retrieve the test set package directory: " + testSetPackageDirectoryDto);
@@ -132,6 +138,7 @@ public class DirectoryMapper {
                     .path(path)
                     .parent(parent)
                     .fqcn(Tools.getInstance().appendFqcn(parent.getFqcn(), fileName, DirectoryType.TRP))
+                    .path2(Tools.getInstance().buildPath2(parent.getPath2(), fileName))
                     .build();
 
             System.out.println("retrieve the test run package directory: " + testRunPackageDirectoryDto);
@@ -148,12 +155,14 @@ public class DirectoryMapper {
     public TestSetDirectoryDto testSetNode(final Path path, final DirectoryDto parent) {
         final String fileName = path.getFileName().toString();
         try {
+            System.out.println("retrieve the test set directory: " + fileName);
             TestSetDirectoryDto testSetDirectoryDto = TestSetDirectoryDto
                     .builder()
                     .name(fileName)
                     .path(path)
                     .parent(parent)
                     .fqcn(Tools.getInstance().appendFqcn(parent.getFqcn(), fileName, DirectoryType.TS))
+                    .path2(Tools.getInstance().buildPath2(parent.getPath2(), fileName))
                     .build();
 
             System.out.println("retrieve the test set directory: " + testSetDirectoryDto);
@@ -176,6 +185,7 @@ public class DirectoryMapper {
                     .path(path)
                     .parent(parent)
                     .fqcn(Tools.getInstance().appendFqcn(parent.getFqcn(), fileName, DirectoryType.TR))
+                    .path2(Tools.getInstance().buildPath2(parent.getPath2(), fileName))
                     .build();
 
             System.out.println("retrieve the test run directory: " + testRunDirectoryDto);

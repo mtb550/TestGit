@@ -27,7 +27,7 @@ public class UpdateTestCaseDescription {
                     if (cleanedFqcn.isEmpty()) return;
 
                     List<String> packageList = new ArrayList<>(cleanedFqcn);
-                    String baseClassName = packageList.remove(packageList.size() - 1);
+                    String baseClassName = packageList.removeLast();
                     String expectedClassName = Tools.getInstance().toPascalCase(baseClassName);
 
                     if (expectedClassName.toLowerCase().endsWith("test")) {
@@ -91,7 +91,7 @@ public class UpdateTestCaseDescription {
         boolean startAdding = false;
         for (String part : rawFqcn) {
             if (startAdding) {
-                if (!part.equalsIgnoreCase(DirectoryType.TCD.getPathName())) {
+                if (!part.equalsIgnoreCase(DirectoryType.TCD.getDisplayedName())) {
                     sanitized.add(part.replace(" ", "").toLowerCase());
                 }
             }

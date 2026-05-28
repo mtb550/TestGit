@@ -58,12 +58,12 @@ public final class HtmlGenerator {
             AtomicInteger seq = new AtomicInteger(1);
 
             tr.getResults().forEach(result -> {
-                UUID id = result.getTestCaseId();
+                UUID id = result.getId();
                 TestCaseDto d = detailsMap.get(id);
 
                 html.append("<tr>")
                         .append(cell("col-seq", String.valueOf(seq.getAndIncrement()), "40px"))
-                        .append(cell("col-id", id == null ? "" : id.toString(), "250px"))
+                        .append(cell("col-id", id.toString(), "250px"))
                         .append(descriptionCell(d.getDescription()))
                         .append(statusCell(result.getStatus()))
                         .append(durationCell(result.getDuration()))

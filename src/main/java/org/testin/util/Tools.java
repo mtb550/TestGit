@@ -5,9 +5,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.treeStructure.SimpleTree;
 import lombok.AccessLevel;
@@ -21,7 +19,6 @@ import org.testin.pojo.Group;
 import org.testin.pojo.Priority;
 import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.pojo.dto.dirs.TestProjectDirectoryDto;
-import org.testin.settings.AppSettingsState;
 import org.testin.util.notifications.Notifier;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -35,10 +32,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -105,14 +100,17 @@ public class Tools {
     }
 
     public List<String> appendFqcn(final List<String> pFqcn, final String s, final DirectoryType t) {
-        List<String> newFqcn = new ArrayList<>(pFqcn.size() + 1);
-        newFqcn.addAll(pFqcn);
+        List<String> source = (pFqcn != null) ? pFqcn : Collections.emptyList();
+
+        List<String> newFqcn = new ArrayList<>(source.size() + 1);
+        newFqcn.addAll(source);
 
         if (t == DirectoryType.TSP || t == DirectoryType.TP)
             newFqcn.add(sanitizePackageName(s));
-
         else if (t == DirectoryType.TS)
             newFqcn.add(sanitizeClassName(s));
+        else
+            return newFqcn;
 
         return newFqcn;
     }
@@ -160,30 +158,6 @@ public class Tools {
         return result.toString();
     }
 
-    public @NotNull List<String> extractLogicalPath(final @NotNull Path path) {
-        if (path.toString().isEmpty()) return new ArrayList<>();
-
-        String pathStr = path.toAbsolutePath().toString().replace("\\", "/");
-
-        int markerIndex = pathStr.indexOf("/org/testin/");
-        if (markerIndex != -1) {
-            pathStr = pathStr.substring(markerIndex + "/org/testin/".length());
-        } else if (pathStr.startsWith("org/testin/")) {
-            pathStr = pathStr.substring("org/testin/".length());
-        }
-
-        String[] segments = pathStr.split("/");
-        List<String> logicalPath = new ArrayList<>();
-
-        for (String segment : segments) {
-            if (segment.isEmpty() || segment.equals(DirectoryType.TCD.getPathName())) continue;
-
-            logicalPath.add(segment);
-        }
-
-        return logicalPath;
-    }
-
     public void updateChildrenPathsRecursive(final DefaultMutableTreeNode parentNode, final Path oldParentPath, final Path newParentPath) {
         for (int i = 0; i < parentNode.getChildCount(); i++) {
             DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) parentNode.getChildAt(i);
@@ -202,76 +176,6 @@ public class Tools {
     public String getFormattedDuration(final Duration duration) {
         if (duration == null) return null;
         return String.format("%02d:%02d:%02d", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
-    }
-
-    public void createJavaClassInTestRoot(@NotNull final Project project, @NotNull final String packageName, @NotNull final String className) {
-
-        ApplicationManager.getApplication().invokeLater(() ->
-                ApplicationManager.getApplication().runWriteAction(() -> {
-                    try {
-                        ProjectRootManager rootManager = ProjectRootManager.getInstance(project);
-
-                        VirtualFile testRoot = Arrays.stream(rootManager.getContentSourceRoots())
-                                .filter(root -> rootManager.getFileIndex().isInTestSourceContent(root))
-                                .findFirst()
-                                .orElse(null);
-
-                        if (testRoot != null) {
-                            String basePath = AppSettingsState.getInstance().rootAutomationPath;
-
-                            String safePackageName = !packageName.isEmpty() ? toCamelCase(packageName) : "";
-
-                            String safeCamelClass = toCamelCase(className);
-                            String safeClassName = safeCamelClass.substring(0, 1).toUpperCase() + safeCamelClass.substring(1);
-                            safeClassName += "Test";
-
-                            String relativePackagePath = basePath != null && !basePath.trim().isEmpty() ? basePath.replace(".", "/") : "";
-                            String fullPackageDeclaration = basePath != null && !basePath.trim().isEmpty() ? basePath : "";
-
-                            if (!safePackageName.isEmpty()) {
-                                relativePackagePath = relativePackagePath.isEmpty() ? safePackageName : relativePackagePath + "/" + safePackageName;
-                                fullPackageDeclaration = fullPackageDeclaration.isEmpty() ? safePackageName : fullPackageDeclaration + "." + safePackageName;
-                            }
-
-                            VirtualFile targetDirectory = VfsUtil.createDirectoryIfMissing(testRoot, relativePackagePath);
-
-                            if (targetDirectory != null) {
-                                String fileName = safeClassName + ".java";
-                                VirtualFile existingFile = targetDirectory.findChild(fileName);
-
-                                if (existingFile == null) {
-                                    VirtualFile newClassFile = targetDirectory.createChildData(Tools.class, fileName);
-
-                                    String classContent = buildClassContent(fullPackageDeclaration, safeClassName);
-                                    VfsUtil.saveText(newClassFile, classContent);
-
-                                    System.out.println("[TRACE] Successfully created Java class: " + newClassFile.getPath());
-
-                                } else {
-                                    System.out.println("[WARNING] Java class already exists: " + fileName);
-                                }
-                            }
-                        } else {
-                            System.out.println("[WARNING] No Test Source Root found in the project.");
-                        }
-                    } catch (Exception ex) {
-                        System.err.println("[ERROR] Failed to create Java class: " + ex.getMessage());
-                    }
-                }));
-    }
-
-    private String buildClassContent(String fullPackageName, String className) {
-        StringBuilder content = new StringBuilder();
-
-        if (fullPackageName != null && !fullPackageName.isEmpty()) {
-            content.append("package ").append(fullPackageName).append(";\n\n");
-        }
-
-        content.append("public class ").append(className).append(" {\n\n");
-        content.append("    // TODO: Auto-generated test class\n\n");
-        content.append("}\n");
-
-        return content.toString();
     }
 
     public @Nullable VirtualFile getTestSourceRoot(final @NotNull Project project) {
@@ -402,19 +306,6 @@ public class Tools {
                 .collect(Collectors.toList());
     }
 
-    public List<String> sanitizeFqcn(final List<String> rawFqcn) {
-        List<String> sanitized = new ArrayList<>();
-        for (String part : rawFqcn) {
-            if (part.contains("/") || part.contains("\\")) {
-                continue;
-            }
-            if (!part.equalsIgnoreCase(DirectoryType.TCD.getPathName())) {
-                sanitized.add(part.replace(" ", ""));
-            }
-        }
-        return sanitized;
-    }
-
     public String sanitizeMethodName(final String description) {
         if (description == null || description.isEmpty()) return "testMethod";
 
@@ -436,4 +327,23 @@ public class Tools {
         return methodName.toString();
     }
 
+    public ArrayList<String> buildPath2(final @Nullable List<String> parentPath, final @NotNull String newName) {
+        ArrayList<String> newPath = new ArrayList<>();
+
+        if (parentPath != null) newPath.addAll(parentPath);
+        newPath.add(newName);
+
+        return newPath;
+    }
+
+    public Path buildLocalPathFromList(final List<String> pathSegments) {
+        Path currentPath = Path.of(Config.getTestinPath().toString());
+
+        if (pathSegments != null && !pathSegments.isEmpty()) {
+            for (String segment : pathSegments) {
+                currentPath = currentPath.resolve(segment);
+            }
+        }
+        return currentPath;
+    }
 }

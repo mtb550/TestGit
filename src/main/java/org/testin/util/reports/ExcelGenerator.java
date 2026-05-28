@@ -45,8 +45,8 @@ public final class ExcelGenerator {
 
             row++;
             for (var result : tr.getResults()) {
-                UUID id = result.getTestCaseId();
-                ws.value(row, 0, id != null ? id.toString() : "N/A");
+                UUID id = result.getId();
+                ws.value(row, 0, id.toString());
 
                 TestCaseDto details = (detailsMap != null) ? detailsMap.get(id) : null;
                 String title = details != null ? details.getDescription() : "N/A";

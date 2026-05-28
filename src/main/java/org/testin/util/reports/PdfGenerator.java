@@ -44,8 +44,8 @@ public final class PdfGenerator {
                     .setMarginBottom(20);
             document.add(header);
 
-            document.add(new Paragraph("Platform: " + (tr.getPlatform() != null ? tr.getPlatform() : "N/A")));
-            document.add(new Paragraph("Status: " + (tr.getStatus() != null ? tr.getStatus().name() : "N/A")).setMarginBottom(20));
+            document.add(new Paragraph("Platform: " + tr.getPlatform()));
+            document.add(new Paragraph("Status: " + tr.getStatus().name()).setMarginBottom(20));
 
             Table table = new Table(UnitValue.createPercentArray(new float[]{10, 50, 20, 20})).useAllAvailableWidth();
 
@@ -54,11 +54,11 @@ public final class PdfGenerator {
             table.addHeaderCell(createHeaderCell("Status", boldFont));
             table.addHeaderCell(createHeaderCell("Duration", boldFont));
 
-            if (tr.getResults() != null && !tr.getResults().isEmpty()) {
+            if (!tr.getResults().isEmpty()) {
                 AtomicInteger seq = new AtomicInteger(1);
 
                 tr.getResults().forEach(result -> {
-                    UUID id = result.getTestCaseId();
+                    UUID id = result.getId();
 
                     table.addCell(new Cell().add(new Paragraph(String.valueOf(seq.getAndIncrement())))
                             .setTextAlignment(TextAlignment.CENTER));

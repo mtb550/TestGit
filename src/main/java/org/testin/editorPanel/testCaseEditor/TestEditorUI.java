@@ -161,6 +161,7 @@ public class TestEditorUI implements Disposable, IToolBar, IEditorUI {
                 allTestCases.addAll(items);
                 currentTestCases.addAll(items);
                 items.forEach(item -> unsortedIds.add(item.getId()));
+                items.forEach(item -> item.setPath(vf.getTestSet().getPath2()));
                 refreshView();
             }
 

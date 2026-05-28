@@ -3,7 +3,6 @@ package org.testin.pojo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.testin.editorPanel.Shared;
-import org.testin.pojo.dto.TestRunDto;
 
 import javax.swing.*;
 import java.util.List;
@@ -20,7 +19,7 @@ public enum RunEditorAttributes {
             "Description",
             true,
             true,
-            item -> item.getTestCaseDetails().getDescription(),
+            item -> item.getTc().getDescription(),
             null
     ),
 
@@ -28,7 +27,7 @@ public enum RunEditorAttributes {
             "Expected Result",
             true,
             true,
-            item -> item.getTestCaseDetails().getExpectedResult(),
+            item -> item.getTc().getExpectedResult(),
             null
     ),
 
@@ -36,7 +35,7 @@ public enum RunEditorAttributes {
             "Steps",
             true,
             true,
-            item -> String.join(", ", item.getTestCaseDetails().getSteps()),
+            item -> String.join(", ", item.getTc().getSteps()),
             null
     ),
 
@@ -44,23 +43,23 @@ public enum RunEditorAttributes {
             "Priority",
             true,
             true,
-            item -> item.getTestCaseDetails().getPriority().getName(),
-            item -> List.of(Shared.createPriorityBadge(item.getTestCaseDetails()))
+            item -> item.getTc().getPriority().getName(),
+            item -> List.of(Shared.createPriorityBadge(item.getTc()))
     ),
 
     GROUP(
             "Group",
             true,
             true,
-            item -> item.getTestCaseDetails().getGroup().stream().map(Group::getName).collect(Collectors.joining(", ")),
-            item -> item.getTestCaseDetails().getGroup().stream().map(Shared::createGroupBadge).collect(Collectors.<JComponent>toList())
+            item -> item.getTc().getGroup().stream().map(Group::getName).collect(Collectors.joining(", ")),
+            item -> item.getTc().getGroup().stream().map(Shared::createGroupBadge).collect(Collectors.<JComponent>toList())
     ),
 
     ACTUAL_RESULT(
             "Actual Result",
             true,
             true,
-            TestRunDto.TestRunItems::getActualResult,
+            TestRunItems::getActualResult,
             null
     ),
 
@@ -87,17 +86,17 @@ public enum RunEditorAttributes {
             "Path",
             true,
             true,
-            item -> String.join(".", item.getTestCaseDetails().getPath()),
+            item -> String.join(" > ", item.getPath()),
             null
     );
 
     private final String name;
     private final boolean standardToolBarOption;
     private final boolean defaultToolBarSelected;
-    private final Function<TestRunDto.TestRunItems, String> valueExtractor;
-    private final Function<TestRunDto.TestRunItems, List<JComponent>> drawItem;
+    private final Function<TestRunItems, String> valueExtractor;
+    private final Function<TestRunItems, List<JComponent>> drawItem;
 
-    public void applyToUI(final TestRunDto.TestRunItems runItem, final List<JComponent> badges, final Map<String, String> details) {
+    public void applyToUI(final TestRunItems runItem, final List<JComponent> badges, final Map<String, String> details) {
         if (drawItem != null) badges.addAll(drawItem.apply(runItem));
         else details.put(name, valueExtractor.apply(runItem));
     }

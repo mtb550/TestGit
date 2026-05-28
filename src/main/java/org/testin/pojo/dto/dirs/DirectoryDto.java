@@ -11,6 +11,7 @@ import org.testin.pojo.CreateNodeMenu;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -22,6 +23,8 @@ public abstract class DirectoryDto {
     private String name;
 
     private Path path;
+
+    private ArrayList<String> path2;
 
     private List<String> fqcn;
 
@@ -41,11 +44,6 @@ public abstract class DirectoryDto {
 
     @JsonAlias("modified_by")
     private String modifiedBy;
-
-    @ToString.Include(name = "parentName")
-    private String getParentNameForToString() {
-        return parent != null ? parent.getName() : "null";
-    }
 
     public abstract CreateNodeMenu getMenu();
 }

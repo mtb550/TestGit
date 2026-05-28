@@ -8,9 +8,9 @@ import com.intellij.util.ui.JBUI;
 import org.testin.editorPanel.BaseCard;
 import org.testin.pojo.CardHoverAction;
 import org.testin.pojo.RunEditorAttributes;
+import org.testin.pojo.TestRunItems;
 import org.testin.pojo.TestStatus;
 import org.testin.pojo.dto.TestCaseDto;
-import org.testin.pojo.dto.TestRunDto;
 
 import javax.swing.*;
 import java.awt.*;
@@ -50,7 +50,7 @@ public class RunCard extends BaseCard {
         this.add(actionPanel, BorderLayout.EAST);
     }
 
-    public void updateData(final int index, final TestCaseDto tc, final Set<?> activeDetails, final TestRunDto.TestRunItems runItem) {
+    public void updateData(final int index, final TestCaseDto tc, final Set<?> activeDetails, final TestRunItems runItem) {
         badges.clear();
         details.clear();
 

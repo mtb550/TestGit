@@ -17,7 +17,6 @@ public enum DirectoryType {
     TP(
             "Test Project",
             null,
-            null,
             AllIcons.Nodes.Project,
             TestProjectDirectoryDto.class,
             ".tp",
@@ -27,7 +26,6 @@ public enum DirectoryType {
     TCD(
             "Test Cases Directory",
             "Test Cases",
-            "testCases",
             AllIcons.Nodes.Bookmark,
             TestCasesMainDirectoryDto.class,
             ".tcd",
@@ -37,7 +35,6 @@ public enum DirectoryType {
     TRD(
             "Test Runs Directory",
             "Test Runs",
-            "testRuns",
             AllIcons.Nodes.Bookmark,
             TestRunsMainDirectoryDto.class,
             ".trd",
@@ -46,7 +43,6 @@ public enum DirectoryType {
 
     TSP(
             "Test Set Package",
-            null,
             null,
             AllIcons.Nodes.WebFolder,
             TestSetPackageDirectoryDto.class,
@@ -57,7 +53,6 @@ public enum DirectoryType {
     TRP(
             "Test Run Package",
             null,
-            null,
             AllIcons.Nodes.WebFolder,
             TestRunPackageDirectoryDto.class,
             ".trp",
@@ -66,7 +61,6 @@ public enum DirectoryType {
 
     TS(
             "Test Set",
-            null,
             null,
             AllIcons.FileTypes.Text,
             TestSetDirectoryDto.class,
@@ -77,7 +71,6 @@ public enum DirectoryType {
     TR(
             "Test Run",
             null,
-            null,
             AllIcons.Nodes.Services,
             TestRunDirectoryDto.class,
             ".tr",
@@ -87,7 +80,6 @@ public enum DirectoryType {
     IMPORT_TP(
             "Import Project (Git)",
             null,
-            null,
             AllIcons.Vcs.Clone,
             TestProjectDirectoryDto.class,
             null,
@@ -96,7 +88,6 @@ public enum DirectoryType {
 
     private final String description;
     private final String displayedName;
-    private final String pathName;
     private final Icon icon;
     private final Class<? extends DirectoryDto> clazz;
     private final String marker;

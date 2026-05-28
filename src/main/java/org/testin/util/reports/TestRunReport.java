@@ -7,8 +7,10 @@ import com.intellij.notification.NotificationAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ide.CopyPasteManager;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.Config;
+import org.testin.pojo.TestRunItems;
 import org.testin.pojo.dto.TestCaseDto;
 import org.testin.pojo.dto.TestRunDto;
 import org.testin.pojo.dto.dirs.TestRunDirectoryDto;
@@ -37,18 +39,26 @@ public final class TestRunReport {
     }
 
     public void asHtml() {
-        processAndSave("HTML", ".html");
+        processAndSave(ReportFormat.HTML);
     }
 
     public void asPdf() {
-        processAndSave("PDF", ".pdf");
+        processAndSave(ReportFormat.PDF);
     }
 
     public void asExcel() {
-        processAndSave("EXCEL", ".xlsx");
+        processAndSave(ReportFormat.EXCEL);
     }
 
-    private void processAndSave(String format, String extension) {
+    public void asJson() {
+        // TODO: to be implemented
+    }
+
+    public void asXml() {
+        // TODO: to be implemented
+    }
+
+    private void processAndSave(final ReportFormat format) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try {
                 Path dirPath = tr.getPath();
@@ -67,24 +77,20 @@ public final class TestRunReport {
                 byte[] fileBytes;
 
                 switch (format) {
-                    case "HTML" -> {
-                        ///  todo, to be implemented, put report file types in enum class
+                    case HTML -> {
                         String reportHtml = new HtmlGenerator().generate(runData, detailsMap);
                         fileBytes = reportHtml.getBytes(StandardCharsets.UTF_8);
                     }
-
-                    case "PDF" -> fileBytes = new PdfGenerator().generate(runData, detailsMap);
-
-                    case "EXCEL" -> fileBytes = new ExcelGenerator().generate(runData, detailsMap);
-
-                    case null, default -> throw new UnsupportedOperationException("Unknown format: " + format);
+                    case PDF -> fileBytes = new PdfGenerator().generate(runData, detailsMap);
+                    case EXCEL -> fileBytes = new ExcelGenerator().generate(runData, detailsMap);
+                    default -> throw new UnsupportedOperationException("Unknown format: " + format.name());
                 }
 
                 String cleanName = runData.getRunName().replace(".json", "");
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
                 String timestamp = LocalDateTime.now().format(formatter);
 
-                File reportFile = dirPath.resolve(cleanName + "_Report_" + timestamp + extension).toFile();
+                File reportFile = dirPath.resolve(cleanName + "_Report_" + timestamp + format.getExtension()).toFile();
 
                 Files.write(reportFile.toPath(), fileBytes);
 
@@ -101,28 +107,34 @@ public final class TestRunReport {
                 copyAction.getTemplatePresentation().setIcon(AllIcons.Actions.Copy);
 
                 Notifier.getInstance().infoWithActions(
-                        format + " Report Generated",
+                        format.name() + " Report Generated",
                         "Saved successfully: " + reportFile.getName(),
                         openAction,
                         copyAction
                 );
 
             } catch (Exception e) {
-                Notifier.getInstance().error("Report Error", "Failed to generate " + format + " report: " + e.getMessage());
+                Notifier.getInstance().error("Report Error", "Failed to generate " + format.name() + " report: " + e.getMessage());
             }
         });
     }
 
-    private Map<UUID, TestCaseDto> fetchTestCaseDetails(TestRunDto tr) {
+    private Map<UUID, TestCaseDto> fetchTestCaseDetails(final TestRunDto tr) {
         Map<UUID, TestCaseDto> detailsMap = new ConcurrentHashMap<>();
 
-        if (tr.getTestCase().isEmpty()) {
+        if (tr.getResults().isEmpty()) {
             return detailsMap;
         }
 
-        for (TestRunDto.TestCase tcPathObj : tr.getTestCase()) {
-            Path dirPath = tcPathObj.getPath();
-            List<UUID> targetIds = tcPathObj.getUuid();
+        Map<List<String>, List<UUID>> pathMap = new HashMap<>();
+        for (TestRunItems item : tr.getResults()) {
+            pathMap.computeIfAbsent(item.getPath(), k -> new ArrayList<>()).add(item.getId());
+        }
+
+        for (Map.Entry<List<String>, List<UUID>> entry : pathMap.entrySet()) {
+
+            Path dirPath = org.testin.util.Tools.getInstance().buildLocalPathFromList(entry.getKey());
+            List<UUID> targetIds = entry.getValue();
 
             if (dirPath == null || !Files.exists(dirPath) || targetIds.isEmpty()) {
                 continue;
@@ -150,12 +162,19 @@ public final class TestRunReport {
         return detailsMap;
     }
 
-    public void asJson() {
-        // TODO: to be implemented
-    }
+    @Getter // todo, move to separate class
+    public enum ReportFormat {
+        HTML(".html"),
+        PDF(".pdf"),
+        EXCEL(".xlsx"),
+        JSON(".json"),
+        XML(".xml");
 
-    public void asXml() {
-        // TODO: to be implemented
-    }
+        private final String extension;
 
+        ReportFormat(String extension) {
+            this.extension = extension;
+        }
+
+    }
 }
