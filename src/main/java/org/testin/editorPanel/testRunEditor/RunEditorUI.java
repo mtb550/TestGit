@@ -36,7 +36,8 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -458,7 +459,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
 
         if (item != null) {
             item.setStatus(status);
-            item.setExecutedAt(LocalDateTime.now());
+            item.setExecutedAt(ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         }
 
         persistRunDataAsync();
@@ -469,7 +470,7 @@ public class RunEditorUI implements Disposable, IToolBar, IEditorUI {
         TestRunItems item = resultsMap.get(tc.getId());
         if (item != null) {
             item.setStatus(newStatus);
-            item.setExecutedAt(LocalDateTime.now());
+            item.setExecutedAt(ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 
             int tcIndex = currentTestCases.indexOf(tc);
             if (tcIndex != -1 && tcIndex == currentlyExecutingIndex) {

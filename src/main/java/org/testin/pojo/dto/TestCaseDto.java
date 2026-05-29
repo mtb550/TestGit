@@ -3,14 +3,11 @@ package org.testin.pojo.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.*;
 import lombok.experimental.Accessors;
 import org.testin.pojo.Config;
 import org.testin.pojo.Group;
 import org.testin.pojo.Priority;
-import org.testin.util.DateDeserializer;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -84,16 +81,12 @@ public class TestCaseDto {
 
     @NonNull
     @Builder.Default
-    @JsonProperty("createdAt")
-    @JsonDeserialize(using = DateDeserializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Config.DATE_FORMAT_PATTERN, locale = "en_US")
     private ZonedDateTime createdAt = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
     @NonNull
     @Builder.Default
-    @JsonProperty("updatedAt")
-    @JsonDeserialize(using = DateDeserializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "EEEE dd-MM-yyyy 'At' HH:mm:ss '['VV']'", locale = "en_US")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Config.DATE_FORMAT_PATTERN, locale = "en_US")
     private ZonedDateTime updatedAt = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
     @NonNull

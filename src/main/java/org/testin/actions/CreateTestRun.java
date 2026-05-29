@@ -21,7 +21,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -135,7 +136,7 @@ public class CreateTestRun implements NodeCreator {
 
         final String fileName = runName + ".json";
         run.setRunName(fileName);
-        run.setCreatedAt(LocalDateTime.now());
+        run.setCreatedAt(ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         run.setStatus(TestRunStatus.CREATED);
 
         final List<TestRunItems> items = new ArrayList<>();

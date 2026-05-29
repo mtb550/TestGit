@@ -10,7 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.dto.TestCaseDto;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -53,8 +54,8 @@ public class TestRunItems {
 
     @NotNull
     @Builder.Default
-    @JsonFormat(pattern = "EEEE hh:mm a dd.MM.yyyy", locale = "en_US")
-    private LocalDateTime executedAt = LocalDateTime.now();
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Config.DATE_FORMAT_PATTERN, locale = "en_US")
+    private ZonedDateTime executedAt = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
     @NotNull
     @Builder.Default

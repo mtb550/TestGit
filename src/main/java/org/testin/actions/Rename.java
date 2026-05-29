@@ -22,7 +22,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class Rename extends DumbAwareAction {
     private final ProjectPanel projectPanel;
@@ -60,7 +61,7 @@ public class Rename extends DumbAwareAction {
 
             dir.setName(newName);
             dir.setPath(newPath);
-            dir.setModifiedAt(LocalDateTime.now());
+            dir.setModifiedAt(ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS));
             dir.setModifiedBy("Muteb almughyiri");
 
             Tools.getInstance().updateChildrenPathsRecursive(node, oldPath, newPath);

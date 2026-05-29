@@ -6,10 +6,12 @@ import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 import org.jetbrains.annotations.NotNull;
+import org.testin.pojo.Config;
 import org.testin.pojo.TestRunItems;
 import org.testin.pojo.TestRunStatus;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,8 +55,8 @@ public class TestRunDto {
 
     @NotNull
     @Builder.Default
-    @JsonFormat(pattern = "EEEE hh:mm a dd.MM.yyyy", locale = "en_US")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Config.DATE_FORMAT_PATTERN, locale = "en_US")
+    private ZonedDateTime createdAt = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
     @NotNull
     @Builder.Default

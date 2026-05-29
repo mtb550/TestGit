@@ -21,8 +21,6 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -87,10 +85,11 @@ public final class TestRunReport {
                 }
 
                 String cleanName = runData.getRunName().replace(".json", "");
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
-                String timestamp = LocalDateTime.now().format(formatter);
 
-                File reportFile = dirPath.resolve(cleanName + "_Report_" + timestamp + format.getExtension()).toFile();
+                String rawTimestamp = java.time.ZonedDateTime.now().format(Config.getDateFormatterPattern());
+                String safeTimestamp = rawTimestamp.replace(":", "-").replace("/", "-");
+
+                File reportFile = dirPath.resolve(cleanName + "_Report_" + safeTimestamp + format.getExtension()).toFile();
 
                 Files.write(reportFile.toPath(), fileBytes);
 
@@ -115,6 +114,7 @@ public final class TestRunReport {
 
             } catch (Exception e) {
                 Notifier.getInstance().error("Report Error", "Failed to generate " + format.name() + " report: " + e.getMessage());
+                e.printStackTrace(System.err);
             }
         });
     }
