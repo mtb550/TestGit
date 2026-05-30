@@ -100,6 +100,28 @@ public enum TestEditorAttributes {
             TestCaseDto::setReference
     ),
 
+    TEST_DATA(
+            "Test Data",
+            "Test Data:",
+            true,
+            false,
+            true,
+            TestCaseDto::getTestData,
+            null,
+            TestCaseDto::setTestData
+    ),
+
+    PRE_CONDITIONS(
+            "Pre Conditions",
+            "Pre Conditions:",
+            true,
+            false,
+            true,
+            TestCaseDto::getPreConditions,
+            null,
+            TestCaseDto::setPreConditions
+    ),
+
     GROUP(
             "Group",
             "Group:",

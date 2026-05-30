@@ -108,6 +108,28 @@ public enum UpdateTestCaseFields implements IStatusBarItem {
             TestCaseUIBase::getModuleSection
     ),
 
+    TEST_DATA(
+            "Test Data",
+            KeyboardSet.UpdateTestCaseTestData,
+            AllIcons.Nodes.DataTables,
+            new IStatusBarItem[]{SAVE},
+            true,
+            GeneratorType.UPDATE_TEST_CASE_TEST_DATA,
+            (items, updatedItems) -> new TestDataBulkSection().show(items, updatedItems),
+            TestCaseUIBase::getTestDataSection
+    ),
+
+    PRE_CONDITIONS(
+            "Pre Conditions",
+            KeyboardSet.UpdateTestCasePreConditions,
+            AllIcons.Actions.StepOut,
+            new IStatusBarItem[]{SAVE},
+            true,
+            GeneratorType.UPDATE_TEST_CASE_PRE_CONDITIONS,
+            (items, updatedItems) -> new PreConditionsBulkSection().show(items, updatedItems),
+            TestCaseUIBase::getPreConditionsSection
+    ),
+
     AUTO_COMPLETE(
             "Auto Complete",
             KeyboardSet.AutoComplete.getShortcutText(),
@@ -179,30 +201,30 @@ public enum UpdateTestCaseFields implements IStatusBarItem {
     private final String customShortcutText;
     private final Icon icon;
     private final IStatusBarItem[] statusBarItems;
-    private final boolean editMenuItem;
+    private final boolean updateMenuItem;
     private final GeneratorType changeType;
     private final IBulkEditorAction bulkAction;
     private final Function<TestCaseUIBase, ICreateTestCaseSection> sectionExtractor;
 
-    UpdateTestCaseFields(final String name, final KeyboardSet shortcut, final Icon icon, final IStatusBarItem[] statusBarItems, final boolean editMenuItem, final GeneratorType changeType, final IBulkEditorAction bulkAction, final Function<TestCaseUIBase, ICreateTestCaseSection> sectionExtractor) {
+    UpdateTestCaseFields(final String name, final KeyboardSet shortcut, final Icon icon, final IStatusBarItem[] statusBarItems, final boolean updateMenuItem, final GeneratorType changeType, final IBulkEditorAction bulkAction, final Function<TestCaseUIBase, ICreateTestCaseSection> sectionExtractor) {
         this.name = name;
         this.shortcut = shortcut;
         this.customShortcutText = null;
         this.icon = icon;
         this.statusBarItems = statusBarItems;
-        this.editMenuItem = editMenuItem;
+        this.updateMenuItem = updateMenuItem;
         this.changeType = changeType;
         this.bulkAction = bulkAction;
         this.sectionExtractor = sectionExtractor;
     }
 
-    UpdateTestCaseFields(final String name, final String customShortcutText, final Icon icon, final IStatusBarItem[] statusBarItems, final boolean editMenuItem, final GeneratorType changeType, final IBulkEditorAction bulkAction, final Function<TestCaseUIBase, ICreateTestCaseSection> sectionExtractor) {
+    UpdateTestCaseFields(final String name, final String customShortcutText, final Icon icon, final IStatusBarItem[] statusBarItems, final boolean updateMenuItem, final GeneratorType changeType, final IBulkEditorAction bulkAction, final Function<TestCaseUIBase, ICreateTestCaseSection> sectionExtractor) {
         this.name = name;
         this.shortcut = null;
         this.customShortcutText = customShortcutText;
         this.icon = icon;
         this.statusBarItems = statusBarItems;
-        this.editMenuItem = editMenuItem;
+        this.updateMenuItem = updateMenuItem;
         this.changeType = changeType;
         this.bulkAction = bulkAction;
         this.sectionExtractor = sectionExtractor;

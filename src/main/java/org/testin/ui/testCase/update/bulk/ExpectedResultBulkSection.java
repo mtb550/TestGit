@@ -12,12 +12,12 @@ public class ExpectedResultBulkSection extends JsonSplitBulkSection {
     }
 
     @Override
-    protected String getOriginalValue(TestCaseDto tc) {
+    protected String getOriginalValue(final TestCaseDto tc) {
         return tc.getExpectedResult();
     }
 
     @Override
-    protected void appendJsonItem(TestCaseDto tc, int index, boolean isLast, StringBuilder leftSb, StringBuilder rightSb, List<int[]> rightEditableRanges) {
+    protected void appendJsonItem(final TestCaseDto tc, int index, boolean isLast, StringBuilder leftSb, StringBuilder rightSb, List<int[]> rightEditableRanges) {
         String id = escapeJson(tc.getId().toString());
         String escapedDescription = escapeJson(tc.getDescription());
         String escapedExpectedResult = escapeJson(tc.getExpectedResult());

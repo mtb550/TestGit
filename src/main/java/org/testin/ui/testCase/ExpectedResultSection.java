@@ -38,14 +38,14 @@ public class ExpectedResultSection implements ICreateTestCaseSection {
     }
 
     @Override
-    public void showSection(JPanel contentPanel) {
+    public void showSection(final JPanel contentPanel) {
         if (wrapper.getParent() == null)
             contentPanel.add(wrapper);
         expectedResultField.requestFocus();
     }
 
     @Override
-    public void applyTo(TestCaseDto dto) {
+    public void applyTo(final TestCaseDto dto) {
         if (wrapper.getParent() != null) {
             dto.setExpectedResult(expectedResultField.getText().trim());
         }

@@ -141,7 +141,7 @@ public class StepsSection implements ICreateTestCaseSection {
     }
 
     @Override
-    public void applyTo(TestCaseDto dto) {
+    public void applyTo(final TestCaseDto dto) {
         if (wrapper.getParent() != null) {
             List<String> finalSteps = new ArrayList<>();
             for (TextFieldWithAutoCompletion<String> sf : stepFields) {

@@ -8,7 +8,10 @@ import com.intellij.ui.treeStructure.SimpleNode;
 import org.jetbrains.annotations.NotNull;
 import org.testin.pojo.DirectoryMapper;
 import org.testin.pojo.DirectoryType;
-import org.testin.pojo.dto.dirs.*;
+import org.testin.pojo.dto.dirs.DirectoryDto;
+import org.testin.pojo.dto.dirs.TestCasesMainDirectoryDto;
+import org.testin.pojo.dto.dirs.TestProjectDirectoryDto;
+import org.testin.pojo.dto.dirs.TestRunsMainDirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
 
 import java.nio.file.Files;

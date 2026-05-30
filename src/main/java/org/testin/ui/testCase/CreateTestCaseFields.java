@@ -160,6 +160,26 @@ public enum CreateTestCaseFields implements IStatusBarItem {
             "set module"
     ),
 
+    TEST_DATA(
+            "Test Data",
+            KeyboardSet.CreateTestCaseTestData,
+            AllIcons.Nodes.DataTables,
+            new IStatusBarItem[]{SAVE, NAVIGATE_TAB},
+            true,
+            TestCaseUIBase::getTestDataSection,
+            "set test data"
+    ),
+
+    PRE_CONDITIONS(
+            "Pre Conditions",
+            KeyboardSet.CreateTestCasePreConditions,
+            AllIcons.Actions.StepOut,
+            new IStatusBarItem[]{SAVE, NAVIGATE_TAB},
+            true,
+            TestCaseUIBase::getPreConditionsSection,
+            "set pre conditions"
+    ),
+
     STEPS(
             "Steps",
             KeyboardSet.CreateTestCaseAddStep,
@@ -167,7 +187,7 @@ public enum CreateTestCaseFields implements IStatusBarItem {
             new IStatusBarItem[]{SAVE, ADD_STEP, REMOVE_STEP, AUTO_COMPLETE, NAVIGATE_TAB},
             true,
             TestCaseUIBase::getStepsSection,
-            "set step "
+            "set step"
     ),
 
     PRIORITY(

@@ -68,7 +68,7 @@ public class TestCaseUpdateMenu {
     }
 
     private void showMenu(final String title, final Consumer<UpdateTestCaseFields> onSelection) {
-        UpdateTestCaseFields[] fields = Arrays.stream(UpdateTestCaseFields.values()).filter(UpdateTestCaseFields::isEditMenuItem).toArray(UpdateTestCaseFields[]::new);
+        UpdateTestCaseFields[] fields = Arrays.stream(UpdateTestCaseFields.values()).filter(UpdateTestCaseFields::isUpdateMenuItem).toArray(UpdateTestCaseFields[]::new);
         JBList<UpdateTestCaseFields> list = buildMenuList(fields);
         JBPopup popup = buildPopup(title, list);
         registerShortcuts(list, popup, onSelection);
@@ -116,7 +116,7 @@ public class TestCaseUpdateMenu {
         };
 
         Arrays.stream(UpdateTestCaseFields.values())
-                .filter(UpdateTestCaseFields::isEditMenuItem)
+                .filter(UpdateTestCaseFields::isUpdateMenuItem)
                 .forEach(f -> f.bindShortcut(list, () -> {
                     onSelection.accept(f);
                     popup.closeOk(null);

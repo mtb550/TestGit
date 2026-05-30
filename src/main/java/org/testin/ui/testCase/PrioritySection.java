@@ -56,7 +56,7 @@ public class PrioritySection implements ICreateTestCaseSection {
     }
 
     @Override
-    public void showSection(JPanel contentPanel) {
+    public void showSection(final JPanel contentPanel) {
         if (wrapper.getParent() == null)
             contentPanel.add(wrapper);
         priority.requestFocus();
@@ -67,7 +67,7 @@ public class PrioritySection implements ICreateTestCaseSection {
     }
 
     @Override
-    public void applyTo(TestCaseDto dto) {
+    public void applyTo(final TestCaseDto dto) {
         if (wrapper.getParent() != null) {
             dto.setPriority((Priority) Objects.requireNonNull(priority.getSelectedItem()));
         }

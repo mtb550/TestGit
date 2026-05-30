@@ -93,6 +93,14 @@ public class TestCaseDto {
     @Builder.Default
     private String module = "";
 
+    @NonNull
+    @Builder.Default
+    private String testData = "";
+
+    @NonNull
+    @Builder.Default
+    private String preConditions = "";
+
     @JsonIgnore
     @NonNull
     @Builder.Default

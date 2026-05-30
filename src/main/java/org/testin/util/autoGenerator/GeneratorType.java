@@ -46,6 +46,18 @@ public enum GeneratorType {
             new UpdateTestCase()
     ),
 
+    UPDATE_TEST_CASE_TEST_DATA(
+            "Update Test Case",
+            "Update Automation Test Method Test Data",
+            new UpdateTestCase()
+    ),
+
+    UPDATE_TEST_CASE_PRE_CONDITIONS(
+            "Update Test Case",
+            "Update Automation Test Method Pre Conditions",
+            new UpdateTestCase()
+    ),
+
     UPDATE_TEST_CASE_STEPS(
             "Update Test Case",
             "Update Automation Test Method Steps",

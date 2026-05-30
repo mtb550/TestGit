@@ -44,7 +44,7 @@ public class GroupSection implements ICreateTestCaseSection {
     }
 
     @Override
-    public void showSection(JPanel contentPanel) {
+    public void showSection(final JPanel contentPanel) {
         if (wrapper.getParent() == null)
             contentPanel.add(wrapper);
         focusFirstCheckbox();
@@ -60,7 +60,7 @@ public class GroupSection implements ICreateTestCaseSection {
     }
 
     @Override
-    public void applyTo(TestCaseDto dto) {
+    public void applyTo(final TestCaseDto dto) {
         if (wrapper.getParent() != null) {
             ArrayList<Group> selectedGroups = new ArrayList<>();
             for (Component c : group.getComponents()) {
