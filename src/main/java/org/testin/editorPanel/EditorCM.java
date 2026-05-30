@@ -20,6 +20,9 @@ public class EditorCM extends DefaultActionGroup {
         addSeparator();
         add(new UpdateTestCase(ui, list, dir.getPath()));
         add(new CopyTestCase(list));
+        add(new CopyTestCaseNode(list));
+        add(new CutTestCaseNode(list));
+        add(new PasteTestCaseNode(ui, list));
         add(new RemoveTestCase(dir, list, model));
         addSeparator();
         add(new GenerateTestCase(list));

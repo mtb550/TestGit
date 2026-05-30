@@ -12,13 +12,13 @@ import javax.swing.*;
 
 public class CloseTestCaseDetails extends DumbAwareAction {
 
-    public CloseTestCaseDetails(JComponent component) {
+    public CloseTestCaseDetails(final JComponent component) {
         super("Close View Panel");
         this.registerCustomShortcutSet(KeyboardSet.Escape.getCustomShortcut(), component);
     }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public void actionPerformed(final @NotNull AnActionEvent e) {
         ViewPanel viewer = ViewToolWindowFactory.getViewPanel();
         if (viewer != null) {
             viewer.hide().reset();
