@@ -5,6 +5,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.SimpleTree;
 import com.intellij.util.ui.tree.TreeUtil;
 import lombok.Getter;
+import org.testin.pojo.ProjectStatus;
 import org.testin.pojo.dto.dirs.TestProjectDirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
 
@@ -65,15 +66,18 @@ public class ProjectTree {
             if (projectPanel.getTestProjectSelector() != null && projectPanel.getTestProjectSelector().getSelectedTestProject() != null) {
                 testProjectDirectory = (TestProjectDirectoryDto) projectPanel.getTestProjectSelector().getSelectedTestProject().getSelectedItem();
             }
+
             if (testProjectDirectory != null) {
                 mainRoot.setUserObject(testProjectDirectory);
+
+                if (testProjectDirectory.getMarker().getStatus() == ProjectStatus.ACTIVE) {
+                    DefaultMutableTreeNode tcNode = projectPanel.getTestCaseTreeBuilder().getRootNode();
+                    DefaultMutableTreeNode trNode = projectPanel.getTestRunTreeBuilder().getRootNode();
+
+                    if (tcNode != null) mainRoot.add(tcNode);
+                    if (trNode != null) mainRoot.add(trNode);
+                }
             }
-
-            DefaultMutableTreeNode tcNode = projectPanel.getTestCaseTreeBuilder().getRootNode();
-            DefaultMutableTreeNode trNode = projectPanel.getTestRunTreeBuilder().getRootNode();
-
-            if (tcNode != null) mainRoot.add(tcNode);
-            if (trNode != null) mainRoot.add(trNode);
 
             treeModel.reload();
             TreeUtil.expandAll(mainTree);

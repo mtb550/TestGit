@@ -105,6 +105,8 @@ public class RemoveTestCase extends DumbAwareAction {
         if (targetFile == null) {
             try {
                 targetFile = dirVFile.createChildData(this, fileName);
+
+                // todo, use writeValueAsBytes(value) instead of writeValueAsString(value)
                 String jsonContent = Config.getMapper().writerWithDefaultPrettyPrinter().writeValueAsString(item);
                 VfsUtil.saveText(targetFile, jsonContent);
 

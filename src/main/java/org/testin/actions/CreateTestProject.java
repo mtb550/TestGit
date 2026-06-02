@@ -6,17 +6,17 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
-import org.testin.pojo.Config;
-import org.testin.pojo.CreateNodeMenu;
-import org.testin.pojo.DirectoryMapper;
-import org.testin.pojo.DirectoryType;
+import org.testin.pojo.*;
 import org.testin.pojo.dto.dirs.TestProjectDirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
 import org.testin.ui.createNodes.CreateNodesDialog;
+import org.testin.util.Mapper;
 import org.testin.util.TreeUtilImpl;
 import org.testin.util.autoGenerator.GeneratorType;
 import org.testin.util.notifications.Notifier;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class CreateTestProject extends DumbAwareAction {
@@ -52,6 +52,11 @@ public class CreateTestProject extends DumbAwareAction {
             final String tpName = name.trim();
             final Path tpPath = Config.getTestinPath().resolve(tpName);
 
+            if (Files.exists(tpPath)) {
+                Notifier.getInstance().error("Creation Failed", "A test project named '" + tpName + "' already exists.");
+                return;
+            }
+
             TestProjectDirectoryDto newTp = DirectoryMapper.getInstance().testProjectNode(tpPath);
 
             if (newTp == null) {
@@ -61,8 +66,29 @@ public class CreateTestProject extends DumbAwareAction {
 
             TreeUtilImpl.executeVfsAction(Config.getTestinPath(), "IO Error", vf -> {
 
+                if (vf.findChild(tpName) != null) {
+                    Notifier.getInstance().error("Creation Failed", "The directory '" + tpName + "' already exists in the IDE's Virtual File System.");
+                    return;
+                }
+
                 VirtualFile projectDir = vf.createChildDirectory(this, tpName);
-                projectDir.createChildData(this, DirectoryType.TP.getMarker());
+
+                VirtualFile tpFile = projectDir.createChildData(this, DirectoryType.TP.getMarker());
+
+                TestProjectMarker marker = TestProjectMarker.builder()
+                        .status(ProjectStatus.ACTIVE)
+                        .createdBy(System.getProperty("user.name", ""))
+                        .build();
+
+                try {
+                    byte[] jsonContent = Mapper.writeValueAsBytes(marker);
+                    tpFile.setBinaryContent(jsonContent);
+
+                    newTp.setMarker(marker);
+
+                } catch (IOException ex) {
+                    System.err.println("Failed to write JSON to .tp file: " + ex.getMessage());
+                }
 
                 String tcdName = newTp.getTestCasesDirectory().getPath().getFileName().toString();
                 VirtualFile tcdDir = projectDir.createChildDirectory(this, tcdName);

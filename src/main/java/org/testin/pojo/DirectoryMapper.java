@@ -3,6 +3,7 @@ package org.testin.pojo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.testin.pojo.dto.dirs.*;
+import org.testin.util.Mapper;
 import org.testin.util.Tools;
 import org.testin.util.notifications.Notifier;
 
@@ -26,10 +27,11 @@ public class DirectoryMapper {
                     .path(path)
                     .pathName(fileName)
                     .fqcn(List.of(Tools.getInstance().sanitizePackageName(fileName)))
-                    //.projectStatus(ProjectStatus.valueOf(parts[1])) // todo, to be moved to .pr file
                     .path2(Tools.getInstance().buildPath2(null, fileName))
+                    .marker(Mapper.readValue(path.resolve(DirectoryType.TP.getMarker()).toFile(), TestProjectMarker.class))
                     .build();
 
+            // todo, to be removed. call testCasesRootNode instead.
             TestCasesMainDirectoryDto tcd = TestCasesMainDirectoryDto.builder()
                     .path(path.resolve(DirectoryType.TCD.getDisplayedName()))
                     .name(DirectoryType.TCD.getDisplayedName())
@@ -38,6 +40,7 @@ public class DirectoryMapper {
                     .path2(Tools.getInstance().buildPath2(tp.getPath2(), DirectoryType.TCD.getDisplayedName()))
                     .build();
 
+            // todo, to be removed. call testRunsRootNode instead.
             TestRunsMainDirectoryDto trd = TestRunsMainDirectoryDto.builder()
                     .path(path.resolve(DirectoryType.TRD.getDisplayedName()))
                     .name(DirectoryType.TRD.getDisplayedName())
@@ -63,7 +66,7 @@ public class DirectoryMapper {
     public TestCasesMainDirectoryDto testCasesRootNode(final Path path, final DirectoryDto parent) {
         final String fileName = path.getFileName().toString();
         try {
-            TestCasesMainDirectoryDto testCasesMainDirectoryDto = TestCasesMainDirectoryDto
+            TestCasesMainDirectoryDto tcd = TestCasesMainDirectoryDto
                     .builder()
                     .name(fileName)
                     .path(path)
@@ -72,8 +75,8 @@ public class DirectoryMapper {
                     .path2(Tools.getInstance().buildPath2(parent.getPath2(), fileName))
                     .build();
 
-            System.out.println("retrieve the test cases main directory: " + testCasesMainDirectoryDto);
-            return testCasesMainDirectoryDto;
+            System.out.println("retrieve the test cases main directory: " + tcd);
+            return tcd;
 
         } catch (Exception e) {
             Notifier.getInstance().error("Read Test Case Package Failed", "Failed to parse directory: " + path.getFileName());
@@ -86,7 +89,7 @@ public class DirectoryMapper {
     public TestRunsMainDirectoryDto testRunsRootNode(final Path path, final DirectoryDto parent) {
         final String fileName = path.getFileName().toString();
         try {
-            TestRunsMainDirectoryDto testRunsMainDirectoryDto = TestRunsMainDirectoryDto
+            TestRunsMainDirectoryDto trd = TestRunsMainDirectoryDto
                     .builder()
                     .name(fileName)
                     .path(path)
@@ -95,8 +98,8 @@ public class DirectoryMapper {
                     .path2(Tools.getInstance().buildPath2(parent.getPath2(), fileName))
                     .build();
 
-            System.out.println("retrieve the test runs main directory: " + testRunsMainDirectoryDto);
-            return testRunsMainDirectoryDto;
+            System.out.println("retrieve the test runs main directory: " + trd);
+            return trd;
 
         } catch (Exception e) {
             Notifier.getInstance().error("Read Test Case Package Failed", "Failed to parse directory: " + path.getFileName());

@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.testin.pojo.Config;
 import org.testin.pojo.DirectoryMapper;
 import org.testin.pojo.DirectoryType;
+import org.testin.pojo.ProjectStatus;
 import org.testin.pojo.dto.dirs.TestProjectDirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
 
@@ -35,7 +36,7 @@ public class TestProjectSelector {
 
         selectedTestProject.setFocusable(false);
         selectedTestProject.setRenderer(new RendererImpl());
-        selectedTestProject.addActionListener(new Listener(projectPanel));
+        selectedTestProject.addActionListener(new ListenerImpl(projectPanel));
     }
 
     public boolean init() {
@@ -50,8 +51,6 @@ public class TestProjectSelector {
 
         final Path root = Config.getTestinPath();
 
-        if (root == null) return false;
-
         if (Files.exists(root) && Files.isDirectory(root)) {
 
             try (Stream<Path> paths = Files.list(root)) {
@@ -59,14 +58,10 @@ public class TestProjectSelector {
                 paths.filter(Files::isDirectory)
                         .filter(path -> !path.getFileName().toString().startsWith("."))
                         .filter(path -> Files.exists(path.resolve(DirectoryType.TP.getMarker())))
-                        .peek(path -> System.out.println(path.getFileName().toString())) // todo to be removed.
+                        .peek(path -> System.out.println(path.getFileName().toString()))
                         .map(DirectoryMapper.getInstance()::testProjectNode)
                         .filter(Objects::nonNull)
-                        //.filter(p -> p.getProjectStatus() == ProjectStatus.ACTIVE) // todo, to be moved to .tp marker
                         .forEach(testProjectList::addElement);
-
-                for (int i = 0; i < testProjectList.getSize(); i++) // todo, to be removed
-                    System.out.println("project name: " + testProjectList.getElementAt(i).getName() + ". path: " + testProjectList.getElementAt(i).getPath());
 
             } catch (Exception e) {
                 System.err.println("Error reading directory: " + e.getMessage());
@@ -84,7 +79,6 @@ public class TestProjectSelector {
         selectedTestProject.setEnabled(true);
         TestProjectDirectoryDto firstTestTestProjectDirectory = testProjectList.getElementAt(0);
         selectedTestProject.setSelectedItem(firstTestTestProjectDirectory);
-        //filterByTestProject(firstTestProject);
         return true;
     }
 
@@ -137,8 +131,14 @@ public class TestProjectSelector {
     public void filterByTestProject(final TestProjectDirectoryDto testProjectDirectory) {
         System.out.println("Panel.filterByProject(): " + testProjectDirectory.getName());
 
-        projectPanel.getTestCaseTreeBuilder().buildTree(selectedTestProject.getItem());
-        projectPanel.getTestRunTreeBuilder().buildTree(selectedTestProject.getItem());
+        if (testProjectDirectory.getMarker().getStatus() == ProjectStatus.ACTIVE) {
+            projectPanel.getTestCaseTreeBuilder().buildTree(selectedTestProject.getItem());
+            projectPanel.getTestRunTreeBuilder().buildTree(selectedTestProject.getItem());
+        } else {
+            if (projectPanel.getProjectTree() != null) {
+                projectPanel.getProjectTree().updateNodes();
+            }
+        }
 
         if (projectPanel.getBranchSelector() != null) {
             projectPanel.getBranchSelector().updateProject(testProjectDirectory);

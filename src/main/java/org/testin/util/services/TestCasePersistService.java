@@ -44,6 +44,7 @@ public final class TestCasePersistService implements Disposable {
                         targetFile = dirVFile.createChildData(this, fileName);
                     }
 
+                    // todo, use writeValueAsBytes(value) instead of writeValueAsString(value)
                     String jsonContent = Config.getMapper().writerWithDefaultPrettyPrinter().writeValueAsString(tc);
                     VfsUtil.saveText(targetFile, jsonContent);
                 }

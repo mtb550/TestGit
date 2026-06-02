@@ -1,7 +1,9 @@
 package org.testin.projectPanel.tree;
 
+import com.intellij.openapi.application.ApplicationManager;
 import org.testin.pojo.DirectoryMapper;
 import org.testin.pojo.DirectoryType;
+import org.testin.pojo.ProjectStatus;
 import org.testin.pojo.dto.dirs.DirectoryDto;
 import org.testin.pojo.dto.dirs.TestProjectDirectoryDto;
 import org.testin.projectPanel.ProjectPanel;
@@ -16,6 +18,15 @@ public class TestCaseTreeBuilder extends AbstractTreeBuilder {
     }
 
     public void buildTree(final TestProjectDirectoryDto selectedTestProjectDirectory) {
+        if (selectedTestProjectDirectory == null || selectedTestProjectDirectory.getMarker().getStatus() != ProjectStatus.ACTIVE) {
+            this.rootNode = null;
+            ApplicationManager.getApplication().invokeLater(() -> {
+                if (projectPanel.getProjectTree() != null) {
+                    projectPanel.getProjectTree().updateNodes();
+                }
+            });
+            return;
+        }
         super.buildTree(selectedTestProjectDirectory.getTestCasesDirectory());
     }
 

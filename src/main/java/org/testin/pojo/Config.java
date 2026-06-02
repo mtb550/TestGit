@@ -38,6 +38,8 @@ public class Config {
     private static Project project; // todo, to be removed as we can get the project from toolwindow class e.getProject()
 
 
+    // todo, to be removed, call Mapper class instead
+    @Deprecated
     public static ObjectMapper getMapper() {
         return new ObjectMapper()
                 .registerModule(new JavaTimeModule())

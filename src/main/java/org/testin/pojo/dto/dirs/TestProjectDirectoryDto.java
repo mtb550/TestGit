@@ -3,7 +3,7 @@ package org.testin.pojo.dto.dirs;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.testin.pojo.CreateNodeMenu;
-import org.testin.pojo.ProjectStatus;
+import org.testin.pojo.TestProjectMarker;
 
 @Setter
 @Getter
@@ -12,13 +12,14 @@ import org.testin.pojo.ProjectStatus;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class TestProjectDirectoryDto extends DirectoryDto {
-    private ProjectStatus projectStatus;
 
     private TestCasesMainDirectoryDto testCasesDirectory;
 
     private TestRunsMainDirectoryDto testRunsDirectory;
 
     private String pathName;
+
+    private TestProjectMarker marker;
 
     @Override
     public CreateNodeMenu getMenu() {

@@ -7,11 +7,11 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class Listener implements ActionListener {
+public class ListenerImpl implements ActionListener {
     private final ProjectPanel projectPanel;
     private TestProjectDirectoryDto lastSelected = null;
 
-    public Listener(final ProjectPanel projectPanel) {
+    public ListenerImpl(final ProjectPanel projectPanel) {
         this.projectPanel = projectPanel;
     }
 
@@ -19,6 +19,7 @@ public class Listener implements ActionListener {
     public void actionPerformed(final ActionEvent e) {
         if (e.getSource() instanceof JComboBox<?> comboBox) {
             if (comboBox.getSelectedItem() instanceof TestProjectDirectoryDto selected) {
+
                 if (selected.equals(lastSelected)) {
                     return;
                 }
